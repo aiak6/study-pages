@@ -1,0 +1,553 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Containers Session 11 Recap</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one reading column; sections as stacked "shipping manifest" blocks with a stencilled label; code and tables scroll in place. */
+:root{
+  --bg:#f3f5f7; --surface:#ffffff; --ink:#15202b; --muted:#56657a; --line:#d8dee6;
+  --accent:#c4501b; --accent-soft:#fbe9df; --steel:#1f5f8b; --steel-soft:#e3eef6;
+  --code-bg:#0f1b26; --code-fg:#dbe7f2; --code-cmt:#7f97ad;
+  --good:#2e7d4f; --bad:#b3261e;
+  --f-display:"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --f-body:"Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e151c; --surface:#16202a; --ink:#e6edf3; --muted:#9aabbd; --line:#2a3845;
+  --accent:#f0874f; --accent-soft:#3a2418; --steel:#7ab8e3; --steel-soft:#16303f;
+  --code-bg:#0a1016; --code-fg:#dbe7f2; --code-cmt:#6f879c;
+  --good:#6cc493; --bad:#f08a80; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0e151c; --surface:#16202a; --ink:#e6edf3; --muted:#9aabbd; --line:#2a3845;
+  --accent:#f0874f; --accent-soft:#3a2418; --steel:#7ab8e3; --steel-soft:#16303f;
+  --code-bg:#0a1016; --code-fg:#dbe7f2; --code-cmt:#6f879c;
+  --good:#6cc493; --bad:#f08a80; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:17px/1.6 var(--f-body);padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:28px 64px}
+.wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.15;margin:0}
+h1{font-size:clamp(30px,6vw,44px);font-weight:800;letter-spacing:-.01em}
+h2{font-size:24px;font-weight:800}
+h3{font-size:18px;font-weight:600;margin-top:6px}
+p{margin:0}
+a{color:var(--steel)}
+code{font-family:var(--f-mono);font-size:.86em;background:var(--steel-soft);color:var(--ink);padding:1px 5px;border-radius:4px}
+strong{font-weight:700}
+.eyebrow{font:600 12px/1 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+header{display:flex;flex-direction:column;gap:12px;border-bottom:3px solid var(--ink);padding-bottom:20px}
+.meta{display:flex;flex-wrap:wrap;gap:8px 16px;color:var(--muted);font-size:15px}
+.lede{font-size:19px;max-width:65ch}
+nav{display:flex;flex-wrap:wrap;gap:8px}
+nav a{font:600 13px/1 var(--f-mono);text-decoration:none;color:var(--ink);border:1px solid var(--line);background:var(--surface);padding:8px 10px;border-radius:6px}
+nav a:hover,nav a:focus-visible{border-color:var(--accent);color:var(--accent);outline:none}
+section{display:flex;flex-direction:column;gap:14px;scroll-margin-top:16px}
+section > .label{display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--line);padding-bottom:8px}
+section > .label .tag{font:600 11px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--surface);background:var(--ink);padding:5px 7px;border-radius:3px}
+ul,ol{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px}
+.table{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:15.5px;min-width:480px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:600 12px/1.3 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--bg)}
+tr:last-child td{border-bottom:0}
+blockquote{margin:0;border-left:4px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 8px 8px 0;font-weight:600}
+pre{margin:0;background:var(--code-bg);color:var(--code-fg);font:14px/1.6 var(--f-mono);padding:14px 16px;border-radius:8px;overflow-x:auto}
+pre .c{color:var(--code-cmt)}
+.codebox{position:relative}
+.copy{position:absolute;top:8px;right:8px;font:600 11px/1 var(--f-mono);background:transparent;color:var(--code-cmt);border:1px solid var(--code-cmt);border-radius:4px;padding:5px 7px;cursor:pointer}
+.copy:hover,.copy:focus-visible{color:var(--code-fg);border-color:var(--code-fg);outline:none}
+.flow{font:600 14px/1.5 var(--f-mono);background:var(--steel-soft);color:var(--ink);padding:14px 16px;border-radius:8px;overflow-x:auto;white-space:pre}
+.step{display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:start}
+.step > .n{font:800 18px/34px var(--f-display);text-align:center;background:var(--ink);color:var(--bg);border-radius:50%;width:34px;height:34px}
+.step > div{min-width:0;display:flex;flex-direction:column;gap:8px}
+.see{font-size:15px;color:var(--good)}
+.see::before{content:"You should see: ";font-weight:700}
+.warn{border:1px solid var(--bad);border-radius:8px;padding:12px 16px;display:flex;flex-direction:column;gap:10px;background:var(--surface)}
+.warn .eyebrow{color:var(--bad)}
+details{border:1px solid var(--line);background:var(--surface);border-radius:8px}
+details summary{cursor:pointer;padding:12px 16px;font-weight:600;list-style-position:inside}
+details summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:8px}
+details > div{padding:0 16px 14px;display:flex;flex-direction:column;gap:8px}
+.q{display:flex;flex-direction:column;gap:10px}
+.q p.ask{font-weight:600}
+.reread{font-style:italic;color:var(--muted);font-size:15px}
+footer{color:var(--muted);font-size:15px;border-top:1px solid var(--line);padding-top:16px}
+@media (prefers-reduced-motion: reduce){*{scroll-behavior:auto!important}}
+html{scroll-behavior:smooth}
+</style>
+
+<div class="wrap">
+<header>
+  <span class="eyebrow">312 School · Cohort 26a · Containers &amp; Orchestration</span>
+  <h1>Session 11: The password out of Git, and what a pod may use</h1>
+  <div class="meta"><span>Wed, Oct 21, 2026</span><span>Maher (Mo), plus after-class hands-on with Bakhtiyar</span><span>Deck: unit 4 part 4 + unit 5 start</span></div>
+  <p class="lede">Two halves. First, unit 4 ends: the database password leaves Git. You stop writing a Secret file and write an <strong>ExternalSecret</strong> instead, which holds only the <strong>path</strong> of the password in <strong>AWS Secrets Manager</strong>. The <strong>External Secrets Operator</strong> copies the real value into a normal Secret, and AWS refuses anyone who asks for a classmate's path. Then unit 5 begins: every container declares a CPU and memory <strong>request</strong>, which decides which node it lands on, and a <strong>limit</strong>. Past the CPU limit it gets slower (throttled). Past the memory limit it is killed and restarted (OOMKilled).</p>
+  <nav aria-label="Sections">
+    <a href="#did">What we did</a><a href="#ideas">Main ideas</a><a href="#corrections">Corrections</a><a href="#demo">Redo the demo</a><a href="#commands">Commands</a><a href="#stressed">Stressed</a><a href="#homework">Homework</a><a href="#check">Check yourself</a><a href="#quiz">Full quiz</a>
+  </nav>
+</header>
+
+<section id="did">
+  <div class="label"><span class="tag">Run of show</span><h2>What we actually did</h2></div>
+  <ol>
+    <li><strong>New class rules.</strong> Cameras on, and questions held until Mo pauses. Put them in the chat in the meantime.</li>
+    <li><strong>RBAC recap on the live cluster.</strong> <code>k get clusterrole</code>, then <code>edit</code> as YAML (it already lists <code>external-secrets.io</code> resources). Then <code>k get rolebinding -o yaml</code>, which shows each student bound to <code>edit</code> / <code>view</code> / <code>namespace-reader</code> in their own namespace only.</li>
+    <li><strong>Why the password can't live in Git.</strong> Mo decoded the instructor Secret with <code>base64 -d</code> on screen: one command gives the real password.</li>
+    <li><strong>Secrets Manager in the console</strong> (the school account): one secret per student, <code>/26a/&lt;namespace&gt;/investment-app</code>, holding <code>DB_PASSWORD</code> and <code>FINNHUB_KEY</code>.</li>
+    <li><strong>The operator chain</strong> on the diagram: ExternalSecret → SecretStore → ServiceAccount <code>secrets-reader</code> → IAM role → Secrets Manager → normal Secret → pod. A long Q&amp;A followed on where the SecretStore fits.</li>
+    <li><strong>Operator debugging:</strong> <code>k get pods -n external-secrets</code>, then <code>k logs</code> on the operator pod, which shows the region <code>us-east-1</code> it got from the SecretStore.</li>
+    <li><strong>Unit 5 on the whiteboard:</strong> pods share a node's CPU and memory, so without limits the Instagram "messages" pods could starve the "posts" pods.</li>
+    <li><strong>Placement vs execution</strong>, then units (millicores, MiB), then an interactive node simulator: a web pod and an API pod on a 2 vCPU node, demand raised until CPU throttles and memory goes over the limit and gets OOMKilled.</li>
+    <li><strong>Measure first:</strong> <code>k top pods -l app=investment-app</code>, plus <code>describe</code>. Mo's own pods showed <code>InvalidImageName</code> (no image URI in his file). Stopped at "placement failure", part 2 of the unit.</li>
+    <li><strong>After class (Bakhtiyar):</strong> did the ExternalSecret hands-on live, fixed the image, read <code>logs --previous</code> for a restart, ran <code>top</code> and <code>describe</code>, and answered "where do my values come from?".</li>
+  </ol>
+</section>
+
+<section id="ideas">
+  <div class="label"><span class="tag">Concepts</span><h2>The main ideas, from zero</h2></div>
+
+  <h3>Why a Secret file can't go into Git</h3>
+  <ul>
+    <li>A <strong>Secret</strong> stores values in <strong>base64</strong>. That's encoding, not encryption: <code>base64 -d</code> turns it back into the password (Session 09).</li>
+    <li>Git is where the whole team shares YAML, so a committed Secret is a password for anyone with the repo.</li>
+    <li><code>.gitignore</code> keeps it out, but then <strong>nobody else on the team has it</strong>. Mo's example: you're off sick, the Secret gets deleted, and your teammate can't recreate it.</li>
+  </ul>
+  <blockquote>The fix: keep the password in AWS Secrets Manager, and commit only its address.</blockquote>
+
+  <h3>The External Secrets Operator: a controller that copies the password in</h3>
+  <ul>
+    <li><strong>Operator / controller:</strong> a program in the cluster that watches objects and makes things match, like the Deployment controller (unit 2).</li>
+    <li>It is <strong>open source and not part of Kubernetes</strong>. A new EKS cluster doesn't have it; the team installs it with <strong>Helm</strong> (a package installer for Kubernetes). It runs in its own namespace, <code>external-secrets</code>.</li>
+    <li>It adds a new kind of object, the <strong>ExternalSecret</strong>, which says which AWS secret to copy and which Kubernetes Secret to write.</li>
+  </ul>
+  <div class="flow">ExternalSecret (your ns, in Git: only a PATH)
+   ↓ names
+SecretStore aws-secrets-manager  (AWS region + which ServiceAccount to sign in as)
+   ↓ uses
+ServiceAccount secrets-reader  →  IAM role (may read ONLY /26a/&lt;your-ns&gt;/)
+   ↓ operator signs in to AWS as that role
+AWS Secrets Manager  /26a/&lt;your-ns&gt;/investment-app  (DB_PASSWORD, FINNHUB_KEY)
+   ↓ operator writes
+normal Secret investment-app-secret  (your ns; re-read from AWS every 1h)
+   ↓ copied once, when the container starts
+pod env vars  DB_PASSWORD, FINNHUB_KEY</div>
+  <div class="table"><table>
+    <thead><tr><th>Object</th><th>Lives in</th><th>Its job</th><th>Who made it</th></tr></thead>
+    <tbody>
+      <tr><td><strong>External Secrets Operator</strong></td><td>ns <code>external-secrets</code></td><td>Does the copying</td><td>School, with Helm</td></tr>
+      <tr><td><strong>SecretStore</strong> <code>aws-secrets-manager</code></td><td>Your ns</td><td>Where AWS is (region) and how to sign in</td><td>School</td></tr>
+      <tr><td><strong>ServiceAccount</strong> <code>secrets-reader</code></td><td>Your ns</td><td>The "user" linked to your IAM role</td><td>School</td></tr>
+      <tr><td><strong>The AWS secret</strong></td><td>Secrets Manager</td><td>The real values</td><td>A school script (random password, placeholder Finnhub key)</td></tr>
+      <tr><td><strong>ExternalSecret</strong></td><td>Your ns + Git</td><td>The path to copy + the Secret to write</td><td><strong>You</strong>, the one file you write</td></tr>
+    </tbody>
+  </table></div>
+  <blockquote>The ExternalSecret holds the path, not the password, so it is safe to push. Reading the value still needs AWS permission on that path, or access to your namespace.</blockquote>
+
+  <h3>The ExternalSecret file, line by line</h3>
+  <div class="codebox"><pre>apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: investment-app-secret
+spec:
+  secretStoreRef:
+    name: aws-secrets-manager            <span class="c"># the SecretStore already in your namespace</span>
+  refreshInterval: 1h                    <span class="c"># read AWS again every hour</span>
+  target:
+    name: investment-app-secret          <span class="c"># the Secret to write: night 1's name, so Deployments don't change</span>
+  dataFrom:
+  - extract:
+      key: /26a/&lt;namespace&gt;/investment-app   <span class="c"># the path in Secrets Manager; both keys are copied</span></pre></div>
+  <ul>
+    <li><code>STATUS SecretSynced</code>, <code>READY True</code> means it worked. <strong><code>SecretSyncedError</code> always means the operator could not read the secret</strong>; <code>describe</code> says why.</li>
+    <li>Can a teammate still see the value? Only if they have <strong>your namespace</strong> (they read the copied Secret, or <code>exec</code> into the pod) or <strong>AWS permission</strong> on the path.</li>
+  </ul>
+
+  <h3>Rotation: a running pod keeps the value it started with</h3>
+  <div class="flow">10:00  password changed in Secrets Manager   ("rotated")
+≤11:00 operator re-reads (refreshInterval 1h) → updates the Secret
+       running containers: still the OLD value (env copied at start)
+       kubectl rollout restart deploy/investment-app → new pods read the NEW value</div>
+  <blockquote>After a Secret or ConfigMap changes, replace the pods that use it. Same rule as Session 09's TICKER change.</blockquote>
+
+  <h3>Least privilege, made visible: asking for a classmate's password</h3>
+  <ul>
+    <li>Change the key to a <strong>classmate's path</strong> and apply. <strong>Kubernetes accepts the object</strong>, because the file itself is allowed. <strong>AWS refuses the read.</strong></li>
+    <li>Read the error as four facts: <strong>who</strong> (the IAM role behind <code>secrets-reader</code>), <strong>what</strong> (<code>GetSecretValue</code>), <strong>where</strong> (the classmate's path), <strong>answer</strong> (no policy allows it).</li>
+    <li>Mo: it took him <strong>5–6 months</strong> at his company to get Secrets Manager access. New hires get least privilege, and more is granted per ticket.</li>
+  </ul>
+
+  <h3>Unit 5: request, actual use, limit are three different numbers</h3>
+  <ul>
+    <li>A pod runs on a <strong>node</strong> (an EC2 instance) with fixed CPU and memory, shared with other pods, from <strong>any namespace</strong>. A namespace is not a machine.</li>
+    <li>Without limits, one busy (or DDoS'd, or buggy) pod can use the CPU and memory the others need.</li>
+  </ul>
+  <div class="table"><table>
+    <thead><tr><th>Number</th><th>Who uses it</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Request</strong></td><td>The <strong>scheduler</strong>, at placement</td><td>"Put me on a node with at least this much free." Reserves scheduling room. <strong>Doesn't consume CPU and doesn't cap use.</strong></td></tr>
+      <tr><td><strong>Limit</strong></td><td>The <strong>node</strong>, while it runs</td><td>The most the container may use. Must be ≥ the request.</td></tr>
+      <tr><td><strong>Actual use</strong></td><td><code>kubectl top</code></td><td>What it uses right now. Can be below or above the request, <strong>never above the limit</strong>.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="table"><table>
+    <thead><tr><th>Unit</th><th>Rule</th><th>Example</th></tr></thead>
+    <tbody>
+      <tr><td><strong>CPU: millicores <code>m</code></strong></td><td><strong>1000m = 1 core</strong></td><td><code>250m</code> = a quarter core → four such pods fit on one core</td></tr>
+      <tr><td><strong>Memory: <code>Mi</code> / <code>Gi</code></strong></td><td><strong>1024Mi = 1Gi</strong> (mebibytes, gibibytes)</td><td><code>512Mi</code> = half a GiB</td></tr>
+      <tr><td colspan="3"><strong><code>m</code> is only for CPU, never memory.</strong> <code>Mi</code> is not "milli".</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Placement: the request must fit on one node</h3>
+  <ul>
+    <li>Each node offers its <strong>allocatable</strong> capacity: what's left after it reserves some for itself (kubelet, containerd, kube-proxy).</li>
+    <li>The scheduler adds up the requests already on each node and places the pod only where its request still fits.</li>
+    <li><strong>Node A and B each have 400m free, the pod requests 600m → it fits on neither.</strong> The scheduler can't split one pod across two nodes. It stays <strong>Pending</strong> until a bigger or new node exists.</li>
+  </ul>
+
+  <h3>Execution: at the limit, CPU waits and memory ends the container</h3>
+  <div class="table"><table>
+    <thead><tr><th></th><th>CPU limit reached</th><th>Memory limit exceeded</th></tr></thead>
+    <tbody>
+      <tr><td><strong>What happens</strong></td><td><strong>Throttling.</strong> Extra work waits; the container keeps running, slower</td><td><strong>OOMKilled</strong> (out of memory). The container is killed</td></tr>
+      <tr><td><strong>Then</strong></td><td>Latency for users</td><td>The <strong>kubelet restarts the container in the same pod</strong>. The pod isn't replaced, and its RAM is freed</td></tr>
+      <tr><td><strong>You'll see</strong></td><td>Slow answers. Prove it with <strong>throttling metrics + response times</strong>; slow alone proves nothing</td><td><code>RESTARTS</code> goes up; <code>describe</code>: <code>Last State: Terminated, Reason: OOMKilled</code></td></tr>
+      <tr><td><strong>Users of a 3-pod Service</strong></td><td>Slower answers from that pod</td><td>Errors only while <strong>every</strong> pod is restarting</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li>Mo's cashier analogy: one cashier, ten customers at once. Nobody is thrown out; the last one just waits a long time. That's throttling.</li>
+    <li>If the app needs that memory every time, it is killed again and again. A climbing <code>RESTARTS</code> count means read the logs and describe.</li>
+  </ul>
+  <blockquote>CPU over the limit gets slow. Memory over the limit gets killed and restarted.</blockquote>
+
+  <h3>Choosing the numbers: measure, then set, then adjust</h3>
+  <div class="flow">measure  → kubectl top at startup, normal traffic, peaks (one top = a snapshot)
+set      → requests from what you saw; CPU limit for OK response time;
+           memory limit above the highest use (+ some headroom)
+test     → watch for throttling, OOMKilled, Pending; change when load changes</div>
+  <ul>
+    <li>The <strong>developer</strong> usually knows roughly what their app needs. Mo's comparison: a PS5 game listing the space it needs.</li>
+    <li><strong>Headroom:</strong> peak was 2 CPU over a week, so set 2.5.</li>
+    <li>Billing: you pay for the <strong>EC2 node</strong> either way. Good requests let you fit more pods per node.</li>
+    <li><code>resources:</code> goes <strong>on each container</strong>, inside the Deployment's <code>spec.template.spec.containers</code>, so every replacement pod gets it.</li>
+  </ul>
+
+  <h3>Pending: the event says why a pod has no node</h3>
+  <div class="table"><table>
+    <thead><tr><th>Reason in <code>describe</code></th><th>Means</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Not enough capacity</strong></td><td>No node has enough free CPU or memory for the requests</td></tr>
+      <tr><td><strong>Placement rule</strong></td><td>No node matches the pod's node requirements</td></tr>
+      <tr><td><strong>Node unavailable</strong></td><td>A fitting node isn't Ready yet, e.g. one the autoscaler just started</td></tr>
+    </tbody>
+  </table></div>
+  <ul><li><code>PodScheduled: False</code> + <code>FailedScheduling</code> = no node assigned. A pod can also be Pending <strong>after</strong> it has a node, while its image downloads.</li></ul>
+</section>
+
+<section id="corrections">
+  <div class="warn">
+    <span class="eyebrow">Where the notes correct what was said live</span>
+    <div class="table"><table>
+      <thead><tr><th>Said in class</th><th>Correct version (site notes, Bakhtiyar, Granola)</th></tr></thead>
+      <tbody>
+        <tr><td>"100 millicores equals one CPU"</td><td><strong>1000m = 1 core.</strong> 100m = 0.1 core. Bakhtiyar corrected it after class.</td></tr>
+        <tr><td>"It copies the password inside the pod, not into a Secret"</td><td>The operator writes a <strong>normal Secret</strong> in your namespace; the pod reads it as in night 1. Mo corrected himself later.</td></tr>
+        <tr><td>"If the secret changed, refreshInterval throws you an error"</td><td>It <strong>updates the Secret</strong> with the new value. Running pods just don't notice.</td></tr>
+        <tr><td>"OOM: the cluster kills it and spins up another one"</td><td>The <strong>kubelet restarts the container in the same pod</strong>. Same pod, RESTARTS +1. Mo said this himself later in Q&amp;A.</td></tr>
+        <tr><td>"Kill the pod to get the new secret"</td><td>Works, but <code>kubectl rollout restart</code> replaces pods one by one with no downtime.</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<section id="demo">
+  <div class="label"><span class="tag">Hands-on</span><h2>Redo the demo yourself</h2></div>
+  <p><strong>Before you start:</strong></p>
+  <ul>
+    <li><code>aws sso login --profile 312-cluster</code> (every class day), and your namespace set in the context.</li>
+    <li><code>git pull</code> in the containers repo, on <code>main</code>. If <code>04-…</code> only shows a README, re-clone into a new folder (that happened to a classmate).</li>
+    <li>In <code>04-config-secrets-identity/deployment-investment-app.yaml</code>, replace <code>IMAGE_URI</code> with your investment-app <strong>amd64</strong> image URI. A missing image gives <code>InvalidImageName</code>.</li>
+    <li>Already set up for you: the operator, the SecretStore <code>aws-secrets-manager</code>, the ServiceAccount <code>secrets-reader</code>, and your secret in AWS.</li>
+  </ul>
+
+  <div class="step"><span class="n">1</span><div>
+    <p><strong>Check your connection and what's already there.</strong></p>
+    <div class="codebox"><pre>cd 04-config-secrets-identity
+kubectl get namespaces                      <span class="c"># proves you reach the cluster</span>
+kubectl get secretstore,serviceaccount      <span class="c"># aws-secrets-manager, secrets-reader</span></pre></div>
+    <p class="see"><code>secretstore/aws-secrets-manager</code> and <code>serviceaccount/secrets-reader</code> in the list.</p>
+  </div></div>
+
+  <div class="step"><span class="n">2</span><div>
+    <p><strong>Bring back night 1's objects</strong>, because the app needs its ConfigMap, Secret and Postgres.</p>
+    <div class="codebox"><pre>kubectl apply -f configmap-investment-app.yaml -f secret-investment-app.yaml \
+  -f postgres.yaml -f deployment-investment-app.yaml
+kubectl get pods                            <span class="c"># postgres + 2 investment-app pods Running</span></pre></div>
+  </div></div>
+
+  <div class="step"><span class="n">3</span><div>
+    <p><strong>See the problem.</strong> The hand-made Secret decodes to plain text.</p>
+    <div class="codebox"><pre>kubectl get secret investment-app-secret -o jsonpath='{.data.DB_PASSWORD}' | base64 -d</pre></div>
+    <p class="see"><code>change-me-class-password</code>, the password that's in your Git file.</p>
+  </div></div>
+
+  <div class="step"><span class="n">4</span><div>
+    <p><strong>Edit the ExternalSecret.</strong> In <code>externalsecret-investment-app.yaml</code>, replace <code>NAMESPACE</code> in the key with your namespace, e.g. <code>/26a/my-namespace/investment-app</code>.</p>
+  </div></div>
+
+  <div class="step"><span class="n">5</span><div>
+    <p><strong>Delete the hand-made Secret, apply the ExternalSecret, wait for it to sync.</strong> You delete it first so the operator can write its own under the same name.</p>
+    <div class="codebox"><pre>kubectl delete secret investment-app-secret
+kubectl apply -f externalsecret-investment-app.yaml
+kubectl get externalsecret                  <span class="c"># wait for STATUS SecretSynced, READY True</span>
+kubectl get secret investment-app-secret    <span class="c"># it exists again, written by the operator</span></pre></div>
+    <p class="see"><code>investment-app-secret   SecretStore   aws-secrets-manager   1h   SecretSynced   True</code>. <code>unchanged</code> on apply is fine if someone already applied it.</p>
+  </div></div>
+
+  <div class="step"><span class="n">6</span><div>
+    <p><strong>Look at the values. They came from AWS now.</strong></p>
+    <div class="codebox"><pre>kubectl get secret investment-app-secret -o yaml                       <span class="c"># data: DB_PASSWORD, FINNHUB_KEY</span>
+kubectl get secret investment-app-secret -o jsonpath='{.data.DB_PASSWORD}' | base64 -d   <span class="c"># the random AWS value</span></pre></div>
+    <p class="see">a random password, not <code>change-me-class-password</code>. The Finnhub key is a placeholder, which the app tolerates.</p>
+  </div></div>
+
+  <div class="step"><span class="n">7</span><div>
+    <p><strong>Replace the pods so they read the new Secret.</strong> Postgres too: its password comes from the same Secret, and it has no volume, so it starts fresh.</p>
+    <div class="codebox"><pre>kubectl rollout restart deploy/postgres deploy/investment-app
+kubectl get pods
+kubectl logs &lt;pod&gt; --previous    <span class="c"># if RESTARTS is 1: the log from BEFORE the restart</span></pre></div>
+    <p class="see">all pods Running. Bakhtiyar saw one restart whose <code>--previous</code> log showed a Postgres <code>duplicate key</code> error from a double apply. It was harmless, and the app was fine after it.</p>
+  </div></div>
+
+  <div class="step"><span class="n">8</span><div>
+    <p><strong>Ask for a classmate's password and watch AWS refuse.</strong> In <code>externalsecret-other-path.yaml</code>, replace <code>CLASSMATE</code> with a classmate's namespace.</p>
+    <div class="codebox"><pre>kubectl apply -f externalsecret-other-path.yaml      <span class="c"># accepted by Kubernetes</span>
+kubectl get externalsecret other-path                 <span class="c"># SecretSyncedError   False</span>
+kubectl describe externalsecret other-path            <span class="c"># Events at the bottom</span>
+kubectl delete externalsecret other-path              <span class="c"># clean up</span></pre></div>
+    <p class="see"><code>AccessDeniedException … assumed-role/containers-26a-secrets-&lt;you&gt;/… is not authorized to perform: secretsmanager:GetSecretValue on resource: /26a/&lt;classmate&gt;/investment-app</code></p>
+  </div></div>
+
+  <div class="step"><span class="n">9</span><div>
+    <p><strong>Unit 5: measure what the app uses.</strong> Nothing to apply.</p>
+    <div class="codebox"><pre>kubectl top pods -l app=investment-app       <span class="c"># CPU (m) and MEMORY (Mi) per pod, right now</span>
+kubectl describe pods -l app=investment-app  <span class="c"># Last State / termination reason, Events</span></pre></div>
+    <p class="see">something like <code>1m</code> CPU and <code>81Mi</code> memory per pod: almost idle. <code>-l app=investment-app</code> selects by the label from the Deployment template.</p>
+  </div></div>
+
+  <div class="step"><span class="n">10</span><div>
+    <p><strong>Add requests and limits</strong> (in <code>05-health-and-capacity/</code>; covered in the notes, not live). Two replicas, 200m CPU and 256Mi in total.</p>
+    <div class="codebox"><pre>cd ../05-health-and-capacity
+kubectl patch deployment investment-app --type=strategic \
+  --patch-file investment-app-resources.patch.yaml
+kubectl rollout status deployment/investment-app --timeout=120s
+kubectl describe pods -l app=investment-app | grep -A6 -E 'Limits|Requests'</pre></div>
+    <p class="see"><code>successfully rolled out</code>, then <code>Requests:</code> and <code>Limits:</code> blocks on each container.</p>
+  </div></div>
+
+  <h3>If it goes wrong</h3>
+  <div class="table"><table>
+    <thead><tr><th>What you see</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td><code>SecretSyncedError</code> / READY False</td><td>The operator couldn't read AWS: a typo in the path (<code>NAMESPACE</code> left in?), a refused permission, or the secret doesn't exist. Run <code>describe externalsecret</code>, then <code>kubectl logs -n external-secrets &lt;operator-pod&gt;</code>.</td></tr>
+      <tr><td><code>InvalidImageName</code></td><td><code>IMAGE_URI</code> is still the literal text, or a character is missing.</td></tr>
+      <tr><td>Pod <code>CrashLoopBackOff</code> after restart</td><td>Usually the DB password: Postgres and the app must both restart onto the new Secret. <code>logs --previous</code> shows the crash.</td></tr>
+      <tr><td><code>error: Metrics API not available</code> on <code>top</code></td><td>The metrics server isn't reachable. Not your YAML.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Clean up</h3>
+  <div class="codebox"><pre>kubectl delete externalsecret other-path --ignore-not-found
+cd ../04-config-secrets-identity
+kubectl delete -f . --ignore-not-found       <span class="c"># when you're done with unit 4's app</span>
+kubectl get pods,cm,secret,externalsecret    <span class="c"># kube-root-ca.crt always stays</span></pre></div>
+  <p>Everything runs on the school's cluster, so nothing here bills your AWS account.</p>
+</section>
+
+<section id="commands">
+  <div class="label"><span class="tag">Reference</span><h2>Commands that came up</h2></div>
+  <div class="table"><table>
+    <thead><tr><th>Command</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td><code>kubectl get clusterrole</code> / <code>get clusterrole edit -o yaml</code></td><td>Cluster-wide roles; the rules inside <code>edit</code></td></tr>
+      <tr><td><code>kubectl get rolebinding -o yaml</code></td><td>Which user is bound to which role, in this namespace</td></tr>
+      <tr><td><code>kubectl get all -n &lt;ns&gt;</code></td><td>Pods, Services, Deployments, ReplicaSets at once (<strong>not</strong> Secrets)</td></tr>
+      <tr><td><code>echo '&lt;value&gt;' | base64 -d</code></td><td>Decode a base64 Secret value</td></tr>
+      <tr><td><code>kubectl get secretstore</code></td><td>The SecretStore in your namespace</td></tr>
+      <tr><td><code>kubectl get sa</code></td><td>ServiceAccounts (<code>sa</code> = short name)</td></tr>
+      <tr><td><code>kubectl apply -f externalsecret-investment-app.yaml</code></td><td>Create the ExternalSecret</td></tr>
+      <tr><td><code>kubectl get externalsecret</code></td><td>STATUS SecretSynced / SecretSyncedError, READY</td></tr>
+      <tr><td><code>kubectl describe externalsecret &lt;name&gt;</code></td><td>Events: why it didn't sync</td></tr>
+      <tr><td><code>kubectl get pods -n external-secrets</code></td><td>The operator's pods</td></tr>
+      <tr><td><code>kubectl logs &lt;operator-pod&gt; -n external-secrets</code></td><td>Operator log: region, credentials, errors</td></tr>
+      <tr><td><code>kubectl rollout restart deploy/postgres deploy/investment-app</code></td><td>New pods that read the new Secret</td></tr>
+      <tr><td><code>kubectl logs &lt;pod&gt; --previous</code></td><td>Log of the container before its last restart</td></tr>
+      <tr><td><code>kubectl get deploy,pods,svc -o wide</code></td><td>Which node each pod landed on</td></tr>
+      <tr><td><code>kubectl top pods -l app=investment-app</code></td><td>Current CPU and memory per pod</td></tr>
+      <tr><td><code>kubectl describe pods -l app=investment-app</code></td><td>Last termination reason (OOMKilled), FailedScheduling events</td></tr>
+      <tr><td><code>kubectl patch deployment investment-app --type=strategic --patch-file …</code></td><td>Add <code>resources:</code> without rewriting the Deployment</td></tr>
+      <tr><td><code>kubectl rollout status deployment/investment-app --timeout=120s</code></td><td>Wait for the patched rollout</td></tr>
+    </tbody>
+  </table></div>
+  <div class="codebox"><pre><span class="c"># resources: on each container, inside spec.template.spec.containers</span>
+resources:
+  requests:
+    cpu: 100m        <span class="c"># scheduler: needs 0.1 core free on the node</span>
+    memory: 128Mi
+  limits:
+    cpu: 250m        <span class="c"># above this: throttled</span>
+    memory: 256Mi    <span class="c"># above this: OOMKilled, container restarts</span></pre></div>
+</section>
+
+<section id="stressed">
+  <div class="label"><span class="tag">Emphasis</span><h2>What the instructor stressed</h2></div>
+  <ul>
+    <li><strong>Never push a password to Git.</strong> Push the address (the ExternalSecret), keep the value in AWS.</li>
+    <li><strong>Least privilege everywhere:</strong> per-namespace IAM roles, the read-only Claude Code from Session 10. AI agents can delete things if permissions allow it.</li>
+    <li><strong>Operators are real work.</strong> Mo runs External Secrets at his job. When an app breaks over an expired secret, check <code>describe</code>, then the operator logs, then the secret in AWS.</li>
+    <li><strong>"This red AccessDenied you'll see a lot from now on."</strong> Read it calmly as who / what / where / answer.</li>
+    <li><strong>Memory → OOMKilled, CPU → throttling.</strong> Remember both. You'll read them in describe and logs at work.</li>
+    <li><strong>Double-check the command you typed</strong> before deciding the cluster is broken. He mistyped <code>top</code> live.</li>
+    <li>To create any object (e.g. a ServiceAccount), search the <strong>Kubernetes docs</strong> for its YAML.</li>
+  </ul>
+</section>
+
+<section id="homework">
+  <div class="label"><span class="tag">Due next class</span><h2>Homework</h2></div>
+  <ul>
+    <li>Do the <strong>ExternalSecret hands-on</strong> in your own namespace, including the classmate-path failure (steps above).</li>
+    <li>Do <strong>Bakhtiyar's lab on Roles and ClusterRoles</strong> (already posted).</li>
+    <li>Do the <strong>lab on CPU/memory requests and limits</strong> when Bakhtiyar publishes it.</li>
+  </ul>
+  <p><strong>Next class:</strong> unit 5 continues: <strong>LimitRange</strong> (fills in requests nobody wrote), <strong>ResourceQuota</strong> (caps the namespace total), and the <strong>HorizontalPodAutoscaler</strong> (adds pods when CPU rises).</p>
+  <h3>Worth replaying</h3>
+  <ul>
+    <li><strong>The node simulator</strong> (second half): web and API pods on a 2 vCPU node, CPU demand raised into throttling, then memory past 2Gi and the instant "OOMKilled, restarting". Seeing it beats reading it.</li>
+    <li><strong>The "where is the SecretStore?" Q&amp;A</strong> right after the operator diagram, where the chain finally clicks.</li>
+    <li><strong>After-class, Bakhtiyar's <code>logs --previous</code></strong> on the restarted pod.</li>
+  </ul>
+  <h3>Left unclear</h3>
+  <ul>
+    <li>The contents of <code>investment-app-resources.patch.yaml</code> weren't shown. Notes say 200m CPU / 256Mi total for 2 replicas, which suggests 100m / 128Mi each. Open the file to confirm.</li>
+    <li>"Placement failure" (part 2 of unit 5) was started but not finished, and <code>deployment-cpu-demo</code> / <code>deployment-quota-failure</code> weren't used yet.</li>
+    <li>Mo said that with no limit a pod "might crash the whole node". The notes only say it starves other pods. Ask which is true on EKS.</li>
+    <li>Does the operator re-check only when a pod uses the secret, or always? Mo said "if it's being used". The notes say every <code>refreshInterval</code>.</li>
+  </ul>
+</section>
+
+<section id="check">
+  <div class="label"><span class="tag">Self-test</span><h2>Check yourself</h2></div>
+  <div class="q">
+    <p class="ask">1. You push <code>externalsecret-investment-app.yaml</code> to a public repo. A stranger reads it. What can they do with it?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>Learn the path, nothing else.</strong> The file holds <code>/26a/&lt;ns&gt;/investment-app</code>, not the value. Reading it needs AWS <code>GetSecretValue</code> on that path, or access to your namespace.</p>
+      <p class="reread">If this one was shaky, reread "The External Secrets Operator" chain.</p>
+    </div></details>
+  </div>
+  <div class="q">
+    <p class="ask">2. Two nodes have 400m CPU free each. Your new pod requests 600m. What do you see, and why?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>Pending, with a FailedScheduling "not enough capacity" event.</strong> A request must fit on one node, and the scheduler can't split a pod across two. It waits for a bigger or new node.</p>
+      <p class="reread">If this one was shaky, reread "Placement: the request must fit on one node."</p>
+    </div></details>
+  </div>
+  <div class="q">
+    <p class="ask">3. Pod A answers slowly under load. Pod B shows RESTARTS 7. Which limit did each probably hit, and how do you prove it?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>A: CPU (throttling). B: memory (OOMKilled).</strong> For A, check throttling metrics and response times, because slow alone doesn't prove throttling. For B, <code>describe pod</code> shows <code>Last State: Terminated, Reason: OOMKilled</code>.</p>
+      <p class="reread">If this one was shaky, reread "Execution: at the limit."</p>
+    </div></details>
+  </div>
+</section>
+
+<section id="quiz">
+  <div class="label"><span class="tag">Quiz</span><h2>Full self-test (10)</h2></div>
+  <p>Answer out loud first, then open the answer. Score yourself out of 10.</p>
+  <div class="q">
+    <p class="ask">1. A teammate says: "Our Secret is base64, so it's encrypted, and it's fine to commit." What do you answer, and what actually protects the value?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>base64 is encoding, not encryption.</strong> <code>base64 -d</code> reverses it in one command. EKS does encrypt etcd on disk with KMS, but the API server decrypts for anyone allowed to read the Secret. What protects it is <strong>who may read it</strong> (RBAC) and <strong>keeping the file out of Git</strong>.</p>
+    </div></details>
+  </div>
+  <div class="q">
+    <p class="ask">2. Why not just put <code>secret-investment-app.yaml</code> in <code>.gitignore</code> and keep it on your laptop?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>Then the password lives only with you.</strong> Git is how the team shares the YAML. If you're off and the Secret is deleted, nobody can recreate it. Secrets Manager keeps the value where a teammate <strong>with permission</strong> can read it, and Git keeps only the path (the ExternalSecret).</p>
+    </div></details>
+  </div>
+  <div class="q">
+    <p class="ask">3. Walk the chain from <code>kubectl apply -f externalsecret-investment-app.yaml</code> to <code>DB_PASSWORD</code> inside the app. Name every object.</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>ExternalSecret → SecretStore → ServiceAccount → IAM role → Secrets Manager → Secret → pod env.</strong> The operator reads your <strong>ExternalSecret</strong>, which names the <strong>SecretStore</strong> <code>aws-secrets-manager</code> (region + which ServiceAccount). <code>secrets-reader</code> is linked to an <strong>IAM role</strong> that may read only <code>/26a/&lt;ns&gt;/</code>. The operator reads the AWS secret, writes the normal <strong>Secret</strong> <code>investment-app-secret</code>, and the kubelet copies it into env vars <strong>when the container starts</strong>.</p>
+    </div></details>
+  </div>
+  <div class="q">
+    <p class="ask">4. The password is rotated in Secrets Manager at 10:00. <code>refreshInterval</code> is <code>1h</code>. At 11:15 the app still uses the old password. Why, and what's the fix?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>The Secret was updated; the running containers weren't.</strong> Within the hour the operator rewrote the Secret, but env vars are copied <strong>once, at container start</strong>. <code>kubectl rollout restart deploy/postgres deploy/investment-app</code> gives new pods that read the new value, one by one, with no downtime. (Same lesson as the TICKER change in Session 09.)</p>
+    </div></details>
+  </div>
+  <div class="q">
+    <p class="ask">5. <code>kubectl get externalsecret</code> shows <code>SecretSyncedError</code>, READY <code>False</code>. Where do you look, and what are the likely causes?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong><code>kubectl describe externalsecret &lt;name&gt;</code>, then the Events at the bottom.</strong> SecretSyncedError always means the operator couldn't read the secret. Usual causes: <strong>wrong path</strong> (e.g. <code>NAMESPACE</code> left unreplaced), <strong>permission refused</strong> (AccessDenied), the <strong>secret doesn't exist</strong>, or a wrong SecretStore name. Next: <code>kubectl logs -n external-secrets &lt;operator-pod&gt;</code>, then the secret itself in AWS.</p>
+    </div></details>
+  </div>
+  <div class="q">
+    <p class="ask">6. Interview: you see <code>AccessDeniedException … assumed-role/containers-26a-secrets-ana/… is not authorized to perform: secretsmanager:GetSecretValue on resource: /26a/bob/investment-app</code>. Read it. And why did Kubernetes accept the object?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>Who, what, where, and the answer: no.</strong> <strong>Who:</strong> the IAM role behind ana's <code>secrets-reader</code>. <strong>What:</strong> <code>GetSecretValue</code>. <strong>Where:</strong> bob's path. <strong>Answer:</strong> no policy allows it. Kubernetes accepted it because the *object* is allowed in ana's namespace; the *read* is AWS's decision. That is least privilege doing its job.</p>
+    </div></details>
+  </div>
+  <div class="q">
+    <p class="ask">7. Node A and node B each have 400m CPU allocatable left. A new pod requests 600m. What happens, what do you see, and what could still get it running?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>Pending: it fits on neither node, and a pod can't be split.</strong> The scheduler places a pod only where its <strong>request</strong> fits on <strong>one</strong> node. <code>describe</code> shows <code>PodScheduled: False</code> and <code>FailedScheduling</code> with <strong>not enough capacity</strong>. A cluster autoscaler can add a bigger node; the pod stays Pending until that node is Ready.</p>
+    </div></details>
+  </div>
+  <div class="q">
+    <p class="ask">8. Under load, pod A answers slowly but never restarts. Pod B shows RESTARTS 6. Which limit did each hit, and how do you prove it?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>A: CPU limit (throttled). B: memory limit (OOMKilled).</strong> CPU over the limit makes extra work <strong>wait</strong>, and the container keeps running. Prove it with <strong>throttling metrics + response times</strong>, because slow alone could be the app's own code. Memory over the limit <strong>kills</strong> the container. <code>describe pod</code> shows <code>Last State: Terminated, Reason: OOMKilled</code>.</p>
+    </div></details>
+  </div>
+  <div class="q">
+    <p class="ask">9. A container is OOMKilled. Is the pod replaced? What happens to its name, its IP and its memory?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>No. The kubelet restarts the container inside the same pod.</strong> Same pod name, same IP, RESTARTS +1, and its RAM is released. If the app needs that memory every time, it's killed again, so a climbing RESTARTS means read <code>logs --previous</code> and <code>describe</code>. A pod is only *replaced* when it's deleted or its node goes (ReplicaSet, unit 2).</p>
+    </div></details>
+  </div>
+  <div class="q">
+    <p class="ask">10. A developer asks you to choose <code>requests</code> and <code>limits</code> for a new service. How do you pick them, and why is a request not "CPU the pod uses"?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>Measure first, then set, then adjust.</strong> Run <code>kubectl top</code> at startup, normal traffic and peaks. Set <strong>requests</strong> from what you saw, a <strong>CPU limit</strong> that keeps response time acceptable, and a <strong>memory limit</strong> above the peak plus headroom. Then watch for throttling, OOMKilled and Pending. A request only <strong>reserves scheduling room</strong>. It doesn't consume CPU and doesn't stop the container using spare CPU above it. (1000m = 1 core, 1024Mi = 1Gi.)</p>
+    </div></details>
+  </div>
+  <p><strong>Scoring:</strong> 9–10: your passwords stay out of Git and your pods stay in budget 🏆 · 7–8: solid 💪 · below 7: reopen the sections above and retry 🔁</p>
+</section>
+
+<footer>The same study page and quiz are in Notion under DevOps / 312 - Notes / Containers &amp; Orchestration.</footer>
+</div>
+
+<script>
+document.querySelectorAll('.codebox').forEach(function(box){
+  var pre = box.querySelector('pre'); var b = document.createElement('button');
+  b.className = 'copy'; b.type = 'button'; b.textContent = 'Copy';
+  b.addEventListener('click', function(){
+    var text = pre.innerText.split('\n').map(function(l){ return l.replace(/\s+#.*$/, ''); }).join('\n').trim();
+    var done = function(){ b.textContent = 'Copied'; setTimeout(function(){ b.textContent = 'Copy'; }, 1500); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(function(){ selectPre(); });
+    } else { selectPre(); }
+    function selectPre(){ var r = document.createRange(); r.selectNodeContents(pre); var s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = 'Selected'; }
+  });
+  box.appendChild(b);
+});
+</script>
+
+</body></html>

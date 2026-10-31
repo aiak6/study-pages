@@ -1,0 +1,439 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>kubectl Imperative Commands Cheat Sheet</title>
+<style>:root{--bg:#fafaf7;--fg:#1d1d1b;--code:#efeee9;--line:#d9d7cf}
+@media (prefers-color-scheme:dark){:root{--bg:#16161a;--fg:#e8e6e1;--code:#24242a;--line:#3a3a42}}
+body{background:var(--bg);color:var(--fg);font:16px/1.6 system-ui,sans-serif;max-width:860px;margin:0 auto;padding:24px 16px}
+pre,code{background:var(--code);border-radius:6px;font-family:ui-monospace,Menlo,monospace;font-size:14px}
+pre{padding:12px;overflow-x:auto} code{padding:1px 4px} pre code{padding:0}
+table{border-collapse:collapse;display:block;overflow-x:auto} td,th{border:1px solid var(--line);padding:6px 10px;text-align:left}</style>
+</head><body><div id="c"></div>
+<script id="md" type="text/markdown"># kubectl Imperative Commands Cheat Sheet
+
+Oct 16, 2026 · @Aia
+
+## The big idea
+
+Use imperative commands to do quick one-time tasks or to generate a YAML template, then edit the YAML and apply it. This saves a lot of time in the CKA/CKAD exam.
+
+- **Declarative** = you write a YAML file that describes what you want, then run `kubectl apply -f file.yaml`. Like giving the chef a written recipe.
+- **Imperative** = you tell Kubernetes exactly what to do with one command, e.g. `kubectl run nginx --image=nginx`. Like shouting "one pizza, please!"
+
+### The two magic flags
+
+| Flag | What it does | Simple meaning |
+| --- | --- | --- |
+| `--dry-run=client` | Checks the command but does NOT create the resource | "Pretend, don't actually do it" |
+| `-o yaml` | Prints the resource definition as YAML on screen | "Show me the recipe" |
+
+Together they make a ready-made YAML template:
+
+```bash
+kubectl run nginx --image=nginx --dry-run=client -o yaml > pod.yaml
+# edit pod.yaml if needed, then:
+kubectl apply -f pod.yaml
+```
+
+The `>` sign saves the output into a file instead of showing it on screen.
+
+## Pod
+
+A Pod is the smallest unit in Kubernetes: a wrapper around one (or more) containers.
+
+Create an nginx Pod right away:
+
+```bash
+kubectl run nginx --image=nginx
+```
+
+Generate the Pod YAML only, without creating it:
+
+```bash
+kubectl run nginx --image=nginx --dry-run=client -o yaml
+```
+
+Save it to a file, edit, then create:
+
+```bash
+kubectl run nginx --image=nginx --dry-run=client -o yaml > nginx-pod.yaml
+kubectl apply -f nginx-pod.yaml
+```
+
+Read it as: `run` = make a Pod, `nginx` = the Pod's name, `--image=nginx` = which container image to use.
+
+## Deployment
+
+A Deployment manages Pods for you: it keeps the right number of copies (replicas) running and replaces any that die.
+
+Create a Deployment:
+
+```bash
+kubectl create deployment nginx --image=nginx
+```
+
+Generate the Deployment YAML only, without creating it:
+
+```bash
+kubectl create deployment nginx --image=nginx --dry-run=client -o yaml
+```
+
+Create a Deployment with 4 replicas:
+
+```bash
+kubectl create deployment nginx --image=nginx --replicas=4
+```
+
+Change the replica count of an existing Deployment:
+
+```bash
+kubectl scale deployment nginx --replicas=4
+```
+
+Or save the YAML, change `replicas` (or any field) in the file, then create it:
+
+```bash
+kubectl create deployment nginx --image=nginx --dry-run=client -o yaml > nginx-deployment.yaml
+kubectl apply -f nginx-deployment.yaml
+```
+
+Note: Pods use `kubectl run`, but Deployments use `kubectl create deployment`.
+
+## Service
+
+A Service gives Pods a stable address. It finds its Pods by their labels (the selector), like a mail carrier finding houses by street name.
+
+- **ClusterIP** = reachable only inside the cluster (the default).
+- **NodePort** = also reachable from outside, on a port of every node (range 30000–32767).
+
+### ClusterIP: expose pod redis on port 6379 as redis-service
+
+Option 1, recommended (uses the Pod's real labels as the selector):
+
+```bash
+kubectl expose pod redis --port=6379 --name=redis-service --dry-run=client -o yaml
+```
+
+Option 2 (assumes the selector is `app=redis`, and you cannot pass your own selector):
+
+```bash
+kubectl create service clusterip redis --tcp=6379:6379 --dry-run=client -o yaml
+```
+
+If your Pod has different labels, option 2 will not find it. Save the file and fix the selector before creating.
+
+### NodePort: expose pod nginx port 80 on node port 30080
+
+Option 1, recommended (uses the Pod's labels, but you cannot set the node port):
+
+```bash
+kubectl expose pod nginx --port=80 --name=nginx-service --type=NodePort --dry-run=client -o yaml > svc.yaml
+```
+
+Then open svc.yaml and add `nodePort: 30080` under `ports`:
+
+```yaml
+ports:
+- port: 80
+  targetPort: 80
+  nodePort: 30080
+```
+
+Option 2 (sets the node port, but does not use the Pod's labels):
+
+```bash
+kubectl create service nodeport nginx --tcp=80:80 --node-port=30080 --dry-run=client -o yaml
+```
+
+### Which one to pick?
+
+| Command | Uses Pod's labels? | Can set node port? |
+| --- | --- | --- |
+| `kubectl expose` | Yes | No (add it by hand) |
+| `kubectl create service` | No (assumes `app=<name>`) | Yes |
+
+Rule of thumb: use `kubectl expose`, and if you need a node port, generate the YAML and add it by hand.
+
+## Namespace
+
+A Namespace is like a folder inside the cluster: it keeps resources of different teams or apps apart, e.g. `dev` and `prod`. Every cluster starts with a `default` namespace.
+
+Create a namespace:
+
+```bash
+kubectl create namespace dev
+# short form
+kubectl create ns dev
+```
+
+Generate the YAML only, without creating it:
+
+```bash
+kubectl create namespace dev --dry-run=client -o yaml > dev-ns.yaml
+```
+
+List namespaces:
+
+```bash
+kubectl get namespaces
+```
+
+Create something inside a namespace with `-n`:
+
+```bash
+kubectl run nginx --image=nginx -n dev
+kubectl create deployment web --image=nginx -n dev
+```
+
+See resources in a namespace:
+
+```bash
+kubectl get pods -n dev
+kubectl get pods --all-namespaces   # or -A
+```
+
+Switch your default namespace, so you don't have to type `-n dev` every time:
+
+```bash
+kubectl config set-context --current --namespace=dev
+```
+
+Delete a namespace (careful: this deletes everything inside it):
+
+```bash
+kubectl delete namespace dev
+```
+
+Exam tip: if the task says "in namespace X", always add `-n X`. Forgetting it puts the resource in `default` and you lose the points.
+
+## ConfigMap
+
+A ConfigMap holds ordinary settings (not passwords) as key: value pairs, outside the image. Like a sticky note of settings the Pod reads when it starts.
+
+Create from values typed on the command line:
+
+```bash
+kubectl create configmap app-config --from-literal=DB_HOST=db --from-literal=DB_PORT=5432
+```
+
+Create from a file (each line `KEY=value` becomes a key):
+
+```bash
+kubectl create configmap app-config --from-env-file=app.env
+```
+
+Generate the YAML only:
+
+```bash
+kubectl create configmap app-config --from-literal=TICKER=AAPL --dry-run=client -o yaml > cm.yaml
+```
+
+Look at it and change it:
+
+```bash
+kubectl get cm                       # DATA = number of keys
+kubectl describe cm app-config       # every key and value, plain text
+kubectl edit cm app-config           # change the live object
+```
+
+In YAML, every value is text, so quote numbers: `DB_PORT: "5432"`.
+
+## Secret
+
+A Secret is the same idea for passwords and API keys. It is stored as base64, which is encoding, not encryption: anyone who can read it can decode it.
+
+Create a generic Secret:
+
+```bash
+kubectl create secret generic app-secret --from-literal=DB_PASSWORD=change-me
+```
+
+Generate the YAML only:
+
+```bash
+kubectl create secret generic app-secret --from-literal=DB_PASSWORD=change-me --dry-run=client -o yaml > secret.yaml
+```
+
+Look at it and decode one value:
+
+```bash
+kubectl get secret app-secret               # TYPE Opaque, DATA 1
+kubectl describe secret app-secret          # sizes only, not values
+kubectl get secret app-secret -o jsonpath='{.data.DB_PASSWORD}' | base64 -d
+```
+
+Never commit a Secret file with a real password to GitHub; add it to `.gitignore`.
+
+## Using them in a Pod
+
+```yaml
+envFrom:                      # every key of the ConfigMap
+  - configMapRef:
+      name: app-config
+env:                          # one key from the Secret
+  - name: DB_PASSWORD         # variable name inside the container
+    valueFrom:
+      secretKeyRef:
+        name: app-secret
+        key: DB_PASSWORD      # key in the Secret
+```
+
+Check what the app really sees:
+
+```bash
+kubectl exec deploy/investment-app -- env
+kubectl exec deploy/investment-app -- printenv TICKER
+```
+
+Pods copy the values only when they start. After you change a ConfigMap or Secret, restart the pods:
+
+```bash
+kubectl rollout restart deploy/investment-app
+```
+
+Wrong ConfigMap or Secret name → Pod shows `CreateContainerConfigError` and has no logs. Read `kubectl describe pod` events instead.
+
+## Editing Pods and Deployments
+
+A running Pod is mostly locked. You can only change these fields in place:
+
+- `spec.containers[*].image`
+- `spec.initContainers[*].image`
+- `spec.activeDeadlineSeconds`
+- `spec.tolerations`
+
+Everything else (env vars, service account, resource limits) needs the Pod to be deleted and created again. Think of it like a printed ticket: to change the seat, you get a new ticket.
+
+### Option 1: kubectl edit, then recreate
+
+```bash
+kubectl edit pod webapp
+# save → "Forbidden"; kubectl saves your changes to a temp file, e.g. /tmp/kubectl-edit-ccvrq.yaml
+kubectl delete pod webapp
+kubectl create -f /tmp/kubectl-edit-ccvrq.yaml
+```
+
+Faster: skip the delete and use the temp file path kubectl printed:
+
+```bash
+kubectl replace --force -f /tmp/kubectl-edit-1037383925.yaml
+```
+
+### Option 2: export the YAML, edit, recreate
+
+```bash
+kubectl get pod webapp -o yaml > my-new-pod.yaml
+vi my-new-pod.yaml
+kubectl delete pod webapp
+kubectl create -f my-new-pod.yaml
+```
+
+Exam shortcut: delete and recreate in one step.
+
+```bash
+kubectl replace --force -f my-new-pod.yaml
+```
+
+### Deployments: just edit
+
+A Deployment can change any field of its Pod template. It deletes the old Pods and creates new ones for you.
+
+```bash
+kubectl edit deployment my-deployment
+```
+
+This is one more reason to run apps as Deployments, not bare Pods.
+
+## Output formats (-o)
+
+By default kubectl prints a human-readable table. The `-o` flag changes how the result is shown.
+
+Pattern: `kubectl [command] [TYPE] [NAME] -o <format>`
+
+| Flag | What you get | When to use |
+| --- | --- | --- |
+| `-o json` | The object as JSON | Feeding data to scripts or tools like `jq` |
+| `-o yaml` | The object as YAML | Making a template to edit and `apply` |
+| `-o wide` | The normal table plus extra columns (IP, node) | Seeing which node a Pod runs on and its IP |
+| `-o name` | Only the resource name, e.g. `pod/nginx` | Scripts and loops |
+
+### JSON example
+
+```bash
+kubectl create namespace test-123 --dry-run=client -o json
+```
+
+```json
+{
+    "kind": "Namespace",
+    "apiVersion": "v1",
+    "metadata": {
+        "name": "test-123",
+        "creationTimestamp": null
+    },
+    "spec": {},
+    "status": {}
+}
+```
+
+### YAML example
+
+Same object, different format: YAML uses indentation instead of `{ }` brackets.
+
+```bash
+kubectl create namespace test-123 --dry-run=client -o yaml
+```
+
+```yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  creationTimestamp: null
+  name: test-123
+spec: {}
+status: {}
+```
+
+### Wide example
+
+The most common one in daily work: it adds the Pod's IP and the node it runs on.
+
+```bash
+kubectl get pods -o wide
+```
+
+```text
+NAME      READY   STATUS    RESTARTS   AGE     IP          NODE     NOMINATED NODE   READINESS GATES
+busybox   1/1     Running   0          3m39s   10.36.0.2   node01   <none>           <none>
+nginx     1/1     Running   0          7m32s   10.44.0.1   node03   <none>           <none>
+redis     1/1     Running   0          3m59s   10.36.0.1   node01   <none>           <none>
+```
+
+More: [kubectl overview](https://kubernetes.io/docs/reference/kubectl/overview/) · [kubectl cheat sheet](https://kubernetes.io/docs/reference/kubectl/cheatsheet/)
+
+## Quick reference
+
+| Goal | Command |
+| --- | --- |
+| Create Pod | `kubectl run nginx --image=nginx` |
+| Pod YAML only | `kubectl run nginx --image=nginx --dry-run=client -o yaml` |
+| Create Deployment | `kubectl create deployment nginx --image=nginx` |
+| Deployment YAML only | `kubectl create deployment nginx --image=nginx --dry-run=client -o yaml` |
+| Deployment with 4 replicas | `kubectl create deployment nginx --image=nginx --replicas=4` |
+| Scale Deployment | `kubectl scale deployment nginx --replicas=4` |
+| ClusterIP Service | `kubectl expose pod redis --port=6379 --name=redis-service` |
+| NodePort Service | `kubectl expose pod nginx --port=80 --name=nginx-service --type=NodePort` (add nodePort by hand) |
+| Create from file | `kubectl apply -f file.yaml` |
+
+### Exam tips
+
+Quick output tip: `kubectl get pods -o wide` shows each Pod's IP and node; `-o name` prints names only.
+
+- Always write `--dry-run=client`, not just `--dry-run`. The old form is deprecated and newer kubectl rejects it.
+- Put a space before every flag: `--image=nginx --dry-run`, not `--image=nginx--dry-run` (the original notes had this typo).
+- Check the name the task asks for. If it says "Service named nginx", use `--name=nginx`, not `nginx-service`.
+- After creating, verify with `kubectl get pods`, `kubectl get deploy` or `kubectl get svc`.
+
+Reference: [kubectl usage conventions](https://kubernetes.io/docs/reference/kubectl/conventions/)
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+<script>document.getElementById('c').innerHTML=marked.parse(document.getElementById('md').textContent);</script>
+</body></html>

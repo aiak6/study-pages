@@ -1,0 +1,422 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Interview System Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root{
+    --ground:#eef1f4;
+    --panel:#ffffff;
+    --panel-2:#f7f9fb;
+    --ink:#161b22;
+    --ink-soft:#3f4956;
+    --ink-faint:#6b7686;
+    --line:#d7dde4;
+    --line-strong:#c2cad4;
+    --blue:#2f66e0;         /* priority / core */
+    --blue-soft:#e6eefc;
+    --amber:#b46a12;        /* "on the real system" */
+    --amber-soft:#f6ecdb;
+    --green:#1f7a4d;
+    --track:#aeb8c6;        /* diagram wires */
+    --shadow:0 1px 2px rgba(20,27,38,.06),0 8px 24px rgba(20,27,38,.05);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#0d1117;
+      --panel:#161c25;
+      --panel-2:#1b2330;
+      --ink:#e8edf3;
+      --ink-soft:#b3bdca;
+      --ink-faint:#8592a3;
+      --line:#28313d;
+      --line-strong:#38424f;
+      --blue:#6fa0ff;
+      --blue-soft:#1a2740;
+      --amber:#e2a24a;
+      --amber-soft:#2c2312;
+      --green:#57c088;
+      --track:#4a5666;
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#0d1117;
+    --panel:#161c25;
+    --panel-2:#1b2330;
+    --ink:#e8edf3;
+    --ink-soft:#b3bdca;
+    --ink-faint:#8592a3;
+    --line:#28313d;
+    --line-strong:#38424f;
+    --blue:#6fa0ff;
+    --blue-soft:#1a2740;
+    --amber:#e2a24a;
+    --amber-soft:#2c2312;
+    --green:#57c088;
+    --track:#4a5666;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);
+  }
+
+  *{box-sizing:border-box}
+  body{
+    background:var(--ground);
+    color:var(--ink);
+    font-family:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1000px;margin:0 auto;padding-block:28px 64px;padding-left:16px;padding-right:16px}
+
+  h1,h2,h3,.map-title{font-family:"Bricolage Grotesque",system-ui,sans-serif}
+  h1{font-size:clamp(1.9rem,5vw,2.9rem);font-weight:800;line-height:1.02;letter-spacing:-.02em;margin:0;text-wrap:balance}
+  .kicker{font-family:"IBM Plex Mono",monospace;font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:var(--blue);font-weight:500;margin:0 0 12px}
+  .lede{color:var(--ink-soft);max-width:64ch;margin:14px 0 0;font-size:1.02rem}
+
+  /* legend */
+  .legend{display:flex;flex-wrap:wrap;gap:10px 18px;margin-top:22px;padding:14px 16px;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow)}
+  .legend .li{display:flex;align-items:center;gap:8px;font-size:.82rem;color:var(--ink-soft)}
+  .swatch{width:14px;height:14px;border-radius:4px;flex:none}
+  .swatch.core{background:var(--blue)}
+  .swatch.real{background:var(--amber)}
+  .bar-legend{width:5px;height:16px;border-radius:3px;background:var(--blue);flex:none}
+
+  /* section header */
+  .sec-head{margin:56px 0 6px;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+  .sec-num{font-family:"IBM Plex Mono",monospace;font-size:.8rem;color:var(--ink-faint);border:1px solid var(--line-strong);border-radius:6px;padding:2px 8px}
+  .sec-head h2{font-size:clamp(1.3rem,3.4vw,1.7rem);font-weight:700;margin:0;letter-spacing:-.01em}
+  .sec-sub{color:var(--ink-faint);font-size:.92rem;margin:4px 0 0}
+
+  /* diagram frame */
+  figure{margin:22px 0 8px}
+  .diagram{background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:10px}
+  .diagram svg{display:block;width:100%;height:auto}
+  figcaption{color:var(--ink-faint);font-size:.82rem;margin-top:10px;font-style:italic;text-align:center}
+
+  /* stop cards */
+  .stops{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-top:22px}
+  .stop{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 16px 18px;position:relative;overflow:hidden;box-shadow:var(--shadow)}
+  .stop::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--line-strong)}
+  .stop.has-core::before{background:var(--blue)}
+  .stop-top{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+  .stop-idx{font-family:"IBM Plex Mono",monospace;font-size:.78rem;color:var(--ink-faint)}
+  .stop h3{font-size:1.06rem;font-weight:700;margin:0;letter-spacing:-.01em}
+  .counts{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 12px}
+  .chip{font-family:"IBM Plex Mono",monospace;font-size:.72rem;padding:3px 8px;border-radius:20px;background:var(--panel-2);border:1px solid var(--line);color:var(--ink-soft)}
+  .chip.core{background:var(--blue-soft);border-color:transparent;color:var(--blue);font-weight:500}
+  .real{display:flex;gap:8px;font-size:.85rem;color:var(--ink-soft);background:var(--amber-soft);border-radius:9px;padding:9px 11px;margin-bottom:12px}
+  .real b{color:var(--amber);font-weight:600;font-family:"IBM Plex Mono",monospace;font-size:.72rem;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+  .vocab-h{font-family:"IBM Plex Mono",monospace;font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);margin:2px 0 7px}
+  .vocab{display:flex;flex-wrap:wrap;gap:6px}
+  .term{font-family:"IBM Plex Mono",monospace;font-size:.74rem;padding:3px 8px;border-radius:6px;background:var(--panel-2);border:1px solid var(--line);color:var(--ink-soft)}
+
+  /* domains */
+  .domains{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:22px}
+  .dom{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:8px}
+  .dom-n{font-family:"Bricolage Grotesque",sans-serif;font-size:1.6rem;font-weight:800;color:var(--blue);line-height:1}
+  .dom h3{font-size:.98rem;font-weight:600;margin:0}
+  .dom .q{font-family:"IBM Plex Mono",monospace;font-size:.72rem;color:var(--ink-faint)}
+  .dom.big{outline:2px solid var(--blue);outline-offset:-2px}
+  .dom .flag{font-size:.72rem;color:var(--blue);font-weight:500}
+
+  .note{margin-top:44px;padding:16px 18px;background:var(--panel-2);border:1px dashed var(--line-strong);border-radius:12px;color:var(--ink-soft);font-size:.9rem}
+  .note b{color:var(--ink)}
+  .footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);color:var(--ink-faint);font-size:.8rem}
+
+  /* svg shared text */
+  svg text{font-family:"IBM Plex Sans",sans-serif}
+  .n-label{font-weight:600;font-size:14px;fill:var(--ink)}
+  .n-sub{font-size:11px;fill:var(--ink-faint);font-family:"IBM Plex Mono",monospace}
+  .wire-label{font-size:10.5px;fill:var(--ink-faint);font-family:"IBM Plex Mono",monospace}
+  @media (prefers-reduced-motion: no-preference){
+    .stop,.dom{transition:transform .15s ease}
+    .stop:hover,.dom:hover{transform:translateY(-2px)}
+  }
+</style>
+
+<div class="wrap">
+
+  <p class="kicker">312 School · Scale · 26a · Knowledge interview</p>
+  <h1>The system, drawn twice</h1>
+  <p class="lede">Your whole interview lives on two maps. The first follows <b>one request</b> from a browser to the database and back. The second follows <b>the system itself</b>: how it is built, watched, and changed. Learn to point at any box and say what it does — and what happens when it dies.</p>
+
+  <div class="legend">
+    <div class="li"><span class="bar-legend"></span> Blue bar / chip = <b>&nbsp;core</b>&nbsp;— the interviewer starts here</div>
+    <div class="li"><span class="swatch real"></span> Amber = worked live "on the real system"</div>
+    <div class="li"><span class="swatch" style="background:var(--track)"></span> Grey wires = the path a request or change travels</div>
+  </div>
+
+  <!-- ============ SESSION 1 ============ -->
+  <div class="sec-head">
+    <span class="sec-num">MAP 1</span>
+    <h2>One request, end to end</h2>
+  </div>
+  <p class="sec-sub">A browser asks for your page. Follow the request down through six stops and watch the answer come back.</p>
+
+  <figure>
+    <div class="diagram">
+      <svg viewBox="0 0 900 520" role="img" aria-label="A request travels from the browser through Route 53, the load balancer, a server, its IAM role and secret, to the database, then a response returns.">
+        <defs>
+          <marker id="ar" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+            <path d="M0,0 L8,3 L0,6 Z" fill="var(--track)"/>
+          </marker>
+          <marker id="arb" markerWidth="11" markerHeight="11" refX="8.5" refY="3.2" orient="auto" markerUnits="userSpaceOnUse">
+            <path d="M0,0 L8.5,3.2 L0,6.4 Z" fill="var(--green)"/>
+          </marker>
+        </defs>
+
+        <!-- vertical request spine on the left, boxes stacked -->
+        <!-- Box helper geometry: x=250 w=400 ; rows at y -->
+        <!-- Row 1 Browser -->
+        <rect x="250" y="16" width="400" height="56" rx="12" fill="var(--panel-2)" stroke="var(--line-strong)"/>
+        <text x="270" y="41" class="n-label">Browser</text>
+        <text x="270" y="59" class="n-sub">types your domain, waits for a page</text>
+
+        <!-- wire 1 -->
+        <line x1="450" y1="72" x2="450" y2="104" stroke="var(--track)" stroke-width="2" marker-end="url(#ar)"/>
+        <text x="462" y="92" class="wire-label">name → address</text>
+
+        <!-- Row 2 Route53 (core) -->
+        <rect x="250" y="104" width="400" height="60" rx="12" fill="var(--panel)" stroke="var(--blue)" stroke-width="2"/>
+        <rect x="250" y="104" width="5" height="60" rx="2.5" fill="var(--blue)"/>
+        <text x="270" y="130" class="n-label">1 · The name  ·  Route 53 (DNS)</text>
+        <text x="270" y="149" class="n-sub">alias record answers apex with A records</text>
+
+        <line x1="450" y1="164" x2="450" y2="196" stroke="var(--track)" stroke-width="2" marker-end="url(#ar)"/>
+        <text x="462" y="184" class="wire-label">request · port 443</text>
+
+        <!-- Row 3 Load balancer (core) -->
+        <rect x="250" y="196" width="400" height="70" rx="12" fill="var(--panel)" stroke="var(--blue)" stroke-width="2"/>
+        <rect x="250" y="196" width="5" height="70" rx="2.5" fill="var(--blue)"/>
+        <text x="270" y="221" class="n-label">2 · The load balancer</text>
+        <text x="270" y="240" class="n-sub">listener → rule → target group</text>
+        <text x="270" y="257" class="n-sub">TLS + certificate · health check picks a live server</text>
+
+        <!-- health check side loop -->
+        <path d="M650 231 h40 a10 10 0 0 1 10 10 v40 a10 10 0 0 1 -10 10 h-40" fill="none" stroke="var(--track)" stroke-width="1.6" stroke-dasharray="4 4" marker-end="url(#ar)"/>
+        <text x="712" y="266" class="wire-label" text-anchor="start">health</text>
+        <text x="712" y="279" class="wire-label" text-anchor="start">check</text>
+
+        <line x1="450" y1="266" x2="450" y2="298" stroke="var(--track)" stroke-width="2" marker-end="url(#ar)"/>
+
+        <!-- Row 4 Server -->
+        <rect x="250" y="298" width="400" height="70" rx="12" fill="var(--panel-2)" stroke="var(--line-strong)"/>
+        <text x="270" y="323" class="n-label">3 · The server  ·  service</text>
+        <text x="270" y="342" class="n-sub">systemd runs the app · listens on a port</text>
+        <text x="270" y="359" class="n-sub">in a private subnet, across two zones</text>
+
+        <!-- Role & secret to the right of server -->
+        <rect x="672" y="298" width="212" height="70" rx="12" fill="var(--panel)" stroke="var(--blue)" stroke-width="2"/>
+        <rect x="672" y="298" width="5" height="70" rx="2.5" fill="var(--blue)"/>
+        <text x="690" y="322" class="n-label" style="font-size:12.5px">4 · Role &amp; secret</text>
+        <text x="690" y="340" class="n-sub" style="font-size:10px">IAM role at boot</text>
+        <text x="690" y="354" class="n-sub" style="font-size:10px">Secrets Manager</text>
+        <line x1="672" y1="333" x2="650" y2="333" stroke="var(--track)" stroke-width="1.6" marker-end="url(#ar)"/>
+
+        <line x1="450" y1="368" x2="450" y2="400" stroke="var(--track)" stroke-width="2" marker-end="url(#ar)"/>
+        <text x="462" y="388" class="wire-label">query</text>
+
+        <!-- Row 5 Database (core) -->
+        <rect x="250" y="400" width="400" height="60" rx="12" fill="var(--panel)" stroke="var(--blue)" stroke-width="2"/>
+        <rect x="250" y="400" width="5" height="60" rx="2.5" fill="var(--blue)"/>
+        <text x="270" y="426" class="n-label">5 · The database  ·  RDS</text>
+        <text x="270" y="445" class="n-sub">managed · private subnets · standby in 2nd zone</text>
+
+        <!-- Response spine on the right going up -->
+        <path d="M210 430 v-394" fill="none" stroke="var(--green)" stroke-width="2" marker-end="url(#arb)"/>
+        <text x="150" y="240" class="n-sub" transform="rotate(-90 150 240)" style="fill:var(--green);font-weight:500">6 · response · status + body</text>
+        <line x1="250" y1="430" x2="210" y2="430" stroke="var(--green)" stroke-width="2"/>
+        <line x1="210" y1="44" x2="250" y2="44" stroke="var(--green)" stroke-width="2" marker-end="url(#arb)"/>
+      </svg>
+    </div>
+    <figcaption>Down the grey spine: the request. Up the green spine: the answer. The four blue boxes are where the interview starts.</figcaption>
+  </figure>
+
+  <div class="stops" id="stops1"></div>
+
+  <!-- ============ SESSION 2 ============ -->
+  <div class="sec-head">
+    <span class="sec-num">MAP 2</span>
+    <h2>How it is built &amp; kept running</h2>
+  </div>
+  <p class="sec-sub">Map 1 was the system answering. Map 2 is where the system comes from: code becomes infrastructure, runs in separate copies, and is watched and changed without going dark.</p>
+
+  <figure>
+    <div class="diagram">
+      <svg viewBox="0 0 900 560" role="img" aria-label="Code in a repository is turned into infrastructure by Terraform, which records state in S3, applies into separate environments, and the running system is watched by CloudWatch, changed via launch templates, and fronted by CloudFront at the edge.">
+        <defs>
+          <marker id="ar2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+            <path d="M0,0 L8,3 L0,6 Z" fill="var(--track)"/>
+          </marker>
+        </defs>
+
+        <!-- Repository -->
+        <rect x="40" y="24" width="220" height="64" rx="12" fill="var(--panel)" stroke="var(--blue)" stroke-width="2"/>
+        <rect x="40" y="24" width="5" height="64" rx="2.5" fill="var(--blue)"/>
+        <text x="60" y="49" class="n-label">1 · Repository</text>
+        <text x="60" y="68" class="n-sub">git · main · pull requests</text>
+        <text x="60" y="82" class="n-sub">.gitignore keeps state &amp; secrets out</text>
+
+        <line x1="260" y1="56" x2="320" y2="56" stroke="var(--track)" stroke-width="2" marker-end="url(#ar2)"/>
+        <text x="268" y="46" class="wire-label">apply</text>
+
+        <!-- Terraform -->
+        <rect x="320" y="24" width="230" height="64" rx="12" fill="var(--panel)" stroke="var(--blue)" stroke-width="2"/>
+        <rect x="320" y="24" width="5" height="64" rx="2.5" fill="var(--blue)"/>
+        <text x="340" y="49" class="n-label">2 · Terraform</text>
+        <text x="340" y="68" class="n-sub">plan → apply · providers</text>
+        <text x="340" y="82" class="n-sub">builds the finished result, not steps</text>
+
+        <!-- State -->
+        <line x1="435" y1="88" x2="435" y2="120" stroke="var(--track)" stroke-width="2" marker-end="url(#ar2)"/>
+        <text x="447" y="108" class="wire-label">records ids</text>
+        <rect x="320" y="120" width="230" height="52" rx="12" fill="var(--panel-2)" stroke="var(--line-strong)"/>
+        <text x="340" y="143" class="n-label" style="font-size:13px">State  ·  S3 bucket + lock</text>
+        <text x="340" y="161" class="n-sub">one key per environment · lock blocks a 2nd apply</text>
+
+        <!-- Terraform -> environments -->
+        <line x1="550" y1="56" x2="610" y2="56" stroke="var(--track)" stroke-width="2" marker-end="url(#ar2)"/>
+        <text x="556" y="46" class="wire-label">into each</text>
+
+        <!-- Environments column -->
+        <rect x="610" y="20" width="250" height="150" rx="12" fill="none" stroke="var(--line-strong)" stroke-dasharray="5 4"/>
+        <text x="622" y="14" class="vocab-h" style="fill:var(--ink-faint)">3 · ENVIRONMENTS</text>
+        <rect x="626" y="30" width="218" height="38" rx="9" fill="var(--panel)" stroke="var(--line)"/>
+        <text x="642" y="54" class="n-sub" style="fill:var(--ink)">dev</text>
+        <rect x="626" y="74" width="218" height="38" rx="9" fill="var(--panel)" stroke="var(--line)"/>
+        <text x="642" y="98" class="n-sub" style="fill:var(--ink)">staging</text>
+        <rect x="626" y="118" width="218" height="42" rx="9" fill="var(--panel)" stroke="var(--blue)" stroke-width="1.6"/>
+        <text x="642" y="144" class="n-sub" style="fill:var(--ink)">production — the running system ↓</text>
+
+        <line x1="735" y1="170" x2="735" y2="212" stroke="var(--track)" stroke-width="2" marker-end="url(#ar2)"/>
+
+        <!-- Running system block -->
+        <rect x="300" y="212" width="560" height="128" rx="14" fill="var(--panel-2)" stroke="var(--line-strong)"/>
+        <text x="320" y="236" class="vocab-h" style="fill:var(--ink-faint)">THE RUNNING SYSTEM  (map 1)</text>
+        <rect x="320" y="248" width="120" height="74" rx="10" fill="var(--panel)" stroke="var(--line)"/>
+        <text x="336" y="272" class="n-sub" style="fill:var(--ink)">balancer</text>
+        <rect x="452" y="248" width="120" height="74" rx="10" fill="var(--panel)" stroke="var(--line)"/>
+        <text x="468" y="266" class="n-sub" style="fill:var(--ink)">server</text>
+        <text x="468" y="300" class="n-sub" style="fill:var(--ink)">server</text>
+        <rect x="584" y="248" width="120" height="74" rx="10" fill="var(--panel)" stroke="var(--line)"/>
+        <text x="600" y="272" class="n-sub" style="fill:var(--ink)">database</text>
+        <line x1="440" y1="285" x2="452" y2="285" stroke="var(--track)" stroke-width="1.6" marker-end="url(#ar2)"/>
+        <line x1="572" y1="285" x2="584" y2="285" stroke="var(--track)" stroke-width="1.6" marker-end="url(#ar2)"/>
+
+        <!-- CloudWatch (watch) left -->
+        <rect x="40" y="230" width="230" height="92" rx="12" fill="var(--panel)" stroke="var(--blue)" stroke-width="2"/>
+        <rect x="40" y="230" width="5" height="92" rx="2.5" fill="var(--blue)"/>
+        <text x="60" y="255" class="n-label">4 · CloudWatch</text>
+        <text x="60" y="274" class="n-sub">metrics · logs · alarm</text>
+        <text x="60" y="291" class="n-sub">alarm → topic → email</text>
+        <text x="60" y="308" class="n-sub">agent sends what's inside</text>
+        <line x1="300" y1="276" x2="270" y2="276" stroke="var(--track)" stroke-width="1.6" marker-end="url(#ar2)"/>
+        <text x="150" y="222" class="wire-label" text-anchor="middle">metrics · logs</text>
+
+        <!-- Launch template / change (bottom) -->
+        <line x1="500" y1="340" x2="500" y2="382" stroke="var(--track)" stroke-width="2" marker-end="url(#ar2)"/>
+        <text x="512" y="366" class="wire-label">new servers</text>
+        <rect x="300" y="382" width="270" height="86" rx="12" fill="var(--panel)" stroke="var(--blue)" stroke-width="2"/>
+        <rect x="300" y="382" width="5" height="86" rx="2.5" fill="var(--blue)"/>
+        <text x="320" y="407" class="n-label">5 · Changing it</text>
+        <text x="320" y="426" class="n-sub">launch template v2 · instance refresh</text>
+        <text x="320" y="443" class="n-sub">min-healthy stays up · draining · rollback</text>
+        <text x="320" y="460" class="n-sub">replace servers without going dark</text>
+
+        <!-- Edge / CloudFront (top of stack, users first) -->
+        <rect x="610" y="382" width="250" height="86" rx="12" fill="var(--panel)" stroke="var(--blue)" stroke-width="2"/>
+        <rect x="610" y="382" width="5" height="86" rx="2.5" fill="var(--blue)"/>
+        <text x="630" y="407" class="n-label">6 · The edge · CloudFront</text>
+        <text x="630" y="426" class="n-sub">users → edge → origin</text>
+        <text x="630" y="443" class="n-sub">cached copies · hit / miss · TTL</text>
+        <text x="630" y="460" class="n-sub">invalidate to drop a stale copy</text>
+        <line x1="735" y1="382" x2="735" y2="340" stroke="var(--track)" stroke-width="1.6" marker-end="url(#ar2)"/>
+        <text x="747" y="366" class="wire-label" text-anchor="start">fronts origin</text>
+
+        <!-- Failure walk banner -->
+        <rect x="40" y="498" width="820" height="44" rx="12" fill="var(--amber-soft)" stroke="var(--amber)" stroke-width="1.2"/>
+        <text x="60" y="525" class="n-sub" style="fill:var(--amber);font-weight:600;font-family:'IBM Plex Mono',monospace;font-size:12px">7 · THE FAILURE WALK</text>
+        <text x="235" y="525" class="n-sub" style="fill:var(--ink)">Point at any box: what happens when it dies, and what catches it?</text>
+      </svg>
+    </div>
+    <figcaption>Code flows left to right into environments, then down into the running system — which CloudWatch watches, launch templates rebuild, and CloudFront fronts.</figcaption>
+  </figure>
+
+  <div class="stops" id="stops2"></div>
+
+  <!-- ============ DOMAINS ============ -->
+  <div class="sec-head">
+    <span class="sec-num">THE ASK</span>
+    <h2>What the 25 minutes covers</h2>
+  </div>
+  <p class="sec-sub">Eight domains, 134 questions in the bank. The interviewer picks 1–3 per domain — then asks <b>why</b> until your understanding stops. That follow-up is the interview.</p>
+
+  <div class="domains" id="domains"></div>
+
+  <div class="note">
+    <b>How to prep, in one line:</b> explain each box <em>out loud, in your own words, from your own build</em>. If you use a word you can't define, stop — "sort of" counts as "no". Name the mechanism and you pass even if you forget the name; name the thing without the mechanism and you don't.
+  </div>
+
+  <div class="footer">
+    Study map built from 312 School · Scale · 26a · Knowledge interview prep (sessions 1 &amp; 2). Not on the interview: multi-account/Organizations, Kubernetes &amp; containers, CI pipelines, <span style="font-family:'IBM Plex Mono',monospace">terraform import</span>, <span style="font-family:'IBM Plex Mono',monospace">for_each</span> mechanics, point-in-time recovery, Aurora, WAF rules, your app's own code.
+  </div>
+</div>
+
+<script>
+  const stops1 = [
+    {i:"1", t:"The name", core:1, q:1, real:"An alias record at the top of the domain points at the balancer's name; dig apex vs www returns two kinds of answer.", vocab:["A record","CNAME","Alias record","Apex / top of domain"]},
+    {i:"2", t:"The load balancer", core:3, q:10, real:"The health check's four numbers tell you how long a dead server keeps getting traffic.", vocab:["Listener","Rule","Target group","Health check","Sticky session","Launch template","Auto Scaling group","Availability zone"]},
+    {i:"3", t:"The server", core:2, q:7, real:"A dead server is diagnosed in a fixed order: boot script → service → port → app log.", vocab:["Service (systemd)","Boot script / user data","Listening address","Port","Reverse proxy","Refused vs timed out"]},
+    {i:"4", t:"The role & the secret", core:2, q:6, real:"Role → policy → instance profile → the boot line that fetches the secret form one chain.", vocab:["IAM user","IAM role","Policy","Instance profile","Secrets Manager","Least privilege"]},
+    {i:"5", t:"The database", core:3, q:11, real:'"Private" is a missing route-table row, not a label; the DB security group names the app\'s group as source.', vocab:["Managed database","CIDR","Public vs private subnet","Subnet group","Backup vs snapshot","RPO / RTO","Standby","Read replica"]},
+    {i:"6", t:"The answer comes back", core:1, q:3, real:"curl a page that exists and one that doesn't — the two status lines differ.", vocab:["HTTP","API","Status code (first digit)"]},
+  ];
+
+  const stops2 = [
+    {i:"1", t:"The repository", core:2, q:3, real:"GitHub history shows main, the merged PRs, and the ignore file.", vocab:["Branch","Pull request","Merge conflict","History","Ignore file","Fetch vs pull"]},
+    {i:"2", t:"Describing the system", core:3, q:8, real:"Read a plan backwards from the summary line; renaming a tag in the console shows drift.", vocab:["Configuration","Provider","Resource","Variable / output","Data source","Plan","State","Lock"]},
+    {i:"3", t:"A second environment", core:2, q:4, real:"One root per environment, each calling the same module with its own backend key.", vocab:["Environment","Root directory","Module","Input / output","State key","Collision"]},
+    {i:"4", t:"Watching it", core:3, q:7, real:"An alarm has four settings; the outage check runs from the domain name down.", vocab:["Metric","Log event","Agent","Log group / stream","Alarm","Topic / subscription"]},
+    {i:"5", t:"Changing it", core:1, q:2, real:"Change one boot-script line, apply, start an instance refresh, watch the target group.", vocab:["Launch template version","Instance refresh","Minimum healthy","Draining","Rollback"]},
+    {i:"6", t:"The edge", core:2, q:7, real:"curl the distribution twice — compare the cache header and the age.", vocab:["Cache","Origin","Hit vs miss","Time to live (TTL)","Stale","Edge location","Invalidation"]},
+    {i:"7", t:"The failure walk", core:1, q:1, real:"Both maps, one question at every part: what dies, what catches it. Most questions are this, with one thing named.", vocab:["What happens when this dies?","What catches it?"]},
+  ];
+
+  const domains = [
+    {n:"1", t:"Linux, shell & git", q:21},
+    {n:"2", t:"Networking, HTTP, DNS & TLS", q:20},
+    {n:"3", t:"IAM & secrets", q:16},
+    {n:"4", t:"Terraform & IaC", q:21, big:true, flag:"5 min — the longest domain"},
+    {n:"5", t:"The data tier", q:15},
+    {n:"6", t:"Load balancing & autoscaling", q:17, big:true, flag:"4 min — the other big one"},
+    {n:"7", t:"Monitoring, alarms & deploys", q:17},
+    {n:"8", t:"The edge & caching", q:7},
+  ];
+
+  function stopCard(s){
+    const core = s.core > 0;
+    const chips = `<span class="chip ${core?'core':''}">${s.q} question${s.q>1?'s':''}</span>` +
+                  (core?`<span class="chip core">${s.core} core</span>`:'');
+    const terms = s.vocab.map(v=>`<span class="term">${v}</span>`).join('');
+    return `<div class="stop ${core?'has-core':''}">
+      <div class="stop-top"><span class="stop-idx">STOP ${s.i}</span><h3>${s.t}</h3></div>
+      <div class="counts">${chips}</div>
+      <div class="real"><b>real&nbsp;system</b><span>${s.real}</span></div>
+      <div class="vocab-h">Vocabulary first</div>
+      <div class="vocab">${terms}</div>
+    </div>`;
+  }
+
+  document.getElementById('stops1').innerHTML = stops1.map(stopCard).join('');
+  document.getElementById('stops2').innerHTML = stops2.map(stopCard).join('');
+
+  document.getElementById('domains').innerHTML = domains.map(d=>`
+    <div class="dom ${d.big?'big':''}">
+      <span class="dom-n">${d.n}</span>
+      <h3>${d.t}</h3>
+      <span class="q">${d.q} questions</span>
+      ${d.flag?`<span class="flag">${d.flag}</span>`:''}
+    </div>`).join('');
+</script>
+
+</body></html>

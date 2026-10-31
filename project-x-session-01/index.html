@@ -1,0 +1,303 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Project X Session 01</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one reading column; sections as stacked "shipping manifest" blocks with a stencilled label; code and tables scroll in place. */
+:root{
+  --bg:#f3f5f7; --surface:#ffffff; --ink:#15202b; --muted:#56657a; --line:#d8dee6;
+  --accent:#c4501b; --accent-soft:#fbe9df; --steel:#1f5f8b; --steel-soft:#e3eef6;
+  --code-bg:#0f1b26; --code-fg:#dbe7f2; --code-cmt:#7f97ad;
+  --good:#2e7d4f; --bad:#b3261e;
+  --f-display:"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --f-body:"Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e151c; --surface:#16202a; --ink:#e6edf3; --muted:#9aabbd; --line:#2a3845;
+  --accent:#f0874f; --accent-soft:#3a2418; --steel:#7ab8e3; --steel-soft:#16303f;
+  --code-bg:#0a1016; --code-fg:#dbe7f2; --code-cmt:#6f879c;
+  --good:#6cc493; --bad:#f08a80; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0e151c; --surface:#16202a; --ink:#e6edf3; --muted:#9aabbd; --line:#2a3845;
+  --accent:#f0874f; --accent-soft:#3a2418; --steel:#7ab8e3; --steel-soft:#16303f;
+  --code-bg:#0a1016; --code-fg:#dbe7f2; --code-cmt:#6f879c;
+  --good:#6cc493; --bad:#f08a80; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:17px/1.6 var(--f-body);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 64px}
+.wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.15;margin:0}
+h1{font-size:clamp(30px,6vw,44px);font-weight:800;letter-spacing:-.01em}
+h2{font-size:24px;font-weight:800}
+h3{font-size:18px;font-weight:600;margin-top:6px}
+p{margin:0}
+a{color:var(--steel)}
+code{font-family:var(--f-mono);font-size:.86em;background:var(--steel-soft);color:var(--ink);padding:1px 5px;border-radius:4px}
+strong{font-weight:700}
+.eyebrow{font:600 12px/1 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+header{display:flex;flex-direction:column;gap:12px;border-bottom:3px solid var(--ink);padding-bottom:20px}
+.meta{display:flex;flex-wrap:wrap;gap:8px 16px;color:var(--muted);font-size:15px}
+.lede{font-size:19px;max-width:65ch}
+nav{display:flex;flex-wrap:wrap;gap:8px}
+nav a{font:600 13px/1 var(--f-mono);text-decoration:none;color:var(--ink);border:1px solid var(--line);background:var(--surface);padding:8px 10px;border-radius:6px}
+nav a:hover,nav a:focus-visible{border-color:var(--accent);color:var(--accent);outline:none}
+section{display:flex;flex-direction:column;gap:14px;scroll-margin-top:16px}
+section > .label{display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--line);padding-bottom:8px}
+section > .label .tag{font:600 11px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--surface);background:var(--ink);padding:5px 7px;border-radius:3px}
+ul,ol{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px}
+.table{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:15.5px;min-width:480px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:600 12px/1.3 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--bg)}
+tr:last-child td{border-bottom:0}
+blockquote{margin:0;border-left:4px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 8px 8px 0;font-weight:600}
+pre{margin:0;background:var(--code-bg);color:var(--code-fg);font:14px/1.6 var(--f-mono);padding:14px 16px;border-radius:8px;overflow-x:auto}
+pre .c{color:var(--code-cmt)}
+.codebox{position:relative}
+.copy{position:absolute;top:8px;right:8px;font:600 11px/1 var(--f-mono);background:transparent;color:var(--code-cmt);border:1px solid var(--code-cmt);border-radius:4px;padding:5px 7px;cursor:pointer}
+.copy:hover,.copy:focus-visible{color:var(--code-fg);border-color:var(--code-fg);outline:none}
+.flow{font:600 14px/1.5 var(--f-mono);background:var(--steel-soft);color:var(--ink);padding:14px 16px;border-radius:8px;overflow-x:auto;white-space:pre}
+.step{display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:start}
+.step > .n{font:800 18px/34px var(--f-display);text-align:center;background:var(--ink);color:var(--bg);border-radius:50%;width:34px;height:34px}
+.step > div{min-width:0;display:flex;flex-direction:column;gap:8px}
+.see{font-size:15px;color:var(--good)}
+.see::before{content:"You should see: ";font-weight:700}
+.warn{border:1px solid var(--bad);border-radius:8px;padding:12px 16px;display:flex;flex-direction:column;gap:10px;background:var(--surface)}
+.warn .eyebrow{color:var(--bad)}
+details{border:1px solid var(--line);background:var(--surface);border-radius:8px}
+details summary{cursor:pointer;padding:12px 16px;font-weight:600;list-style-position:inside}
+details summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:8px}
+details > div{padding:0 16px 14px;display:flex;flex-direction:column;gap:8px}
+.q{display:flex;flex-direction:column;gap:10px}
+.q p.ask{font-weight:600}
+.reread{font-style:italic;color:var(--muted);font-size:15px}
+footer{color:var(--muted);font-size:15px;border-top:1px solid var(--line);padding-top:16px}
+@media (prefers-reduced-motion: reduce){*{scroll-behavior:auto!important}}
+html{scroll-behavior:smooth}
+</style>
+
+<div class="wrap">
+<header>
+  <span class="eyebrow">312 School · Cohort 26a · Project X</span>
+  <h1>Session 01: The final stage, and why AI fluency gets you hired</h1>
+  <div class="meta"><span>Wed, Oct 28, 2026</span><span>Marcel</span><span>No deck · recording + Granola notes</span></div>
+  <p class="lede">Day one of Project X, the last stage. No terminal tonight. Foundations, Scale and Containers gave us the pieces; this stage puts them together into one real environment and turns it into a job. Project X and market prep are now <strong>one course</strong>: by the end the resume, the interview answers and a full <strong>multi-account</strong> infra repo should come out as side effects of the work. The big message: <strong>knowledge is cheap</strong>, and employers hire people who really use <strong>AI</strong> for everything. Plus the models and <strong>harnesses</strong> to know, the move from Claude to a personal <strong>ChatGPT/Codex</strong> subscription, and where a platform engineer sits inside a software business.</p>
+  <nav aria-label="Sections">
+    <a href="#ref">Quick reference</a><a href="#stage">The stage</a><a href="#fluency">AI fluency</a><a href="#market">Job market</a><a href="#models">Models</a><a href="#gpt">Claude → GPT</a><a href="#business">Business</a><a href="#team">The team</a><a href="#check">Quiz</a>
+  </nav>
+</header>
+
+<section id="ref">
+  <div class="label"><span class="tag">Glance</span><h2>Quick reference</h2></div>
+  <div class="table"><table>
+    <thead><tr><th>Topic</th><th>Key point</th></tr></thead>
+    <tbody>
+      <tr><td><strong>This course</strong></td><td>Project X (final project) <strong>+</strong> market prep merged. ~1 month optimistic, may stretch to ~6 weeks</td></tr>
+      <tr><td><strong>Deliverables</strong></td><td>Resume, interview assets (questions, answers, projects), <strong>full environment code</strong>, work-ticket replicas</td></tr>
+      <tr><td><strong>#1 hiring signal</strong></td><td><strong>AI fluency</strong>: real, everyday use you can talk about, not a tool on a list</td></tr>
+      <tr><td><strong>Knowledge is cheap</strong></td><td>Anyone can learn Terraform or Photoshop with AI as a live tutor. Selling skills alone = "I know Photoshop"</td></tr>
+      <tr><td><strong>Capability belief</strong></td><td>Ask <strong>"what can't I do with AI?"</strong> and assume everything else is possible</td></tr>
+      <tr><td><strong>Salaries (Aug–Oct)</strong></td><td>18 offers, <strong>$105K–$180K base</strong>, ~<strong>$145K</strong> median, plus bonuses &amp; equity</td></tr>
+      <tr><td><strong>Harness</strong></td><td>The tool that runs a model: <strong>Claude Code</strong> (Claude), <strong>Codex</strong> (GPT), <strong>Grok CLI</strong> (Grok), <strong>Antigravity</strong> (Gemini)</td></tr>
+      <tr><td><strong>Open-weight model</strong></td><td>Self-hosted LLM. ~<strong>700 GB+ RAM</strong> for a 1M-token context, $1M+ hardware or rented GPUs</td></tr>
+      <tr><td><strong>Claude → GPT</strong></td><td>School Claude ends in <strong>one month</strong>. Get a personal ChatGPT (~$20). Move memories to a <strong>private GitHub repo</strong></td></tr>
+      <tr><td><strong>B2B vs B2C</strong></td><td>Business sells to businesses vs to consumers. Most big businesses are <strong>B2B chains</strong></td></tr>
+      <tr><td><strong>Requests come from</strong></td><td>Browsers, phones, <strong>other companies' apps</strong>, AI agents, internal analytics. Not just "users"</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="stage">
+  <div class="label"><span class="tag">Stage</span><h2>The final stage: what Project X is now</h2></div>
+  <ul>
+    <li>Timeline so far: first terminal on <strong>May 18</strong> → Foundations → Scale → Containers → now Project X, which <strong>started Oct 28</strong>.</li>
+    <li>The skills alone don't get you hired. "Nobody hires you just because you know AWS." This stage connects them to a <strong>business need</strong>.</li>
+    <li><strong>Merged course:</strong> before, Project X and market prep were separate, and the resume was its own slow process. Now resume and interview answers are generated from the <strong>context</strong> built during the course.</li>
+  </ul>
+  <h3>What you'll have at the end</h3>
+  <ul>
+    <li>Resume, plus a clear idea of what an interview looks like</li>
+    <li>A repo of interview assets: questions, answers, projects</li>
+    <li><strong>Code for a full environment replica</strong>: multi-account / multi-stage with EKS, ECR, Secrets Manager, Kubernetes internals, ACM, Auto Scaling</li>
+    <li>New topics: <strong>CI/CD, Argo CD, GitHub connections, monitoring, logging, on-call</strong></li>
+    <li><strong>AI fluency</strong> in practice: communications, build-outs, code review, multi-model reviews, sub-agents</li>
+    <li><strong>Work-ticket replicas</strong>. Before, students did ~1 of ~15 tickets; now aim for <strong>10+</strong> with AI for a broader story.</li>
+  </ul>
+  <ul>
+    <li><strong>After this course</strong>, only resume/LinkedIn reviews, mock interviews and the job search are left.</li>
+    <li><strong>Logistics:</strong> 3 classes a week, Saturdays stay office hours (maybe hands-on lab help). <strong>Kubernetes cert no longer required</strong>, a nice-to-have later. A <strong>new cluster</strong> is coming (the old one was deleted).</li>
+    <li>The course was designed from <strong>300+ real interview recordings</strong> (Sept–Oct), cross-checked with AI.</li>
+  </ul>
+  <blockquote>Expect to rewatch. First pass maybe 30%, next pass 60–70%. Goal: on the market before New Year. Applying in December still gets you mid-January interviews.</blockquote>
+</section>
+
+<section id="fluency">
+  <div class="label"><span class="tag">Mindset</span><h2>AI fluency &amp; capability belief</h2></div>
+  <ul>
+    <li>Opener: <strong>"What are you most excited about this year?"</strong> The honest answer, and the right interview answer: <strong>AI</strong>.</li>
+    <li>What the cohort has built: troubleshooting, websites, quiz bots, a Tron-style bike game (heading to Quest VR), a finger-tracking piano, Cyberpunk mods, hard-level Hack The Box CTFs, a hologram kiosk clone, Grok Bot renewing car registrations and answering DMs, legal/tenant letters, Gemini Enterprise meeting notes, Photoshop retouching through Claude + MCP.</li>
+    <li>Marcel's two insights: <strong>(1)</strong> there's not much to "learn" about AI the old way, because it eats itself: what you needed five months ago is built in today. <strong>(2)</strong> You learn it by <strong>doing everything with AI</strong>.</li>
+  </ul>
+  <div class="table"><table>
+    <thead><tr><th>Suggested limit</th><th>Marcel's take</th></tr></thead>
+    <tbody>
+      <tr><td>Compliance (HIPAA, healthcare)</td><td><strong>Not a ceiling.</strong> AWS <strong>Bedrock</strong> and enterprise setups can be compliant; most companies just haven't figured it out</td></tr>
+      <tr><td>Human relationships</td><td>A <strong>choice</strong>, not a capability limit</td></tr>
+      <tr><td>Illegal documents</td><td><strong>Safety guardrails</strong>, not capability</td></tr>
+      <tr><td>Physical world (house chores)</td><td>The <strong>real</strong> limit today. Humanoid robots may close it in a few years</td></tr>
+      <tr><td>Bad AI phone bots</td><td>A <strong>product</strong> problem. You stay in the loop to confirm and correct</td></tr>
+    </tbody>
+  </table></div>
+  <ul><li><strong>MCP</strong> will be core to the course; A2A only indirectly.</li></ul>
+  <blockquote>Employers hire on mindset, not only hard skills. The interviewer should walk away thinking "that's the person who's really into AI."</blockquote>
+</section>
+
+<section id="market">
+  <div class="label"><span class="tag">Market</span><h2>The job market right now</h2></div>
+  <ul>
+    <li><strong>AI as a skill is the #1 thing employers look for.</strong> It should come through naturally, not as a resume line.</li>
+    <li>AI progress has <strong>slowed and settled</strong>. The program didn't get easier: AI <strong>raises the bar</strong>. One engineer is expected to do maybe <strong>two or three</strong> people's work. "100x" is marketing.</li>
+  </ul>
+  <div class="table"><table>
+    <thead><tr><th>Number</th><th>Value</th></tr></thead>
+    <tbody>
+      <tr><td>Offers</td><td>18 (16 with salary data)</td></tr>
+      <tr><td>Base range</td><td><strong>$105K – $180K</strong></td></tr>
+      <tr><td>Median / average</td><td>~<strong>$145K</strong> base</td></tr>
+      <tr><td>Extras</td><td>Bonuses 5–17%, equity (one $52K grant). One July offer: <strong>$285K</strong> total comp</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li>Mostly graduates from <strong>pre-AI batches</strong>, so strong AI users can aim higher. Top engineers ask <strong>$230K+</strong>, Bay Area $400K+.</li>
+    <li>Hiring is <strong>transactional</strong>, not personal. Don't take a pass or a fail personally.</li>
+  </ul>
+</section>
+
+<section id="models">
+  <div class="label"><span class="tag">Tools</span><h2>AI models, harnesses &amp; open-weight models</h2></div>
+  <div class="table"><table>
+    <thead><tr><th>Company</th><th>Models</th><th>Harness</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Anthropic</strong></td><td>Claude (Opus 5.5, Sonnet 5.5, Fable 5.1)</td><td><strong>Claude Code</strong></td></tr>
+      <tr><td><strong>OpenAI</strong></td><td>GPT</td><td><strong>Codex</strong> (ChatGPT app + CLI)</td></tr>
+      <tr><td><strong>Google</strong></td><td>Gemini</td><td><strong>Antigravity</strong></td></tr>
+      <tr><td><strong>xAI / SpaceX</strong></td><td>Grok</td><td><strong>Grok CLI</strong>, Grok Bot</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li><strong>Harness</strong> = the program around a model that lets it read files, run commands and act. Add the word to your vocabulary.</li>
+    <li><strong>Chinese models</strong> (Qwen, DeepSeek): strong, but off-limits for most US enterprises over <strong>data privacy</strong>.</li>
+    <li><strong>Open-weight models</strong> = models you host yourself. A <strong>1M-token context</strong> needs roughly <strong>700 GB+ RAM</strong>, $1M+ of hardware. Companies build data centers or <strong>rent GPU servers</strong>.</li>
+    <li><strong>Context window</strong> = how much the session holds without forgetting (Marcel's Claude Code showed "29% used" of 1M).</li>
+    <li><strong>Rankings:</strong> <strong>arena.ai</strong> is a human-preference leaderboard. Claude led in May; GPT and Gemini have caught up.</li>
+    <li><strong>Multi-model review:</strong> from one harness, launch <strong>sub-agents</strong> on other models to review the work and catch gaps.</li>
+    <li>Marcel's setup: several Grok Bots that talk to each other, all <strong>committing memory into one Git repo</strong>, so any harness sees the same context.</li>
+  </ul>
+</section>
+
+<section id="gpt">
+  <div class="label"><span class="tag">Notice</span><h2>Moving from Claude to GPT</h2></div>
+  <ul>
+    <li><strong>Official notice:</strong> one more month on the school's Claude subscription, then it's <strong>cancelled</strong>. Get your own <strong>ChatGPT</strong> (~$20/month). You can run both for now.</li>
+    <li><strong>Marcel's reasons:</strong> Claude <strong>pushes back more</strong> on resume and interview-story work; GPT answers sound <strong>more like an everyday human</strong>, Claude's more academic; Codex has become very good. He'd still trust Claude slightly more for fewest errors in pure coding.</li>
+    <li>Use <strong>Codex as the main interface</strong> for interview work.</li>
+    <li><strong>Memory migration:</strong> move Claude memories and important chats out this month. Best place: a <strong>personal private GitHub repo</strong> (not the 312school org), so it works with any model. The export block some students hit is an admin permission Marcel will fix.</li>
+    <li>Try the same task in both models and compare. That comparison is itself interview material.</li>
+  </ul>
+  <blockquote>Whatever tool writes your resume, only claim what you can explain and defend under follow-up questions.</blockquote>
+</section>
+
+<section id="business">
+  <div class="label"><span class="tag">Context</span><h2>Where platform engineering fits in a business</h2></div>
+  <ul>
+    <li><strong>Everything starts with money:</strong> buyers pay for software; that revenue pays employees, cloud compute, security. You work somewhere in that chain.</li>
+    <li><strong>B2B</strong> = business to business. <strong>B2C</strong> = business to consumer. <strong>Customer</strong> = the buyer; <strong>user</strong> = whoever uses it (people, apps, agents).</li>
+  </ul>
+  <div class="flow">Thatch → Slack → GitHub → Cursor → New York Times   (each sells to the next)</div>
+  <h3>Who sends Thatch's requests?</h3>
+  <ul>
+    <li>HR admins and employees in the benefits portal (browser/app)</li>
+    <li>HR/payroll software like <strong>Gusto</strong> checking budgets and deductions</li>
+    <li>Insurers (Blue Cross, Aetna, Cigna) checking enrollment, Group ID, Member ID</li>
+    <li>AI agents (partners' or Thatch's own) and internal data-analytics apps</li>
+  </ul>
+  <ul>
+    <li>Same "requests" that drove HPA scaling in Containers Session 12, and the request path from Assignment 11.</li>
+    <li><strong>Even non-software companies run software</strong> (a 100-year-old water-fountain maker, Target's inventory app).</li>
+  </ul>
+  <blockquote>Never share a company's internal architecture in an interview. This picture is for your own understanding.</blockquote>
+</section>
+
+<section id="team">
+  <div class="label"><span class="tag">Project</span><h2>The software team &amp; our project</h2></div>
+  <div class="table"><table>
+    <thead><tr><th>Role</th><th>What they do</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Product manager</strong></td><td>Sets requirements and priorities</td></tr>
+      <tr><td><strong>Front-end developer</strong></td><td>The part users see and click</td></tr>
+      <tr><td><strong>Back-end developer</strong></td><td>Logic, APIs, data</td></tr>
+      <tr><td><strong>QA engineer</strong></td><td>Validates nothing is broken</td></tr>
+      <tr><td><strong>Security engineer</strong></td><td>Network, app, compliance</td></tr>
+      <tr><td><strong>UI/UX designer</strong></td><td>Visual design and flow</td></tr>
+      <tr><td><strong>Platform / DevOps engineer</strong></td><td><strong>Us</strong>: the infra everything runs on, plus <strong>security</strong></td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li><strong>The project:</strong> the familiar <strong>investment / paper-trading app</strong> (Foundations Classes 18–19), taken to production level.</li>
+    <li><strong>AI agents play the back-end dev, front-end dev and product manager</strong> and keep adding features. We build the infra they need.</li>
+    <li><strong>No infra base is given</strong>: we write it in <strong>Terraform</strong>, separate <strong>dev / staging / prod accounts</strong>, plus context engineering and a second repo for monitoring and tooling.</li>
+    <li>Fundamentals still come up: each domain gets a <strong>question bank</strong>. There's also an <strong>interview assistant</strong> app that listens and suggests answers to knowledge questions (don't rely on it fully).</li>
+    <li>A classmate's tip: Claude voice mode, fed the question bank, works well for drilling answers.</li>
+  </ul>
+  <blockquote>The golden rule of this class: knowledge is cheap. What gets you hired is the story of what you've built and how you use AI to do it, so use AI for everything and ask only "what can't I do with it?"</blockquote>
+</section>
+
+<section id="check">
+  <div class="label"><span class="tag">Self-test</span><h2>Quiz: check yourself</h2></div>
+  <p class="reread">Answer each out loud first, then open the answer. Score yourself out of 10.</p>
+  <div class="q"><p class="ask">1. An interviewer asks, "What are you most excited about this year?" You say "AI" and stop. Why is that weak, and what makes it strong?</p>
+    <details><summary>Show answer</summary><div><p><strong>"AI" alone is a claim; a strong answer is proof.</strong> Follow with one or two concrete things you built or automated, the harness you used, and what you learned (where it failed, how you checked it). If the interviewer doesn't feel real excitement backed by real use, they won't believe it.</p></div></details></div>
+  <div class="q"><p class="ask">2. "Knowledge is cheap." Explain it with an example, and say what it means for how you present Terraform and Kubernetes.</p>
+    <details><summary>Show answer</summary><div><p><strong>Anyone can get any skill on demand with AI, so a skill list alone isn't an asset.</strong> Photoshop used to be a resume line; now you ask Claude to retouch the photo. "Terraform, Kubernetes" is the new "I know Photoshop." Sell what you built and decided: the multi-account environment, failures you debugged, trade-offs, and how AI helped.</p></div></details></div>
+  <div class="q"><p class="ask">3. A classmate says, "My company can't use AI because of HIPAA." How would Marcel answer, and what AWS service backs him up?</p>
+    <details><summary>Show answer</summary><div><p><strong>Compliance isn't a capability ceiling; the company just hasn't implemented compliant AI yet.</strong> Healthcare companies already work with OpenAI and Anthropic. <strong>AWS Bedrock</strong> runs models with enterprise privacy and security and can be HIPAA-eligible when set up properly. The real limit today is the physical world.</p></div></details></div>
+  <div class="q"><p class="ask">4. What's the difference between a model and a harness? Give a pair for each of the four big companies.</p>
+    <details><summary>Show answer</summary><div><p><strong>The model is the brain; the harness is the tool around it that reads files, runs commands and acts.</strong> Claude → Claude Code; GPT → Codex; Gemini → Antigravity; Grok → Grok CLI. The same model can feel very different in a weak vs a strong harness.</p></div></details></div>
+  <div class="q"><p class="ask">5. Security asks, "Why don't we self-host an open-weight model instead of paying for an API?" What are the trade-offs?</p>
+    <details><summary>Show answer</summary><div><p><strong>Full data control, but very expensive and you own the operations.</strong> Pros: data stays in your infra, no per-token bill. Cons: a 1M-token context needs ~700 GB+ RAM and $1M+ of GPUs (or rented GPU servers), and you handle scaling and uptime. Middle ground: a managed, compliant service like Bedrock. Chinese open models are often off-limits for US enterprises anyway.</p></div></details></div>
+  <div class="q"><p class="ask">6. Why keep your AI memories in a private GitHub repo instead of just moving them into ChatGPT?</p>
+    <details><summary>Show answer</summary><div><p><strong>A repo is model-agnostic and future-proof.</strong> Memory locked in one vendor dies when you switch (exactly what's happening with Claude → GPT). Context in Git works with any harness, has history, and can be shared between agents. Keep it private and personal, not in the school org.</p></div></details></div>
+  <div class="q"><p class="ask">7. A Thatch pod's HPA scales up because requests spiked. Name at least four kinds of clients that could be behind those requests.</p>
+    <details><summary>Show answer</summary><div><p><strong>"Requests" rarely means only people in a browser.</strong> HR admins and employees in the portal; payroll software like Gusto calling an API; insurers' apps checking enrollment and member IDs; AI agents; internal analytics jobs. Knowing who calls you helps you reason about traffic, auth, rate limits and blast radius.</p></div></details></div>
+  <div class="q"><p class="ask">8. B2B vs B2C, and customer vs user. Why does it matter to a platform engineer?</p>
+    <details><summary>Show answer</summary><div><p><strong>B2B sells to businesses, B2C to consumers. The customer pays; the user uses (a person, app or agent).</strong> In a B2B chain your outage hits other companies' systems and contracts, so reliability, integrations and SLAs weigh heavily. Customer revenue pays for your compute and your salary.</p></div></details></div>
+  <div class="q"><p class="ask">9. In the Project X simulation, who plays back-end dev, front-end dev and product manager, and what exactly is your job?</p>
+    <details><summary>Show answer</summary><div><p><strong>AI agents play those roles; you're the platform engineer (plus security).</strong> You build the infra from scratch in Terraform with separate dev/staging/prod accounts, EKS, ECR, secrets, ACM, autoscaling, then CI/CD (Argo CD), monitoring, logging and on-call. No infra base is provided.</p></div></details></div>
+  <div class="q"><p class="ask">10. "Doesn't AI make you 100x more productive? Shouldn't we just hire fewer people?" Give a balanced answer.</p>
+    <details><summary>Show answer</summary><div><p><strong>"100x" is marketing; realistically a strong engineer with AI does two or three people's work, which raises the bar rather than removing the job.</strong> AI still needs a human to direct, review and fix it. Companies pay more for people who prove this: recent grads $105K–$180K base, median ~$145K. Show both the leverage and the limits, plus how you check AI output (multi-model review with sub-agents).</p></div></details></div>
+  <p><strong>Scoring:</strong> 9–10 ready to talk AI with any hiring manager · 7–8 solid · below 7 reread the sections and retry</p>
+</section>
+
+<footer>The full study page and quiz are in Notion under DevOps / 312 - Notes / 🏁 ProjectX.</footer>
+</div>
+<script>
+document.querySelectorAll('.codebox').forEach(function(box){
+  var pre = box.querySelector('pre'); var b = document.createElement('button');
+  b.className = 'copy'; b.type = 'button'; b.textContent = 'Copy';
+  b.addEventListener('click', function(){
+    var text = pre.innerText.split('\n').map(function(l){ return l.replace(/\s+#.*$/, ''); }).join('\n').trim();
+    var done = function(){ b.textContent = 'Copied'; setTimeout(function(){ b.textContent = 'Copy'; }, 1500); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(function(){ selectPre(); });
+    } else { selectPre(); }
+    function selectPre(){ var r = document.createRange(); r.selectNodeContents(pre); var s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = 'Selected'; }
+  });
+  box.appendChild(b);
+});
+</script>
+
+</body></html>

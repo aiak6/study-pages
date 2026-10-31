@@ -1,0 +1,373 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Session 02: The Dockerfile, the drill app, and Claude&#x27;s Dockerfile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EEF2F7; --surface:#FFFFFF; --ink:#1B2A41; --muted:#56657C; --line:#C9D3E1;
+  --blue:#2459C8; --blue-soft:#DCE6FA;
+  --ok:#1F8A5B; --ok-soft:#D8F0E4;
+  --warn:#A86A00; --warn-soft:#FBEBC9;
+  --bad:#B83A30; --bad-soft:#F7DCD8;
+  --code-bg:#1B2A41; --code-ink:#E6ECF5;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1724; --surface:#172234; --ink:#E4EAF3; --muted:#9AA8BD; --line:#2C3B53;
+    --blue:#7FA6F5; --blue-soft:#1E3157;
+    --ok:#5CCB94; --ok-soft:#163A2B;
+    --warn:#E8B04D; --warn-soft:#3A2D12;
+    --bad:#F08A80; --bad-soft:#3E1C1A;
+    --code-bg:#0B111B; --code-ink:#DCE4F0;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1724; --surface:#172234; --ink:#E4EAF3; --muted:#9AA8BD; --line:#2C3B53;
+  --blue:#7FA6F5; --blue-soft:#1E3157;
+  --ok:#5CCB94; --ok-soft:#163A2B;
+  --warn:#E8B04D; --warn-soft:#3A2D12;
+  --bad:#F08A80; --bad-soft:#3E1C1A;
+  --code-bg:#0B111B; --code-ink:#DCE4F0;
+  color-scheme:dark;
+}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 72px)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:21;background:var(--bg)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size:17px;line-height:1.6}
+code,pre,.mono{font-family:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace}
+code{font-size:.88em;background:var(--blue-soft);padding:.1em .35em;border-radius:4px}
+.wrap{max-width:980px;margin:0 auto;padding:40px 20px 80px}
+header{margin-bottom:36px}
+h1{font-size:clamp(2rem,5vw,3rem);line-height:1.1;margin:.2em 0 .4em;letter-spacing:-.01em}
+.sub{color:var(--muted);margin:0;max-width:62ch}
+.rule-line{margin-top:24px;display:flex;flex-wrap:wrap;gap:12px}
+.rule-line div{flex:1 1 260px;padding:14px 16px;border-left:5px solid;background:var(--surface);border-radius:0 8px 8px 0}
+.rule-line .r{border-color:var(--ok)} .rule-line .l{border-color:var(--bad)}
+.rule-line strong{display:block;font-size:1.1rem}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;display:flex;flex-wrap:nowrap;gap:8px;overflow-x:auto;
+  margin:0 -20px;padding:10px 20px;background:var(--bg);border-bottom:1px solid var(--line);scrollbar-width:thin}
+@media(min-width:900px){nav{flex-wrap:wrap}}
+nav a{white-space:nowrap}
+nav a.active{background:var(--blue);color:var(--surface);border-color:var(--blue)}
+nav a{color:var(--blue);text-decoration:none;border:1px solid var(--line);padding:4px 12px;border-radius:999px;font-size:.92rem;background:var(--surface)}
+nav a:hover{border-color:var(--blue)}
+section{margin-top:56px}
+h2{font-size:1.6rem;margin:0 0 .3em;line-height:1.2}
+h3{font-size:1.15rem;margin:1.4em 0 .3em}
+p{max-width:70ch}
+.lede{color:var(--muted);margin-top:0}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px}
+button{font:inherit;font-size:.95rem;cursor:pointer;border-radius:8px;border:1px solid var(--line);
+  background:var(--surface);color:var(--ink);padding:8px 14px}
+button:hover{border-color:var(--blue)}
+button.primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+:root[data-theme="dark"] button.primary{color:#0F1724}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) button.primary{color:#0F1724}}
+button.danger{border-color:var(--bad);color:var(--bad)}
+button:focus-visible,a:focus-visible,summary:focus-visible,select:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+button:disabled{opacity:.45;cursor:not-allowed}
+.opts button:disabled{opacity:.7}
+.opts button.right:disabled,.opts button.nope:disabled{opacity:1}
+.controls{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;align-items:center}
+
+/* simulator */
+.sim{display:grid;grid-template-columns:1fr;gap:16px}
+@media(min-width:760px){.sim{grid-template-columns:1.25fr 1fr}}
+.rs{border:1px dashed var(--line);border-radius:10px;padding:12px;margin-bottom:12px;transition:opacity .4s}
+.rs.zero{opacity:.55}
+.rs-head{display:flex;justify-content:space-between;gap:8px;font-size:.9rem;color:var(--muted);margin-bottom:8px;flex-wrap:wrap}
+.rs-head b{color:var(--ink)}
+.pods{display:flex;flex-wrap:wrap;gap:10px;min-height:76px}
+.pod{width:150px;border-radius:10px;padding:10px;border:2px solid;font-size:.85rem;line-height:1.35;transition:opacity .5s, transform .3s}
+.pod .n{font-family:"JetBrains Mono",monospace;font-size:.78rem;word-break:break-all}
+.pod .st{font-weight:700;font-size:1rem}
+.pod.ready{border-color:var(--ok);background:var(--ok-soft)}
+.pod.notready{border-color:var(--warn);background:var(--warn-soft)}
+.pod.starting{border-color:var(--line);background:var(--bg)}
+.pod.term{border-color:var(--bad);background:var(--bad-soft);opacity:.6}
+.pod.flash{transform:scale(1.06)}
+.empty{color:var(--muted);font-size:.9rem;align-self:center}
+.log{background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:12px 14px;font-size:.8rem;
+  height:330px;overflow-y:auto;line-height:1.5}
+.log div{white-space:pre-wrap;word-break:break-word}
+.log .w{color:#F4BE5B} .log .e{color:#F49088} .log .g{color:#7FDCA8} .log .c{color:#8FB2F7}
+.users{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:.92rem;color:var(--muted);flex-wrap:wrap}
+.status-pill{display:inline-block;padding:2px 10px;border-radius:999px;font-weight:700;font-size:.85rem}
+.pill-ok{background:var(--ok-soft);color:var(--ok)} .pill-warn{background:var(--warn-soft);color:var(--warn)} .pill-bad{background:var(--bad-soft);color:var(--bad)}
+
+/* liveness */
+.live-grid{display:grid;grid-template-columns:1fr;gap:16px}
+@media(min-width:760px){.live-grid{grid-template-columns:280px 1fr}}
+.bigpod{border:2px solid var(--line);border-radius:14px;padding:18px;text-align:left}
+.bigpod .row{display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding:6px 0;font-size:.95rem}
+.bigpod .row:last-child{border:none}
+.bigpod .val{font-family:"JetBrains Mono",monospace;font-weight:600}
+select{font:inherit;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.backoff{display:flex;gap:4px;align-items:flex-end;height:90px;margin-top:14px}
+.backoff span{flex:1;background:var(--blue-soft);border-radius:4px 4px 0 0;position:relative;transition:background .3s}
+.backoff span.on{background:var(--bad)}
+.backoff-labels{display:flex;gap:4px;font-size:.72rem;color:var(--muted)}
+.backoff-labels span{flex:1;text-align:center}
+
+/* tables */
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:.95rem}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--bg);font-weight:700}
+tr:last-child td{border-bottom:none}
+
+/* request path */
+.path{display:flex;flex-direction:column;gap:0;margin-top:12px}
+.hop{display:grid;grid-template-columns:44px 1fr;gap:14px;position:relative;padding-bottom:18px}
+.hop .dot{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-weight:700;
+  background:var(--surface);border:2px solid var(--blue);color:var(--blue);z-index:1}
+.hop::before{content:"";position:absolute;left:21px;top:44px;bottom:0;width:2px;background:var(--line)}
+.hop:last-child::before{display:none}
+.hop h4{margin:8px 0 2px;font-size:1.05rem}
+.hop p{margin:0;color:var(--muted)}
+.hop.https .dot{border-color:var(--ok);color:var(--ok)}
+.tag{display:inline-block;font-size:.78rem;padding:1px 8px;border-radius:999px;margin-left:6px;vertical-align:2px}
+.tag.enc{background:var(--ok-soft);color:var(--ok)} .tag.plain{background:var(--warn-soft);color:var(--warn)}
+.note{border-left:4px solid var(--blue);background:var(--blue-soft);padding:12px 16px;border-radius:0 8px 8px 0;margin:16px 0;max-width:70ch}
+
+pre{background:var(--code-bg);color:var(--code-ink);padding:14px 16px;border-radius:10px;overflow-x:auto;font-size:.82rem;line-height:1.55;margin:10px 0}
+pre .cm{color:#8A9AB5}
+
+details{background:var(--surface);border:1px solid var(--line);border-radius:10px;margin-bottom:8px}
+summary{cursor:pointer;padding:12px 16px;font-weight:700}
+details > div{padding:0 16px 14px}
+.wrong{color:var(--bad);text-decoration:line-through;text-decoration-thickness:1px}
+
+/* quiz */
+.q{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:14px}
+.q p.prompt{font-weight:700;margin-top:0}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opts button{text-align:left;padding:10px 14px}
+.opts button.right{border-color:var(--ok);background:var(--ok-soft)}
+.opts button.nope{border-color:var(--bad);background:var(--bad-soft)}
+.explain{margin-top:10px;color:var(--muted);display:none}
+.explain.show{display:block}
+.score{font-weight:700}
+footer{margin-top:64px;color:var(--muted);font-size:.9rem}
+
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.tabs button[aria-selected="true"]{background:var(--blue);color:var(--surface);border-color:var(--blue)}
+.tabpane{display:none}.tabpane.show{display:block}
+.timeline{list-style:none;padding:0;margin:0;counter-reset:t}
+.timeline li{counter-increment:t;position:relative;padding:14px 18px 14px 64px;margin-bottom:10px;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.timeline li h4{margin:0 0 4px;font-size:1.08rem}
+.timeline li p{margin:0;color:var(--ink);max-width:68ch}
+.timeline li::before{content:counter(t);position:absolute;left:16px;top:14px;width:32px;height:32px;border-radius:50%;
+  background:var(--blue-soft);color:var(--blue);font-weight:700;display:grid;place-items:center;font-size:.9rem}
+.timeline details{margin:0}
+.yaml-toggle .ln{display:block;transition:background .2s,opacity .2s}
+.yaml-toggle.focus .ln{opacity:.35}
+.yaml-toggle.focus .ln.hl{opacity:1;background:rgba(127,166,245,.18)}
+.flow{display:flex;flex-direction:column;gap:6px;margin:14px 0;max-width:620px}
+.flow div{padding:10px 14px;border-radius:8px;border:1px solid var(--line);background:var(--surface)}
+.flow .arrow{border:none;background:none;padding:0 0 0 18px;color:var(--muted)}
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px}
+.compare > div{border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--bg)}
+.lbs{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.lbs span{display:inline-block;padding:3px 8px;border-radius:6px;font-size:.8rem;font-family:"JetBrains Mono",monospace}
+.lb-many span{background:var(--bad-soft);color:var(--bad)}
+.lb-one span{background:var(--ok-soft);color:var(--ok)}
+.form-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:14px}
+@media(min-width:640px){.form-grid{grid-template-columns:1fr 1fr}}
+.form-grid label{display:flex;flex-direction:column;font-size:.9rem;color:var(--muted);gap:4px}
+.form-grid input{font:inherit;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.verdict{padding:12px 16px;border-radius:8px;font-size:.9rem}
+.verdict.ok{background:var(--ok-soft);color:var(--ok)} .verdict.no{background:var(--bad-soft);color:var(--bad)} .verdict.warn{background:var(--warn-soft);color:var(--warn)}
+.step{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:12px}
+.step.done{border-color:var(--ok)}
+.step-head{display:flex;gap:12px;align-items:flex-start}
+.step-head input{width:22px;height:22px;margin-top:3px;accent-color:var(--ok);flex:none}
+.step-head h4{margin:0;font-size:1.05rem}
+.step-head p{margin:2px 0 0;color:var(--muted)}
+.step pre{margin:10px 0 6px}
+.step details{border:none;background:var(--bg)}
+.step summary{font-weight:400;color:var(--blue);padding:8px 12px}
+.progress{height:8px;background:var(--line);border-radius:999px;overflow:hidden;margin:10px 0 18px}
+.progress div{height:100%;background:var(--ok);width:0;transition:width .3s}
+.cards2{display:grid;grid-template-columns:1fr;gap:14px}
+@media(min-width:720px){.cards2{grid-template-columns:1fr 1fr}}
+.cards2 > div{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.cards2 h3{margin-top:0}
+.cards2 ul{margin:0;padding-left:20px}
+.cards2 li{margin-bottom:6px}
+.fixbox{border:1.5px solid var(--warn);border-radius:14px;padding:12px;background:var(--warn-soft)}
+.fixbox td:first-child{width:44%;color:var(--muted)}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+
+.term{background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:12px 14px;font-family:"JetBrains Mono",monospace;font-size:.8rem;line-height:1.5;overflow-x:auto;white-space:pre}
+.chip{display:inline-block;padding:3px 10px;border-radius:999px;font-size:.85rem;font-weight:700}
+.chip.ok{background:var(--ok-soft);color:var(--ok)}.chip.warn{background:var(--warn-soft);color:var(--warn)}.chip.bad{background:var(--bad-soft);color:var(--bad)}.chip.idle{background:var(--bg);color:var(--muted);border:1px solid var(--line)}
+.lab-row{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:12px}
+.lab-row label{display:flex;gap:6px;align-items:center;font-size:.95rem}
+.lab-row input[type=checkbox]{width:18px;height:18px;accent-color:var(--blue)}
+.layers{display:flex;flex-direction:column;gap:6px}
+.layer{display:flex;justify-content:space-between;gap:10px;padding:8px 12px;border-radius:8px;border:1px solid var(--line);font-family:"JetBrains Mono",monospace;font-size:.82rem;flex-wrap:wrap}
+.layer.cached{background:var(--ok-soft);border-color:var(--ok)}.layer.rebuilt{background:var(--warn-soft);border-color:var(--warn)}.layer.none{background:var(--bg);color:var(--muted)}
+.journey{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.journey .hopbox{padding:10px 14px;border-radius:10px;border:2px solid var(--line);background:var(--surface);font-weight:700;transition:all .3s}
+.journey .hopbox.on{border-color:var(--blue);background:var(--blue-soft);color:var(--blue)}
+.journey .ar{color:var(--muted)}
+</style></head><body><div class="wrap">
+<header><p class="sub">Containers &amp; Orchestration, unit 1</p><h1>Session 02: The Dockerfile, the drill app, and Claude's Dockerfile</h1><p class="sub">The boot script from Scale turned into a Dockerfile: a short text file of instructions that <code>docker build</code> runs top to bottom to make an image. You built the drill app, ran it, stopped and started it in seconds, and saw why a file written inside a container disappears. Then the rules behind every good Dockerfile, and Claude wrote the investment app's Dockerfile for you to review.</p><div class="rule-line"><div class="r"><strong>RUN happens at build. CMD happens at run.</strong>That's why the build listed 5 steps, not 6.</div><div class="l"><strong>Claude writes the Dockerfile. You review it.</strong>Check every one against the five review items.</div></div></header>
+<nav aria-label="Sections"><a href="#timeline">What we did</a><a href="#dockerfile">The Dockerfile</a><a href="#base">Base images</a><a href="#immutable">Immutability</a><a href="#layers">Layers &amp; cache</a><a href="#exec">Exec vs shell form</a><a href="#logs">Logs &amp; ports</a><a href="#context">.dockerignore</a><a href="#buckets">Four buckets</a><a href="#review">Five review items</a><a href="#fixes">Corrections</a><a href="#demo">Redo the demo</a><a href="#commands">Commands</a><a href="#wrapup">Stressed &amp; homework</a><a href="#quiz">Check yourself</a></nav>
+<section id="timeline"><h2>What we actually did, in order</h2><p class="lede">Wed, Sep 30, 2026, with Eldiiar, plus after-class with Bakhtiyar. Deck unit 1, slides 15–32.</p><ol class="timeline"><li><h4>Recap</h4><p>A container is not a small machine. It boots nothing, which is why it starts in seconds.</p></li><li><h4>The goal for the day</h4><p>Move the Scale boot script into a Dockerfile. The slides on the boot script's nine steps were skipped at first and covered at the end.</p></li><li><h4>The drill app</h4><p>In <code>01-the-container/example/drill/</code>, Eldiiar went through the Dockerfile one instruction at a time (FROM, WORKDIR, COPY, RUN, CMD) and showed Docker Hub tags.</p></li><li><h4>Build</h4><p><code>docker build -t hello:v1 .</code> showed 5 steps, and CMD was not one of them. To rebuild from zero he had to remove the containers first, then the images (<code>rmi</code>).</p></li><li><h4>Run</h4><p><code>docker run -d -p 127.0.0.1:8000:8080 --name hello hello:v1</code>, then the browser and curl. Then <code>docker stop</code> and <code>docker start</code>, each taking about a second.</p></li><li><h4>Immutability</h4><p>He made files with <code>docker exec</code>, removed the container and ran it again. The files were gone.</p></li><li><h4>Theory blocks</h4><p>Layers, ENV, exec vs shell form, logs, port binding and EXPOSE, build context and .dockerignore, the cache, and the five review items.</p></li><li><h4>Claude wrote the investment app's Dockerfile</h4><p>Eldiiar's copy (on Sonnet) left out USER. The four-bucket table was matched line by line against the worked file in the repo.</p></li><li><h4>After class with Bakhtiyar</h4><p>The same drill run, a shell-form CMD build, an <code>app.py</code> change showing the cache, and Claude's Dockerfile built and run. It exited with a psycopg error because there's no DB.</p></li></ol></section>
+<section id="dockerfile"><h2>The Dockerfile: your boot script, rewritten as instructions</h2><p><b>Problem:</b> on EC2, a boot script installed Python, copied the app and started it on every new machine. That's slow, and it runs again every time.</p><p><b>What it is:</b> a plain text file named <code>Dockerfile</code>. Each line is an INSTRUCTION (uppercase) followed by its arguments. <code>docker build</code> reads it top to bottom, and the result is an image.</p><div class="tbl-wrap"><table><tr><th>Instruction</th><th>What it does</th><th>Runs when</th></tr><tr><td><code>FROM python:3.12-slim</code></td><td>The base image to start from (Docker Hub by default)</td><td>build</td></tr><tr><td><code>WORKDIR /app</code></td><td>The folder that later instructions and the app run in</td><td>build</td></tr><tr><td><code>COPY requirements.txt .</code></td><td>Copies a file from your folder into the image (<code>.</code> = the WORKDIR)</td><td>build</td></tr><tr><td><code>RUN pip install -r requirements.txt</code></td><td>Runs a command and keeps its result in the image</td><td>build</td></tr><tr><td><code>CMD ["gunicorn", ...]</code></td><td>The start command, which becomes PID 1</td><td>docker run</td></tr><tr><td><code>ENV KEY=value</code></td><td>Sets an environment variable inside every container</td><td>setting only</td></tr><tr><td><code>EXPOSE 8080</code></td><td>Documentation only. It opens nothing.</td><td>setting only</td></tr><tr><td><code>USER investment-app</code></td><td>Runs the start command as this user instead of root</td><td>setting only</td></tr></table></div><p><code>ADD</code> is a more powerful COPY; you can skip it. <code>ENTRYPOINT</code> was skipped on purpose, because Kubernetes replaces it anyway (unit 2, command/args).</p></section>
+<section id="base"><h2>Base images and tags: which FROM to pick</h2><p>Image name : tag. In <code>python:3.12-slim</code>, <code>python</code> is the image and <code>3.12-slim</code> is the tag. There are many tags so each carries only what one use case needs. Like a Terraform module, someone already built it, so you reuse it.</p><div class="tbl-wrap"><table><tr><th>Base image</th><th>Size (deck, arm64)</th><th>Trade-off</th></tr><tr><td><code>python:3.12</code></td><td>1.12 GB</td><td>Lots of tools, easy to debug, slow to pull</td></tr><tr><td><code>python:3.12-slim</code></td><td>145 MB</td><td>Used in this course. No extras, which is why <code>top</code> was missing.</td></tr><tr><td><code>python:3.12-alpine</code></td><td>53 MB</td><td>Smallest, but some Python packages have to compile on it, which is slow and sometimes fails</td></tr></table></div><div class="note">Smaller image = faster start, fewer tools when it breaks. The app decides.</div></section>
+<section id="immutable"><h2>Containers are immutable: what you change inside doesn't survive</h2><div class="flow"><div><code>docker exec hello touch /app/created-here</code> → the file exists in THIS container</div><div class="arrow">↓</div><div><code>docker rm -f hello</code> → the container is gone, with its file</div><div class="arrow">↓</div><div><code>docker run ... hello</code> → a fresh container from the same image: no file</div></div><p>On EC2, files went to the disk (EBS) and stayed. A container gets a fresh file system from the image every time. Kept data (databases) needs volumes, which unit 6 covers.</p><div class="note">To change what's in a container, change the Dockerfile and build again.</div></section>
+<section id="layers"><h2>Layers and the cache: why the order of lines matters</h2><div class="tbl-wrap"><table><tr><th>Idea</th><th>Plain meaning</th></tr><tr><td>Layer</td><td>The saved result of one instruction that changes files. An image is its layers stacked in order, like an onion.</td></tr><tr><td>No layer</td><td><code>CMD</code> and <code>ENV</code> add no layer. They change settings, not files.</td></tr><tr><td>Never changed</td><td>If you copy a secret in and delete it in a later line, it's still in the image (deck slide 22).</td></tr><tr><td>Cache</td><td>A second build reuses saved layers from the top until the first line whose input changed. Every layer after that line is rebuilt.</td></tr></table></div><h3>Lab: change a file, then build</h3><p class="lede">Pick the Dockerfile order and what you changed, then build. The deck measured the investment app: 0.3 s vs 8.2 s per rebuild.</p><div class="panel"><div class="lab-row"><label>Dockerfile order <select id="c2ord"><option value="good">Good: requirements.txt first, then app.py</option><option value="bad">Bad: COPY . . first</option></select></label><label>You changed <select id="c2chg"><option value="app">app.py</option><option value="req">requirements.txt</option><option value="none">nothing</option></select></label><button class="primary" id="c2build">docker build</button></div><div class="layers" id="c2layers"></div><p id="c2sum" style="margin:10px 0 0"></p></div><div class="note"><b>Dependencies before source code.</b> A code change then reuses the slow <code>pip install</code> layer.</div></section>
+<section id="exec"><h2>Exec form vs shell form: who is PID 1</h2><div class="tbl-wrap"><table><tr><th></th><th>Exec form</th><th>Shell form</th></tr><tr><td>Looks like</td><td><code>CMD ["gunicorn", "--bind", "0.0.0.0:8080", "app:app"]</code></td><td><code>CMD gunicorn --bind 0.0.0.0:8080 app:app</code></td></tr><tr><td>PID 1</td><td>gunicorn itself</td><td><code>/bin/sh</code>, with gunicorn as its child</td></tr><tr><td>docker stop</td><td>gunicorn gets the signal and exits: 0.24 s, exit 0</td><td>sh doesn't pass the signal on. Docker waits 10 s, then kills it: 10.15 s, exit 137</td></tr></table></div><h3>Lab: docker stop</h3><div class="panel"><div class="lab-row"><label>CMD form <select id="c2form"><option value="exec">exec form [ ... ]</option><option value="shell">shell form</option></select></label><button class="primary" id="c2stop">docker stop app</button><span id="c2pid" class="chip idle"></span></div><div class="term" id="c2out" style="min-height:90px"></div></div><div class="note">Always exec form: square brackets, double quotes, commas.</div></section>
+<section id="logs"><h2>Logs go to the terminal, and the three places a port shows up</h2><pre>EC2:        gunicorn → trades.log file → CloudWatch agent ships it → CloudWatch
+container:  gunicorn → stdout / stderr → Docker keeps them → docker logs &lt;name&gt;</pre><p><b>stdout</b> is the program's normal text; <b>stderr</b> is its error text. The CloudWatch agent and log file are dropped, and the app's one logging line loses its <code>filename=</code>. At work, agents in the cluster (Eldiiar's company uses Datadog on EKS) collect container logs.</p><div class="tbl-wrap"><table><tr><th>What it says</th><th>Where</th><th>What it does</th></tr><tr><td><code>--bind 0.0.0.0:8080</code></td><td>CMD (gunicorn)</td><td>The app listens on 8080 inside the container. This is what makes it work.</td></tr><tr><td><code>EXPOSE 8080</code></td><td>Dockerfile</td><td>A note for people reading it. Opens nothing.</td></tr><tr><td><code>-p 127.0.0.1:8000:8080</code></td><td>docker run</td><td>Laptop port 8000 reaches container port 8080, from your laptop only</td></tr></table></div><p>Ports 0–65535 exist. Linux reserves below 1024 for root (22 SSH, 53 DNS, 80, 443), so containers use a high port; the course uses 8080. An app bound to <code>127.0.0.1</code> inside the container can't be reached by <code>-p</code>. Bind <code>0.0.0.0</code>.</p></section>
+<section id="context"><h2>Build context and .dockerignore</h2><p><b>Build context:</b> the files <code>docker build .</code> lets the builder see (<code>.</code> = this folder). A file reaches the image only if a COPY copies it. <code>COPY . .</code> copies everything, including <code>.git/</code>, <code>.terraform/</code> and env files with secrets.</p><p><code>.dockerignore</code> works like <code>.gitignore</code>. You create it by hand next to the Dockerfile:</p><pre>*.env
+.terraform/
+.git/</pre><div class="note">A Scale repo root with <code>.terraform/</code> sends 823 MB to the builder. With these three lines it sends under 1 MB.</div></section>
+<section id="buckets"><h2>Boot script → Dockerfile: the four buckets</h2><div class="tbl-wrap"><table><tr><th>Boot script step</th><th>Bucket</th><th>Becomes</th></tr><tr><td>1 Install Python, pip, etc.</td><td>Image content</td><td><code>FROM python:3.12-slim</code></td></tr><tr><td>2 Read 2 secrets</td><td>Run-time config</td><td>env vars passed at start</td></tr><tr><td>3 CloudWatch agent</td><td>Deleted</td><td>logs go to stderr</td></tr><tr><td>4 User + directories</td><td>Image content</td><td><code>RUN useradd</code>, <code>WORKDIR</code></td></tr><tr><td>5 venv + pip install</td><td>Image content</td><td><code>RUN pip install</code> (no venv needed)</td></tr><tr><td>6 Write app.py</td><td>Image content</td><td><code>COPY app.py .</code></td></tr><tr><td>7 Environment file</td><td>Run-time config</td><td><code>--env-file investment-app.env</code></td></tr><tr><td>8 systemd unit</td><td>Image content, mostly</td><td>ExecStart→CMD, User→USER, WorkingDirectory→WORKDIR. Restart=always moves to unit 2.</td></tr><tr><td>9 Wait for /health</td><td>Later unit</td><td>Unit 3</td></tr></table></div></section>
+<section id="review"><h2>The five review items for any Dockerfile Claude writes</h2><div class="tbl-wrap"><table><tr><th>#</th><th>Check</th><th>Why</th></tr><tr><td>1</td><td>Base image with a version (<code>3.12-slim</code>, never <code>latest</code>)</td><td>latest moves. A rebuild in 5 years should get the same Python.</td></tr><tr><td>2</td><td>Non-root USER, created first with <code>RUN useradd</code></td><td>USER alone doesn't create the user</td></tr><tr><td>3</td><td>Dependencies before source</td><td>The cache: a code change doesn't repeat pip install</td></tr><tr><td>4</td><td>No secret in the image</td><td>A layer keeps it forever, and Dockerfiles get pushed to git</td></tr><tr><td>5</td><td>CMD in exec form</td><td>The app is PID 1 and gets the stop signal</td></tr></table></div><p>Also pick official images with lots of downloads. Anyone can push an image called "python-chatgpt" with malware in it.</p><h3>The investment app's Dockerfile (worked copy in <code>01-the-container/example/investment-app/</code>)</h3><pre>FROM python:3.12-slim                # step 1 · base image with a version
+ENV PYTHONUNBUFFERED=1               # Python writes output at once
+WORKDIR /app                         # step 4 · the directory
+RUN useradd --system investment-app  # step 4 · user, created before USER
+COPY requirements.txt .              # step 5 · dependencies before source
+RUN pip install -r requirements.txt  # step 5
+COPY app.py .                        # step 6
+USER investment-app                  # non-root for the start command
+EXPOSE 8080                          # a note, opens nothing
+CMD [&quot;gunicorn&quot;, &quot;--workers&quot;, &quot;2&quot;, &quot;--bind&quot;, &quot;0.0.0.0:8080&quot;, &quot;app:app&quot;]  # step 8 · exec form</pre><p>The prompt from the deck, typed into Claude in <code>apps/investment-app/</code>:</p><div class="note" style="max-width:none">Write a Dockerfile for the Flask app in this folder. Gunicorn serves it on port 8080 with two workers. Configuration comes from an environment file when the container starts, not from the image.</div><p><code>--workers 2</code> means Gunicorn starts two child processes to answer requests. In this course, "worker" will also mean a machine in the cluster.</p></section>
+<section id="fixes"><h2>Where the notes correct what was said live</h2>
+<p class="lede">Left: what was said in class. Right: the correct version from the site notes and deck.</p>
+<div class="fixbox"><div class="tbl-wrap"><table><tr><th>Said in class</th><th>Correct version (site notes and deck)</th></tr><tr><td>"Binding port 80 of my laptop to 8080" / "gunicorn listens on port 80"</td><td>Laptop <b>8000</b> → container <b>8080</b>. Gunicorn listens on <b>8080</b>.</td></tr><tr><td>"Shell form takes about 10 seconds to reach the main process"</td><td>The signal <b>never reaches gunicorn</b>. sh doesn't pass it on, so Docker waits 10 s and then kills the container (<b>exit 137</b>).</td></tr><tr><td>"The build only fetches metadata, it doesn't pull the base image"</td><td>The base image's <b>layers are downloaded</b>. The build keeps them in its own cache, which is why <code>python:3.12-slim</code> didn't show up in <code>docker images</code>.</td></tr><tr><td><code>PYTHONUNBUFFERED=1</code>: "no idea what it is"</td><td>When Python isn't attached to a terminal, it holds <code>print()</code> output in a buffer. This makes it <b>write right away</b>, so <code>docker logs</code> shows output immediately.</td></tr></table></div></div></section><section id="demo"><h2>Redo the demo yourself</h2>
+<p class="lede">Everything runs on your laptop and costs nothing. Tick each step as you finish it; your ticks stay in this browser.</p>
+<h3>Before you start</h3><div class="note" style="max-width:none">Docker Desktop running, and your clone of <code>312school/containers</code> up to date (<code>git pull origin main</code> on your branch).</div>
+<p style="margin-bottom:0"><b id="demoCount">0 of 10 steps done</b></p><div class="progress"><div id="demoBar"></div></div>
+<div class="step" data-i="0"><div class="step-head"><input type="checkbox" aria-label="Mark step 1 done"><div><h4>1. Check that Docker is up</h4><p>An empty table means the daemon is running.</p></div></div>
+<pre>docker ps</pre>
+<details><summary>What you should see</summary><div><p>Column headers. If you get <code>Cannot connect to the Docker daemon</code>, open Docker Desktop.</p></div></details></div>
+<div class="step" data-i="1"><div class="step-head"><input type="checkbox" aria-label="Mark step 2 done"><div><h4>2. Read the six lines</h4><p>Map each one to a boot script step before you build.</p></div></div>
+<pre>cd ~/DevOps/containers/01-the-container/example/drill
+cat Dockerfile requirements.txt</pre>
+<details><summary>What you should see</summary><div><p>FROM, WORKDIR, COPY, RUN, COPY, CMD, then flask and gunicorn.</p></div></details></div>
+<div class="step" data-i="2"><div class="step-head"><input type="checkbox" aria-label="Mark step 3 done"><div><h4>3. Build the image with a name and a tag</h4><p><code>-t name:tag</code>; <code>.</code> = this folder is the build context.</p></div></div>
+<pre>docker build -t hello:v1 .
+docker images                 # hello  v1  ...  ~160 MB</pre>
+<details><summary>What you should see</summary><div><p><code>[1/5] FROM … [5/5] COPY app.py</code>. There's no CMD step, because CMD runs at docker run.</p></div></details></div>
+<div class="step" data-i="3"><div class="step-head"><input type="checkbox" aria-label="Mark step 4 done"><div><h4>4. Run it in the background and call it</h4><p></p></div></div>
+<pre>docker run -d -p 127.0.0.1:8000:8080 --name hello hello:v1
+curl --retry 5 --retry-all-errors --retry-delay 1 localhost:8000</pre>
+<details><summary>What you should see</summary><div><p><code>hello from the drill app</code>. It also works in the browser at <code>127.0.0.1:8000</code>.</p></div></details></div>
+<div class="step" data-i="4"><div class="step-head"><input type="checkbox" aria-label="Mark step 5 done"><div><h4>5. Stop it and start it again</h4><p>Notice how fast this is compared with EC2.</p></div></div>
+<pre>docker stop hello
+docker ps          # empty
+docker ps -a       # hello is there, Exited: stopped, not deleted
+docker start hello # back in about a second</pre>
+<details><summary>What you should see</summary><div><p><code>hello</code> listed as Exited, then running again in about a second.</p></div></details></div>
+<div class="step" data-i="5"><div class="step-head"><input type="checkbox" aria-label="Mark step 6 done"><div><h4>6. See the file disappear</h4><p><code>-f</code> stops it first.</p></div></div>
+<pre>docker exec hello touch /app/created-here
+docker exec hello ls /app        # created-here is there
+docker rm -f hello
+docker run -d -p 127.0.0.1:8000:8080 --name hello hello:v1
+docker exec hello ls /app        # gone</pre>
+<details><summary>What you should see</summary><div><p>Only <code>app.py</code> and <code>requirements.txt</code> the second time.</p></div></details></div>
+<div class="step" data-i="6"><div class="step-head"><input type="checkbox" aria-label="Mark step 7 done"><div><h4>7. Read the logs, and check PID 1</h4><p></p></div></div>
+<pre>docker logs hello                     # gunicorn&#x27;s startup lines
+docker exec hello cat /proc/1/cmdline # gunicorn = exec form worked</pre>
+<details><summary>What you should see</summary><div><p><code>Listening at: http://0.0.0.0:8080</code>.</p></div></details></div>
+<div class="step" data-i="7"><div class="step-head"><input type="checkbox" aria-label="Mark step 8 done"><div><h4>8. Watch the cache</h4><p>Change the text in <code>app.py</code> (for example "hello v2"), then rebuild.</p></div></div>
+<pre>docker build -t hello:v2 .</pre>
+<details><summary>What you should see</summary><div><p>CACHED on steps 1–4, and only <code>[5/5] COPY app.py</code> rebuilt. Undo your edit afterwards with <code>git checkout app.py</code>.</p></div></details></div>
+<div class="step" data-i="8"><div class="step-head"><input type="checkbox" aria-label="Mark step 9 done"><div><h4>9. Homework part 1: the investment app</h4><p>Use the Dockerfile Claude writes for you, or the worked one from the repo.</p></div></div>
+<pre>cd ~/DevOps/containers/apps/investment-app
+cp ../../01-the-container/example/investment-app/{Dockerfile,.dockerignore} .
+docker build -t investment-app .
+docker run -d -p 127.0.0.1:8001:8080 --env-file investment-app.env --name app investment-app
+docker ps -a       # app: Exited (3)
+docker logs app    # psycopg.OperationalError ... Name or service not known
+docker rm app</pre>
+<details><summary>What you should see</summary><div><p>It exits. That's expected: nothing called <code>db</code> exists yet.</p></div></details></div>
+<div class="step" data-i="9"><div class="step-head"><input type="checkbox" aria-label="Mark step 10 done"><div><h4>10. Homework part 2: add the database container</h4><p>Deck slide 32. Containers on the network find each other by name.</p></div></div>
+<pre>docker network create app-net
+docker run -d --name db --network app-net -e POSTGRES_USER=investment_app \
+  -e POSTGRES_PASSWORD=laptop-only-password -e POSTGRES_DB=investment_app postgres:16
+docker logs db                  # wait for: ready to accept connections
+docker run -d --name app --network app-net -p 127.0.0.1:8001:8080 \
+  --env-file investment-app.env investment-app
+curl --retry 5 --retry-all-errors --retry-delay 1 localhost:8001/health</pre>
+<details><summary>What you should see</summary><div><p><code>{"server":"…","status":"ok"}</code>. The password matches DB_PASSWORD in your env file, and it's for the laptop only.</p></div></details></div>
+<h3>If it goes wrong</h3><div class="tbl-wrap"><table><tr><th>Error</th><th>Meaning</th></tr><tr><td><code>Unable to find image 'hello:latest'</code></td><td>You left out the tag, so Docker assumed latest. Use <code>hello:v1</code>.</td></tr><tr><td><code>port is already allocated</code></td><td>Another container already uses laptop port 8000. Use 8001 or 8002, or remove the old container.</td></tr><tr><td><code>The container name "/hello" is already in use</code></td><td>A stopped hello still exists. Run <code>docker rm -f hello</code> first.</td></tr><tr><td><code>rmi: image is being used by stopped container</code></td><td>Remove the containers first, then the image</td></tr><tr><td>docker build asks for credentials</td><td>Old Docker Hub login in the keychain. Eldiiar hit this and fixed it with AI. Try <code>docker logout</code>.</td></tr></table></div>
+<h3>Clean up</h3><pre>docker rm -f hello app db      # remove the containers
+docker network rm app-net
+docker rmi hello:v1 hello:v2   # optional: images cost disk, not money</pre>
+<button id="demoReset">Clear my ticks</button></section><section id="commands"><h2>Commands and config that came up</h2><div class="tbl-wrap"><table><tr><th>Command</th><th>What it does</th></tr><tr><td><code>docker build -t name:tag .</code></td><td>Build an image from the Dockerfile in this folder</td></tr><tr><td><code>docker images</code></td><td>List local images, tags and sizes</td></tr><tr><td><code>docker run -d -p 127.0.0.1:8000:8080 --name x image:tag</code></td><td>Run in the background, laptop 8000 → container 8080</td></tr><tr><td><code>docker ps</code> / <code>docker ps -a</code></td><td>Running containers / all containers, stopped ones too</td></tr><tr><td><code>docker stop x</code> / <code>docker start x</code></td><td>Stop without deleting / start it again</td></tr><tr><td><code>docker rm -f x</code></td><td>Delete a container (stops it first)</td></tr><tr><td><code>docker rmi image:tag</code></td><td>Delete an image. No containers can be using it.</td></tr><tr><td><code>docker exec -it x sh</code></td><td>A shell inside a running container</td></tr><tr><td><code>docker logs x</code></td><td>What PID 1 wrote to stdout/stderr</td></tr><tr><td><code>for c in $(docker ps -aq); do docker rm -f "$c"; done</code></td><td>Remove every container on the laptop</td></tr><tr><td><code>docker run ... --env-file investment-app.env</code></td><td>Pass run-time config from a file</td></tr><tr><td><code>docker network create app-net</code></td><td>A network where containers reach each other by name</td></tr></table></div></section><section id="wrapup"><h2>What the instructor stressed, and what's next</h2><div class="cards2">
+<div><h3>Stressed in class</h3><ul><li>Always exec form for CMD. If you see shell form, tell the author to switch.</li><li>Always pin a version tag. latest moves, and a new Python can break your app.</li><li>Never put a secret in a Dockerfile or image. He called it a golden rule.</li><li>Use official images with a large download count. Public registries can carry malware.</li><li>You won't write Dockerfiles by hand. Claude writes them; you check them against the five items. His Sonnet run left out USER, so review every time.</li><li>Don't let AI run commands on its own. At his company, he approves each command, because AI agents have connected to accounts and databases on their own.</li><li>The app decides the tools. Pick the base image and setup from what the app needs.</li></ul></div>
+<div><h3>Homework</h3><ul><li>Due Thursday: build and run the investment app from deck slides 30–32, until the container runs (demo steps 9–10).</li><li>Try adding the DB container so the two talk. AI help is fine. It will be done together at the start of the next class.</li><li>Experiment with .dockerignore: build with <code>COPY . .</code> without it and then with it, and compare what ends up inside.</li><li>On the deck but not assigned out loud: the unit 1 assignment (slide 43). Next class: tags, repositories and ECR (slides 33–41), then unit 2, Kubernetes.</li></ul></div>
+<div><h3>Worth replaying in the recording</h3><ul><li>The four-bucket comparison at the end: Claude's Dockerfile side by side with the boot script slide. That's where the whole unit comes together.</li><li>After class, the cache demo: Bakhtiyar edits app.py, rebuilds, and only the last step is rebuilt.</li><li>The file-disappears demo (exec → rm -f → run → ls). It's short, and seeing it beats reading it.</li></ul></div>
+<div><h3>Left unclear</h3><ul><li>The shell-form stop delay was explained but never timed live. The 10.15 s figure is the deck's measurement.</li><li>How to see the build cache: the captions garbled the command, and he said you don't need it. It was probably <code>docker buildx du</code> (a guess).</li><li>Why Claude's Dockerfile differed for Eldiiar (Sonnet, no USER) and Bakhtiyar. Either way, review against the five items.</li><li>ENTRYPOINT was skipped on purpose. It's in Eldiiar's Dockerfile_notes in the repo if you're curious.</li></ul></div></div></section><section id="quiz"><h2>Check yourself</h2><p class="lede">Pick an answer to see why. Score: <span class="score" id="score">0 / 0</span></p><div id="quizArea"></div></section>
+<footer>Built from your Session 02 recap. </footer></div>
+<script>
+(function(){
+ const $=id=>document.getElementById(id);
+ const L={good:['FROM python:3.12-slim','WORKDIR /app','COPY requirements.txt .','RUN pip install -r requirements.txt','COPY app.py .'],
+          bad:['FROM python:3.12-slim','WORKDIR /app','COPY . .','RUN pip install -r requirements.txt']};
+ function build(){const o=$('c2ord').value,c=$('c2chg').value,ls=L[o];let first=-1;
+  if(c!=='none'){first=(o==='good')?(c==='req'?2:4):2}
+  $('c2layers').innerHTML=ls.map((l,i)=>{const r=first>=0&&i>=first;return `<div class="layer ${r?'rebuilt':'cached'}"><span>[${i+1}/${ls.length}] ${l}</span><b>${r?'rebuilt':'CACHED'}</b></div>`}).join('');
+  const slow=first>=0&&first<=3&&ls.length>3&&(first<=3);const pipRe=first>=0&&first<=3;
+  $('c2sum').innerHTML=c==='none'?'Nothing changed: every layer is reused. Same image.':(pipRe?'<span class="chip bad">about 8.2 s</span> pip install ran again because a layer above it changed.':'<span class="chip ok">about 0.3 s</span> Only the app.py layer rebuilt. pip install was reused.')}
+ $('c2build').onclick=build;['c2ord','c2chg'].forEach(i=>$(i).onchange=build);build();
+ function pid(){const s=$('c2form').value==='shell';$('c2pid').textContent='PID 1 = '+(s?'/bin/sh (gunicorn is its child)':'gunicorn');$('c2pid').className='chip '+(s?'warn':'ok')}
+ $('c2form').onchange=pid;pid();let run=0;
+ $('c2stop').onclick=async()=>{const my=++run,s=$('c2form').value==='shell',o=$('c2out');o.textContent='$ docker stop app\nSending SIGTERM to PID 1...';
+  if(!s){await new Promise(r=>setTimeout(r,240));if(my!==run)return;o.textContent+='\ngunicorn got the signal, finished, exited.\napp\nreal 0.24s   exit code 0';return}
+  o.textContent+='\n/bin/sh does not pass it on. gunicorn never hears it.';
+  for(let i=1;i<=10;i++){await new Promise(r=>setTimeout(r,300));if(my!==run)return;o.textContent+='\n  waiting... '+i+'s'}
+  o.textContent+='\nTimeout: SIGKILL\napp\nreal 10.15s   exit code 137 (killed)'};
+})();
+
+
+(function(){
+  const nav=document.querySelector('nav');const links=[...nav.querySelectorAll('a')];
+  const map=new Map(links.map(l=>[l.getAttribute('href').slice(1),l]));
+  const obs=new IntersectionObserver(es=>{es.forEach(e=>{if(!e.isIntersecting)return;
+    links.forEach(l=>l.classList.remove('active'));const l=map.get(e.target.id);
+    if(l){l.classList.add('active');nav.scrollTo({left:Math.max(0,l.offsetLeft-20),behavior:'smooth'})}})},
+    {rootMargin:'-25% 0px -65% 0px'});
+  map.forEach((l,id)=>{const el=document.getElementById(id);if(el)obs.observe(el)});
+})();
+(function(){
+  const KEY='s02-demo';let done={};
+  try{done=JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(e){done={}}
+  const steps=[...document.querySelectorAll('#demo .step')];
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(done))}catch(e){}}
+  function upd(){const n=steps.filter(s=>done[s.dataset.i]).length;
+    document.getElementById('demoCount').textContent=n+' of '+steps.length+' steps done';
+    document.getElementById('demoBar').style.width=(n/steps.length*100)+'%';}
+  steps.forEach(s=>{const cb=s.querySelector('input');cb.checked=!!done[s.dataset.i];s.classList.toggle('done',cb.checked);
+    cb.onchange=()=>{done[s.dataset.i]=cb.checked;s.classList.toggle('done',cb.checked);save();upd()};});
+  document.getElementById('demoReset').onclick=()=>{done={};save();steps.forEach(s=>{s.querySelector('input').checked=false;s.classList.remove('done')});upd()};
+  upd();
+})();
+(function(){
+  const Q=[{"q": "A Dockerfile has COPY . . on line 2 and RUN pip install on line 3. Every one-line code change takes minutes to build. Why?", "o": ["pip is slow on Macs", "The code copy breaks the cache before pip install, so pip install reruns every time", "The base image is too big"], "a": 1, "e": "Any change in the folder changes the COPY . . layer, and every layer after it rebuilds. Copy requirements.txt first, pip install, then copy the code."}, {"q": "Your Dockerfile has EXPOSE 8080, but curl localhost:8080 from the laptop fails. The app is running. What's missing?", "o": ["A second EXPOSE line", "A -p mapping on docker run", "A USER line"], "a": 1, "e": "EXPOSE is only a note. The laptop reaches the container only through -p. Also check the app binds 0.0.0.0."}, {"q": "Every old container takes about 10 seconds to stop and exits with code 137. What's in the Dockerfile?", "o": ["CMD in shell form", "A missing USER", "EXPOSE 8080"], "a": 0, "e": "/bin/sh is PID 1 and doesn't pass the stop signal on, so Docker waits 10 s and kills it. Use exec form."}, {"q": "Which instruction does NOT show up as a build step?", "o": ["RUN", "COPY", "CMD"], "a": 2, "e": "CMD runs at docker run, not at build. That's why the drill build showed 5 steps, not 6."}, {"q": "You copy a secret file in on one line and delete it on the next. Is the secret gone from the image?", "o": ["Yes, deleted is deleted", "No, the earlier layer still contains it", "Only if you use alpine"], "a": 1, "e": "A layer is never changed. The secret stays in the image forever. Never put secrets in images."}, {"q": "You touch a file inside a container, then docker rm -f it and docker run again. Is the file there?", "o": ["Yes", "No, every new container gets a fresh filesystem from the image", "Only with --rm"], "a": 1, "e": "Containers are immutable. To change what's inside, change the Dockerfile and build again."}, {"q": "Why add a .dockerignore with .terraform/ and .git/?", "o": ["To make the container start faster", "So COPY . . doesn't send huge folders and secrets to the builder and image", "It's required by Docker"], "a": 1, "e": "In the deck example, the build context went from 823 MB to under 1 MB."}, {"q": "Which base image did the course pick, and why?", "o": ["python:3.12, it has the most tools", "python:3.12-slim, small and works with Python packages", "python:latest, always newest"], "a": 1, "e": "Slim is 145 MB. Alpine is smaller but some packages must compile on it. latest moves, so never use it."}];
+  const area=document.getElementById('quizArea'),scoreEl=document.getElementById('score');let answered=0,right=0;
+  Q.forEach((item,i)=>{const box=document.createElement('div');box.className='q';
+    const p=document.createElement('p');p.className='prompt';p.textContent=(i+1)+'. '+item.q;box.appendChild(p);
+    const opts=document.createElement('div');opts.className='opts';const ex=document.createElement('p');ex.className='explain';ex.textContent=item.e;
+    item.o.forEach((t,j)=>{const b=document.createElement('button');b.textContent=t;
+      b.onclick=()=>{if(box.dataset.done)return;box.dataset.done=1;answered++;
+        if(j===item.a){right++;b.classList.add('right')}else{b.classList.add('nope');opts.children[item.a].classList.add('right')}
+        [...opts.children].forEach(x=>x.disabled=true);ex.classList.add('show');scoreEl.textContent=right+' / '+answered;};
+      opts.appendChild(b);});
+    box.appendChild(opts);box.appendChild(ex);area.appendChild(box);});
+})();
+</script></body></html>

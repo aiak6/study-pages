@@ -1,0 +1,381 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Session 03: The registry and the push</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EEF2F7; --surface:#FFFFFF; --ink:#1B2A41; --muted:#56657C; --line:#C9D3E1;
+  --blue:#2459C8; --blue-soft:#DCE6FA;
+  --ok:#1F8A5B; --ok-soft:#D8F0E4;
+  --warn:#A86A00; --warn-soft:#FBEBC9;
+  --bad:#B83A30; --bad-soft:#F7DCD8;
+  --code-bg:#1B2A41; --code-ink:#E6ECF5;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1724; --surface:#172234; --ink:#E4EAF3; --muted:#9AA8BD; --line:#2C3B53;
+    --blue:#7FA6F5; --blue-soft:#1E3157;
+    --ok:#5CCB94; --ok-soft:#163A2B;
+    --warn:#E8B04D; --warn-soft:#3A2D12;
+    --bad:#F08A80; --bad-soft:#3E1C1A;
+    --code-bg:#0B111B; --code-ink:#DCE4F0;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1724; --surface:#172234; --ink:#E4EAF3; --muted:#9AA8BD; --line:#2C3B53;
+  --blue:#7FA6F5; --blue-soft:#1E3157;
+  --ok:#5CCB94; --ok-soft:#163A2B;
+  --warn:#E8B04D; --warn-soft:#3A2D12;
+  --bad:#F08A80; --bad-soft:#3E1C1A;
+  --code-bg:#0B111B; --code-ink:#DCE4F0;
+  color-scheme:dark;
+}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 72px)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:21;background:var(--bg)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size:17px;line-height:1.6}
+code,pre,.mono{font-family:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace}
+code{font-size:.88em;background:var(--blue-soft);padding:.1em .35em;border-radius:4px}
+.wrap{max-width:980px;margin:0 auto;padding:40px 20px 80px}
+header{margin-bottom:36px}
+h1{font-size:clamp(2rem,5vw,3rem);line-height:1.1;margin:.2em 0 .4em;letter-spacing:-.01em}
+.sub{color:var(--muted);margin:0;max-width:62ch}
+.rule-line{margin-top:24px;display:flex;flex-wrap:wrap;gap:12px}
+.rule-line div{flex:1 1 260px;padding:14px 16px;border-left:5px solid;background:var(--surface);border-radius:0 8px 8px 0}
+.rule-line .r{border-color:var(--ok)} .rule-line .l{border-color:var(--bad)}
+.rule-line strong{display:block;font-size:1.1rem}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;display:flex;flex-wrap:nowrap;gap:8px;overflow-x:auto;
+  margin:0 -20px;padding:10px 20px;background:var(--bg);border-bottom:1px solid var(--line);scrollbar-width:thin}
+@media(min-width:900px){nav{flex-wrap:wrap}}
+nav a{white-space:nowrap}
+nav a.active{background:var(--blue);color:var(--surface);border-color:var(--blue)}
+nav a{color:var(--blue);text-decoration:none;border:1px solid var(--line);padding:4px 12px;border-radius:999px;font-size:.92rem;background:var(--surface)}
+nav a:hover{border-color:var(--blue)}
+section{margin-top:56px}
+h2{font-size:1.6rem;margin:0 0 .3em;line-height:1.2}
+h3{font-size:1.15rem;margin:1.4em 0 .3em}
+p{max-width:70ch}
+.lede{color:var(--muted);margin-top:0}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px}
+button{font:inherit;font-size:.95rem;cursor:pointer;border-radius:8px;border:1px solid var(--line);
+  background:var(--surface);color:var(--ink);padding:8px 14px}
+button:hover{border-color:var(--blue)}
+button.primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+:root[data-theme="dark"] button.primary{color:#0F1724}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) button.primary{color:#0F1724}}
+button.danger{border-color:var(--bad);color:var(--bad)}
+button:focus-visible,a:focus-visible,summary:focus-visible,select:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+button:disabled{opacity:.45;cursor:not-allowed}
+.opts button:disabled{opacity:.7}
+.opts button.right:disabled,.opts button.nope:disabled{opacity:1}
+.controls{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;align-items:center}
+
+/* simulator */
+.sim{display:grid;grid-template-columns:1fr;gap:16px}
+@media(min-width:760px){.sim{grid-template-columns:1.25fr 1fr}}
+.rs{border:1px dashed var(--line);border-radius:10px;padding:12px;margin-bottom:12px;transition:opacity .4s}
+.rs.zero{opacity:.55}
+.rs-head{display:flex;justify-content:space-between;gap:8px;font-size:.9rem;color:var(--muted);margin-bottom:8px;flex-wrap:wrap}
+.rs-head b{color:var(--ink)}
+.pods{display:flex;flex-wrap:wrap;gap:10px;min-height:76px}
+.pod{width:150px;border-radius:10px;padding:10px;border:2px solid;font-size:.85rem;line-height:1.35;transition:opacity .5s, transform .3s}
+.pod .n{font-family:"JetBrains Mono",monospace;font-size:.78rem;word-break:break-all}
+.pod .st{font-weight:700;font-size:1rem}
+.pod.ready{border-color:var(--ok);background:var(--ok-soft)}
+.pod.notready{border-color:var(--warn);background:var(--warn-soft)}
+.pod.starting{border-color:var(--line);background:var(--bg)}
+.pod.term{border-color:var(--bad);background:var(--bad-soft);opacity:.6}
+.pod.flash{transform:scale(1.06)}
+.empty{color:var(--muted);font-size:.9rem;align-self:center}
+.log{background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:12px 14px;font-size:.8rem;
+  height:330px;overflow-y:auto;line-height:1.5}
+.log div{white-space:pre-wrap;word-break:break-word}
+.log .w{color:#F4BE5B} .log .e{color:#F49088} .log .g{color:#7FDCA8} .log .c{color:#8FB2F7}
+.users{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:.92rem;color:var(--muted);flex-wrap:wrap}
+.status-pill{display:inline-block;padding:2px 10px;border-radius:999px;font-weight:700;font-size:.85rem}
+.pill-ok{background:var(--ok-soft);color:var(--ok)} .pill-warn{background:var(--warn-soft);color:var(--warn)} .pill-bad{background:var(--bad-soft);color:var(--bad)}
+
+/* liveness */
+.live-grid{display:grid;grid-template-columns:1fr;gap:16px}
+@media(min-width:760px){.live-grid{grid-template-columns:280px 1fr}}
+.bigpod{border:2px solid var(--line);border-radius:14px;padding:18px;text-align:left}
+.bigpod .row{display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding:6px 0;font-size:.95rem}
+.bigpod .row:last-child{border:none}
+.bigpod .val{font-family:"JetBrains Mono",monospace;font-weight:600}
+select{font:inherit;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.backoff{display:flex;gap:4px;align-items:flex-end;height:90px;margin-top:14px}
+.backoff span{flex:1;background:var(--blue-soft);border-radius:4px 4px 0 0;position:relative;transition:background .3s}
+.backoff span.on{background:var(--bad)}
+.backoff-labels{display:flex;gap:4px;font-size:.72rem;color:var(--muted)}
+.backoff-labels span{flex:1;text-align:center}
+
+/* tables */
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:.95rem}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--bg);font-weight:700}
+tr:last-child td{border-bottom:none}
+
+/* request path */
+.path{display:flex;flex-direction:column;gap:0;margin-top:12px}
+.hop{display:grid;grid-template-columns:44px 1fr;gap:14px;position:relative;padding-bottom:18px}
+.hop .dot{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-weight:700;
+  background:var(--surface);border:2px solid var(--blue);color:var(--blue);z-index:1}
+.hop::before{content:"";position:absolute;left:21px;top:44px;bottom:0;width:2px;background:var(--line)}
+.hop:last-child::before{display:none}
+.hop h4{margin:8px 0 2px;font-size:1.05rem}
+.hop p{margin:0;color:var(--muted)}
+.hop.https .dot{border-color:var(--ok);color:var(--ok)}
+.tag{display:inline-block;font-size:.78rem;padding:1px 8px;border-radius:999px;margin-left:6px;vertical-align:2px}
+.tag.enc{background:var(--ok-soft);color:var(--ok)} .tag.plain{background:var(--warn-soft);color:var(--warn)}
+.note{border-left:4px solid var(--blue);background:var(--blue-soft);padding:12px 16px;border-radius:0 8px 8px 0;margin:16px 0;max-width:70ch}
+
+pre{background:var(--code-bg);color:var(--code-ink);padding:14px 16px;border-radius:10px;overflow-x:auto;font-size:.82rem;line-height:1.55;margin:10px 0}
+pre .cm{color:#8A9AB5}
+
+details{background:var(--surface);border:1px solid var(--line);border-radius:10px;margin-bottom:8px}
+summary{cursor:pointer;padding:12px 16px;font-weight:700}
+details > div{padding:0 16px 14px}
+.wrong{color:var(--bad);text-decoration:line-through;text-decoration-thickness:1px}
+
+/* quiz */
+.q{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:14px}
+.q p.prompt{font-weight:700;margin-top:0}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opts button{text-align:left;padding:10px 14px}
+.opts button.right{border-color:var(--ok);background:var(--ok-soft)}
+.opts button.nope{border-color:var(--bad);background:var(--bad-soft)}
+.explain{margin-top:10px;color:var(--muted);display:none}
+.explain.show{display:block}
+.score{font-weight:700}
+footer{margin-top:64px;color:var(--muted);font-size:.9rem}
+
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.tabs button[aria-selected="true"]{background:var(--blue);color:var(--surface);border-color:var(--blue)}
+.tabpane{display:none}.tabpane.show{display:block}
+.timeline{list-style:none;padding:0;margin:0;counter-reset:t}
+.timeline li{counter-increment:t;position:relative;padding:14px 18px 14px 64px;margin-bottom:10px;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.timeline li h4{margin:0 0 4px;font-size:1.08rem}
+.timeline li p{margin:0;color:var(--ink);max-width:68ch}
+.timeline li::before{content:counter(t);position:absolute;left:16px;top:14px;width:32px;height:32px;border-radius:50%;
+  background:var(--blue-soft);color:var(--blue);font-weight:700;display:grid;place-items:center;font-size:.9rem}
+.timeline details{margin:0}
+.yaml-toggle .ln{display:block;transition:background .2s,opacity .2s}
+.yaml-toggle.focus .ln{opacity:.35}
+.yaml-toggle.focus .ln.hl{opacity:1;background:rgba(127,166,245,.18)}
+.flow{display:flex;flex-direction:column;gap:6px;margin:14px 0;max-width:620px}
+.flow div{padding:10px 14px;border-radius:8px;border:1px solid var(--line);background:var(--surface)}
+.flow .arrow{border:none;background:none;padding:0 0 0 18px;color:var(--muted)}
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px}
+.compare > div{border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--bg)}
+.lbs{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.lbs span{display:inline-block;padding:3px 8px;border-radius:6px;font-size:.8rem;font-family:"JetBrains Mono",monospace}
+.lb-many span{background:var(--bad-soft);color:var(--bad)}
+.lb-one span{background:var(--ok-soft);color:var(--ok)}
+.form-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:14px}
+@media(min-width:640px){.form-grid{grid-template-columns:1fr 1fr}}
+.form-grid label{display:flex;flex-direction:column;font-size:.9rem;color:var(--muted);gap:4px}
+.form-grid input{font:inherit;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.verdict{padding:12px 16px;border-radius:8px;font-size:.9rem}
+.verdict.ok{background:var(--ok-soft);color:var(--ok)} .verdict.no{background:var(--bad-soft);color:var(--bad)} .verdict.warn{background:var(--warn-soft);color:var(--warn)}
+.step{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:12px}
+.step.done{border-color:var(--ok)}
+.step-head{display:flex;gap:12px;align-items:flex-start}
+.step-head input{width:22px;height:22px;margin-top:3px;accent-color:var(--ok);flex:none}
+.step-head h4{margin:0;font-size:1.05rem}
+.step-head p{margin:2px 0 0;color:var(--muted)}
+.step pre{margin:10px 0 6px}
+.step details{border:none;background:var(--bg)}
+.step summary{font-weight:400;color:var(--blue);padding:8px 12px}
+.progress{height:8px;background:var(--line);border-radius:999px;overflow:hidden;margin:10px 0 18px}
+.progress div{height:100%;background:var(--ok);width:0;transition:width .3s}
+.cards2{display:grid;grid-template-columns:1fr;gap:14px}
+@media(min-width:720px){.cards2{grid-template-columns:1fr 1fr}}
+.cards2 > div{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.cards2 h3{margin-top:0}
+.cards2 ul{margin:0;padding-left:20px}
+.cards2 li{margin-bottom:6px}
+.fixbox{border:1.5px solid var(--warn);border-radius:14px;padding:12px;background:var(--warn-soft)}
+.fixbox td:first-child{width:44%;color:var(--muted)}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+
+.term{background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:12px 14px;font-family:"JetBrains Mono",monospace;font-size:.8rem;line-height:1.5;overflow-x:auto;white-space:pre}
+.chip{display:inline-block;padding:3px 10px;border-radius:999px;font-size:.85rem;font-weight:700}
+.chip.ok{background:var(--ok-soft);color:var(--ok)}.chip.warn{background:var(--warn-soft);color:var(--warn)}.chip.bad{background:var(--bad-soft);color:var(--bad)}.chip.idle{background:var(--bg);color:var(--muted);border:1px solid var(--line)}
+.lab-row{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:12px}
+.lab-row label{display:flex;gap:6px;align-items:center;font-size:.95rem}
+.lab-row input[type=checkbox]{width:18px;height:18px;accent-color:var(--blue)}
+.layers{display:flex;flex-direction:column;gap:6px}
+.layer{display:flex;justify-content:space-between;gap:10px;padding:8px 12px;border-radius:8px;border:1px solid var(--line);font-family:"JetBrains Mono",monospace;font-size:.82rem;flex-wrap:wrap}
+.layer.cached{background:var(--ok-soft);border-color:var(--ok)}.layer.rebuilt{background:var(--warn-soft);border-color:var(--warn)}.layer.none{background:var(--bg);color:var(--muted)}
+.journey{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.journey .hopbox{padding:10px 14px;border-radius:10px;border:2px solid var(--line);background:var(--surface);font-weight:700;transition:all .3s}
+.journey .hopbox.on{border-color:var(--blue);background:var(--blue-soft);color:var(--blue)}
+.journey .ar{color:var(--muted)}
+</style></head><body><div class="wrap">
+<header><p class="sub">Containers &amp; Orchestration, the last day of unit 1</p><h1>Session 03: The registry and the push</h1><p class="sub">The day the image left the laptop. The investment app finally answered next to a Postgres container on its own network, after two failures found in <code>docker logs</code>. Then the three ideas that make an image portable: the processor it was built for, the registry that stores it, and the address, tag and digest that name it. It ends with your own ECR repository from Terraform, the push, and the repository policy that lets the school's cluster pull your image.</p><div class="rule-line"><div class="r"><strong>Build for the cluster's processor.</strong><code>--platform linux/amd64</code>, then check with <code>docker image inspect</code>.</div><div class="l"><strong>Grant the pull from your side.</strong>The repository policy names the school's node role. Keep SCHOOL_ACCOUNT_ID.</div></div></header>
+<nav aria-label="Sections"><a href="#timeline">What we did</a><a href="#ref">Quick reference</a><a href="#network">Postgres &amp; network</a><a href="#failures">Two failures</a><a href="#payoff">Second copy</a><a href="#arch">Processor</a><a href="#registry">Registry &amp; tags</a><a href="#digest">Tag vs digest</a><a href="#lab">Push lab</a><a href="#ecr">ECR &amp; push</a><a href="#policy">Repository policy</a><a href="#k8s">Why Kubernetes</a><a href="#fixes">Corrections</a><a href="#demo">Redo the demo</a><a href="#commands">Commands</a><a href="#wrapup">Stressed &amp; homework</a><a href="#quiz">Check yourself</a></nav>
+<section id="timeline"><h2>What we actually did, in order</h2><p class="lede">Thu, Oct 1, 2026. Unit 1, the container. The steps follow the order of the class notes.</p><ol class="timeline"><li><h4>A second container: Postgres on its own network</h4><p>The app can't boot without a database, and your Scale RDS is in a private subnet the laptop can't reach. So the database became a second container on <code>app-net</code>.</p></li><li><h4>Why the app stopped twice</h4><p>First it wasn't on <code>app-net</code>, so the name <code>db</code> didn't exist. Then two workers created the table at once. Both found by pasting <code>docker logs</code> into Claude. Fix: <code>--network app-net</code> and <code>--preload</code>.</p></li><li><h4>The payoff: a second copy in seconds</h4><p><code>app2</code> on port 8002 answered a few seconds later. The Dockerfile takes time once; after that, starting the app is one command.</p></li><li><h4>The processor</h4><p>arm64 on Apple Silicon vs amd64 on the cluster. Build with <code>--platform linux/amd64</code> and check with <code>docker image inspect</code>.</p></li><li><h4>Registry, repository and tags</h4><p>Registry = the service (ECR). Repository = one app's image versions. Image tags vs repository (resource) tags, lifecycle policies, and ECR pricing.</p></li><li><h4>Tag vs digest</h4><p>A tag is a movable label; <code>latest</code> means "no tag given". A digest is a hash of the content. Shown live by adding one ENV line and rebuilding.</p></li><li><h4>Your ECR repository from Terraform, then the push</h4><p>Two files, <code>terraform apply</code>, log in, tag with the full address, <code>docker push</code>. A duplicate provider block stopped <code>terraform init</code> in class.</p></li><li><h4>Cross-account: the repository policy</h4><p>The school's cluster lives in account SCHOOL_ACCOUNT_ID. Your repository policy names its node role so it can pull.</p></li><li><h4>Next: why Kubernetes</h4><p>Nobody can watch a hundred containers by hand. Unit 2 starts Monday Oct 5 with Maher.</p></li></ol></section>
+<section id="ref"><h2>Quick reference</h2><div class="tbl-wrap"><table><tr><th>Topic</th><th>Key point</th></tr><tr><td>docker network</td><td><code>docker network create app-net</code>. Containers on it reach each other by name (<code>DB_HOST=db</code>). Both containers need <code>--network app-net</code>.</td></tr><tr><td>postgres image</td><td>Postgres is already installed. <code>-e POSTGRES_USER / _PASSWORD / _DB</code> create the user, password and database on first start, like clicking through RDS.</td></tr><tr><td>--preload</td><td>Gunicorn imports the app once before starting workers, so two workers can't race to CREATE TABLE.</td></tr><tr><td>Rebuild rule</td><td>Changed the Dockerfile? Build again, <code>docker rm -f app</code>, then <code>docker run</code>. An image can't be edited.</td></tr><tr><td>Architecture</td><td>Apple Silicon is arm64; the cluster and EC2 are amd64. The wrong one gives <code>exec format error</code>. Build with <code>--platform linux/amd64</code>.</td></tr><tr><td>Registry vs repo</td><td>Registry = the service (Docker Hub, ECR). Repository = one app's image versions inside it.</td></tr><tr><td>Tag vs digest</td><td>A tag is a movable label; <code>latest</code> means "no tag given", not newest. A digest is <code>sha256:</code> of the content and always names the same image.</td></tr><tr><td>IMMUTABLE</td><td>The repo refuses a second push of the same tag: <code>tag invalid … already exists</code>. Push v2.</td></tr><tr><td>Cross-account pull</td><td>Two halves: the school's role policy (already done) plus your repository policy naming <code>containers-26a-node</code>. Keep SCHOOL_ACCOUNT_ID.</td></tr></table></div></section>
+<section id="network"><h2>A second container: Postgres on its own network</h2><p><code>app-net</code> is a private network on the laptop. Only containers you put on it can use it, and they find each other by name, so <code>DB_HOST=db</code> finds the container called <code>db</code>. Same idea as RDS in a private subnet only the app servers can reach (Scale Session 06), or an SSH tunnel.</p><p><code>-e POSTGRES_*</code> are environment variables the official image reads on its first start (its Docker Hub page lists them). They must match what the app uses in <code>investment-app.env</code>. You install nothing, just as you installed nothing on RDS. <code>postgres:16</code> is about 400 MB, so the first pull is slow. Secrets Manager is out of scope for now: everything is local and hard-coded on purpose.</p><div class="note"><b>Order:</b> network, then the DB container, then the app container. Check <code>docker ps</code> shows <code>db</code> as Up before starting the app.</div></section>
+<section id="failures"><h2>Why the app stopped twice</h2><div class="tbl-wrap"><table><tr><th></th><th>What happened</th><th>Log said</th><th>Fix</th></tr><tr><td>Failure 1</td><td>The app started on Docker's default bridge network, where the name <code>db</code> doesn't exist</td><td><code>Name or service not known</code></td><td>Add <code>--network app-net</code> to the app's docker run</td></tr><tr><td>Failure 2</td><td><code>app.py</code> creates its table on import. With <code>--workers 2</code>, both workers ran CREATE TABLE at the same moment on a new database, and one failed</td><td><code>Worker failed to boot</code></td><td><code>--preload</code>: import the app once in the master, then start the workers</td></tr></table></div><pre>CMD ["gunicorn", "--workers", "2", "--preload", "--bind", "0.0.0.0:8080", "app:app"]</pre><p>A Dockerfile change needs a new build: build, <code>docker rm -f app</code>, run again. The course repo's Dockerfile has <code>--preload</code> now. Both causes were found by pasting the log into Claude, which is how Eldiiar works day to day.</p><div class="note">Read what Claude changes before you accept it. Its first answer also changed the port mapping, which wasn't the problem, and the page stopped loading. The real fix was the original command plus <code>--network app-net</code>.</div><div class="note"><b>Rule:</b> <code>docker ps -a</code> shows Exited → <code>docker logs app</code> → read the error → fix → rebuild if the Dockerfile changed.</div></section>
+<section id="payoff"><h2>The payoff: a second copy in seconds</h2><pre>docker run -d --name app2 --network app-net -p 127.0.0.1:8002:8080 \
+  --env-file investment-app.env investment-app:v1</pre><p>The same image answers on port 8002 a few seconds later. Compare the nine-step boot script from Scale Session 09. The image runs the same way on any Linux machine with the same processor type.</p><p>Docker Desktop shows the same images and containers as <code>docker images</code> and <code>docker ps -a</code>, with stop and delete buttons, and scans each image for packages with known vulnerabilities. At work you'll mostly use the CLI.</p></section>
+<section id="arch"><h2>The processor: arm64, amd64 and --platform</h2><pre>uname -m   # arm64 on Apple Silicon; x86_64 (= amd64) on Intel, EC2 and the cluster
+docker build --platform linux/amd64 -t investment-app:v1 .
+docker image inspect investment-app:v1 --format '{{.Os}}/{{.Architecture}}'   # linux/amd64</pre><p>A program is built for one kind of processor, called its architecture. An image built on Apple Silicon holds arm64 programs. The cluster's amd64 machines can't run them, and the container stops with <code>exec format error</code>.</p><p>The difference is the processor, not macOS vs Linux: these are Linux images on both machines. The <code>--platform</code> build is slower because the Mac emulates the other processor.</p><div class="note"><b>Rule:</b> check with <code>docker image inspect</code> before every push.</div></section>
+<section id="registry"><h2>Registry, repository and tags</h2><p><b>Registry:</b> a service that stores images. Docker Hub is one; Amazon Elastic Container Registry (ECR) is this course's.</p><p><b>Repository:</b> inside a registry, it holds the versions of one app's image. Make one per app, <code>investment-app</code>, in your own AWS account. It's not a git repo and not an S3 bucket. Think of a GitHub repo for images.</p><div class="tbl-wrap"><table><tr><th></th><th>Image tag</th><th>Repository tag</th></tr><tr><td>Example</td><td><code>v1</code></td><td><code>owner = devops</code>, a cost code</td></tr><tr><td>Names</td><td>One image in the repo</td><td>The repo as an AWS resource, like EC2 tags</td></tr><tr><td>Used by</td><td>Docker</td><td>People and finance. Docker never sees it</td></tr></table></div><p>If the ECR bill jumps from $100 to $1,000 in a month, finance reads the resource tags to see which team to ask. A <b>lifecycle policy</b> deletes images by a rule, for example everything older than a year.</p><p><b>Price:</b> $0.10 per GB per month stored. Push is free, a pull from the same region is free, and a cross-region pull is about $0.09/GB. The cluster is in us-east-1.</p><h3>The full image address</h3><p class="lede">Change any part and watch the address update. <code>docker push</code>, <code>docker pull</code> and the cluster all use this whole address.</p><div class="panel"><div class="form-grid"><label>account<input id="c3acct" value="123456789012"></label><label>region<input id="c3reg" value="us-east-1"></label><label>repository<input id="c3repo" value="investment-app"></label><label>tag<input id="c3tag" value="v1"></label></div><div class="term" id="c3addr"></div></div><div class="note">ECR is regional, so a repository made in us-east-1 is not listed in any other region.</div></section>
+<section id="digest"><h2>Tag vs digest</h2><div class="tbl-wrap"><table><tr><th></th><th>Tag</th><th>Digest</th></tr><tr><td>Looks like</td><td><code>v1</code>, <code>latest</code></td><td><code>sha256:…</code></td></tr><tr><td>Can it move?</td><td>Yes. A person can point it at another image.</td><td>No. Computed from the bytes, like a git commit SHA.</td></tr><tr><td>Build with no tag</td><td>Docker uses <code>latest</code>; building again moves <code>latest</code> and leaves the old image untagged</td><td>Same content, same digest. Change anything and it changes.</td></tr></table></div><p><code>latest</code> doesn't mean newest. It means no tag was given. A digest isn't encryption, and nothing can be read back from it. A build that reuses every cached layer gives the same image and ID.</p><div class="note"><b>Rule:</b> use version tags like v1 and v2, never latest.</div></section>
+<section id="lab"><h2>Lab: will the push work, and can the cluster run it?</h2><p class="lede">Each switch is one thing you might forget. Press push and read what Docker and then the cluster would say.</p><div class="panel"><div class="lab-row" style="flex-direction:column;align-items:flex-start;gap:8px"><label><input type="checkbox" id="c3plat"> Built with <code>--platform linux/amd64</code></label><label><input type="checkbox" id="c3login" checked> Logged in with <code>aws ecr get-login-password | docker login</code></label><label><input type="checkbox" id="c3full" checked> Tagged with the full ECR address (not just <code>investment-app</code>)</label><label><input type="checkbox" id="c3dup"> <code>v1</code> was already pushed before (repo is IMMUTABLE)</label><label><input type="checkbox" id="c3pol"> Repository policy naming <code>containers-26a-node</code> is set</label></div><div class="controls"><button class="primary" id="c3go">docker push, then the cluster pulls v1</button></div><div class="term" id="c3out" style="min-height:120px"></div></div></section>
+<section id="ecr"><h2>Your ECR repository from Terraform, then the push</h2><p>Run <code>aws sts get-caller-identity</code> first: the next commands act in your account. Then two files in a folder of their own (in class, <code>01-the-container/ecr-terraform/</code>):</p><pre># providers.tf
+terraform {
+  required_providers {
+    aws = { source = &quot;hashicorp/aws&quot;, version = &quot;~&gt; 6.0&quot; }
+  }
+}
+provider &quot;aws&quot; { region = &quot;us-east-1&quot; }
+
+# ecr.tf
+resource &quot;aws_ecr_repository&quot; &quot;investment_app&quot; {
+  name                 = &quot;investment-app&quot;
+  image_tag_mutability = &quot;IMMUTABLE&quot;   # a pushed tag can never be overwritten
+}</pre><pre>terraform init &amp;&amp; terraform plan &amp;&amp; terraform apply
+REGISTRY=&lt;your account&gt;.dkr.ecr.us-east-1.amazonaws.com
+aws ecr get-login-password --region us-east-1 \
+  | docker login --username AWS --password-stdin $REGISTRY   # valid 12 hours
+docker tag investment-app:v1 $REGISTRY/investment-app:v1
+docker push $REGISTRY/investment-app:v1</pre><div class="tbl-wrap"><table><tr><th>Gotcha</th><th>What to do</th></tr><tr><td>Claude's <code>ecr.tf</code> also has a <code>provider "aws"</code> block</td><td>Delete it. Terraform refuses two provider blocks for the same provider; this stopped <code>terraform init</code> in class.</td></tr><tr><td><code>docker push investment-app</code> fails with <code>denied</code></td><td>A bare name is a Docker Hub name. Use the full ECR address.</td></tr><tr><td>Pushing v1 twice fails with <code>tag invalid … already exists</code></td><td>That's IMMUTABLE working. Push v2.</td></tr><tr><td>A push stops part way with a network error</td><td>Run it again. Layers already sent aren't sent twice.</td></tr></table></div><div class="note"><b>Watch out:</b> the console's <b>View push commands</b> button builds with no <code>--platform</code> and tags <code>latest</code>. On Apple Silicon that pushes an arm64 image the cluster can't run. If inspect says linux/arm64, rebuild with <code>--platform linux/amd64</code> and push as v1.</div></section>
+<section id="policy"><h2>Cross-account: the repository policy</h2><p>Your repository is in your account. The school's EKS cluster is in the school's account, SCHOOL_ACCOUNT_ID. A <b>cluster</b> is a group of Linux machines (EC2 underneath) that run containers together, and those machines share an IAM role that must be allowed to pull your image. Like IAM roles in Scale Session 04, it needs two sides:</p><div class="tbl-wrap"><table><tr><th>Side</th><th>What</th><th>Status</th></tr><tr><td>School's side</td><td>A role policy on the node role allows the pull actions</td><td>Already done</td></tr><tr><td>Your side</td><td>A resource policy on your repository naming that role</td><td>You write this one. Without it the pull is refused.</td></tr></table></div><pre>{
+  &quot;Version&quot;: &quot;2012-10-17&quot;,
+  &quot;Statement&quot;: [{
+    &quot;Effect&quot;: &quot;Allow&quot;,
+    &quot;Principal&quot;: { &quot;AWS&quot;: &quot;arn:aws:iam::SCHOOL_ACCOUNT_ID:role/containers-26a-node&quot; },
+    &quot;Action&quot;: [
+      &quot;ecr:BatchGetImage&quot;,
+      &quot;ecr:GetDownloadUrlForLayer&quot;,
+      &quot;ecr:BatchCheckLayerAvailability&quot;
+    ]
+  }]
+}</pre><pre>aws ecr set-repository-policy --repository-name investment-app \
+  --policy-text file://repository-policy.json</pre><p>Or in the console: your repository → Permissions → Edit policy JSON → paste → Save. View JSON shows what was saved.</p><p>The three actions are what a pull does: check which layers exist, get their download addresses, get the image. <code>ecr:GetAuthorizationToken</code> isn't here; it can only go in a role policy, on the school's side.</p><div class="note"><b>Rule:</b> don't change the account ID. SCHOOL_ACCOUNT_ID is the school's account, and the policy names the school's role.</div></section>
+<section id="k8s"><h2>Next: why Kubernetes</h2><p>One or two containers are easy to start by hand. A stopped container stays stopped until someone starts it, and nobody can watch a hundred of them.</p><p><b>Kubernetes</b> is container orchestration, like a conductor for an orchestra. It places containers on a group of machines, starts a new one when one stops, and adds copies when load grows. The school's EKS cluster is AWS-managed, has one node right now, and scales up as more people use it.</p><div class="note"><b>The golden rule of this class:</b> an image is only useful where it can run and be found. Build it for the cluster's processor, push it to your registry under a version tag, and grant the cluster's role the pull from your side of the account line.</div></section>
+<section id="fixes"><h2>Where the notes correct what was said live</h2>
+<p class="lede">Left: what was said in class. Right: the correct version from the site notes and deck.</p>
+<div class="fixbox"><div class="tbl-wrap"><table><tr><th>Said in class</th><th>Correct version (site notes and deck)</th></tr><tr><td>"The digest changes on every build"</td><td><b>Same content, same digest.</b> Change anything and the digest changes. A build that reuses every cached layer gives the same image and ID.</td></tr><tr><td>Claude's first fix: also change the port mapping</td><td>The port mapping wasn't the problem, and the page stopped loading. The real fix was the original command plus <code>--network app-net</code>.</td></tr></table></div></div></section><section id="demo"><h2>Redo the demo yourself</h2>
+<p class="lede">Steps 1–4 run on your laptop. Steps 5–8 act in your own AWS account. Tick each step as you finish it; your ticks stay in this browser.</p>
+<h3>Before you start</h3><div class="note" style="max-width:none">Docker Desktop running, the containers repo pulled, and <code>apps/investment-app/investment-app.env</code> in place. Use the <code>DB_PASSWORD</code> from that file for Postgres.</div>
+<p style="margin-bottom:0"><b id="demoCount">0 of 8 steps done</b></p><div class="progress"><div id="demoBar"></div></div>
+<div class="step" data-i="0"><div class="step-head"><input type="checkbox" aria-label="Mark step 1 done"><div><h4>1. Build, then make the network and the database</h4><p>Order matters: network, then DB, then app.</p></div></div>
+<pre>cd apps/investment-app
+docker build -t investment-app:v1 .
+docker network create app-net
+docker run -d --name db --network app-net \
+  -e POSTGRES_USER=investment_app \
+  -e POSTGRES_PASSWORD=&lt;DB_PASSWORD from investment-app.env&gt; \
+  -e POSTGRES_DB=investment_app \
+  postgres:16
+docker logs db      # wait for: database system is ready to accept connections</pre>
+<details><summary>What you should see</summary><div><p><code>db</code> Up in <code>docker ps</code>, and the "ready to accept connections" line in its log.</p></div></details></div>
+<div class="step" data-i="1"><div class="step-head"><input type="checkbox" aria-label="Mark step 2 done"><div><h4>2. Start the app on the same network</h4><p>Both containers need <code>--network app-net</code>.</p></div></div>
+<pre>docker run -d --name app --network app-net -p 127.0.0.1:8001:8080 \
+  --env-file investment-app.env investment-app:v1
+curl localhost:8001/health</pre>
+<details><summary>What you should see</summary><div><p><code>{"server":"…","status":"ok"}</code>. If it Exited, run <code>docker logs app</code> and check the two failures above.</p></div></details></div>
+<div class="step" data-i="2"><div class="step-head"><input type="checkbox" aria-label="Mark step 3 done"><div><h4>3. Start a second copy</h4><p>The payoff: one command.</p></div></div>
+<pre>docker run -d --name app2 --network app-net -p 127.0.0.1:8002:8080 \
+  --env-file investment-app.env investment-app:v1
+curl localhost:8002/health</pre>
+<details><summary>What you should see</summary><div><p>The same answer on port 8002 a few seconds later.</p></div></details></div>
+<div class="step" data-i="3"><div class="step-head"><input type="checkbox" aria-label="Mark step 4 done"><div><h4>4. Build for the cluster's processor</h4><p>Check before every push.</p></div></div>
+<pre>uname -m
+docker build --platform linux/amd64 -t investment-app:v1 .
+docker image inspect investment-app:v1 --format &#x27;{{.Os}}/{{.Architecture}}&#x27;</pre>
+<details><summary>What you should see</summary><div><p><code>arm64</code> from uname on Apple Silicon, then <code>linux/amd64</code> from inspect.</p></div></details></div>
+<div class="step" data-i="4"><div class="step-head"><input type="checkbox" aria-label="Mark step 5 done"><div><h4>5. Create your ECR repository with Terraform</h4><p>Check the account first. Two files: <code>providers.tf</code> and <code>ecr.tf</code> (above). Only one provider block.</p></div></div>
+<pre>aws sts get-caller-identity
+terraform init &amp;&amp; terraform plan &amp;&amp; terraform apply</pre>
+<details><summary>What you should see</summary><div><p>Your account in the identity output, then <code>Apply complete! Resources: 1 added</code>.</p></div></details></div>
+<div class="step" data-i="5"><div class="step-head"><input type="checkbox" aria-label="Mark step 6 done"><div><h4>6. Log in and push v1</h4><p>The login lasts 12 hours.</p></div></div>
+<pre>REGISTRY=&lt;your account&gt;.dkr.ecr.us-east-1.amazonaws.com
+aws ecr get-login-password --region us-east-1 \
+  | docker login --username AWS --password-stdin $REGISTRY
+docker tag investment-app:v1 $REGISTRY/investment-app:v1
+docker push $REGISTRY/investment-app:v1</pre>
+<details><summary>What you should see</summary><div><p><code>Login Succeeded</code>, then layers pushing and a line ending in a <code>sha256:</code> digest.</p></div></details></div>
+<div class="step" data-i="6"><div class="step-head"><input type="checkbox" aria-label="Mark step 7 done"><div><h4>7. See IMMUTABLE refuse a second v1</h4><p>Optional, but good to recognize.</p></div></div>
+<pre>docker push $REGISTRY/investment-app:v1</pre>
+<details><summary>What you should see</summary><div><p><code>tag invalid … already exists</code>. That's the protection working.</p></div></details></div>
+<div class="step" data-i="7"><div class="step-head"><input type="checkbox" aria-label="Mark step 8 done"><div><h4>8. Set the repository policy</h4><p>Save the JSON above as <code>repository-policy.json</code>. Keep SCHOOL_ACCOUNT_ID.</p></div></div>
+<pre>aws ecr set-repository-policy --repository-name investment-app \
+  --policy-text file://repository-policy.json</pre>
+<details><summary>What you should see</summary><div><p>The policy printed back in the output. In the console, Permissions → View JSON shows it.</p></div></details></div>
+<h3>If it goes wrong</h3><div class="tbl-wrap"><table><tr><th>Error</th><th>Meaning</th></tr><tr><td><code>Name or service not known</code></td><td>The app isn't on <code>app-net</code>. Add <code>--network app-net</code>.</td></tr><tr><td><code>Worker failed to boot</code></td><td>Two workers raced to create the table. Use the CMD with <code>--preload</code>, rebuild, rm, run.</td></tr><tr><td><code>exec format error</code> on the cluster</td><td>arm64 image. Rebuild with <code>--platform linux/amd64</code>.</td></tr><tr><td><code>denied</code> on docker push</td><td>Bare name = Docker Hub. Tag and push the full ECR address.</td></tr><tr><td><code>tag invalid … already exists</code></td><td>IMMUTABLE repo. Push a new tag (v2).</td></tr><tr><td><code>terraform init</code> refuses two provider blocks</td><td>Delete the extra <code>provider "aws"</code> block from <code>ecr.tf</code>.</td></tr><tr><td>Push stops part way with a network error</td><td>Run it again. Sent layers aren't sent twice.</td></tr></table></div>
+<h3>Clean up</h3><pre>docker rm -f app app2 db       # the laptop containers
+docker network rm app-net</pre><p>Keep the ECR repository, the pushed v1 and the policy: unit 2 pulls your image from there.</p>
+<button id="demoReset">Clear my ticks</button></section><section id="commands"><h2>Commands and config that came up</h2><div class="tbl-wrap"><table><tr><th>Command</th><th>What it does</th></tr><tr><td><code>docker network create app-net</code></td><td>Private network, names resolve</td></tr><tr><td><code>docker run -d --name db --network app-net -e POSTGRES_… postgres:16</code></td><td>The database container</td></tr><tr><td><code>docker run -d --name app --network app-net -p 127.0.0.1:8001:8080 --env-file investment-app.env investment-app:v1</code></td><td>The app container on the same network</td></tr><tr><td><code>docker logs app</code></td><td>Why did it exit?</td></tr><tr><td><code>docker rm -f app</code></td><td>Remove before re-running with the same name</td></tr><tr><td><code>uname -m</code></td><td>Your processor</td></tr><tr><td><code>docker build --platform linux/amd64 -t investment-app:v1 .</code></td><td>Build for the cluster</td></tr><tr><td><code>docker image inspect investment-app:v1 --format '{{.Os}}/{{.Architecture}}'</code></td><td>Check the platform before pushing</td></tr><tr><td><code>terraform init &amp;&amp; terraform apply</code></td><td>The ECR repository</td></tr><tr><td><code>aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $REGISTRY</code></td><td>Log Docker in to ECR (12 hours)</td></tr><tr><td><code>docker tag investment-app:v1 $REGISTRY/investment-app:v1</code></td><td>Give the image its full address</td></tr><tr><td><code>docker push $REGISTRY/investment-app:v1</code></td><td>Upload it</td></tr><tr><td><code>aws ecr set-repository-policy --repository-name investment-app --policy-text file://repository-policy.json</code></td><td>Let the school's cluster pull</td></tr></table></div></section><section id="wrapup"><h2>Rules from class, and what's next</h2><div class="cards2"><div><h3>Rules to remember</h3><ul><li><code>docker ps -a</code> shows Exited → <code>docker logs</code> → read the error → fix → rebuild if the Dockerfile changed.</li><li>Read what Claude changes before you accept it.</li><li>Check the platform with <code>docker image inspect</code> before every push.</li><li>Use version tags like v1 and v2, never latest.</li><li>Don't change the account ID SCHOOL_ACCOUNT_ID in the policy.</li><li>An image is only useful where it can run and be found.</li></ul></div><div><h3>Due before Monday (unit 2)</h3><ul><li>The <code>investment-app</code> repository from Terraform.</li><li>A <code>linux/amd64</code> image pushed as <code>v1</code>.</li><li>The repository policy.</li><li>Read <code>02-the-cluster-and-the-loop/Kubernetes_notes_from_eddie</code> and finish the setup page after "Stop here until after the first session".</li><li>Unit 2 starts Monday Oct 5 with Maher. Saturday office hours become a practical lab on one problem the room picks; post yours in the class channel ("Terraform from scratch" is up for a vote).</li></ul></div></div></section><section id="quiz"><h2>Check yourself</h2><p class="lede">Pick an answer to see why. Score: <span class="score" id="score">0 / 0</span></p><div id="quizArea"></div></section>
+<footer>Built from your Session 03 recap. </footer></div>
+<script>
+(function(){
+ const $=id=>document.getElementById(id);
+ function addr(){$('c3addr').innerHTML='<span style="color:#8FB2F7">'+$('c3acct').value+'</span>.dkr.ecr.<span style="color:#7FDCA8">'+$('c3reg').value+'</span>.amazonaws.com/<span style="color:#F4BE5B">'+$('c3repo').value+'</span>:<span style="color:#F49088">'+$('c3tag').value+'</span>\n\naccount (blue) · region (green) · repository (yellow) · tag (red)'}
+ ['c3acct','c3reg','c3repo','c3tag'].forEach(i=>$(i).oninput=addr);addr();
+ $('c3go').onclick=()=>{const plat=$('c3plat').checked,login=$('c3login').checked,full=$('c3full').checked,dup=$('c3dup').checked,pol=$('c3pol').checked;
+  let o='$ docker push '+(full?'$REGISTRY/investment-app:v1':'investment-app:v1')+'\n';let inRepo=dup;
+  if(!full)o+='denied: requested access to the resource is denied\n→ A bare name points at Docker Hub. Tag with the full ECR address.\n';
+  else if(!login)o+='no basic auth credentials\n→ Run aws ecr get-login-password | docker login first.\n';
+  else if(dup)o+='tag invalid: The image tag \'v1\' already exists in the \'investment-app\' repository\n→ IMMUTABLE did its job. Push v2 instead.\n';
+  else{o+='v1: digest: sha256:4f9c…e21a size: 2417   ✓ pushed\n';inRepo=true}
+  o+='\nCluster pulls investment-app:v1 ...\n';
+  if(!inRepo)o+='ImagePullBackOff: …investment-app:v1: not found\n→ Nothing named v1 is in your repository yet.';
+  else if(!pol)o+='ImagePullBackOff: …403 Forbidden\n→ Add the repository policy naming containers-26a-node.';
+  else if(!plat&&!dup)o+='Pulled ✓  →  CrashLoopBackOff: exec format error\n→ arm64 image on amd64 nodes. Rebuild with --platform linux/amd64 (and push as a new tag).';
+  else if(dup)o+='Pulled ✓  (the v1 that was pushed earlier). It runs only if that one was built for linux/amd64.';
+  else o+='Pulled ✓  Running ✓\n→ Everything lined up: right processor, right address, pull allowed.';
+  $('c3out').textContent=o};
+})();
+
+
+(function(){
+  const nav=document.querySelector('nav');const links=[...nav.querySelectorAll('a')];
+  const map=new Map(links.map(l=>[l.getAttribute('href').slice(1),l]));
+  const obs=new IntersectionObserver(es=>{es.forEach(e=>{if(!e.isIntersecting)return;
+    links.forEach(l=>l.classList.remove('active'));const l=map.get(e.target.id);
+    if(l){l.classList.add('active');nav.scrollTo({left:Math.max(0,l.offsetLeft-20),behavior:'smooth'})}})},
+    {rootMargin:'-25% 0px -65% 0px'});
+  map.forEach((l,id)=>{const el=document.getElementById(id);if(el)obs.observe(el)});
+})();
+(function(){
+  const KEY='s03-demo';let done={};
+  try{done=JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(e){done={}}
+  const steps=[...document.querySelectorAll('#demo .step')];
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(done))}catch(e){}}
+  function upd(){const n=steps.filter(s=>done[s.dataset.i]).length;
+    document.getElementById('demoCount').textContent=n+' of '+steps.length+' steps done';
+    document.getElementById('demoBar').style.width=(n/steps.length*100)+'%';}
+  steps.forEach(s=>{const cb=s.querySelector('input');cb.checked=!!done[s.dataset.i];s.classList.toggle('done',cb.checked);
+    cb.onchange=()=>{done[s.dataset.i]=cb.checked;s.classList.toggle('done',cb.checked);save();upd()};});
+  document.getElementById('demoReset').onclick=()=>{done={};save();steps.forEach(s=>{s.querySelector('input').checked=false;s.classList.remove('done')});upd()};
+  upd();
+})();
+(function(){
+  const Q=[{"q": "The app container exits with \"Name or service not known\". What's missing?", "o": ["The DB password", "--network app-net on the app's docker run", "A bigger image"], "a": 1, "e": "Without it the app is on the default bridge network, where the name db doesn't exist."}, {"q": "Gunicorn stops with \"Worker failed to boot\" on a fresh database. Why?", "o": ["Two workers ran CREATE TABLE at the same moment", "Postgres is too old", "The port is wrong"], "a": 0, "e": "--preload imports the app once in the master before starting workers, so they can't race."}, {"q": "Your image runs on your Mac but the cluster shows exec format error. What do you do?", "o": ["Use a Linux laptop", "Rebuild with --platform linux/amd64 and push again", "Change the tag to latest"], "a": 1, "e": "Apple Silicon builds arm64; the cluster is amd64. It's the processor, not macOS vs Linux."}, {"q": "What does latest mean?", "o": ["The newest image", "No tag was given", "The most downloaded image"], "a": 1, "e": "Building again without a tag moves latest to the new image. Use version tags."}, {"q": "docker push investment-app:v1 fails with denied. Why?", "o": ["A bare name is a Docker Hub name; use the full ECR address", "IMMUTABLE blocks it", "You need --platform"], "a": 0, "e": "Tag it as <account>.dkr.ecr.us-east-1.amazonaws.com/investment-app:v1 and push that."}, {"q": "You push v1 a second time and get \"tag invalid \u2026 already exists\". What now?", "o": ["Delete the repo", "Push it as v2", "Turn off the login"], "a": 1, "e": "IMMUTABLE means a pushed tag can never be overwritten. That's the protection."}, {"q": "The cluster can't pull your image: forbidden. The school's role policy is done. What's missing?", "o": ["Your repository policy naming containers-26a-node", "A lifecycle policy", "A resource tag"], "a": 0, "e": "A cross-account pull needs both sides: their role policy and your resource policy."}, {"q": "What's the difference between an image tag and a repository tag?", "o": ["None", "Image tag names one image version for Docker; repository tag labels the AWS resource for people and finance", "Repository tags are faster"], "a": 1, "e": "Docker never sees repository (resource) tags. Finance reads them to find who owns a cost."}];
+  const area=document.getElementById('quizArea'),scoreEl=document.getElementById('score');let answered=0,right=0;
+  Q.forEach((item,i)=>{const box=document.createElement('div');box.className='q';
+    const p=document.createElement('p');p.className='prompt';p.textContent=(i+1)+'. '+item.q;box.appendChild(p);
+    const opts=document.createElement('div');opts.className='opts';const ex=document.createElement('p');ex.className='explain';ex.textContent=item.e;
+    item.o.forEach((t,j)=>{const b=document.createElement('button');b.textContent=t;
+      b.onclick=()=>{if(box.dataset.done)return;box.dataset.done=1;answered++;
+        if(j===item.a){right++;b.classList.add('right')}else{b.classList.add('nope');opts.children[item.a].classList.add('right')}
+        [...opts.children].forEach(x=>x.disabled=true);ex.classList.add('show');scoreEl.textContent=right+' / '+answered;};
+      opts.appendChild(b);});
+    box.appendChild(opts);box.appendChild(ex);area.appendChild(box);});
+})();
+</script></body></html>

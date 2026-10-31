@@ -1,0 +1,275 @@
+<title>Codex Cheat Sheet</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one reading column, same "shipping manifest" blocks as the Project X session pages; code and tables scroll in place. */
+:root{
+  --bg:#f3f5f7; --surface:#ffffff; --ink:#15202b; --muted:#56657a; --line:#d8dee6;
+  --accent:#c4501b; --accent-soft:#fbe9df; --steel:#1f5f8b; --steel-soft:#e3eef6;
+  --code-bg:#0f1b26; --code-fg:#dbe7f2; --code-cmt:#7f97ad;
+  --good:#2e7d4f; --bad:#b3261e; --bad-soft:#fbe4e2;
+  --f-display:"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --f-body:"Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e151c; --surface:#16202a; --ink:#e6edf3; --muted:#9aabbd; --line:#2a3845;
+  --accent:#f0874f; --accent-soft:#3a2418; --steel:#7ab8e3; --steel-soft:#16303f;
+  --code-bg:#0a1016; --code-fg:#dbe7f2; --code-cmt:#6f879c;
+  --good:#6cc493; --bad:#f08a80; --bad-soft:#3a1d1b; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0e151c; --surface:#16202a; --ink:#e6edf3; --muted:#9aabbd; --line:#2a3845;
+  --accent:#f0874f; --accent-soft:#3a2418; --steel:#7ab8e3; --steel-soft:#16303f;
+  --code-bg:#0a1016; --code-fg:#dbe7f2; --code-cmt:#6f879c;
+  --good:#6cc493; --bad:#f08a80; --bad-soft:#3a1d1b; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:17px/1.6 var(--f-body);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 64px}
+.wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.15;margin:0}
+h1{font-size:clamp(30px,6vw,44px);font-weight:800;letter-spacing:-.01em}
+h2{font-size:24px;font-weight:800}
+h3{font-size:18px;font-weight:600;margin-top:6px}
+p{margin:0}
+a{color:var(--steel)}
+code{font-family:var(--f-mono);font-size:.86em;background:var(--steel-soft);color:var(--ink);padding:1px 5px;border-radius:4px;overflow-wrap:anywhere}
+.eyebrow{font:600 12px/1 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+header{display:flex;flex-direction:column;gap:12px;border-bottom:3px solid var(--ink);padding-bottom:20px}
+.meta{display:flex;flex-wrap:wrap;gap:8px 16px;color:var(--muted);font-size:15px}
+.lede{font-size:19px;max-width:65ch}
+nav{display:flex;flex-wrap:wrap;gap:8px}
+nav a{font:600 13px/1 var(--f-mono);text-decoration:none;color:var(--ink);border:1px solid var(--line);background:var(--surface);padding:8px 10px;border-radius:6px}
+nav a:hover,nav a:focus-visible{border-color:var(--accent);color:var(--accent);outline:none}
+section{display:flex;flex-direction:column;gap:14px;scroll-margin-top:16px}
+section > .label{display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--line);padding-bottom:8px}
+section > .label .tag{font:600 11px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--surface);background:var(--ink);padding:5px 7px;border-radius:3px}
+ul,ol{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px}
+ul ul{margin-top:6px}
+.table{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:15.5px;min-width:480px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:600 12px/1.3 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--bg)}
+tr:last-child td{border-bottom:0}
+td code{overflow-wrap:normal;white-space:nowrap}
+blockquote{margin:0;border-left:4px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 8px 8px 0;font-weight:600}
+.tip{border-left:4px solid var(--steel);background:var(--steel-soft);padding:12px 16px;border-radius:0 8px 8px 0}
+pre{margin:0;background:var(--code-bg);color:var(--code-fg);font:14px/1.6 var(--f-mono);padding:14px 16px;padding-right:72px;border-radius:8px;overflow-x:auto}
+pre .c{color:var(--code-cmt)}
+.codebox{position:relative}
+.copy{position:absolute;top:8px;right:8px;font:600 11px/1 var(--f-mono);background:transparent;color:var(--code-cmt);border:1px solid var(--code-cmt);border-radius:4px;padding:5px 7px;cursor:pointer}
+.copy:hover,.copy:focus-visible{color:var(--code-fg);border-color:var(--code-fg);outline:none}
+.split{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.box{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:14px 16px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.box.ok h3{color:var(--good)}
+.box.stop{border-color:var(--bad);background:var(--bad-soft)}
+.box.stop h3{color:var(--bad)}
+.box h3{margin:0;font-size:16px}
+.prompt{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:12px 16px;font-style:italic}
+footer{color:var(--muted);font-size:15px;border-top:1px solid var(--line);padding-top:16px}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+</style>
+
+<div class="wrap">
+<header>
+  <span class="eyebrow">312 School · Cohort 26a · Project X · Tools</span>
+  <h1>Codex Cheat Sheet</h1>
+  <div class="meta"><span>Codex CLI 0.166 + ChatGPT app</span><span>Personal ChatGPT Plus</span><span>Updated Oct 30, 2026</span></div>
+  <p class="lede">Codex is OpenAI's <strong>harness</strong>: the program around the GPT model that reads my files, runs commands and edits code, the same job <strong>Claude Code</strong> does for Claude. From December it's my <strong>main tool</strong>, and Claude Code stays alongside it. Both read the same notes in <code>~/DevOps/claude-export</code>, so whichever one I open knows what the other did.</p>
+  <nav aria-label="Sections">
+    <a href="#ref">Quick reference</a><a href="#start">Starting</a><a href="#slash">Slash commands</a><a href="#cli">Terminal</a><a href="#safety">Sandbox</a><a href="#context">Context</a><a href="#mcp">Notion</a><a href="#sync">Sync</a><a href="#usage">Usage</a><a href="#try">Prompts</a>
+  </nav>
+</header>
+
+<section id="ref">
+  <div class="label"><span class="tag">Glance</span><h2>Quick reference</h2></div>
+  <div class="table"><table>
+    <thead><tr><th>I want to…</th><th>Do this</th></tr></thead>
+    <tbody>
+      <tr><td>Start Codex in the terminal</td><td><code>cd ~/DevOps/projectx &amp;&amp; codex</code></td></tr>
+      <tr><td>Start it in the app</td><td>ChatGPT app → <strong>Codex</strong> → pick a folder</td></tr>
+      <tr><td>Ask one question, no chat</td><td><code>codex exec "question"</code></td></tr>
+      <tr><td>Continue my last chat</td><td><code>codex resume --last</code></td></tr>
+      <tr><td>See account, model &amp; usage <strong>left</strong></td><td><code>/status</code></td></tr>
+      <tr><td>Switch model / effort</td><td><code>/model</code></td></tr>
+      <tr><td>See what it changed</td><td><code>/diff</code></td></tr>
+      <tr><td>Point it at a file</td><td><code>@filename</code> in the message</td></tr>
+      <tr><td>Look around safely</td><td><code>codex -s read-only</code></td></tr>
+      <tr><td>Check connectors (Notion)</td><td><code>codex mcp list</code> or <code>/mcp</code></td></tr>
+      <tr><td>Which account am I on?</td><td><code>codex login status</code> → ChatGPT, Plus</td></tr>
+      <tr><td>Something feels broken</td><td><code>codex doctor</code></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="start">
+  <div class="label"><span class="tag">Start</span><h2>Starting Codex: where, and from which folder</h2></div>
+  <ul>
+    <li><strong>Three ways in, same agent, same login:</strong> the terminal (<code>codex</code>), the <strong>ChatGPT app → Codex</strong> tab, or Codex Cloud on the web, which runs on OpenAI's servers instead of my Mac.</li>
+    <li><strong>Always start from a project folder, never <code>~</code>.</strong> The agent can reach the folder I start it in and everything under it. Starting from home exposes all my files.</li>
+    <li>My folders:
+      <ul>
+        <li>Project X work → <code>~/DevOps/projectx</code> (all 4 repos side by side) or one repo inside it</li>
+        <li>Old Claude history → <code>~/DevOps/claude-export</code></li>
+        <li>Other class work → its own folder under <code>~/DevOps</code></li>
+      </ul>
+    </li>
+  </ul>
+  <div class="codebox"><pre>cd ~/DevOps/projectx &amp;&amp; codex          <span class="c"># chat in the terminal</span>
+codex -C ~/DevOps/projectx             <span class="c"># same thing, without cd</span>
+codex "explain the infra repo README"  <span class="c"># start the chat with a first message</span></pre></div>
+  <p class="tip"><strong>Agentic AI loves file systems.</strong> Clone the repo locally instead of pasting a GitHub link. It reads files instantly instead of going through the internet every time (Project X Session 02).</p>
+</section>
+
+<section id="slash">
+  <div class="label"><span class="tag">Chat</span><h2>Slash commands inside the chat</h2></div>
+  <div class="table"><table>
+    <thead><tr><th>Command</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td><code>/status</code></td><td>Account, model, folder, and how much usage I have <strong>left</strong></td></tr>
+      <tr><td><code>/model</code></td><td>Pick model + reasoning effort (low effort for quick lookups)</td></tr>
+      <tr><td><code>/new</code></td><td>Fresh chat. New topic = new chat, which saves tokens</td></tr>
+      <tr><td><code>/diff</code></td><td>Show every file change Codex made</td></tr>
+      <tr><td><code>/review</code></td><td>Ask Codex to review the current changes</td></tr>
+      <tr><td><code>/compact</code></td><td>Summarize a long chat so it doesn't run out of context</td></tr>
+      <tr><td><code>/init</code></td><td>Create an <code>AGENTS.md</code> for a repo that doesn't have one</td></tr>
+      <tr><td><code>/mcp</code></td><td>List connected tools (Notion should be there)</td></tr>
+      <tr><td><code>@file</code></td><td>Attach a specific file to my message</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li>Type <code>/</code> alone to see the full list for my version.</li>
+    <li><strong>Esc</strong> stops Codex mid-answer if it's going the wrong way.</li>
+  </ul>
+</section>
+
+<section id="cli">
+  <div class="label"><span class="tag">Terminal</span><h2>Terminal commands (outside the chat)</h2></div>
+  <div class="codebox"><pre>codex exec "question"              <span class="c"># one-off answer, then exits (alias: codex e)</span>
+codex exec -s read-only "..."      <span class="c"># one-off, can't change anything</span>
+codex resume                       <span class="c"># pick an old chat to continue</span>
+codex resume --last                <span class="c"># continue the most recent chat</span>
+codex fork --last                  <span class="c"># copy a chat and try a different direction</span>
+codex review                       <span class="c"># code review of my changes, no chat</span>
+codex apply                        <span class="c"># apply Codex's last diff with git apply</span>
+codex -i screenshot.png "what's this error?"   <span class="c"># send an image</span>
+codex login status                 <span class="c"># which account</span>
+codex doctor                       <span class="c"># diagnose install / login / config</span>
+codex update                       <span class="c"># update Codex</span></pre></div>
+  <p class="tip"><code>codex exec</code> is how Claude Code talks to Codex for me: it sends a question and reads the answer.</p>
+</section>
+
+<section id="safety">
+  <div class="label"><span class="tag">Safety</span><h2>Sandbox &amp; approvals: what Codex may touch</h2></div>
+  <div class="table"><table>
+    <thead><tr><th>Flag</th><th>Value</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td><code>-s</code> sandbox</td><td><code>read-only</code></td><td>Look, don't touch. Best for "explain this repo"</td></tr>
+      <tr><td><code>-s</code> sandbox</td><td><code>workspace-write</code></td><td>Edit files inside the folder I started in. The normal mode</td></tr>
+      <tr><td><code>-s</code> sandbox</td><td><code>danger-full-access</code></td><td>Anything on my Mac. <strong>Don't use it</strong></td></tr>
+      <tr><td><code>-a</code> approvals</td><td><code>on-request</code></td><td>Codex decides when to ask me first</td></tr>
+      <tr><td><code>-a</code> approvals</td><td><code>never</code></td><td>Never asks; failures just come back. Only for read-only or throwaway work</td></tr>
+    </tbody>
+  </table></div>
+  <div class="split">
+    <div class="box ok"><h3>Approve</h3><ul><li><code>git commit</code> / <code>git push</code> to my own repos</li><li>Installing a package I asked for</li><li>Running tests</li></ul></div>
+    <div class="box stop"><h3>Stop and ask why</h3><ul><li><code>rm -rf</code></li><li><code>terraform apply</code> / <code>destroy</code></li><li>Anything touching <strong>prod</strong></li><li><code>aws … delete</code>, changing IAM</li></ul></div>
+  </div>
+  <blockquote>When I don't know the system: ask it to explain first, have a second model (Claude) review, and try the change in dev, where it's cheap to undo.</blockquote>
+</section>
+
+<section id="context">
+  <div class="label"><span class="tag">Context</span><h2>How Codex knows me and my repos</h2></div>
+  <div class="table"><table>
+    <thead><tr><th>File / folder</th><th>What it gives Codex</th></tr></thead>
+    <tbody>
+      <tr><td><code>~/.codex/AGENTS.md</code></td><td><strong>Global</strong> instructions: who I am, how I like answers, where my history lives. Read at the start of every chat</td></tr>
+      <tr><td><code>AGENTS.md</code> in a repo</td><td>That repo's rules (every Project X repo has one)</td></tr>
+      <tr><td><code>~/.codex/skills/</code></td><td>My 3 skills (class-recap, class-notes-to-notion, 312-office-hours-notes), linked to the repo copy</td></tr>
+      <tr><td><code>~/.codex/my-memory/</code></td><td>Memory notes + the claude.ai memory summary</td></tr>
+      <tr><td><code>~/DevOps/claude-export/</code></td><td>162 claude.ai chats, 47 Claude Code chats, 34 artifacts</td></tr>
+      <tr><td><code>~/.codex/config.toml</code></td><td>Settings: default model, trusted folders, MCP servers</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li><strong>Prompt engineering</strong> = asking well. <strong>Context engineering</strong> = handing it the right files and docs <em>before</em> asking. A great prompt can't find my dev account if Codex doesn't have the README.</li>
+    <li>Start every real task with the <strong>situation and the task</strong>, not the action: "QA asked to deploy PR #1 to dev. Find where dev is. Don't change anything yet."</li>
+  </ul>
+</section>
+
+<section id="mcp">
+  <div class="label"><span class="tag">Connect</span><h2>Notion &amp; other connectors (MCP)</h2></div>
+  <ul><li>Notion is <strong>already connected</strong> (Oct 30) and tested: Codex can search "312 - Notes".</li></ul>
+  <div class="codebox"><pre>codex mcp list                                        <span class="c"># what's connected</span>
+codex mcp add notion --url https://mcp.notion.com/mcp <span class="c"># add (already done)</span>
+codex mcp login notion                                <span class="c"># log in again if it expires</span>
+codex mcp remove notion                               <span class="c"># disconnect</span></pre></div>
+  <ul>
+    <li>Restart the Codex app after adding a connector so it picks it up.</li>
+    <li><strong>Regular ChatGPT chat</strong> (not Codex) can't see my Mac. For the repo there: ChatGPT → Settings → <strong>Connectors → GitHub</strong> → allow <code>aiak6/claude-export</code>.</li>
+  </ul>
+</section>
+
+<section id="sync">
+  <div class="label"><span class="tag">Sync</span><h2>Staying in sync with Claude Code</h2></div>
+  <div class="table"><table>
+    <thead><tr><th>Shared piece</th><th>Where</th></tr></thead>
+    <tbody>
+      <tr><td>Notes both tools read and update</td><td><code>~/DevOps/claude-export/shared-memory/NOTES.md</code></td></tr>
+      <tr><td>Skills (one copy)</td><td><code>~/DevOps/claude-export/skills/</code>, linked from <code>~/.codex/skills</code> and <code>~/.claude/skills</code></td></tr>
+      <tr><td>"About me" + sync rules</td><td><code>~/.codex/AGENTS.md</code> and <code>~/.claude/CLAUDE.md</code></td></tr>
+      <tr><td>Everything, backed up</td><td>private GitHub <code>aiak6/claude-export</code></td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li>When something lasting happens (new repo, decision, finished assignment), the tool adds a dated line to NOTES.md and pushes it.</li>
+    <li>If one tool doesn't know something, say: "<strong>add that to our shared notes</strong>".</li>
+    <li>When Codex asks to <code>git commit</code> / <code>git push</code> the notes, approve it.</li>
+  </ul>
+  <p class="tip"><strong>Multi-model review:</strong> let Codex do the work, then ask Claude Code to review it, or the other way around. The comparison is itself interview material.</p>
+</section>
+
+<section id="usage">
+  <div class="label"><span class="tag">Cost</span><h2>Usage limits &amp; cost</h2></div>
+  <div class="split">
+    <div class="box"><h3>Codex shows usage LEFT</h3><p>80% in Codex = <strong>80% left</strong>.</p></div>
+    <div class="box"><h3>Claude shows usage USED</h3><p>80% in Claude ≈ <strong>20% left</strong>.</p></div>
+  </div>
+  <ul>
+    <li>Every message spends from the same limit, chat too. Start a <code>/new</code> chat for a new topic instead of one giant chat.</li>
+    <li>Simple lookups ("which README mentions dev?") → low effort or a smaller model. Save high effort for real reasoning.</li>
+    <li>At work this is real money: companies over ~150 users pay <strong>per token</strong>, so model choice is a cost decision.</li>
+    <li>Burned through limits fast? Ask a new Codex session: "look at my usage history and tell me what used the most."</li>
+  </ul>
+</section>
+
+<section id="try">
+  <div class="label"><span class="tag">Practice</span><h2>Prompts to try (Project X)</h2></div>
+  <p class="prompt">"Read the company repo README and requests/PX-001. In simple words: what is the company, who is Nadia, and what does 'deploy PR #1 to dev' mean? Don't change files."</p>
+  <p class="prompt">"Explain Nadia's ECS Fargate setup in the infra repo to me as a Kubernetes person. Map each piece to its Kubernetes equivalent."</p>
+  <p class="prompt">"Using the platform repo, run the app locally with Docker and tell me the URL. Explain each command before you run it."</p>
+  <p class="prompt">"Look in ~/DevOps/claude-export/chats and find what I learned about ALB health checks. Give me 5 bullets."</p>
+  <p class="prompt">"Give me a STAR answer for 'tell me about a time you deployed a change', based on PR #1. Only claim what I can explain."</p>
+  <blockquote>The golden rule: start from the right folder, give Codex the situation and the context before the action, approve only what you understand, and write anything lasting into the shared notes so Claude Code knows it too.</blockquote>
+</section>
+
+<footer>The same cheat sheet is in Notion under DevOps / 312 - Notes / 🏁 ProjectX. Type <code>/</code> in Codex for the exact slash commands in your version.</footer>
+</div>
+<script>
+document.querySelectorAll('.codebox').forEach(function(box){
+  var pre = box.querySelector('pre'); var b = document.createElement('button');
+  b.className = 'copy'; b.type = 'button'; b.textContent = 'Copy';
+  b.addEventListener('click', function(){
+    var text = pre.innerText.split('\n').map(function(l){ return l.replace(/\s+#.*$/, ''); }).join('\n').trim();
+    var done = function(){ b.textContent = 'Copied'; setTimeout(function(){ b.textContent = 'Copy'; }, 1500); };
+    function selectPre(){ var r = document.createRange(); r.selectNodeContents(pre); var s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = 'Selected'; }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(selectPre);
+    } else { selectPre(); }
+  });
+  box.appendChild(b);
+});
+</script>

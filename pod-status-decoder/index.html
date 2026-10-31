@@ -1,0 +1,344 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Pod Status Decoder</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: lifecycle strip on top (where it breaks), then one card per status with cause → what you'll see → fix rows */
+:root{
+  --bg:#f4f6f9; --surface:#ffffff; --fg:#16202c; --muted:#5a6677; --line:#dde3ea; --code:#edf1f6;
+  --accent:#2c58cf;
+  --s-pending:#6a4ed4; --s-pull:#a86a12; --s-config:#c2410c; --s-crash:#c42626; --s-ready:#0d7775;
+  --f-display:"Archivo", "Helvetica Neue", Arial, sans-serif;
+  --f-body:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0e131a; --surface:#151c26; --fg:#e5eaf1; --muted:#99a5b5; --line:#263141; --code:#0a0f15;
+  --accent:#86a6ff;
+  --s-pending:#a995ff; --s-pull:#e2b04e; --s-config:#f2904f; --s-crash:#ff6f6f; --s-ready:#45c9c4;
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0e131a; --surface:#151c26; --fg:#e5eaf1; --muted:#99a5b5; --line:#263141; --code:#0a0f15;
+  --accent:#86a6ff;
+  --s-pending:#a995ff; --s-pull:#e2b04e; --s-config:#f2904f; --s-crash:#ff6f6f; --s-ready:#45c9c4;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.55;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:32px 56px}
+.wrap{max-width:1080px;margin:0 auto;display:flex;flex-direction:column;gap:40px}
+code,.mono{font-family:var(--f-mono);font-size:.86em}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.15}
+h1{font-size:clamp(30px,5vw,46px);font-weight:800;letter-spacing:-.01em}
+h2{font-size:22px;font-weight:800}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.lede{max-width:62ch;color:var(--muted);margin:10px 0 0;font-size:16px}
+
+/* terminal-ish get pods sample */
+.term{background:var(--code);border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow-x:auto;margin-top:18px}
+.term pre{margin:0;font-family:var(--f-mono);font-size:13px;line-height:1.7;white-space:pre}
+.t-pending{color:var(--s-pending);font-weight:600}.t-pull{color:var(--s-pull);font-weight:600}
+.t-config{color:var(--s-config);font-weight:600}.t-crash{color:var(--s-crash);font-weight:600}.t-ready{color:var(--s-ready);font-weight:600}
+.t-dim{color:var(--muted)}
+
+/* lifecycle */
+.flow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-top:16px}
+.stage{--c:var(--accent);background:var(--surface);border:1px solid var(--line);border-top:4px solid var(--c);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:8px;min-width:0;position:relative}
+.stage .num{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.stage h3{font-size:16px}
+.stage p{margin:0;font-size:13.5px;color:var(--muted)}
+.stage .fails{margin-top:auto;display:flex;flex-direction:column;gap:6px;padding-top:6px;border-top:1px dashed var(--line)}
+.stage .fails span{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.badge{display:inline-block;font-family:var(--f-mono);font-size:12px;font-weight:600;padding:3px 8px;border-radius:6px;
+  color:var(--c);background:color-mix(in srgb, var(--c) 13%, transparent);border:1px solid color-mix(in srgb, var(--c) 35%, transparent);word-break:break-word;width:fit-content;max-width:100%}
+.look{font-family:var(--f-mono);font-size:12px;color:var(--fg)}
+.split{display:grid;grid-template-columns:3fr 2fr;gap:10px;margin-top:10px}
+.split div{border-radius:8px;padding:10px 14px;font-size:13.5px;background:var(--surface);border:1px solid var(--line)}
+.split b{font-family:var(--f-display)}
+
+/* quick commands */
+.cmds{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.cmd{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;min-width:0}
+.cmd code{display:block;font-size:13px;font-weight:600;overflow-x:auto;white-space:nowrap;padding-bottom:2px}
+.cmd p{margin:6px 0 0;font-size:13px;color:var(--muted)}
+
+/* nav chips */
+.jump{display:flex;flex-wrap:wrap;gap:8px}
+.jump a{text-decoration:none}
+
+/* status cards */
+.status{--c:var(--accent);background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;scroll-margin-top:16px}
+.status-head{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:12px 24px;align-items:flex-start;justify-content:space-between;
+  background:color-mix(in srgb, var(--c) 6%, var(--surface))}
+.status-head .left{display:flex;flex-direction:column;gap:6px;min-width:0;flex:1 1 380px}
+.status-head h2{color:var(--c);font-family:var(--f-mono);font-size:20px;font-weight:600;word-break:break-word}
+.status-head p{margin:0;max-width:62ch}
+.status-head .where{font-size:12px;color:var(--muted)}
+.lookbox{flex:0 1 auto;min-width:0;background:var(--code);border:1px solid var(--line);border-radius:8px;padding:8px 12px}
+.lookbox span{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.lookbox code{font-size:13px;font-weight:600;white-space:nowrap}
+
+.rows{display:flex;flex-direction:column}
+.row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.45fr) minmax(0,1fr);gap:16px;padding:14px 20px;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.row.head{padding-block:9px;background:var(--bg)}
+.row.head div{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.row > div{min-width:0}
+.cause{font-weight:600}
+.cause small{display:block;font-weight:400;color:var(--muted);font-size:13px;margin-top:2px}
+.see{font-family:var(--f-mono);font-size:12.5px;background:var(--code);border-left:3px solid var(--c);border-radius:4px;padding:8px 10px;overflow-x:auto;white-space:pre-wrap;word-break:break-word;margin:0}
+.see .k{color:var(--muted)}
+.fix{font-size:14px}
+.lbl{display:none}
+.note{padding:12px 20px;font-size:13.5px;color:var(--muted);border-top:1px solid var(--line);background:var(--bg)}
+.note b{color:var(--fg)}
+
+/* backoff timeline */
+.backoff{padding:16px 20px;border-top:1px solid var(--line)}
+.backoff h3{font-size:14px;margin-bottom:10px}
+.bars{display:flex;align-items:flex-end;gap:6px;height:90px}
+.bar{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;min-width:0;height:100%}
+.bar i{display:block;width:100%;max-width:56px;border-radius:4px 4px 0 0;background:color-mix(in srgb, var(--s-crash) 55%, transparent)}
+.bar span{font-family:var(--f-mono);font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.backoff p{margin:10px 0 0;font-size:13px;color:var(--muted)}
+
+footer{font-size:13px;color:var(--muted)}
+
+@media (max-width:900px){
+  .flow{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .cmds{grid-template-columns:1fr}
+  .split{grid-template-columns:1fr}
+}
+@media (max-width:640px){
+  .flow{grid-template-columns:1fr}
+  .row{grid-template-columns:1fr;gap:8px}
+  .row.head{display:none}
+  .lbl{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+  .status-head,.row,.note,.backoff{padding-inline:16px}
+}
+a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+</style>
+
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">kubectl get pods → STATUS column</div>
+  <h1>Pod Status Decoder</h1>
+  <p class="lede">Read the status, find where in the pod's life it broke, then match what you see in Events or logs to the cause and the fix.</p>
+  <div class="term"><pre><span class="t-dim">NAME          READY   STATUS                       RESTARTS</span>
+web-a1        0/1     <span class="t-pending">Pending</span>                      0
+web-b2        0/1     <span class="t-pull">ImagePullBackOff</span>             0
+web-c3        0/1     <span class="t-config">CreateContainerConfigError</span>   0
+web-d4        0/1     <span class="t-crash">CrashLoopBackOff</span>             5
+web-e5        0/1     <span class="t-ready">Running</span>                      0   <span class="t-dim">← running but not Ready</span></pre></div>
+</header>
+
+<section>
+  <h2>Where it breaks</h2>
+  <div class="flow">
+    <div class="stage" style="--c:var(--s-pending)">
+      <div class="num">Step 1</div><h3>Schedule</h3>
+      <p>The scheduler picks a node for the pod.</p>
+      <div class="fails"><span>Fails as</span><a class="badge" href="#pending">Pending</a><div class="look">describe → Events</div></div>
+    </div>
+    <div class="stage" style="--c:var(--s-pull)">
+      <div class="num">Step 2</div><h3>Pull image</h3>
+      <p>That node downloads the image from the registry (ECR).</p>
+      <div class="fails"><span>Fails as</span><a class="badge" href="#pull">ImagePullBackOff</a><div class="look">describe → Events</div></div>
+    </div>
+    <div class="stage" style="--c:var(--s-config)">
+      <div class="num">Step 3</div><h3>Create container</h3>
+      <p>The kubelet plugs in env, ConfigMaps and Secrets.</p>
+      <div class="fails"><span>Fails as</span><a class="badge" href="#config">CreateContainer­ConfigError</a><div class="look">describe → Events</div></div>
+    </div>
+    <div class="stage" style="--c:var(--s-crash)">
+      <div class="num">Step 4</div><h3>Run</h3>
+      <p>Your app's main process starts and must keep running.</p>
+      <div class="fails"><span>Fails as</span><a class="badge" href="#crash">CrashLoopBackOff</a><div class="look">logs --previous</div></div>
+    </div>
+    <div class="stage" style="--c:var(--s-ready)">
+      <div class="num">Step 5</div><h3>Ready</h3>
+      <p>The readiness probe passes, so the Service sends it traffic.</p>
+      <div class="fails"><span>Fails as</span><a class="badge" href="#ready">Running 0/1</a><div class="look">describe → Events</div></div>
+    </div>
+  </div>
+  <div class="split">
+    <div><b>Steps 1–3:</b> the app never ran, so there are no app logs. Use <code>kubectl describe pod</code> and read Events at the bottom.</div>
+    <div><b>Steps 4–5:</b> the app ran, so the logs tell the story.</div>
+  </div>
+</section>
+
+<section>
+  <h2 style="margin-bottom:14px">The three commands</h2>
+  <div class="cmds">
+    <div class="cmd"><code>kubectl get pods -o wide</code><p>See the status. NODE shows <code>&lt;none&gt;</code> if the pod was never scheduled.</p></div>
+    <div class="cmd"><code>kubectl describe pod &lt;name&gt;</code><p>Events at the bottom show what the cluster tried and why it failed.</p></div>
+    <div class="cmd"><code>kubectl logs &lt;name&gt; --previous</code><p>What the app printed before it crashed (the container that already died).</p></div>
+  </div>
+</section>
+
+<nav class="jump" aria-label="Jump to status">
+  <a class="badge" style="--c:var(--s-pending)" href="#pending">Pending</a>
+  <a class="badge" style="--c:var(--s-pull)" href="#pull">ImagePullBackOff</a>
+  <a class="badge" style="--c:var(--s-config)" href="#config">CreateContainerConfigError</a>
+  <a class="badge" style="--c:var(--s-crash)" href="#crash">CrashLoopBackOff</a>
+  <a class="badge" style="--c:var(--s-ready)" href="#ready">Running but not Ready</a>
+</nav>
+
+<!-- PENDING -->
+<section class="status" id="pending" style="--c:var(--s-pending)">
+  <div class="status-head">
+    <div class="left"><div class="where">Step 1 · Schedule</div><h2>Pending</h2>
+      <p>The pod was accepted, but the scheduler can't find a node that fits it. No container exists yet.</p></div>
+    <div class="lookbox"><span>Look with</span><code>kubectl describe pod &lt;name&gt;</code></div>
+  </div>
+  <div class="rows">
+    <div class="row head"><div>Cause</div><div>What you'll see</div><div>Fix</div></div>
+    <div class="row"><div class="cause"><span class="lbl">Cause</span>Not enough CPU or memory<small>No node has room for the pod's requests.</small></div>
+      <div><span class="lbl">What you'll see</span><pre class="see"><span class="k">FailedScheduling</span>
+0/3 nodes are available: 3 Insufficient cpu.</pre></div>
+      <div class="fix"><span class="lbl">Fix</span>Lower <code>resources.requests</code>, or add nodes.</div></div>
+    <div class="row"><div class="cause"><span class="lbl">Cause</span>nodeSelector matches no node</div>
+      <div><span class="lbl">What you'll see</span><pre class="see">0/3 nodes are available: 3 node(s) didn't
+match Pod's node affinity/selector.</pre></div>
+      <div class="fix"><span class="lbl">Fix</span>Fix the label in <code>nodeSelector</code>, or label a node to match.</div></div>
+    <div class="row"><div class="cause"><span class="lbl">Cause</span>Node taint not tolerated</div>
+      <div><span class="lbl">What you'll see</span><pre class="see">0/3 nodes are available: 3 node(s) had
+untolerated taint {dedicated: gpu}.</pre></div>
+      <div class="fix"><span class="lbl">Fix</span>Add a matching <code>toleration</code>, or run on other nodes.</div></div>
+    <div class="row"><div class="cause"><span class="lbl">Cause</span>Volume claim not bound</div>
+      <div><span class="lbl">What you'll see</span><pre class="see">pod has unbound immediate
+PersistentVolumeClaims</pre></div>
+      <div class="fix"><span class="lbl">Fix</span>Check <code>kubectl get pvc</code> and the StorageClass.</div></div>
+  </div>
+</section>
+
+<!-- IMAGE PULL -->
+<section class="status" id="pull" style="--c:var(--s-pull)">
+  <div class="status-head">
+    <div class="left"><div class="where">Step 2 · Pull image</div><h2>ImagePullBackOff / ErrImagePull</h2>
+      <p>The pod has a node, but the node can't download the image. <code>ErrImagePull</code> is the first failure; after retries it becomes <code>ImagePullBackOff</code>.</p></div>
+    <div class="lookbox"><span>Look with</span><code>kubectl describe pod &lt;name&gt;</code></div>
+  </div>
+  <div class="rows">
+    <div class="row head"><div>Cause</div><div>What you'll see</div><div>Fix</div></div>
+    <div class="row"><div class="cause"><span class="lbl">Cause</span>Typo in image name or tag</div>
+      <div><span class="lbl">What you'll see</span><pre class="see">Failed to pull image "my-app:v99":
+... not found</pre></div>
+      <div class="fix"><span class="lbl">Fix</span>Fix the <code>image:</code> line. Check the tag really exists in ECR.</div></div>
+    <div class="row"><div class="cause"><span class="lbl">Cause</span>Image was never pushed<small>Or the repository doesn't exist.</small></div>
+      <div><span class="lbl">What you'll see</span><pre class="see">pull access denied ... repository
+does not exist</pre></div>
+      <div class="fix"><span class="lbl">Fix</span>Push the image first. Check the registry URL, account and region.</div></div>
+    <div class="row"><div class="cause"><span class="lbl">Cause</span>No permission to ECR</div>
+      <div><span class="lbl">What you'll see</span><pre class="see">failed to authorize ...
+403 Forbidden</pre></div>
+      <div class="fix"><span class="lbl">Fix</span>Give the node's IAM role ECR read access.</div></div>
+  </div>
+</section>
+
+<!-- CONFIG -->
+<section class="status" id="config" style="--c:var(--s-config)">
+  <div class="status-head">
+    <div class="left"><div class="where">Step 3 · Create container</div><h2>CreateContainerConfigError</h2>
+      <p>The image is there, but the kubelet can't build the container because something it references is missing.</p></div>
+    <div class="lookbox"><span>Look with</span><code>kubectl describe pod &lt;name&gt;</code></div>
+  </div>
+  <div class="rows">
+    <div class="row head"><div>Cause</div><div>What you'll see</div><div>Fix</div></div>
+    <div class="row"><div class="cause"><span class="lbl">Cause</span>Secret doesn't exist</div>
+      <div><span class="lbl">What you'll see</span><pre class="see">Error: secret "db-secret" not found</pre></div>
+      <div class="fix"><span class="lbl">Fix</span>Create the Secret in the same namespace, or fix the name.</div></div>
+    <div class="row"><div class="cause"><span class="lbl">Cause</span>ConfigMap doesn't exist</div>
+      <div><span class="lbl">What you'll see</span><pre class="see">Error: configmap "app-config" not found</pre></div>
+      <div class="fix"><span class="lbl">Fix</span>Create the ConfigMap, or fix the name.</div></div>
+    <div class="row"><div class="cause"><span class="lbl">Cause</span>Key missing inside it</div>
+      <div><span class="lbl">What you'll see</span><pre class="see">Error: couldn't find key DB_PASSWORD
+in Secret .../db-secret</pre></div>
+      <div class="fix"><span class="lbl">Fix</span>Add the key, or fix <code>secretKeyRef.key</code>.</div></div>
+  </div>
+  <div class="note"><b>After changing a Secret or ConfigMap:</b> running pods don't pick up new env values. Run <code>kubectl rollout restart deployment/&lt;name&gt;</code>.</div>
+</section>
+
+<!-- CRASH -->
+<section class="status" id="crash" style="--c:var(--s-crash)">
+  <div class="status-head">
+    <div class="left"><div class="where">Step 4 · Run</div><h2>CrashLoopBackOff</h2>
+      <p>The container starts, the main process exits, and the kubelet keeps restarting it, waiting longer each time. Same pod name and IP, RESTARTS keeps going up.</p></div>
+    <div class="lookbox"><span>Look with</span><code>kubectl logs &lt;name&gt; --previous</code></div>
+  </div>
+  <div class="rows">
+    <div class="row head"><div>Cause</div><div>What you'll see</div><div>Fix</div></div>
+    <div class="row"><div class="cause"><span class="lbl">Cause</span>Wrong CPU architecture<small>Built on an arm64 Mac, nodes are amd64. The app never actually runs.</small></div>
+      <div><span class="lbl">What you'll see</span><pre class="see"><span class="k">logs:</span>
+exec /usr/local/bin/gunicorn: exec format error</pre></div>
+      <div class="fix"><span class="lbl">Fix</span>Rebuild with <code>docker build --platform linux/amd64</code>, push, redeploy.</div></div>
+    <div class="row"><div class="cause"><span class="lbl">Cause</span>Missing env variable<small>The app ran, then crashed in its own code.</small></div>
+      <div><span class="lbl">What you'll see</span><pre class="see"><span class="k">logs:</span>
+KeyError: 'DB_HOST'</pre></div>
+      <div class="fix"><span class="lbl">Fix</span>Add it with <code>env:</code> or <code>envFrom:</code> in the Deployment.</div></div>
+    <div class="row"><div class="cause"><span class="lbl">Cause</span>Database not up or unreachable<small>For example, the app was deployed before Postgres.</small></div>
+      <div><span class="lbl">What you'll see</span><pre class="see"><span class="k">logs:</span>
+could not translate host name "db" to address
+<span class="k">or</span>  Connection refused</pre></div>
+      <div class="fix"><span class="lbl">Fix</span>Deploy Postgres and its <code>db</code> Service first. Check the Service name and port.</div></div>
+    <div class="row"><div class="cause"><span class="lbl">Cause</span>Liveness probe failing<small>The kubelet kills the container on purpose.</small></div>
+      <div><span class="lbl">What you'll see</span><pre class="see"><span class="k">describe → Events:</span>
+Liveness probe failed: HTTP probe failed
+with statuscode: 500</pre></div>
+      <div class="fix"><span class="lbl">Fix</span>Fix the health endpoint, or give the app more start time with a <code>startupProbe</code>.</div></div>
+    <div class="row"><div class="cause"><span class="lbl">Cause</span>Out of memory</div>
+      <div><span class="lbl">What you'll see</span><pre class="see"><span class="k">describe → Last State:</span>
+Reason: OOMKilled   Exit Code: 137</pre></div>
+      <div class="fix"><span class="lbl">Fix</span>Raise <code>resources.limits.memory</code>, or fix the memory leak.</div></div>
+    <div class="row"><div class="cause"><span class="lbl">Cause</span>Main process just finishes<small>PID 1 exits, so the container stops.</small></div>
+      <div><span class="lbl">What you'll see</span><pre class="see"><span class="k">describe → Last State:</span>
+Reason: Completed   Exit Code: 0</pre></div>
+      <div class="fix"><span class="lbl">Fix</span>Keep the server in the foreground. Don't send it to the background with <code>&amp;</code>.</div></div>
+  </div>
+  <div class="backoff">
+    <h3>The backoff: wait before each restart</h3>
+    <div class="bars" role="img" aria-label="Restart waits double: 10s, 20s, 40s, 80s, 160s, then capped at 5 minutes">
+      <div class="bar"><i style="height:3.3%"></i><span>10s</span></div>
+      <div class="bar"><i style="height:6.7%"></i><span>20s</span></div>
+      <div class="bar"><i style="height:13.3%"></i><span>40s</span></div>
+      <div class="bar"><i style="height:26.7%"></i><span>80s</span></div>
+      <div class="bar"><i style="height:53.3%"></i><span>160s</span></div>
+      <div class="bar"><i style="height:78%"></i><span>5m</span></div>
+      <div class="bar"><i style="height:78%"></i><span>5m</span></div>
+    </div>
+    <p>The wait doubles each time, up to a 5-minute cap. If the container then runs fine for 10 minutes, it resets to 10s.</p>
+  </div>
+</section>
+
+<!-- READY -->
+<section class="status" id="ready" style="--c:var(--s-ready)">
+  <div class="status-head">
+    <div class="left"><div class="where">Step 5 · Ready</div><h2>Running, but READY 0/1</h2>
+      <p>The app is running, but the readiness probe fails, so the Service sends it no traffic. It is not restarted.</p></div>
+    <div class="lookbox"><span>Look with</span><code>kubectl describe pod &lt;name&gt;</code></div>
+  </div>
+  <div class="rows">
+    <div class="row head"><div>Cause</div><div>What you'll see</div><div>Fix</div></div>
+    <div class="row"><div class="cause"><span class="lbl">Cause</span>Probe path or port is wrong</div>
+      <div><span class="lbl">What you'll see</span><pre class="see"><span class="k">describe → Events:</span>
+Readiness probe failed: Get
+"http://10.0.1.23:8000/healthz":
+connection refused</pre></div>
+      <div class="fix"><span class="lbl">Fix</span>Make the probe's <code>path</code> and <code>port</code> match what the app serves.</div></div>
+    <div class="row"><div class="cause"><span class="lbl">Cause</span>New version never gets Ready<small>A stuck rollout. Old pods keep serving.</small></div>
+      <div><span class="lbl">What you'll see</span><pre class="see"><span class="k">kubectl rollout status:</span>
+Waiting for deployment "web" rollout to
+finish: 1 out of 3 new replicas have
+been updated...</pre></div>
+      <div class="fix"><span class="lbl">Fix</span>Roll back with <code>kubectl rollout undo deployment/web</code>, then fix and redeploy.</div></div>
+  </div>
+</section>
+
+<footer>Based on 312 School Containers Sessions 06, 08 and 09. Exact message wording can vary a little between Kubernetes versions.</footer>
+</div>
+
+</body></html>

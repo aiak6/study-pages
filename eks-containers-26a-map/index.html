@@ -1,0 +1,1682 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>EKS containers-26a Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one pannable/zoomable whiteboard. Left to right = where things live: your Mac → your AWS account → the school's AWS account (EKS). Arrows are drawn from real box positions. Notes sit around the edges; a 12-step walker, a jump menu and a self-test mode live in the bottom bar. */
+:root{
+  --paper:#f7f8fb; --dot:#d9dde7; --ink:#1c2230; --muted:#566074; --wire:#2b3242; --wire-soft:#9aa3b5;
+  --note:#ffffff; --note-line:#c9cfdb;
+  --acct:#ef9a4f; --acct-bg:#fff7ee; --mine:#2f9e8f; --mine-bg:#ebf8f5;
+  --clus:#4f7fd6; --clus-bg:#edf3fe; --cp:#9a7ee0; --cp-bg:#f6f1fe; --obj-bg:#fbf8ff;
+  --node:#5b97d6; --node-bg:#e3effb; --pod:#58b374; --pod-bg:#eefaf1; --svc:#c94f8e; --svc-bg:#fdf0f6; --prb:#d9731f; --prb-bg:#fff2e5; --cfg:#a8770f; --cfg-bg:#fdf6e2; --rb:#b4233c; --rb-bg:#fdedf0; --res:#0e7490; --res-bg:#e6f6fa; --sto:#8a5a1c; --sto-bg:#f8f0e4; --ctr:#4aa566; --ctr-bg:#dff4e5; --proc-bg:#c4eccf;
+  --dock:#2496ed; --dock-bg:#eaf5fe;
+  --card:#fff4b8; --card-line:#e2c74a; --ns:#ece2ff; --ns-ink:#5b3ea6;
+  --red:#d6453b; --green:#2f8f4e; --orange:#d9731f; --codebg:#eef0f5; --code:#c03a5b;
+  --hl:#e0533d; --bar:#ffffff;
+  --sans:"Instrument Sans",ui-sans-serif,system-ui,-apple-system,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#14171e; --dot:#262b36; --ink:#e6e9f1; --muted:#a0a8ba; --wire:#cfd5e2; --wire-soft:#5d6577;
+  --note:#1b1f28; --note-line:#363d4c;
+  --acct:#c97e3c; --acct-bg:#1e1914; --mine:#3fb3a2; --mine-bg:#122320;
+  --clus:#4f75c0; --clus-bg:#151c2a; --cp:#8a70cf; --cp-bg:#1d1828; --obj-bg:#221c30;
+  --node:#4a83bd; --node-bg:#14212e; --pod:#4c9e66; --pod-bg:#14231a; --svc:#e07ab0; --svc-bg:#2a1621; --prb:#f39a4c; --prb-bg:#2a1c10; --cfg:#e0b04a; --cfg-bg:#241c0b; --rb:#ff7a8f; --rb-bg:#2a1218; --res:#4cc3dd; --res-bg:#0c2128; --sto:#dcaa6a; --sto-bg:#24190c; --ctr:#57b675; --ctr-bg:#183022; --proc-bg:#1f4029;
+  --dock:#4aa8f0; --dock-bg:#11202e;
+  --card:#2e2a15; --card-line:#7d6c25; --ns:#2a2140; --ns-ink:#c8b4ff;
+  --red:#ff6f63; --green:#6bd08d; --orange:#f39a4c; --codebg:#252a35; --code:#ff8fab;
+  --hl:#ff7a62; --bar:#1b1f28; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#14171e; --dot:#262b36; --ink:#e6e9f1; --muted:#a0a8ba; --wire:#cfd5e2; --wire-soft:#5d6577;
+  --note:#1b1f28; --note-line:#363d4c;
+  --acct:#c97e3c; --acct-bg:#1e1914; --mine:#3fb3a2; --mine-bg:#122320;
+  --clus:#4f75c0; --clus-bg:#151c2a; --cp:#8a70cf; --cp-bg:#1d1828; --obj-bg:#221c30;
+  --node:#4a83bd; --node-bg:#14212e; --pod:#4c9e66; --pod-bg:#14231a; --svc:#e07ab0; --svc-bg:#2a1621; --prb:#f39a4c; --prb-bg:#2a1c10; --cfg:#e0b04a; --cfg-bg:#241c0b; --rb:#ff7a8f; --rb-bg:#2a1218; --res:#4cc3dd; --res-bg:#0c2128; --sto:#dcaa6a; --sto-bg:#24190c; --ctr:#57b675; --ctr-bg:#183022; --proc-bg:#1f4029;
+  --dock:#4aa8f0; --dock-bg:#11202e;
+  --card:#2e2a15; --card-line:#7d6c25; --ns:#2a2140; --ns-ink:#c8b4ff;
+  --red:#ff6f63; --green:#6bd08d; --orange:#f39a4c; --codebg:#252a35; --code:#ff8fab;
+  --hl:#ff7a62; --bar:#1b1f28; color-scheme:dark}
+
+html,body{height:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);overflow:hidden}
+*{box-sizing:border-box}
+code{font-family:var(--mono);font-size:.85em;background:var(--codebg);color:var(--code);padding:1px 5px;border-radius:4px}
+p{margin:0}
+b{font-weight:700}
+
+/* bottom bar */
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:10;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between;
+  padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));background:var(--bar);border-top:1px solid var(--note-line)}
+.grp{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.bar button,.bar select{font:600 13px var(--sans);color:var(--ink);background:var(--paper);border:1px solid var(--note-line);border-radius:8px;padding:6px 10px;cursor:pointer;min-width:34px}
+.bar button.pri{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.bar button[aria-pressed="true"]{background:var(--hl);border-color:var(--hl);color:#fff}
+.bar button:disabled{opacity:.4;cursor:default}
+.bar :focus-visible{outline:2px solid var(--hl);outline-offset:2px}
+#zoomPct{font:500 12px var(--mono);color:var(--muted);min-width:44px;text-align:center}
+.stepbox{flex:1 1 360px;min-width:0;display:flex;flex-direction:column;gap:2px}
+#stepTitle{font-weight:700;font-size:14px}
+#stepBody{font-size:13px;color:var(--muted)}
+
+/* canvas */
+#view{position:fixed;inset:0;overflow:hidden;cursor:grab;touch-action:none;
+  background-image:radial-gradient(var(--dot) 1.2px,transparent 1.2px);background-size:22px 22px}
+#view.dragging{cursor:grabbing}
+#world{position:absolute;left:0;top:0;transform-origin:0 0;width:3780px;padding:40px;
+  display:grid;grid-template-columns:640px 520px 2360px;column-gap:110px;row-gap:90px;font-size:15px;line-height:1.45;align-items:start}
+#wires{position:absolute;left:0;top:0;overflow:visible;pointer-events:none;z-index:5}
+#labels{position:absolute;left:0;top:0;z-index:6}
+#wires path{fill:none;stroke:var(--wire);stroke-width:1.7}
+#wires path.soft{stroke:var(--wire-soft);stroke-dasharray:5 5;stroke-width:1.3}
+#wires path.mine{stroke:var(--mine);stroke-width:2.2}
+#wires marker path{fill:var(--wire);stroke:none}
+#wires marker#ahm path{fill:var(--mine)}
+.wl{position:absolute;font-size:13px;color:var(--muted);width:max-content;max-width:260px;line-height:1.35;background:var(--paper);padding:2px 5px;border-radius:4px;pointer-events:none}
+.wl.c{transform:translate(-50%,-50%);text-align:center}
+.wl.r{transform:translate(10px,-50%)}
+.wl.a{transform:translate(-50%,calc(-100% - 6px));text-align:center}
+.wl.mine{color:var(--mine);font-weight:600}
+
+/* boxes */
+.span{grid-column:1/-1}
+.row{display:flex;gap:40px;align-items:flex-start}
+.box{border:2px solid var(--b);background:var(--bb);border-radius:14px;padding:26px 28px;position:relative}
+.box>h3,.note>h3,.card>h4{margin:0 0 4px;font-weight:700}
+.box>h3{font-size:16px;letter-spacing:.03em;text-transform:uppercase}
+.box>.sub{color:var(--muted);font-size:14px;max-width:780px;margin-bottom:18px}
+.where{display:inline-block;font:600 11px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--b);border:1.5px solid var(--b);border-radius:20px;padding:2px 9px;margin-bottom:8px}
+.mac{--b:var(--note-line);--bb:var(--note)}
+.dock{--b:var(--dock);--bb:var(--dock-bg)}
+.kside{--b:var(--clus);--bb:var(--clus-bg)}
+.mine{--b:var(--mine);--bb:var(--mine-bg)}
+.acct{--b:var(--acct);--bb:var(--acct-bg)}
+.clus{--b:var(--clus);--bb:var(--clus-bg)}
+.cp{--b:var(--cp);--bb:var(--cp-bg)}
+.obj{--b:var(--cp);--bb:var(--obj-bg);border-style:dashed;padding:20px}
+.node{--b:var(--node);--bb:var(--node-bg);padding:24px}
+.pod{--b:var(--pod);--bb:var(--pod-bg);padding:20px}
+.ctr{--b:var(--ctr);--bb:var(--ctr-bg);padding:18px}
+.proc{border:2px solid var(--ink);background:var(--proc-bg);border-radius:10px;padding:12px 14px;font-size:14px}
+.red{color:var(--red)}
+.card{background:var(--card);border:2px solid var(--card-line);border-radius:10px;padding:14px 16px;font-size:14px;position:relative}
+.card.plain{background:var(--note);border-color:var(--note-line)}
+.card.svc{background:var(--svc-bg);border-color:var(--svc)}
+.card.prb{background:var(--prb-bg);border-color:var(--prb)}
+.dec-term{background:var(--codebg);border:1px solid var(--note-line);border-radius:10px;padding:12px 16px;margin:0;font:14px/1.7 var(--mono);white-space:pre;overflow:auto;color:var(--ink)}
+.dec-term .d{color:var(--muted)}
+.dec{display:grid;grid-template-columns:repeat(5,1fr);gap:18px}
+.stg{--c:var(--ink);background:var(--note);border:1.5px solid var(--note-line);border-top:6px solid var(--c);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:10px;font-size:15px}
+.stg .sn{font:600 12px var(--mono);color:var(--muted);letter-spacing:.05em;text-transform:uppercase}
+.stg h4{margin:0;font-size:20px}
+.stg .bdg{all:unset;cursor:pointer;align-self:flex-start;font:600 14px var(--mono);color:var(--c);border:1.5px solid var(--c);border-radius:8px;padding:3px 9px}
+.stg .bdg:hover,.stg .bdg:focus-visible{background:var(--c);color:var(--paper)}
+.stg .lk{font:600 13px var(--mono);background:var(--codebg);border-radius:6px;padding:4px 8px;align-self:flex-start}
+.stg ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;font-size:14px}
+.stg ul b{font-weight:600}
+.dec-split{display:grid;grid-template-columns:3fr 2fr;gap:18px;font-size:15px}
+.dec-split>div{border:1.5px dashed var(--note-line);border-radius:10px;padding:12px 16px}
+.card.sto{background:var(--sto-bg);border-color:var(--sto)}
+#wires path.stow{stroke:var(--sto);stroke-width:2.2}
+#wires marker#ahd path{fill:var(--sto)}
+.wl.stow{color:var(--sto);font-weight:600}
+.card.res{background:var(--res-bg);border-color:var(--res)}
+#wires path.resw{stroke:var(--res);stroke-width:2.2}
+#wires marker#ahx path{fill:var(--res)}
+.wl.resw{color:var(--res);font-weight:600}
+.card.rb{background:var(--rb-bg);border-color:var(--rb)}
+#wires path.rbw{stroke:var(--rb);stroke-width:2.2}
+#wires marker#ahr path{fill:var(--rb)}
+.wl.rbw{color:var(--rb);font-weight:600}
+.card.cfg{background:var(--cfg-bg);border-color:var(--cfg)}
+.box.cfgpod{--b:var(--pod);--bb:var(--pod-bg);padding:18px}
+#wires path.cfgw{stroke:var(--cfg);stroke-width:2.2}
+#wires marker#ahc path{fill:var(--cfg)}
+.wl.cfgw{color:var(--cfg);font-weight:600}
+#wires path.prbw{stroke:var(--prb);stroke-width:2.2}
+#wires marker#ahp path{fill:var(--prb)}
+.wl.prbw{color:var(--prb);font-weight:600}
+.flow{display:flex;flex-direction:column;gap:6px;margin:0;padding-left:0;list-style:none;counter-reset:f}
+.flow li{counter-increment:f;display:flex;gap:10px;font-size:15px}
+.flow li::before{content:counter(f);flex:none;width:22px;height:22px;border-radius:11px;background:var(--svc);color:#fff;font:700 11.5px var(--sans);display:inline-flex;align-items:center;justify-content:center;margin-top:1px}
+#wires path.svcw{stroke:var(--svc);stroke-width:2.2}
+#wires marker#ahs path{fill:var(--svc)}
+.wl.svcw{color:var(--svc);font-weight:600}
+.sgrid{display:grid;grid-template-columns:520px 1fr 1fr;gap:36px;align-items:start}
+.card>h4{font-size:16px}
+.card p+p{margin-top:6px}
+.ns{margin-top:14px;background:var(--ns);color:var(--ns-ink);border:1.5px dashed var(--ns-ink);border-radius:8px;padding:6px 12px;font-size:14px}
+.chip{background:var(--note);border:1.5px solid var(--ctr);border-radius:8px;padding:8px 12px;font-size:14px;margin-top:10px}
+.num{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 4px;border-radius:11px;border:1.6px solid currentColor;font:700 12px var(--sans);margin-right:6px;vertical-align:1px}
+.note{background:var(--note);border:1.5px solid var(--note-line);border-radius:12px;padding:20px 22px;font-size:14.5px;display:flex;flex-direction:column;gap:10px}
+.note.blue{border:2px solid var(--clus)}
+.note.yellow{background:var(--card);border:2px solid var(--card-line)}
+.note.strong{border:2px solid var(--ink)}
+.note>h3{font-size:18px}
+.lbl{font-weight:700;color:var(--red);letter-spacing:.06em;text-transform:uppercase;font-size:17px;margin:0}
+.title h1{margin:0;font-size:64px;line-height:1.1;letter-spacing:-.01em}
+.title p{color:var(--muted);font-size:22px;margin-top:10px;max-width:1500px}
+table.t{border-collapse:collapse;font-size:13.5px;width:100%}
+table.t th,table.t td{border-bottom:1px solid var(--note-line);padding:7px 8px;text-align:left;vertical-align:top}
+table.t th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+table.t td:first-child{font-weight:600}
+
+/* pipeline strip */
+.pipe{display:flex;flex-direction:column;gap:16px;margin-top:28px}
+.pipe-row{display:flex;align-items:stretch;gap:0;flex-wrap:nowrap}
+.zone{display:flex;flex-direction:column;gap:10px;padding:16px 18px;border-radius:12px;border:2px solid var(--b);background:var(--bb)}
+.zone>span{font:700 15px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--b)}
+.zone>div{display:flex;align-items:center;gap:6px}
+.pc{all:unset;cursor:pointer;background:var(--note);border:1.5px solid var(--note-line);border-radius:10px;padding:10px 16px;font:600 20px var(--sans);color:var(--ink);white-space:nowrap}
+.pc small{display:block;font:400 15px var(--sans);color:var(--muted)}
+.pc:hover,.pc:focus-visible{border-color:var(--hl);outline:none}
+.arr{color:var(--muted);font-size:26px;padding:0 6px;align-self:center}
+
+/* failure cards */
+.fails{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.ygrid{display:grid;grid-template-columns:560px 640px 1fr;gap:36px;align-items:start}
+.twom{display:grid;grid-template-columns:760px 1fr;gap:40px;align-items:center;margin:6px 0 10px}
+.twom-box{border:2px solid var(--b);background:var(--bb);border-radius:12px;padding:16px 18px 14px;display:flex;flex-direction:column;gap:8px;position:relative}
+.twom-box.dep{--b:var(--cp);--bb:var(--obj-bg)}
+.twom-box.pod{--b:var(--pod);--bb:var(--pod-bg);margin:4px 0 0 34px}
+.twom-tag{font:700 13px var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--b)}
+.twom-row{display:grid;grid-template-columns:96px 1fr;gap:10px;font-size:15px;align-items:baseline}
+.twom-txt{display:flex;flex-direction:column;gap:10px;font-size:16px;max-width:900px}
+.twom-txt h4{margin:0;font-size:20px}
+.ycol{display:flex;flex-direction:column;gap:8px;min-width:0}
+.ycol>b{font:600 14px var(--mono)}
+pre.yaml{margin:0;font:14px/1.65 var(--mono);background:var(--codebg);border:1px solid var(--note-line);border-radius:10px;padding:16px 18px;white-space:pre;overflow:auto;color:var(--ink)}
+pre.yaml .k{color:var(--clus)} pre.yaml .v{color:var(--green)} pre.yaml .c{color:var(--muted)}
+pre.yaml .tpl{display:block;background:var(--pod-bg);border-left:4px solid var(--pod);margin:0 -18px;padding:0 14px}
+pre.yaml .n{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;border-radius:10px;background:var(--hl);color:#fff;font:700 11px var(--sans);margin-left:10px;vertical-align:1px}
+ol.yl{margin:0;padding:0;list-style:none;columns:2;column-gap:36px;font-size:15.5px}
+ol.yl li{display:flex;gap:10px;break-inside:avoid;margin-bottom:14px}
+ol.yl li>span:first-child{flex:none;display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:11px;background:var(--hl);color:#fff;font:700 11.5px var(--sans);margin-top:1px}
+.mini{display:grid;grid-template-columns:auto repeat(4,1fr);gap:0;font-size:13.5px;border:1px solid var(--note-line);border-radius:8px;overflow:hidden}
+.mini>div{padding:6px 10px;border-bottom:1px solid var(--note-line)}
+.mini>.h{font-weight:700;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.fail{background:var(--note);border:1.5px solid var(--note-line);border-left:5px solid var(--red);border-radius:10px;padding:12px 14px;font-size:13.5px;display:flex;flex-direction:column;gap:6px}
+.fail .sym{font:600 13px var(--mono);color:var(--red)}
+.fail .at{all:unset;cursor:pointer;align-self:flex-start;font:600 11.5px var(--sans);letter-spacing:.05em;text-transform:uppercase;border:1.5px solid var(--muted);color:var(--muted);border-radius:20px;padding:1px 8px}
+.fail .at:hover,.fail .at:focus-visible{border-color:var(--hl);color:var(--hl)}
+
+.lit{box-shadow:0 0 0 5px var(--hl),0 10px 30px rgb(0 0 0 / .18)!important;z-index:2}
+
+/* self-test: hide explanations, keep titles */
+body.quiz .card p,body.quiz .note p,body.quiz .note table,body.quiz .box>.sub,body.quiz .proc,body.quiz .fail p{filter:blur(6px);transition:filter .2s}
+body.quiz .shown p,body.quiz .shown table,body.quiz .shown>.sub,body.quiz .shown .proc{filter:none}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div id="view">
+ <div id="world">
+  <svg id="wires"><defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z"/></marker>
+    <marker id="ahs" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z"/></marker>
+    <marker id="ahp" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z"/></marker>
+    <marker id="ahc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z"/></marker>
+    <marker id="ahr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z"/></marker>
+    <marker id="ahx" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z"/></marker>
+    <marker id="ahd" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z"/></marker>
+    <marker id="ahm" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z"/></marker>
+  </defs><g id="paths"></g></svg>
+  <div id="labels"></div>
+
+  <!-- ===== title + the whole stage in one line ===== -->
+  <div class="span title" id="title">
+    <h1>Containers stage – the big picture: from <code style="font-size:.7em">app.py</code> to a running Pod on <code style="font-size:.7em">containers-26a</code></h1>
+    <p><b>Containers stage complete – Sessions 01–13.</b> Read it left to right: <b>where</b> each thing lives (your Mac → your AWS account → the school's AWS account) and <b>what moves</b> between them. Click any chip below to jump to its box. Drag to move, pinch or Ctrl+scroll to zoom.</p>
+    <div class="pipe">
+      <div class="pipe-row">
+        <div class="zone" style="--b:var(--dock);--bb:var(--dock-bg)"><span>💻 Your Mac – Docker (Sessions 01–03)</span><div>
+          <button class="pc" data-go="dockerfile">Dockerfile<small>the recipe</small></button><span class="arr">→</span>
+          <button class="pc" data-go="build">docker build<small>--platform linux/amd64</small></button><span class="arr">→</span>
+          <button class="pc" data-go="image">image<small>layers, no kernel</small></button><span class="arr">→</span>
+          <button class="pc" data-go="localrun">container<small>PID 1 = gunicorn</small></button></div></div>
+        <span class="arr">→</span>
+        <div class="zone" style="--b:var(--mine);--bb:var(--mine-bg)"><span>☁️ Your AWS account</span><div>
+          <button class="pc" data-go="yourEcr">docker push → ECR<small>investment-app:v1</small></button><span class="arr">+</span>
+          <button class="pc" data-go="policy">repository policy<small>lets the school pull</small></button></div></div>
+      </div>
+      <div class="pipe-row">
+        <div class="zone" style="--b:var(--clus);--bb:var(--clus-bg)"><span>💻 Your Mac – kubectl (Sessions 04–06)</span><div>
+          <button class="pc" data-go="sso">aws sso login</button><span class="arr">→</span>
+          <button class="pc" data-go="kcfg">context<small>cluster + you + namespace</small></button><span class="arr">→</span>
+          <button class="pc" data-go="nYaml">manifest<small>what should exist</small></button><span class="arr">→</span>
+          <button class="pc" data-go="kctl">kubectl apply<small>one HTTPS request</small></button></div></div>
+        <span class="arr">→</span>
+        <div class="zone" style="--b:var(--cp);--bb:var(--cp-bg)"><span>🧠 School's cluster – control plane (AWS runs it)</span><div>
+          <button class="pc" data-go="api">API server</button><span class="arr">→</span>
+          <button class="pc" data-go="etcd">etcd<small>stores it</small></button><span class="arr">→</span>
+          <button class="pc" data-go="ctrl">controllers<small>Deployment → ReplicaSet → Pods</small></button><span class="arr">→</span>
+          <button class="pc" data-go="sched">scheduler<small>picks a node</small></button></div></div>
+        <span class="arr">→</span>
+        <div class="zone" style="--b:var(--node);--bb:var(--node-bg)"><span>🖥️ Worker node (an EC2 instance)</span><div>
+          <button class="pc" data-go="kub1">kubelet</button><span class="arr">→</span>
+          <button class="pc" data-go="rt1">containerd<small>pulls from ECR</small></button><span class="arr">→</span>
+          <button class="pc" data-go="pod1">Pod → container → PID 1</button></div></div>
+      </div>
+      <div class="pipe-row">
+        <div class="zone" style="--b:var(--svc);--bb:var(--svc-bg)"><span>🔗 Reaching the app – inside the cluster (Session 07)</span><div>
+          <button class="pc" data-go="podClient">client Pod<small>curl http://drill</small></button><span class="arr">→</span>
+          <button class="pc" data-go="oDns">DNS name<small>CoreDNS → ClusterIP</small></button><span class="arr">→</span>
+          <button class="pc" data-go="kp1">kube-proxy rule<small>172.20.x.x:80 → a Pod</small></button><span class="arr">→</span>
+          <button class="pc" data-go="oEps">EndpointSlice<small>Pod IPs the selector found</small></button><span class="arr">→</span>
+          <button class="pc" data-go="pod2">drill Pod :8080</button></div></div>
+        <span class="arr">·</span>
+        <div class="zone" style="--b:var(--svc);--bb:var(--svc-bg)"><span>🌍 Reaching the app – from the internet (Session 08)</span><div>
+          <button class="pc" data-go="users">browser<small>*.k8s.312school.com</small></button><span class="arr">→</span>
+          <button class="pc" data-go="alb">shared ALB :443<small>HTTPS ends here</small></button><span class="arr">→</span>
+          <button class="pc" data-go="oIng">your Ingress rule<small>host → Service</small></button><span class="arr">→</span>
+          <button class="pc" data-go="probe1">ready Pod IPs<small>readiness decides</small></button></div></div>
+      </div>
+      <div class="pipe-row">
+        <div class="zone" style="--b:var(--cfg);--bb:var(--cfg-bg)"><span>🔐 Settings outside the image (Session 09)</span><div>
+          <button class="pc" data-go="oCm">ConfigMap<small>DB_HOST, DB_PORT, TICKER…</small></button><span class="arr">+</span>
+          <button class="pc" data-go="oSec">Secret<small>DB_PASSWORD, FINNHUB_KEY</small></button><span class="arr">→</span>
+          <button class="pc" data-go="kub2">kubelet copies at start<small>envFrom / secretKeyRef</small></button><span class="arr">→</span>
+          <button class="pc" data-go="podInv">env vars in the app<small>a copy in memory</small></button><span class="arr">→</span>
+          <button class="pc" data-go="oCopy">changed it?<small>kubectl rollout restart</small></button></div></div>
+      </div>
+      <div class="pipe-row">
+        <div class="zone" style="--b:var(--rb);--bb:var(--rb-bg)"><span>🛂 Who may do what – every request is checked twice (Session 10)</span><div>
+          <button class="pc" data-go="sso">aws sso login<small>role Containers26a</small></button><span class="arr">→</span>
+          <button class="pc" data-go="authz">check 1 · AWS<small>access entry → student:&lt;ns&gt; · else Unauthorized</small></button><span class="arr">→</span>
+          <button class="pc" data-go="authz">check 2 · RBAC<small>a RoleBinding allows it? · else Forbidden</small></button><span class="arr">→</span>
+          <button class="pc" data-go="oRb">your RoleBinding<small>student-edit → ClusterRole edit</small></button><span class="arr">·</span>
+          <button class="pc" data-go="cc">Claude Code<small>read-only: ClusterRole view</small></button></div></div>
+      </div>
+      <div class="pipe-row">
+        <div class="zone" style="--b:var(--cfg);--bb:var(--cfg-bg)"><span>🗝️ The password out of Git (Session 11)</span><div>
+          <button class="pc" data-go="oEs">ExternalSecret<small>only the PATH – safe to commit</small></button><span class="arr">→</span>
+          <button class="pc" data-go="oStore">SecretStore + IAM role<small>may read only /26a/&lt;ns&gt;/</small></button><span class="arr">→</span>
+          <button class="pc" data-go="oOp">operator reads Secrets Manager<small>re-reads every 1h</small></button><span class="arr">→</span>
+          <button class="pc" data-go="oSec">normal Secret<small>→ Pod env at start</small></button></div></div>
+        <span class="arr">·</span>
+        <div class="zone" style="--b:var(--res);--bb:var(--res-bg)"><span>📏 What a Pod may use (Session 11)</span><div>
+          <button class="pc" data-go="res1">request<small>scheduler: where it fits</small></button><span class="arr">·</span>
+          <button class="pc" data-go="res1">limit<small>CPU throttles · memory OOMKilled</small></button><span class="arr">·</span>
+          <button class="pc" data-go="nRes">kubectl top<small>measure first</small></button></div></div>
+      </div>
+      <div class="pipe-row">
+        <div class="zone" style="--b:var(--res);--bb:var(--res-bg)"><span>📈 Namespace rules & scaling (Session 12)</span><div>
+          <button class="pc" data-go="oLr">LimitRange<small>per container: defaults + max</small></button><span class="arr">→</span>
+          <button class="pc" data-go="oRq">ResourceQuota<small>namespace total · else no Pod</small></button><span class="arr">→</span>
+          <button class="pc" data-go="oHpa">HPA<small>more Pods (use ÷ request)</small></button><span class="arr">→</span>
+          <button class="pc" data-go="karp">Karpenter<small>more nodes when Pods don't fit</small></button><span class="arr">·</span>
+          <button class="pc" data-go="nScale">DB down?<small>more Pods can't fix it</small></button></div></div>
+      </div>
+      <div class="pipe-row">
+        <div class="zone" style="--b:var(--sto);--bb:var(--sto-bg)"><span>💾 Data that survives & work that finishes (Session 13)</span><div>
+          <button class="pc" data-go="oPvc">PVC<small>the request: 1Gi, RWO</small></button><span class="arr">→</span>
+          <button class="pc" data-go="oSc">StorageClass<small>provisioner makes the disk</small></button><span class="arr">→</span>
+          <button class="pc" data-go="ebs">EBS disk + PV<small>one AZ · Delete/Retain</small></button><span class="arr">→</span>
+          <button class="pc" data-go="podDb">Pod mounts the claim<small>/var/lib/postgresql/data</small></button><span class="arr">·</span>
+          <button class="pc" data-go="oJob">Job<small>until exit 0</small></button><span class="arr">·</span>
+          <button class="pc" data-go="oCron">CronJob<small>a Job on a schedule</small></button></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== top notes ===== -->
+  <div class="span row">
+    <div class="note yellow" id="nStart" style="width:520px">
+      <h3>📌 Who brings things back?</h3>
+      <p><b>Container restart = the kubelet.</b> When PID 1 exits, the kubelet restarts the container <b>in the same Pod</b>, on the same node – <b>same name, same IP</b> (the IP belongs to the Pod). <code>RESTARTS</code> goes up.</p>
+      <p><b>New Pod = a controller.</b> The <b>ReplicaSet</b> (created by a Deployment) counts its Pods; one missing → it creates a new one with a <b>new name and new IP</b>, on a node with room (~7 s in class).</p>
+      <p><b>Liveness probe fails</b> (Session 08) → the kubelet restarts the container too. <b>Readiness</b> never restarts – it only stops traffic.</p>
+      <p>Kubelet → containers. ReplicaSet → Pods.</p>
+      <p><b class="red">A bare Pod</b> made from <code>pod.yaml</code> has no owner. Delete it and <b>nothing</b> recreates it.</p>
+      <p>With plain <code>docker run</code>, nobody restarts anything: the container stays <b>Exited</b>.</p>
+    </div>
+    <div class="note" id="nRecon" style="width:540px">
+      <h3>🔁 Desired state vs actual state</h3>
+      <p>Your YAML is the <b>desired state</b>, stored in etcd. What really runs is the <b>actual state</b>.</p>
+      <p><b>Controllers</b> keep comparing the two and fixing the difference: a missing Pod is created, an extra one removed – and they repeat even when everything matches. That loop is <b>reconciliation</b>.</p>
+      <p><b>Terraform applies once; Kubernetes applies forever.</b></p>
+      <p><i>Thermostat: you set 21°; it keeps measuring and switches the heating on and off.</i></p>
+    </div>
+    <div class="note strong" id="nTrans" style="width:1060px">
+      <h3>🔗 Same idea, three worlds – connect it to what you already know</h3>
+      <table class="t">
+        <tr><th>Job</th><th>Scale (EC2)</th><th>Docker (your Mac)</th><th>Kubernetes (the cluster)</th></tr>
+        <tr><td>The template</td><td>AMI (has a kernel, boots a machine)</td><td>image (no kernel, starts one process)</td><td>the same image, named in the manifest</td></tr>
+        <tr><td>The build recipe</td><td>user_data boot script, on every boot</td><td>Dockerfile, run once at build</td><td>–</td></tr>
+        <tr><td>Start one</td><td>launch an instance</td><td><code>docker run</code></td><td><code>kubectl apply -f pod.yaml</code></td></tr>
+        <tr><td>Keep N running</td><td>ASG desired capacity</td><td>nothing does</td><td>Deployment <code>replicas</code> (ReplicaSet keeps it)</td></tr>
+        <tr><td>What to launch</td><td>launch template</td><td>–</td><td>Deployment <code>template</code> (the Pod)</td></tr>
+        <tr><td>Restart a crashed app</td><td>systemd <code>Restart=always</code></td><td>stays Exited (unless <code>--restart</code>)</td><td>kubelet (<code>restartPolicy: Always</code>)</td></tr>
+        <tr><td>List</td><td>EC2 console</td><td><code>docker ps -a</code></td><td><code>kubectl get pods</code></td></tr>
+        <tr><td>Logs</td><td>log file + CloudWatch agent</td><td><code>docker logs</code> (stdout/stderr)</td><td><code>kubectl logs</code></td></tr>
+        <tr><td>Shell inside</td><td>SSH / SSM</td><td><code>docker exec -it</code></td><td><code>kubectl exec -it &lt;pod&gt; -- sh</code></td></tr>
+        <tr><td>Details & events</td><td>console</td><td><code>docker inspect</code></td><td><code>kubectl describe</code></td></tr>
+        <tr><td>App settings</td><td><code>/etc/investment-app.env</code> read by the boot script</td><td><code>--env-file investment-app.env</code></td><td><b>ConfigMap</b> (ordinary) + <b>Secret</b> (passwords)</td></tr>
+        <tr><td>Where passwords really live</td><td>Secrets Manager</td><td>a local env file</td><td>Secret – only base64! Production: <b>External Secrets</b> ← Secrets Manager</td></tr>
+        <tr><td>Who may read secrets</td><td>IAM policy</td><td>–</td><td><b>RBAC</b> (Session 10)</td></tr>
+        <tr><td>"Who am I?"</td><td><code>aws sts get-caller-identity</code></td><td>–</td><td><code>kubectl auth whoami</code></td></tr>
+        <tr><td>List of what's allowed</td><td>IAM <b>policy</b></td><td>–</td><td>Kubernetes <b>Role</b> / ClusterRole (≠ IAM role!)</td></tr>
+        <tr><td>Give it to someone</td><td>attach the policy to a role</td><td>–</td><td><b>RoleBinding</b> / ClusterRoleBinding</td></tr>
+        <tr><td>Identity for a program</td><td>EC2 instance role</td><td>–</td><td><b>ServiceAccount</b></td></tr>
+        <tr><td>Deny rules?</td><td>Allow and Deny</td><td>–</td><td><b>Allow only</b> – no rule = refused</td></tr>
+        <tr><td>Password at boot / start</td><td>boot script reads Secrets Manager</td><td><code>--env-file</code></td><td><b>External Secrets Operator</b> copies Secrets Manager → Secret</td></tr>
+        <tr><td>How big is each copy?</td><td>instance type (t3.small…)</td><td><code>--cpus</code> / <code>--memory</code> (optional)</td><td><b>requests</b> (to place) + <b>limits</b> (max)</td></tr>
+        <tr><td>No room for one more</td><td>ASG launches an instance</td><td>–</td><td>Pod <code>Pending</code> → Auto Mode adds a node</td></tr>
+        <tr><td>Scale out on load</td><td>ASG target tracking (e.g. 70% CPU)</td><td>–</td><td><b>HPA</b> → Deployment replicas</td></tr>
+        <tr><td>Add machines</td><td>ASG launches EC2</td><td>–</td><td><b>Karpenter</b> (in EKS Auto Mode) adds nodes</td></tr>
+        <tr><td>A team's spending cap</td><td>AWS service quotas / budgets</td><td>–</td><td><b>ResourceQuota</b> on the namespace</td></tr>
+        <tr><td>Change one field live</td><td>edit in the console (drifts from Terraform)</td><td>–</td><td><code>kubectl patch</code> – cluster only, update the file too!</td></tr>
+        <tr><td>Data that survives</td><td>EBS volume attached to the EC2</td><td>Docker volume (compose <code>pgdata</code>)</td><td><b>PVC</b> → PV → EBS disk</td></tr>
+        <tr><td>Template for new disks</td><td>launch template (for instances)</td><td>–</td><td><b>StorageClass</b> (once per cluster)</td></tr>
+        <tr><td>One-off task</td><td>run a script by hand</td><td><code>docker run --rm</code></td><td><b>Job</b> (until exit 0, retries)</td></tr>
+        <tr><td>Scheduled task</td><td>crontab (Class 13 bot)</td><td>–</td><td><b>CronJob</b> (<code>"0 2 * * *"</code>)</td></tr>
+        <tr><td>Production database</td><td><b>RDS</b></td><td>postgres container (laptop only)</td><td>StatefulSet – but most teams still use <b>RDS</b></td></tr>
+        <tr><td>How much is it using?</td><td>CloudWatch CPU metric</td><td><code>docker stats</code></td><td><code>kubectl top pods</code></td></tr>
+        <tr><td>"May I do this?"</td><td>IAM policy simulator</td><td>–</td><td><code>kubectl auth can-i &lt;verb&gt; &lt;resource&gt;</code></td></tr>
+        <tr><td>Apply changed settings</td><td>restart the service / instance refresh</td><td><code>rm -f</code> + <code>run</code></td><td><code>kubectl rollout restart deploy/…</code></td></tr>
+        <tr><td>Can't reach it from laptop</td><td>RDS in a private subnet</td><td>no <code>-p</code> mapping</td><td>Pod IP inside the cluster's network</td></tr>
+        <tr><td>"Where am I pointing?"</td><td><code>aws sts get-caller-identity</code></td><td>–</td><td><code>kubectl config get-contexts</code></td></tr>
+        <tr><td>Reach it from your laptop</td><td>SSH tunnel to RDS</td><td><code>-p 8000:8080</code></td><td><code>kubectl port-forward deploy/drill 8000:8080</code></td></tr>
+        <tr><td>Ship a new version</td><td>instance refresh</td><td>build v2 → <code>rm -f</code> → <code>run</code></td><td><code>set image</code> → rolling update · <code>rollout undo</code></td></tr>
+        <tr><td>Change the start command</td><td>edit the systemd unit</td><td>ENTRYPOINT / CMD</td><td><code>command</code> / <code>args</code> (no rebuild)</td></tr>
+        <tr><td>See the stored object</td><td><code>terraform state show</code></td><td><code>docker inspect</code></td><td><code>kubectl get &lt;kind&gt; &lt;name&gt; -o yaml</code></td></tr>
+        <tr><td>One stable address</td><td>ALB DNS name</td><td>container name on <code>app-net</code> (<code>db</code>)</td><td><b>Service</b> name <code>drill</code> (a Deployment gets no traffic)</td></tr>
+        <tr><td>The list of targets</td><td>target group's registered targets</td><td>–</td><td><b>EndpointSlice</b> (Pod IPs, kept up to date)</td></tr>
+        <tr><td>Name → address</td><td>Route 53</td><td>Docker's DNS on <code>app-net</code></td><td><b>CoreDNS</b>: <code>drill.&lt;ns&gt;.svc.cluster.local</code></td></tr>
+        <tr><td>"Can it take requests?"</td><td>target group health check</td><td>–</td><td><code>readinessProbe</code> → no traffic</td></tr>
+        <tr><td>"Is it stuck? replace it"</td><td>ASG health check</td><td>–</td><td><code>livenessProbe</code> → restart the container</td></tr>
+        <tr><td>Host → app routing</td><td><code>alb.tf</code> listener rule</td><td>–</td><td><b>Ingress</b> (one rule on the shared ALB)</td></tr>
+        <tr><td>HTTPS certificate</td><td>ACM on the ALB listener</td><td>–</td><td>same ACM cert, set once in the IngressClass</td></tr>
+        <tr><td>Open to the internet</td><td>internet-facing ALB</td><td><code>-p</code></td><td><b>LoadBalancer</b> Service → AWS builds an NLB</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== column 1: your Mac ===== -->
+  <div class="box mac" id="mac">
+    <span class="where">Outside AWS</span>
+    <h3>💻 Your Mac</h3>
+    <p class="sub">Two jobs happen here: <b>building the image</b> (Docker) and <b>telling the cluster what should exist</b> (kubectl). Your app never runs on the cluster from here – the Mac only sends files and requests.</p>
+
+    <div class="box dock" id="dockside">
+      <h3>🐳 Docker side – build & test</h3>
+      <p class="sub">Docker Desktop runs one Linux VM; every container uses that VM's kernel. The <b>daemon</b> does the work – "Cannot connect to the Docker daemon" = Docker Desktop isn't running.</p>
+      <div style="display:flex;flex-direction:column;gap:96px">
+        <div class="card" id="dockerfile"><h4>📄 Dockerfile</h4>
+          <p>The recipe, run <b>once</b> at build. <code>FROM python:3.12-slim</code> → <code>WORKDIR</code> → <code>COPY requirements.txt</code> → <code>RUN pip install</code> → <code>COPY app.py</code> → <code>CMD [...]</code>.</p>
+          <p><b>RUN</b> happens at build. <b>CMD</b> happens at run and becomes <b>PID 1</b>. Exec form <code>CMD ["gunicorn", ...]</code>, never shell form.</p></div>
+        <div class="card" id="build"><h4><span class="num">1</span>docker build</h4>
+          <p><code>docker build --platform linux/amd64 -t investment-app:v1 .</code></p>
+          <p>Your Mac is <b>arm64</b>; the cluster's nodes are <b>amd64</b>. Without the flag → <code>exec format error</code> on the cluster. Check: <code>docker image inspect … --format '{{.Architecture}}'</code> → amd64.</p></div>
+        <div class="card plain" id="image"><h4>📦 The image</h4>
+          <p>Layers stacked like an onion. <b>No kernel, nothing running</b> – a sleeping template. Images are <b>immutable</b>: change the Dockerfile and build again. Dependencies before source so the cache is reused.</p></div>
+        <div class="box ctr" id="localrun"><h3 style="text-transform:none;font-size:16px"><span class="num">2</span>Local test: <code>docker run</code> on <code>app-net</code></h3>
+          <p class="sub" style="margin-bottom:10px">One process on the VM's kernel. Lives exactly as long as PID 1. The app finds the <code>db</code> container <b>by name</b> on the user-defined network.</p>
+          <div class="chip">📦 <b>app</b> – gunicorn, <code>-p 127.0.0.1:8001:8080</code>, <code>--env-file</code></div>
+          <div class="chip">🐘 <b>db</b> – <code>postgres:16</code> (stands in for RDS on the laptop)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="box kside" id="kside" style="margin-top:70px">
+      <h3>☸️ kubectl side – talk to the cluster</h3>
+      <p class="sub">kubectl never touches nodes or containers. Every command is one HTTPS request to the API server.</p>
+      <div style="display:flex;flex-direction:column;gap:96px">
+        <div class="card" id="sso"><h4><span class="num">5</span>Sign in to the school's account</h4>
+          <p><code>aws sso login --profile 312-cluster</code> – the session lasts <b>one day</b>, so every class day. The profile lives in <code>~/.aws/config</code>.</p></div>
+        <div class="card" id="kcfg"><h4>~/.kube/config and the context</h4>
+          <p>A <b>context</b> = one cluster + one identity + one namespace. One is <i>current</i>; every kubectl command uses it silently.</p>
+          <p>Written once by <code>aws eks update-kubeconfig --name containers-26a --region us-east-1 --profile 312-cluster --alias containers-26a</code>. Namespace saved by <code>kubectl config set-context --current --namespace=my-namespace</code>.</p></div>
+        <div class="card" id="kctl"><h4><span class="num">6</span>kubectl</h4>
+          <p>Reads the current context, turns your command into an <b>HTTPS request</b>, sends it to the API server, prints the answer.</p>
+          <p>Before any apply / delete / scale: <code>aws sts get-caller-identity</code> + <code>kubectl config get-contexts</code>.</p></div>
+        <div class="card plain" id="yaml"><h4>📄 Manifests (YAML)</h4>
+          <p>Say <b>what should exist</b>, not steps. Always <code>apiVersion</code>, <code>kind</code>, <code>metadata</code>, <code>spec</code>. Spaces, never tabs.</p>
+          <p><code>pod.yaml</code> = one bare Pod (<code>v1</code>). <code>deployment-drill.yaml</code> = <code>apps/v1</code> Deployment with <code>replicas: 2</code>, <code>selector</code>, <code>template</code>.</p>
+          <p>Dockerfile → image. Manifest → an object that <b>uses</b> the image. The file stays on your Mac; <code>apply</code> sends a copy, nothing copies back.</p>
+          <p><b>Line by line: see "The manifests, piece by piece" below.</b></p></div>
+        <div class="card" id="pf"><h4><span class="num">13</span>🚇 port-forward – a tunnel to one Pod</h4>
+          <p><code>kubectl port-forward deploy/drill 8000:8080</code> (terminal 1, stays open) → <code>curl localhost:8000</code> (terminal 2).</p>
+          <p><b>Laptop port first</b>, then the containerPort. The tunnel goes <b>through the API server</b> to one of the Deployment's Pods. Not SSH – <code>kubectl exec</code> is how you get inside. Users never reach Pods this way; a Service (Session 07) does that. <code>port-forward svc/drill 8000:80</code> also works – still one Pod, still only your laptop.</p></div>
+        <div class="card rb" id="cc"><h4><span class="num">27</span>🤖 Claude Code – can read, can't change (Session 10)</h4>
+          <p>Its own sign-in: profile <code>312-cluster-readonly</code> → IAM role <code>Containers26aReadOnly</code> → user <code>readonly:&lt;ns&gt;</code> → built-in ClusterRole <b>view</b> in your namespace. A <b>separate kubeconfig</b> <code>~/.kube/readonly</code>, so yours doesn't change.</p>
+          <p><code>KUBECONFIG=~/.kube/readonly AWS_PROFILE=312-cluster-readonly claude</code></p>
+          <p>Reads Pods, logs, events, ConfigMaps. <b>No</b> Secrets, no exec, no create/change/delete. Claude finds the problem – <b>you</b> apply the fix with your own profile.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== column 2: your AWS account ===== -->
+  <div class="box mine" id="yourAcct" style="margin-top:420px">
+    <span class="where">Your own account · us-east-1</span>
+    <h3>☁️ Your AWS account</h3>
+    <p class="sub">Where <b>your</b> images live. Made with Terraform in Session 03.</p>
+    <div style="display:flex;flex-direction:column;gap:70px">
+      <div class="card" id="yourEcr"><h4><span class="num">3</span>ECR repository <code>investment-app</code></h4>
+        <p><b>Registry</b> = the service (ECR, Docker Hub). <b>Repository</b> = one app's image versions.</p>
+        <p>Address: <code>&lt;account&gt;.dkr.ecr.us-east-1.amazonaws.com/investment-app:v1</code>. ECR is <b>regional</b>.</p>
+        <p><code>IMMUTABLE</code>: pushing <code>v1</code> twice → <code>tag invalid … already exists</code>. Push <code>v2</code>.</p>
+        <p>Use version tags, never <code>latest</code> ("no tag given", not "newest"). A <b>digest</b> <code>sha256:…</code> always means the same image.</p></div>
+      <div class="card" id="policy"><h4><span class="num">4</span>Repository policy (cross-account)</h4>
+        <p>The cluster is in the <b>school's</b> account, so a pull needs <b>both sides</b>:</p>
+        <p>• School's side: the node role has <code>AmazonEC2ContainerRegistryReadOnly</code> (done).</p>
+        <p>• Your side: this policy, Principal <code>arn:aws:iam::SCHOOL_ACCOUNT_ID:role/containers-26a-node</code>, actions <code>BatchCheckLayerAvailability</code>, <code>GetDownloadUrlForLayer</code>, <code>BatchGetImage</code>.</p>
+        <p>Missing → the node can't pull → <code>ImagePullBackOff</code>.</p></div>
+    </div>
+  </div>
+
+  <!-- ===== column 3: the school's account ===== -->
+  <div class="box acct" id="acct">
+    <span class="where">School's account SCHOOL_ACCOUNT_ID · us-east-1</span>
+    <h3>🏫 The school's AWS account</h3>
+    <p class="sub">The school owns this account and runs one shared cluster in it for every student.</p>
+    <div style="display:flex;gap:90px;align-items:stretch;margin-bottom:60px">
+      <div class="card plain" id="users" style="width:460px"><h4>🌍 Users on the internet</h4>
+        <p><b>Your app (Session 08):</b> <code>https://my-namespace.k8s.312school.com</code>. A <b>wildcard DNS record</b> <code>*.k8s.312school.com</code> already points at the shared ALB – you create no DNS record.</p>
+        <p><code>http://</code> → <code>301</code> redirect to <code>https://</code>.</p>
+        <p><i>Session 07 demo:</i> <code>drillapp.exchangeweb.net</code> → Route 53 CNAME → an NLB, <code>http://</code> only.</p></div>
+      <div class="card svc" id="alb" style="width:760px;border-width:3px"><h4><span class="num">21</span>🚪 The shared ALB – one load balancer for the whole class</h4>
+        <p>Every Ingress of class <code>alb</code> joins group <code>containers-26a</code> = <b>one ALB</b>. Each student's Ingress adds <b>one rule</b> to its <b>443 listener</b>: host → a target group of <b>ready</b> Pod IPs. Default limit 100 rules.</p>
+        <p><b>HTTPS ends here.</b> Certificate <code>*.k8s.312school.com</code> lives in <b>ACM</b> (made with Terraform, validated in Cloudflare) and is set once in the IngressClass – your Ingress never mentions it. After the ALB: plain HTTP inside the VPC.</p>
+        <p>No rule matches → the ALB's own 404 (<code>server: awselb/2.0</code>, empty body).</p></div>
+      <div class="card svc" id="nlb" style="width:620px;opacity:.92"><h4><span class="num">18</span>⚖️ NLB – a <code>type: LoadBalancer</code> Service (Session 07)</h4>
+        <p>Add the annotation <code>service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing</code> (without it: internal only) and <b>AWS creates a real NLB</b>: a listener on <code>:80</code> and a <b>target group holding the Pod IPs</b>, kept equal to the Service's endpoints.</p>
+        <p>Each connection goes <b>straight to a Pod</b> :8080. Billed by the hour, so student namespaces allow none: <code>exceeded quota … services.loadbalancers=0</code>. Shown live in Eldiiar's namespace. Downside: <b>one NLB per Service</b>, each billed – that's why the Ingress exists.</p></div>
+    </div>
+
+    <div class="box clus" id="clus">
+      <h3>☸️ EKS cluster containers-26a</h3>
+      <p class="sub">A cluster = a <b>control plane + nodes</b>. EKS is AWS's managed Kubernetes: AWS runs the control plane, the nodes are EC2 instances. This cluster runs in <b>EKS Auto Mode</b>: AWS adds a node when no node has room for a new Pod.</p>
+
+      <div class="box cp" id="cp">
+        <h3>🧠 Control plane – run by AWS – <span class="red">master nodes</span></h3>
+        <p class="sub" style="margin-bottom:80px">Receives your commands and decides what runs where. You never log in, you never see it in the console, your app never runs here.</p>
+        <div style="display:grid;grid-template-columns:repeat(4,440px);justify-content:space-between;row-gap:110px">
+          <div class="card" id="api"><h4><span class="num">7</span>API server</h4><p>The front door. Receives <b>every</b> kubectl request, checks who you are and whether you're allowed in that namespace, checks the object is valid, stores it in etcd.</p><p>The <b>only way into the cluster</b>: your Mac, the scheduler, controllers and kubelets all talk only to it. Refuses bad files (e.g. selector ≠ template labels).</p></div>
+          <div class="card" id="etcd"><h4>🗃️ etcd</h4><p>The cluster's database: every object, the record of <b>what should exist</b>. Turn your laptop off overnight and <code>kubectl get pods</code> still knows – because of etcd.</p><p>Not your app's database, holds no logs.</p></div>
+          <div class="card" id="sched"><h4><span class="num">9</span>Scheduler</h4><p>Picks a node for each new Pod that has no node yet, looking at free CPU and memory, and spreads Pods across nodes. It starts nothing itself.</p><p>No node has room → Pod stays <code>Pending</code> until Auto Mode adds one (a minute or more).</p><p><b>Session 11:</b> it adds up the <b>requests</b>. A Pod's request must fit on <b>one</b> node: 400m free + 400m free ≠ room for 600m.</p></div>
+          <div class="card" id="ctrl"><h4><span class="num">8</span>Controllers</h4><p>Loops that never stop: <b>desired vs running → fix the difference → repeat</b>. The Deployment controller makes a ReplicaSet; the ReplicaSet controller makes Pods until the count matches.</p></div>
+
+          <div class="card rb" id="authz" style="grid-column:1;grid-row:2;align-self:start;width:330px"><h4><span class="num">25</span>🛂 The two checks on every request</h4>
+            <p><b>1 · AWS – who are you?</b> The token was signed by IAM role <code>Containers26a</code> (the whole class shares it). An <b>access entry</b> maps it to user <code>student:my-namespace</code>. No entry → <code style="color:var(--red)">Unauthorized</code> – even for an AWS admin.</p>
+            <p><b>2 · RBAC – may you?</b> Does a RoleBinding allow this verb on this resource in this namespace? No → <code style="color:var(--red)">Forbidden</code>. Allow-only: no rule = no.</p>
+            <p><code>kubectl auth whoami</code> · <code>kubectl auth can-i list secrets</code></p></div>
+          <div class="box obj" id="objs" style="grid-column:2 / 5">
+            <h3 style="text-transform:none;font-size:16px">📒 What's stored in your namespace – records, not running things</h3>
+            <p class="sub" style="margin-bottom:14px">Pods are found <b>by label</b> (<code>app: drill</code>), not by name. The names below are generated.</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:90px">
+              <div class="card plain" id="oDep"><h4>Deployment <code>drill</code></h4><p>You write this. <code>replicas: 2</code> (the count = ASG desired capacity) + <code>template</code> (the full Pod = launch template) + <code>selector</code>.</p></div>
+              <div class="card plain" id="oRs"><h4>ReplicaSet <code>drill-7ff7775db6</code></h4><p>The Deployment creates it; you never write one. Holds the count and <b>owns</b> the Pods. <code>kubectl scale</code> changes its DESIRED – in the cluster, not your file.</p></div>
+              <div class="card plain" id="oPods"><h4>2 Pods <code>drill-7ff7775db6-…</code></h4><p>Name = Deployment + ReplicaSet hash + random id. Each one gets a node from the scheduler. See all three levels: <code>kubectl get deploy,rs,pods -l app=drill</code></p></div>
+            </div>
+            <p class="sub" style="margin:40px 0 14px"><b>Session 07</b> – after <code>kubectl apply -f service-drill.yaml</code>: a Service is also just a record in your namespace. Not a Pod, not on a node – <code>kubectl get pods</code> never lists it.</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:90px">
+              <div class="card svc" id="oDns"><h4>🌐 DNS name</h4><p><code>drill.my-namespace.svc.cluster.local</code> – from the same namespace just <code>drill</code>, from another namespace <code>drill.&lt;namespace&gt;</code> (the <code>search</code> line in <code>/etc/resolv.conf</code> adds yours). Answered by <b>CoreDNS</b> (<code>172.20.0.10</code>; on this cluster AWS runs it on every node). Recreate the Service → new ClusterIP, <b>same name</b>.</p></div>
+              <div class="card svc" id="oSvc"><h4><span class="num">16</span>Service <code>drill</code> (type ClusterIP)</h4><p>A fixed name + a fixed address <code>172.20.x.x:80</code> in front of a changing set of Pods – the ALB, rebuilt inside Kubernetes. Finds Pods <b>by label</b>: <code>selector: app: drill</code>. <code>kubectl get svc drill</code></p></div>
+              <div class="card svc" id="oEps"><h4>EndpointSlice <code>drill-92lxn</code></h4><p>The Pod IPs the selector found: <code>10.20.127.179:8080</code>, <code>10.20.112.0:8080</code>. Updated <b>on its own</b> when a Pod starts or stops – the target group's targets. Each address is marked <code>Ready: true/false</code> (readiness probe); traffic goes only to ready ones. <b>Empty = no Pod matches.</b> <code>kubectl get endpointslices -l kubernetes.io/service-name=drill</code></p></div>
+            </div>
+            <p class="sub" style="margin:40px 0 14px"><b>Session 08</b> – after <code>kubectl apply -f ingress-drill.yaml</code>: the Ingress is also only a record. <b>Requests never pass through it.</b> Quota: 1 Ingress per namespace.</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:90px">
+              <div class="card svc" id="oIngc"><h4>IngressClass <code>alb</code></h4><p>Already created by the school. Says <b>which program</b> reads Ingresses (on EKS Auto Mode, AWS runs the controller – no Pod to see) plus shared settings: certificate ARN, group <code>containers-26a</code>, <code>internet-facing</code>. <code>kubectl get ingressclassparams alb -o yaml</code></p></div>
+              <div class="card svc" id="oIng"><h4><span class="num">21</span>Ingress <code>drill</code></h4><p>One rule: <b>host <code>my-namespace.k8s.312school.com</code> + path <code>/</code> → Service <code>drill</code> port 80</b>. Your <code>alb.tf</code> listener rule from Scale, in YAML. <code>kubectl get ingress drill</code> → ADDRESS after ~1 min.</p></div>
+              <div class="card svc" id="oCtl"><h4>The controller copies IPs ahead of time</h4><p>It reads your Ingress, adds the rule to the shared ALB, and copies the <b>ready</b> Pod IPs from the EndpointSlice into the rule's target group – and keeps updating it. <b>Neither the controller nor the ClusterIP is on the request path.</b></p></div>
+            </div>
+            <p class="sub" style="margin:40px 0 14px"><b>Session 09</b> – after <code>kubectl apply</code> of the ConfigMap and the Secret: settings stored in etcd, in your namespace. Not on a node, not inside a Pod – separate lifecycles, and any number of Pods can reuse them.</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:90px">
+              <div class="card cfg" id="oCm"><h4><span class="num">22</span>ConfigMap <code>investment-app-config</code></h4><p>Ordinary settings, key: value: <code>DB_HOST: db</code>, <code>DB_PORT: "5432"</code>, <code>DB_NAME</code>, <code>DB_USER</code>, <code>TICKER: AAPL</code>. Every value is text – quote numbers. <code>kubectl describe cm</code> shows them in plain text.</p></div>
+              <div class="card cfg" id="oSec"><h4><span class="num">22</span>Secret <code>investment-app-secret</code> · <code>type: Opaque</code></h4><p><code>DB_PASSWORD</code>, <code>FINNHUB_KEY</code>. Stored as <b>base64 – encoding, not encryption</b>: <code>-o jsonpath=… | base64 -d</code> gives the password back. What protects it is <b>who may read it</b> (RBAC). <code>describe</code> shows sizes only. <b>Since Session 11</b> the External Secrets Operator writes it from AWS – no Secret file in Git.</p></div>
+              <div class="card cfg" id="oCopy"><h4><span class="num">24</span>Copied once, at start</h4><p>The kubelet reads the named ConfigMap/Secret when a container <b>starts</b> and sets env vars in the process. No ongoing sync: <code>kubectl edit cm</code> → running Pods keep the <b>old</b> value. Fix: <code>kubectl rollout restart deploy/investment-app</code> (one Pod at a time).</p></div>
+            </div>
+            <p class="sub" style="margin:40px 0 14px"><b>Session 11</b> – the password leaves Git. You write <b>one</b> object; the school's operator, SecretStore, ServiceAccount and IAM role do the rest.</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:90px">
+              <div class="card cfg" id="oEs"><h4><span class="num">28</span>ExternalSecret <code>investment-app-secret</code></h4><p>The <b>one file you write</b>. Holds only the <b>path</b> <code>/26a/my-namespace/investment-app</code> in AWS Secrets Manager – no value – so it's <b>safe to commit</b>. <code>kubectl get externalsecret</code> → <code>SecretSynced</code>, READY True.</p></div>
+              <div class="card cfg" id="oOp"><h4>External Secrets Operator</h4><p>Open-source controller, <b>not part of Kubernetes</b> – the school installed it with Helm in ns <code>external-secrets</code>. Reads the path from AWS, <b>writes the normal Secret</b> above (same name, so Deployments don't change), and re-reads every <code>refreshInterval</code> (1h).</p></div>
+              <div class="card cfg" id="oStore"><h4>SecretStore <code>aws-secrets-manager</code></h4><p>In your namespace, made by the school: the <b>AWS region</b> + sign in as ServiceAccount <code>secrets-reader</code> → an <b>IAM role that may read only <code>/26a/&lt;your-ns&gt;/</code></b>. A classmate's path → <code>AccessDeniedException</code>.</p></div>
+            </div>
+            <p class="sub" style="margin:40px 0 14px"><b>Session 10</b> – who may read all of the above. The school set these up; <code>edit</code> doesn't let you read Roles or RoleBindings, so you can't print yours.</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:90px">
+              <div class="card rb" id="oRb"><h4><span class="num">26</span>RoleBinding <code>student-edit</code></h4><p>Says <b>who</b> and <b>where</b>: user <code>student:my-namespace</code> gets ClusterRole <code>edit</code> – <b>in your namespace only</b>, because a RoleBinding is namespaced. That's why a classmate's Secrets are <code>Forbidden</code>.</p></div>
+              <div class="card rb" id="oCr"><h4>ClusterRole <code>edit</code> (built in)</h4><p>Says <b>what</b>: verbs on resources – read and change Pods, Deployments, Services, ConfigMaps, <b>Secrets</b>, exec… Written once for the cluster; one <code>edit</code> serves all ~95 students, each only at home. Others: <code>view</code>, <code>admin</code>.</p></div>
+              <div class="card rb" id="oSa"><h4>ServiceAccount <code>default</code></h4><p>A user for a <b>program</b>: <code>system:serviceaccount:&lt;ns&gt;:default</code>. Pods that name none (your investment-app) run as it. It has <b>no rights</b>. Never bind a Role to it – every such Pod would get it. A program that needs rights gets its <b>own</b> ServiceAccount + small Role.</p></div>
+            </div>
+            <p class="sub" style="margin:40px 0 14px"><b>Session 12</b> – the namespace's own rules (set by the admins) and the autoscaler. All checked or read by the control plane; none of them is set on a node.</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:90px">
+              <div class="card res" id="oLr"><h4><span class="num">31</span>LimitRange – per container</h4><p><b>Fills in</b> what a container didn't declare: request 50m / 64Mi, limit 250m / 256Mi. <b>Rejects</b> a container over the max (1 CPU / 1Gi) with 403. A value you write is kept. <b>The max is not a default.</b> Checked only when a Pod is created. <code>kubectl get limitrange -o yaml</code></p></div>
+              <div class="card res" id="oRq"><h4><span class="num">31</span>ResourceQuota – the namespace total</h4><p>Adds up what Pods <b>declare</b>: 500m CPU requests, 1Gi memory requests, 2 CPU / 2Gi limits, 8 Pods. Over it → <b>no Pod is created</b>; the error is on the ReplicaSet: <code>FailedCreate: exceeded quota</code>. A new node can't help. <code>kubectl describe resourcequota</code></p></div>
+              <div class="card res" id="oHpa"><h4><span class="num">32</span>HorizontalPodAutoscaler</h4><p>A controller that changes a Deployment's <b>replicas</b> toward a target, between min and max. <b>Utilization = CPU use ÷ CPU request × 100</b> – no request, no CPU scaling. Class demo <code>unit5-cpu</code>: 60%, 1–2 replicas. <code>kubectl get hpa --watch</code></p></div>
+            </div>
+            <p class="sub" style="margin:40px 0 14px"><b>Session 13</b> – storage. The claim is yours (namespace); the StorageClass and PV are cluster-wide. The real files live on an EBS disk.</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:90px">
+              <div class="card sto" id="oPvc"><h4><span class="num">34</span>PVC <code>postgres-data-unit6</code></h4><p>The <b>request</b>: size, access mode (<code>ReadWriteOnce</code>), StorageClass. Lives in <b>your namespace</b>. <code>Pending</code> until a Pod uses it is <b>normal</b> (<code>WaitForFirstConsumer</code>). <code>kubectl get pvc,pv</code></p></div>
+              <div class="card sto" id="oPv"><h4>PV (made for you)</h4><p>Kubernetes's <b>record</b> of the real disk – cluster-wide. Bound <b>1:1</b> to your claim (matched on size, access mode, class). A <b>hand-written PV creates no disk</b>; it only records storage that already exists.</p></div>
+              <div class="card sto" id="oSc"><h4>StorageClass <code>unit6-ebs</code></h4><p>The <b>template</b>, set once by DevOps (like a launch template): provisioner <code>ebs.csi.aws.com</code>, <code>gp3</code>, encrypted, reclaim <b>Delete</b>, <code>WaitForFirstConsumer</code> (disk made in the Pod's AZ). <code>kubectl get sc</code></p></div>
+            </div>
+            <p class="sub" style="margin:40px 0 14px"><b>Session 13</b> – the other workload kinds. A Deployment keeps something running; these do something else.</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:90px">
+              <div class="card sto" id="oSts"><h4>StatefulSet</h4><p>Stable names <code>postgres-0</code>, <code>postgres-1</code>; <b>one claim per Pod</b> from <code>volumeClaimTemplates</code> (<code>data-postgres-0</code>…); scales one at a time; a replaced Pod gets the <b>same name and claim</b>. Doesn't do replication or backups.</p></div>
+              <div class="card sto" id="oJob"><h4><span class="num">35</span>Job <code>unit6-schema</code></h4><p>Runs a task <b>until exit 0</b>, then stops: <code>psql</code> runs <code>schema.sql</code> (from a ConfigMap) to create the tables – taken out of <code>app.py</code>. <code>backoffLimit: 2</code>. Kubernetes does <b>not</b> make the app wait for it.</p></div>
+              <div class="card sto" id="oCron"><h4><span class="num">36</span>CronJob</h4><p>Creates a <b>new Job on a schedule</b>: <code>"0 2 * * *"</code> = every day at 02:00 (minute hour day month weekday). Must be safe to run twice. Example: warn when a GitHub token is about to expire.</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:40px;margin:150px 0 22px 10px">
+        <p class="lbl" id="wlabel" style="margin:0">Worker nodes · node role <code style="text-transform:none;letter-spacing:0">containers-26a-node</code></p>
+        <div class="card res" id="karp" style="width:330px;font-size:13px"><h4><span class="num">33</span>🖥️ Karpenter – adds nodes (Session 12)</h4><p>Part of <b>EKS Auto Mode</b>, run by AWS. Watches for <b>Pending Pods that can't fit</b> and launches an EC2 worker node (within its limits and AWS capacity). <b>HPA = more Pods. Karpenter = more machines.</b> It can't fix a quota refusal.</p></div>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div class="box node" id="node1" style="width:1180px">
+          <h3>🖥️ Node 1 = a worker node (an EC2 instance)</h3>
+          <p class="sub">Named by its EC2 instance ID (<code>i-0b0e…</code>). The EC2 console shows the node, never the Pods on it. A node is a node because EKS runs the <b>kubelet</b> on it.</p>
+          <div style="display:grid;grid-template-columns:580px 400px;justify-content:space-between;align-items:start">
+            <div style="display:flex;flex-direction:column;gap:40px">
+            <div class="box pod" id="pod1"><h3 style="text-transform:none;font-size:19px"><span class="num">11</span>🫛 Pod <code>drill-7ff7775db6-fjb2v</code></h3>
+              <p class="sub" style="margin-bottom:14px">Smallest thing Kubernetes runs: 1+ containers, one node, <b>one IP</b>. Pod = car body, container = engine.</p>
+              <div class="box ctr" id="ctr1"><h3 style="text-transform:none;font-size:16px">📦 Container drill</h3>
+                <p class="sub" style="margin-bottom:12px">Started from <code>SCHOOL_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/drill:v1</code></p>
+                <div class="proc" id="proc1"><b>⚡ PID 1: gunicorn app:app</b><br>Listening on 8080, logs to stdout (<code>kubectl logs</code>). When it exits, the container stops and the kubelet restarts it in this same Pod.</div>
+              </div>
+              <div class="ns" id="ns1">🏷️ namespace: <b>my-namespace</b> · label <code>app: drill</code></div>
+              <div class="card prb" id="probe1" style="margin-top:14px"><h4><span class="num">19</span>🩺 Probes on this container (Session 08)</h4>
+                <p><b>readiness</b>: <code>GET / :8080</code> every 5 s → fails 3× → <b>no traffic</b> (no restart). <b>liveness</b>: fails → kubelet <b>restarts the container</b>. 200–399 passes.</p></div>
+              <div class="card res" id="res1" style="margin-top:14px"><h4><span class="num">29</span>📏 Requests & limits on this container (Session 11)</h4>
+                <p><b>request</b> <code>cpu: 100m</code>, <code>memory: 128Mi</code> → the scheduler places the Pod where that much is free. <b>limit</b> <code>cpu: 250m</code>, <code>memory: 256Mi</code> → the most it may use. Past the CPU limit: <b>throttled</b> (slower). Past the memory limit: <b>OOMKilled</b> → the container restarts in this same Pod.</p></div>
+            </div>
+            <div class="box pod" id="podClient"><h3 style="text-transform:none;font-size:16px">🫛 Pod <code>client</code> – a test Pod (Session 07)</h3>
+              <p class="sub" style="margin-bottom:0"><code>kubectl exec client -- curl -s http://drill</code> runs curl <b>inside the cluster's network</b>, where Services live. From your Mac, <code>curl http://drill</code> → <code>Could not resolve host</code>.</p>
+              <div class="ns" style="margin-top:10px">🏷️ label <code>app: client</code> – so the drill Service never picks it</div>
+            </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:110px">
+              <div class="card" id="kub1"><h4><span class="num">10</span>kubelet – the node's agent</h4><p>Asks the API server which Pods are assigned to this node, tells the runtime to start their containers, restarts a container whose PID 1 exits, <b>runs the probes</b>, reports status back.</p></div>
+              <div class="card" id="rt1"><h4>Container runtime (containerd)</h4><p>Pulls the image and runs the containers – the job Docker Engine does on your Mac. Kubernetes decides what should run; the runtime runs it.</p></div>
+              <div class="card svc" id="kp1"><h4>kube-proxy – where ClusterIP really lives</h4><p>No machine has the ClusterIP. kube-proxy writes a <b>rule on every node</b>: traffic to <code>172.20.x.x:80</code> is rewritten to a <b>random ready</b> drill Pod <code>10.20.x.x:8080</code> (the targetPort). On this cluster AWS runs it as part of each node – no kube-proxy Pod to list.</p></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="box node" id="node2" style="width:1010px">
+          <h3>🖥️ Node 2 = another EC2 instance</h3>
+          <p class="sub">Same programs as node 1. The scheduler spread the second replica here. Pods from <b>different namespaces</b> share it.</p>
+          <div style="display:grid;grid-template-columns:520px 300px;justify-content:space-between;align-items:start">
+            <div style="display:flex;flex-direction:column;gap:26px">
+              <div class="box pod" id="pod2"><h3 style="text-transform:none;font-size:16px">🫛 Pod <code>drill-7ff7775db6-x9k2p</code></h3>
+                <p class="sub" style="margin-bottom:0">Replica 2 of 2, same template, different node and IP.</p>
+                <div class="chip" id="ctr2">📦 container drill → PID 1 gunicorn</div>
+                <div class="ns" style="margin-top:10px">🏷️ namespace: <b>my-namespace</b> · <code>app: drill</code></div>
+              </div>
+              <div class="box pod" id="podOther"><h3 style="text-transform:none;font-size:16px">🫛 Pod of another student</h3>
+                <p class="sub" style="margin-bottom:0">Same node, different namespace – you have no permissions there.</p>
+                <div class="chip">📦 container, with its process inside</div>
+                <div class="ns" id="ns2" style="margin-top:10px">🏷️ namespace: <b>another-student</b></div>
+              </div>
+              <div class="box cfgpod" id="podDb"><h3 style="text-transform:none;font-size:16px"><span class="num">23</span>🫛 Pod <code>postgres</code> + Service <code>db</code> (Session 09)</h3>
+                <p class="sub" style="margin-bottom:0"><code>postgres:16</code> reads <code>POSTGRES_USER</code> / <code>_DB</code> / <code>_PASSWORD</code> – taken one key at a time from the <b>same</b> ConfigMap and Secret the app uses. One source, two consumers. <b>Deploy it first.</b> Without a volume, rows are lost when the Pod is replaced. <b>Session 13:</b> it mounts a PVC at <code>/var/lib/postgresql/data</code> → a new Pod finds the same <code>trades</code> table.</p>
+              </div>
+              <div class="box cfgpod" id="podInv"><h3 style="text-transform:none;font-size:16px"><span class="num">23</span>🫛 Pod <code>investment-app</code> (your image)</h3>
+                <p class="sub" style="margin-bottom:6px">Reads seven env vars – the code didn't change. They were <b>copied in at start</b>:</p>
+                <div class="chip" style="border-color:var(--cfg)">⚙️ <code>DB_HOST=db</code> · <code>DB_PORT=5432</code> · <code>DB_NAME</code> · <code>DB_USER</code> · <code>TICKER=AAPL</code> ← ConfigMap</div>
+                <div class="chip" style="border-color:var(--cfg)">🔐 <code>DB_PASSWORD</code> · <code>FINNHUB_KEY</code> ← Secret</div>
+                <p class="sub" style="margin:8px 0 0"><code>kubectl exec deploy/investment-app -- env</code> shows the real values; <code>describe pod</code> shows only where they come from. Runs as ServiceAccount <code>default</code> (Session 10).</p>
+              </div>
+              <div class="card sto" id="ebs"><h4><span class="num">34</span>💾 EBS volume – attached to this node (Session 13)</h4><p>A real AWS disk (gp3, 1 GiB, encrypted) in <b>one AZ</b>, the same as the node. <b>ReadWriteOnce</b>: one node at a time – many writers need EFS. Shows in EC2 → Volumes. Reclaim <code>Delete</code>: deleting the claim deletes the disk; <code>Retain</code> keeps it (and the bill). <b>Not a backup.</b></p></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:110px">
+              <div class="card" id="kub2"><h4>kubelet</h4><p>The same agent as on node 1. When a container starts, it asks the API server for the ConfigMaps and Secrets the Pod names and <b>sets them as env vars</b> (Session 09).</p></div>
+              <div class="card" id="rt2"><h4>containerd</h4><p>Pulls the images for this node's Pods – from the school's ECR, or from <b>your</b> ECR when a Pod names your image.</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card plain" id="schoolEcr" style="position:relative;z-index:7;width:560px;margin:150px 0 0 760px">
+      <h4>🗄️ School ECR – the drill images</h4>
+      <p><code>drill:v1</code> lives in the school's own ECR. The nodes are in the <b>same account</b> and their role already has ECR read access, so no extra policy is needed – unlike <b>your</b> repository.</p>
+    </div>
+  </div>
+
+  <!-- ===== bottom: what breaks where ===== -->
+  <div class="span note strong" id="nYaml">
+    <h3>📄 The manifests, piece by piece – <code>pod.yaml</code> vs <code>deployment-drill.yaml</code></h3>
+    <p>Same four top-level keys in every manifest. The <b style="color:var(--green)">green part</b> is the same Pod in both files: a Deployment's <code>template</code> is the Pod you already typed, minus <code>apiVersion</code>, <code>kind</code> and the name (Pod names are generated).</p>
+    <div class="twom">
+      <div class="twom-box dep">
+        <span class="twom-tag">Deployment</span>
+        <div class="twom-row"><code>metadata</code><span>→ about the <b>Deployment</b>: its name (<code>drill</code>)</span></div>
+        <div class="twom-row"><code>spec</code><span>→ what the <b>Deployment</b> should do: <code>replicas</code>, <code>selector</code>, and…</span></div>
+        <div class="twom-box pod">
+          <span class="twom-tag">template = the Pod blueprint</span>
+          <div class="twom-row"><code>metadata</code><span>→ about each <b>Pod</b>: its labels (<code>app: drill</code>)</span></div>
+          <div class="twom-row"><code>spec</code><span>→ what each <b>Pod</b> runs: <code>containers</code>, image, port</span></div>
+        </div>
+      </div>
+      <div class="twom-txt">
+        <h4>Notice: there are TWO <code>metadata</code> and TWO <code>spec</code></h4>
+        <p>This is the confusing part. The trick: <b>look at how far a key is indented</b> to know who it belongs to.</p>
+        <p>The top <code>metadata</code> / <code>spec</code> (no indent) are for the <b>Deployment</b>. The ones inside <code>template</code> (indented 4 spaces) are for the <b>Pod</b>.</p>
+        <p>A Deployment has a Pod inside it, like a box with a smaller box inside. The inner box is exactly the <code>metadata</code> + <code>spec</code> from <code>pod.yaml</code> – that's why the green parts below look the same.</p>
+        <p>So the Deployment's name lives in the <b>outer</b> metadata, but the label its selector searches for lives in the <b>inner</b> metadata – on the Pods.</p>
+      </div>
+    </div>
+    <div class="ygrid">
+      <div class="ycol"><b>pod.yaml – one bare Pod (nobody counts it)</b>
+<pre class="yaml"><span class="k">apiVersion</span>: <span class="v">v1</span><span class="n">1</span>
+<span class="k">kind</span>: <span class="v">Pod</span><span class="n">2</span>
+<span class="k">metadata</span>:<span class="n">3</span>
+  <span class="k">name</span>: <span class="v">drill</span>
+<span class="tpl"><span class="k">spec</span>:<span class="n">4</span>
+  <span class="k">containers</span>:<span class="n">9</span>
+    - <span class="k">name</span>: <span class="v">drill</span>
+      <span class="k">image</span>: <span class="v">SCHOOL_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/drill:v1</span>
+      <span class="k">ports</span>:
+        - <span class="k">containerPort</span>: <span class="v">8080</span></span></pre>
+        <p style="font-size:13.5px;color:var(--muted)">Delete it → gone for good. A container crash → the kubelet restarts it inside this Pod.</p>
+      </div>
+      <div class="ycol"><b>deployment-drill.yaml – a count + the Pod</b>
+<pre class="yaml"><span class="k">apiVersion</span>: <span class="v">apps/v1</span><span class="n">1</span>
+<span class="k">kind</span>: <span class="v">Deployment</span><span class="n">2</span>
+<span class="k">metadata</span>:<span class="n">3</span>
+  <span class="k">name</span>: <span class="v">drill</span>
+<span class="k">spec</span>:<span class="n">4</span>
+  <span class="k">replicas</span>: <span class="v">2</span><span class="n">5</span>
+  <span class="k">selector</span>:<span class="n">6</span>
+    <span class="k">matchLabels</span>:
+      <span class="k">app</span>: <span class="v">drill</span>        <span class="c"># ← must match ↓</span>
+  <span class="k">template</span>:<span class="n">7</span>
+<span class="tpl">    <span class="k">metadata</span>:
+      <span class="k">labels</span>:<span class="n">8</span>
+        <span class="k">app</span>: <span class="v">drill</span>      <span class="c"># ← same label</span>
+    <span class="k">spec</span>:
+      <span class="k">containers</span>:<span class="n">9</span>
+        - <span class="k">name</span>: <span class="v">drill</span>
+          <span class="k">image</span>: <span class="v">SCHOOL_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/drill:v1</span>
+          <span class="k">ports</span>:
+            - <span class="k">containerPort</span>: <span class="v">8080</span></span></pre>
+        <p style="font-size:13.5px;color:var(--muted)">The Kubernetes docs example is the same shape: <code>nginx-deployment</code>, <code>replicas: 3</code>, <code>app: nginx</code>, <code>image: nginx:1.14.2</code>. Always write a version tag – a bare <code>nginx</code> means <code>nginx:latest</code>.</p>
+      </div>
+      <ol class="yl">
+        <li><span>1</span><p><code>apiVersion</code> – which rulebook version. A Pod is <code>v1</code>, a Deployment is <code>apps/v1</code>. Wrong one → the API server refuses the file.</p></li>
+        <li><span>2</span><p><code>kind</code> – what you're creating: Pod, Deployment, Service, Namespace…</p></li>
+        <li><span>3</span><p><code>metadata</code> – info <b>about</b> the object: its name card. No <code>namespace:</code> line → kubectl uses your context's namespace.</p></li>
+        <li><span>4</span><p><code>spec</code> – "specification": <b>what you want</b>, your wish list. Order of lines doesn't matter – it's a description, not steps.</p></li>
+        <li><span>5</span><p><code>replicas</code> – how many copies (the ASG's desired capacity). Leave it out → 1. Changing it does <b>not</b> start a rolling update.</p></li>
+        <li><span>6</span><p><code>selector.matchLabels</code> – the <b>search</b>: "which Pods are mine? The ones wearing <code>app: drill</code>." That's how the ReplicaSet counts.</p></li>
+        <li><span>7</span><p><code>template</code> – the <b>blueprint for each Pod</b> (the launch template). Any change in here – image, env, command, a label – starts a <b>rolling update</b>.</p></li>
+        <li><span>8</span><p><code>template.metadata.labels</code> – the tag stamped on every new Pod. Must equal <span style="color:var(--hl);font-weight:700">6</span>, or the API server refuses: <code>selector does not match template labels</code>.</p></li>
+        <li><span>9</span><p><code>containers</code> – a list (the <code>-</code> starts one item). <code>name</code> is the container's name (the <code>drill=</code> in <code>set image</code>). <code>image</code> is the full ECR address with a tag. <code>containerPort</code> notes the port the app listens on – like EXPOSE, it opens nothing; it's the second number in <code>port-forward 8000:8080</code>.</p></li>
+        <li><span>+</span><p>Optional under a container: <code>command</code> = the Dockerfile's ENTRYPOINT, <code>args</code> = CMD – change what runs without rebuilding. A Pod's <code>restartPolicy: Never</code> shows <code>Completed</code> instead of CrashLoopBackOff.</p></li>
+        <li><span>✓</span><p><b>YAML rules:</b> indentation nests (two spaces), <b>never tabs</b>, <code>key: value</code> with a space after the colon, a key ending in <code>:</code> owns the indented lines under it.</p></li>
+        <li><span>↺</span><p><code>kubectl get deploy drill -o yaml</code> shows what the cluster <b>stores</b> – your file plus <code>status</code> and other fields Kubernetes added. The cluster's copy is the truth.</p></li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="span note strong" id="nSvc" style="border-color:var(--svc)">
+    <h3>🔗 The Service, piece by piece (Session 07) – call the Service, never the Pod</h3>
+    <p>Why: a replaced Pod gets a <b>new IP</b>, and with 2+ replicas a caller would also have to pick one. The Service gives one fixed name and address, and finds the Pods <b>by label</b> – including one started a second ago. Pod ≈ EC2 · Deployment ≈ ASG · Service ≈ ELB.</p>
+    <div class="sgrid">
+      <div class="ycol"><b>service-drill.yaml</b>
+<pre class="yaml"><span class="k">apiVersion</span>: <span class="v">v1</span><span class="n">1</span>      <span class="c"># Deployment is apps/v1</span>
+<span class="k">kind</span>: <span class="v">Service</span>
+<span class="k">metadata</span>:
+  <span class="k">name</span>: <span class="v">drill</span><span class="n">2</span>       <span class="c"># the name callers use</span>
+<span class="k">spec</span>:
+  <span class="k">type</span>: <span class="v">ClusterIP</span><span class="n">3</span>  <span class="c"># the default</span>
+  <span class="k">selector</span>:<span class="n">4</span>
+    <span class="k">app</span>: <span class="v">drill</span>       <span class="c"># = the Pods' label</span>
+  <span class="k">ports</span>:
+    - <span class="k">port</span>: <span class="v">80</span><span class="n">5</span>    <span class="c"># what callers dial</span>
+      <span class="k">targetPort</span>: <span class="v">8080</span><span class="n">6</span> <span class="c"># where the app listens</span></pre>
+<pre class="yaml" style="margin-top:10px"><span class="c"># LoadBalancer version (Eldiiar's namespace only)</span>
+<span class="k">metadata</span>:
+  <span class="k">name</span>: <span class="v">drill-public</span>
+  <span class="k">annotations</span>:<span class="n">7</span>
+    <span class="k">service.beta.kubernetes.io/aws-load-balancer-scheme</span>: <span class="v">internet-facing</span>
+<span class="k">spec</span>:
+  <span class="k">type</span>: <span class="v">LoadBalancer</span></pre>
+      </div>
+      <ol class="yl" style="columns:1">
+        <li><span>1</span><p><code>apiVersion: v1</code> – a Service is core <code>v1</code>, like a Pod. Only the Deployment is <code>apps/v1</code>.</p></li>
+        <li><span>2</span><p><code>name</code> – what callers use: <code>http://drill</code>. DNS turns it into the ClusterIP, so the name survives even if the Service is recreated with a new address.</p></li>
+        <li><span>3</span><p><code>type</code> – how far the Service reaches. ClusterIP is the default and can be left out.</p></li>
+        <li><span>4</span><p><code>selector</code> – which Pods get the traffic. Must equal the Pods' label <b>exactly</b>. <code>app: dril</code> selects nothing – <b>no error, no warning</b>, just an empty EndpointSlice.</p></li>
+        <li><span>5</span><p><code>port</code> – the port callers dial. <code>http://drill</code> = <code>http://drill:80</code>.</p></li>
+        <li><span>6</span><p><code>targetPort</code> – where the rule sends. <b>Must equal where the process listens</b> (<code>--bind 0.0.0.0:8080</code>). Wrong → accepted, endpoints listed, every call <code>Connection refused</code>.</p></li>
+        <li><span>7</span><p><code>annotations</code> – a setting in <code>metadata</code> read by AWS. Without <code>internet-facing</code> the NLB is internal only. GKE and Azure use their own annotations.</p></li>
+      </ol>
+      <div class="ycol" style="gap:16px">
+        <table class="t">
+          <tr><th>The port chain</th><th>#</th><th>Does</th></tr>
+          <tr><td>Service <code>port</code></td><td>80</td><td>what callers dial</td></tr>
+          <tr><td>Service <code>targetPort</code></td><td>8080</td><td><b>must match</b> the process</td></tr>
+          <tr><td><code>--bind 0.0.0.0:8080</code> in CMD</td><td>8080</td><td>where gunicorn really listens</td></tr>
+          <tr><td><code>containerPort</code> (Deployment)</td><td>8080</td><td>documentation only</td></tr>
+          <tr><td><code>EXPOSE</code> (Dockerfile)</td><td>8080</td><td>documentation only</td></tr>
+        </table>
+        <table class="t">
+          <tr><th>Type</th><th>Adds</th><th>Reached from</th><th>For</th></tr>
+          <tr><td>ClusterIP</td><td>name + address in the cluster</td><td>Pods</td><td>app → app</td></tr>
+          <tr><td>NodePort</td><td>port 30000–32767 on <b>every node</b></td><td><code>&lt;node-ip&gt;:&lt;nodePort&gt;</code></td><td>tests, demos (not here: private nodes, quota 0)</td></tr>
+          <tr><td>LoadBalancer</td><td>an AWS <b>NLB</b></td><td>the internet</td><td><b>users</b></td></tr>
+        </table>
+        <p>Each type keeps everything the one before has. <b>ClusterIP for Pods, LoadBalancer for users, port-forward for you.</b></p>
+        <table class="t">
+          <tr><th>The label <code>app: drill</code> is written…</th><th>It means</th></tr>
+          <tr><td>Deployment <code>template.metadata.labels</code></td><td>stamped on every Pod</td></tr>
+          <tr><td>Deployment <code>selector</code></td><td>the Pods the ReplicaSet counts</td></tr>
+          <tr><td>Service <code>selector</code></td><td>the Pods that get traffic</td></tr>
+        </table>
+        <p>Service answers nothing? Read the <b>EndpointSlice first</b>. Empty = the selector matches no Pod.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="span note strong" id="nProbe" style="border-color:var(--prb)">
+    <h3>🩺 Probes, piece by piece (Session 08) – Running doesn't mean the app can answer</h3>
+    <p>A <b>probe</b> is a check the <b>kubelet</b> runs against <b>one container</b>, every few seconds, for its whole life. It goes <b>under the container</b> in the Deployment. Scale twins: readiness = the <b>target group health check</b>, liveness = the <b>ASG health check</b> that replaces an instance.</p>
+    <div class="sgrid">
+      <div class="ycol"><b>deployment-drill-readiness.yaml (the container part)</b>
+<pre class="yaml"><span class="k">containers</span>:
+  - <span class="k">name</span>: <span class="v">drill</span>
+    <span class="k">image</span>: <span class="v">…/drill:v1</span>
+    <span class="k">ports</span>:
+      - <span class="k">containerPort</span>: <span class="v">8080</span>
+<span class="tpl" style="background:var(--prb-bg);border-color:var(--prb)">    <span class="k">readinessProbe</span>:<span class="n">1</span>
+      <span class="k">httpGet</span>:<span class="n">2</span>
+        <span class="k">path</span>: <span class="v">/</span><span class="n">3</span>
+        <span class="k">port</span>: <span class="v">8080</span>
+      <span class="k">periodSeconds</span>: <span class="v">5</span><span class="n">4</span>
+      <span class="k">failureThreshold</span>: <span class="v">3</span><span class="n">5</span></span></pre>
+        <p style="font-size:13.5px;color:var(--muted)">A <code>livenessProbe</code> has the same shape – only the action on failure differs. Class demo: liveness on <code>/health</code> (404) → RESTARTS climbs → CrashLoopBackOff.</p>
+      </div>
+      <ol class="yl" style="columns:1">
+        <li><span>1</span><p><code>readinessProbe</code> – sits <b>under the container</b>, beside <code>image</code> and <code>ports</code>. Same level as <code>livenessProbe</code> / <code>startupProbe</code>.</p></li>
+        <li><span>2</span><p><code>httpGet</code> – the check type (most common). Others: <code>tcpSocket</code> (port accepts a connection), <code>exec</code> (command exits 0), <code>grpc</code>.</p></li>
+        <li><span>3</span><p><code>path</code> – a <b>URL the app answers</b>, like in a browser – not a folder. Passes on <b>200–399</b>. The drill image has only <code>/</code>, so <code>/health</code> = 404 = fails. A route exists only if it's in the image.</p></li>
+        <li><span>4</span><p><code>periodSeconds</code> – how often (default 10). Also <code>initialDelaySeconds</code> (0), <code>timeoutSeconds</code> (1).</p></li>
+        <li><span>5</span><p><code>failureThreshold</code> – fails in a row before it counts as failed (default 3). <code>successThreshold</code> (1) is the way back. Each controls one direction – no conflict.</p></li>
+      </ol>
+      <div class="ycol" style="gap:16px">
+        <table class="t">
+          <tr><th>Probe</th><th>Question</th><th>On failure</th></tr>
+          <tr><td>Readiness</td><td>Ready for requests right now?</td><td><b>Stop traffic</b>. No restart. The Deployment does nothing – the count is still right</td></tr>
+          <tr><td>Liveness</td><td>Still working?</td><td><b>Restart the container</b> – same Pod, name, IP; RESTARTS +1. Waits 10 s → 20 s → 40 s … 5 min</td></tr>
+          <tr><td>Startup</td><td>Finished booting?</td><td>The other two wait; never passes → restart. Rarely needed</td></tr>
+        </table>
+        <p><b>The stuck rollout = a good thing.</b> Apply a file whose new Pods never get ready (wrong path, bad image): the rollout stops at the first new Pod, and the <b>old Pods keep serving</b>. No auto-rollback – after 10 min <code>exceeded its progress deadline</code>. Apply the fixed file; the bad ReplicaSet goes to 0.</p>
+        <p><b>Not-ready Pod in the EndpointSlice:</b> <code>get</code> still lists its address; <code>describe</code> shows <code>Ready: false</code>. "The devil is in the details" – describe when get looks wrong.</p>
+        <p><b>Rules of thumb:</b> liveness checks the <b>app itself, never its database</b> (a slow DB would restart every Pod at once). Use only the probes the app needs.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="span note strong" id="nIng" style="border-color:var(--svc)">
+    <h3>🚪 The Ingress, piece by piece (Session 08) – one rule on a shared load balancer</h3>
+    <p>Problem: a LoadBalancer Service = one AWS load balancer <b>per Service</b>, each billed. Fix: <b>one ALB with rules</b> – "this host → this Service". That rule is an Ingress. Only three lines really matter: <code>ingressClassName</code>, <code>host</code>, and the Service <code>name</code>/<code>port</code>.</p>
+    <div class="sgrid">
+      <div class="ycol"><b>ingress-drill.yaml</b>
+<pre class="yaml"><span class="k">apiVersion</span>: <span class="v">networking.k8s.io/v1</span><span class="n">1</span>
+<span class="k">kind</span>: <span class="v">Ingress</span>
+<span class="k">metadata</span>:
+  <span class="k">name</span>: <span class="v">drill</span>
+<span class="k">spec</span>:
+  <span class="k">ingressClassName</span>: <span class="v">alb</span><span class="n">2</span>
+  <span class="k">rules</span>:
+    - <span class="k">host</span>: <span class="v">my-namespace.k8s.312school.com</span><span class="n">3</span>
+      <span class="k">http</span>:
+        <span class="k">paths</span>:
+          - <span class="k">path</span>: <span class="v">/</span><span class="n">4</span>
+            <span class="k">pathType</span>: <span class="v">Prefix</span>
+            <span class="k">backend</span>:
+              <span class="k">service</span>:
+                <span class="k">name</span>: <span class="v">drill</span><span class="n">5</span>
+                <span class="k">port</span>:
+                  <span class="k">number</span>: <span class="v">80</span><span class="n">6</span></pre>
+      </div>
+      <ol class="yl" style="columns:1">
+        <li><span>1</span><p><code>networking.k8s.io/v1</code> – a third API group: Pod/Service <code>v1</code>, Deployment <code>apps/v1</code>, Ingress <code>networking.k8s.io/v1</code>.</p></li>
+        <li><span>2</span><p><code>ingressClassName: alb</code> – which controller reads it → the shared ALB (group <code>containers-26a</code>).</p></li>
+        <li><span>3</span><p><code>host</code> – <b>only your own</b>: <code>&lt;namespace&gt;.k8s.312school.com</code>. An <b>admission policy</b> (this cluster's own rule) refuses any other host, class, or more than one rule/path/Service.</p></li>
+        <li><span>4</span><p><code>path: /</code> + <code>Prefix</code> – <code>/</code> and every path under it. (Normal clusters can route <code>/api</code> and <code>/</code> to different Services – refused here.)</p></li>
+        <li><span>5</span><p><code>service.name</code> – your Service from Session 07.</p></li>
+        <li><span>6</span><p><code>number: 80</code> – <b>the Service's port</b>, not the app's 8080. <b>Never change it:</b> a port the Service doesn't have freezes the shared ALB for <b>everyone</b>, and no check catches it.</p></li>
+      </ol>
+      <div class="ycol" style="gap:16px">
+        <b style="font:700 15px var(--sans)">One request, browser → Pod</b>
+        <ol class="flow">
+          <li><span>Browser asks DNS for <code>my-namespace.k8s.312school.com</code> → wildcard → the shared ALB.</span></li>
+          <li><span>HTTPS hits the <b>443 listener</b> and ends there (port 80 → <code>301</code> to 443).</span></li>
+          <li><span>Rules are checked in order; your host's rule matches. No match → the ALB's own 404.</span></li>
+          <li><span>The rule's target group holds the IPs of the <b>ready</b> drill Pods.</span></li>
+          <li><span>The ALB sends plain HTTP <b>straight to one Pod</b> at <code>10.20.x.x:8080</code>.</span></li>
+        </ol>
+        <table class="t">
+          <tr><th>404 with…</th><th>Means</th></tr>
+          <tr><td><code>server: awselb/2.0</code>, empty body</td><td><b>No rule matched</b> – stopped at the ALB</td></tr>
+          <tr><td>your app's own 404 page</td><td><b>The rule worked</b> – reached your Pod</td></tr>
+        </table>
+        <table class="t">
+          <tr><th></th><th>NodePort</th><th>LoadBalancer</th><th>Ingress</th></tr>
+          <tr><td>User needs</td><td>node IP + port &gt;30000</td><td>one NLB name per app</td><td>one hostname</td></tr>
+          <tr><td>Cost</td><td>–</td><td>one LB per Service</td><td>one shared ALB</td></tr>
+          <tr><td>HTTPS</td><td>no</td><td>not in class</td><td>at the ALB</td></tr>
+        </table>
+        <p>Old tutorials use <b>ingress-nginx</b> (maintenance ended March 2026); the <b>Gateway API</b> is the newer API for the same job. Deleting your Ingress removes only <b>your rule</b>.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="span note strong" id="nCfg" style="border-color:var(--cfg)">
+    <h3>🔐 ConfigMaps & Secrets, piece by piece (Session 09) – settings live outside the image</h3>
+    <p>Why: in unit 2 all seven settings, <b>password included</b>, were typed into the Deployment's <code>env:</code> – and that file is on GitHub. The image is the same on your laptop, in testing and in production; only the settings differ. Scale's <code>/etc/investment-app.env</code>, split in two:</p>
+    <div class="sgrid" style="grid-template-columns:560px 1fr 1fr">
+      <div class="ycol"><b>configmap-investment-app.yaml</b>
+<pre class="yaml"><span class="k">apiVersion</span>: <span class="v">v1</span>
+<span class="k">kind</span>: <span class="v">ConfigMap</span>
+<span class="k">metadata</span>:
+  <span class="k">name</span>: <span class="v">investment-app-config</span>
+<span class="k">data</span>:<span class="n">1</span>
+  <span class="k">DB_HOST</span>: <span class="v">db</span>
+  <span class="k">DB_PORT</span>: <span class="v">"5432"</span><span class="n">2</span>
+  <span class="k">DB_NAME</span>: <span class="v">investment_app</span>
+  <span class="k">DB_USER</span>: <span class="v">investment_app</span>
+  <span class="k">TICKER</span>: <span class="v">AAPL</span></pre>
+        <b>secret-investment-app.yaml <span style="color:var(--red)">(never commit it)</span></b>
+<pre class="yaml"><span class="k">apiVersion</span>: <span class="v">v1</span>
+<span class="k">kind</span>: <span class="v">Secret</span>
+<span class="k">metadata</span>:
+  <span class="k">name</span>: <span class="v">investment-app-secret</span>
+<span class="k">type</span>: <span class="v">Opaque</span><span class="n">3</span>
+<span class="k">stringData</span>:<span class="n">4</span>
+  <span class="k">DB_PASSWORD</span>: <span class="v">change-me-class-password</span>
+  <span class="k">FINNHUB_KEY</span>: <span class="v">replace-with-your-finnhub-key</span></pre>
+        <b>in the Deployment's container</b>
+<pre class="yaml"><span class="tpl" style="background:var(--cfg-bg);border-color:var(--cfg)"><span class="k">envFrom</span>:<span class="n">5</span>
+  - <span class="k">configMapRef</span>:
+      <span class="k">name</span>: <span class="v">investment-app-config</span>
+<span class="k">env</span>:<span class="n">6</span>
+  - <span class="k">name</span>: <span class="v">DB_PASSWORD</span><span class="n">7</span>
+    <span class="k">valueFrom</span>:
+      <span class="k">secretKeyRef</span>:
+        <span class="k">name</span>: <span class="v">investment-app-secret</span>
+        <span class="k">key</span>: <span class="v">DB_PASSWORD</span><span class="n">8</span>
+  - <span class="k">name</span>: <span class="v">FINNHUB_KEY</span>
+    <span class="k">valueFrom</span>:
+      <span class="k">secretKeyRef</span>:
+        <span class="k">name</span>: <span class="v">investment-app-secret</span>
+        <span class="k">key</span>: <span class="v">FINNHUB_KEY</span></span></pre>
+      </div>
+      <ol class="yl" style="columns:1">
+        <li><span>1</span><p><code>data:</code> – the settings, key then value. No <code>spec:</code> here – a ConfigMap describes data, not a wish.</p></li>
+        <li><span>2</span><p><code>"5432"</code> – <b>every value is text</b>. Without quotes, <code>kubectl apply</code> refuses the file.</p></li>
+        <li><span>3</span><p><code>type: Opaque</code> – "the keys are yours, Kubernetes doesn't check them". It does <b>not</b> mean hidden. Other types have a checked shape: <code>kubernetes.io/tls</code>, <code>dockerconfigjson</code>, <code>ssh-auth</code>.</p></li>
+        <li><span>4</span><p><code>stringData:</code> – you type plain text; the cluster stores it under <code>data:</code> in <b>base64</b>. base64 is a fixed mapping anyone can reverse – it exists so Secrets can hold binary data (certs, key files) in text-only YAML.</p></li>
+        <li><span>5</span><p><code>envFrom: configMapRef</code> – <b>every key</b> of the ConfigMap becomes an env var with the same name.</p></li>
+        <li><span>6</span><p><code>env:</code> – <b>one variable at a time</b>. <code>valueFrom: secretKeyRef</code> (or <code>configMapKeyRef</code>) says where its value comes from.</p></li>
+        <li><span>7</span><p><code>name</code> – the <b>variable inside the container</b>, what the app reads.</p></li>
+        <li><span>8</span><p><code>key</code> – the <b>key in the Secret</b>. Name and key can differ – that's where beginners get confused. Postgres uses this: <code>POSTGRES_PASSWORD</code> ← key <code>DB_PASSWORD</code>.</p></li>
+        <li><span>!</span><p>The app <b>never reads the ConfigMap or Secret itself</b>. It reads its env vars, copied by the kubelet when the container started.</p></li>
+      </ol>
+      <div class="ycol" style="gap:16px">
+        <table class="t">
+          <tr><th>ConfigMap (not sensitive)</th><th>Secret (sensitive)</th></tr>
+          <tr><td style="font-weight:400"><code>DB_HOST</code>, <code>DB_PORT</code>, <code>DB_NAME</code>, <code>DB_USER</code>, <code>TICKER</code></td><td><code>DB_PASSWORD</code>, <code>FINNHUB_KEY</code></td></tr>
+          <tr><td style="font-weight:400">Why two kinds?</td><td>So an access rule can allow ConfigMaps but <b>not Secrets</b> (a QA engineer, Claude Code)</td></tr>
+        </table>
+        <table class="t">
+          <tr><th>Command</th><th>Shows</th></tr>
+          <tr><td><code>kubectl describe pod -l app=investment-app</code></td><td><b>where</b> each value comes from (<code>&lt;set to the key 'DB_PASSWORD' in secret …&gt;</code>)</td></tr>
+          <tr><td><code>kubectl exec deploy/investment-app -- env</code></td><td>the <b>real values</b> the app sees, password included</td></tr>
+          <tr><td><code>kubectl get secret … -o yaml</code></td><td>base64 values – <code>| base64 -d</code> reverses them</td></tr>
+        </table>
+        <table class="t">
+          <tr><th>What you want</th><th>How</th></tr>
+          <tr><td>All keys as env variables</td><td><code>envFrom</code> + <code>configMapRef</code> / <code>secretRef</code></td></tr>
+          <tr><td>One key as an env variable (can rename)</td><td><code>env</code> + <code>valueFrom</code> + <code>configMapKeyRef</code> / <code>secretKeyRef</code></td></tr>
+          <tr><td>All keys as files <span style="font-weight:400;color:var(--muted)">(not in class yet)</span></td><td><code>volumes</code> + <code>configMap</code> / <code>secret</code>, plus <code>volumeMounts</code> in the container – one file per key</td></tr>
+          <tr><td>Specific keys as files <span style="font-weight:400;color:var(--muted)">(not in class yet)</span></td><td><code>volumes</code> + <code>items</code> (pick keys, choose file names)</td></tr>
+        </table>
+        <p style="font-size:13.5px;color:var(--muted)">Memory trick: the names with <b>Key</b> pick <b>one key</b>. Spelling is exact – <code>configMapKeyRef</code> starts with a small <code>c</code>. <b>Changed the ConfigMap/Secret?</b> Env variables do <b>not</b> update until the Pod restarts (<code>rollout restart</code>). Files from a volume <b>do</b> update on their own after a short delay (up to about a minute) – the app must re-read the file.</p>
+        <table class="t">
+          <tr><th>Cheat sheet: do I need to encode?</th><th>ConfigMap</th><th>Secret</th></tr>
+          <tr><td>Imperative: <code>kubectl create secret generic … --from-literal=DB_PASSWORD=…</code></td><td>No</td><td>No – kubectl encodes it</td></tr>
+          <tr><td>Declarative with <code>data:</code></td><td>No – plain text</td><td><b style="color:var(--red)">Yes</b> – you must base64 it first (<code>echo -n 'pass' | base64</code>)</td></tr>
+          <tr><td>Declarative with <code>stringData:</code></td><td>(not used – ConfigMaps have no <code>stringData</code>)</td><td>No – Kubernetes encodes it (the class's Secret file uses this)</td></tr>
+        </table>
+        <p style="font-size:13.5px;color:var(--muted)">Use <code>echo -n</code> – without <code>-n</code> a newline sneaks into the password. Either way, the cluster stores the Secret under <code>data:</code> in base64.</p>
+        <p><b>Is a Secret safe?</b> On EKS, etcd is encrypted on disk with a key in AWS KMS – but the API server <b>decrypts before answering</b>. So what protects a Secret is <b>who is allowed to read it</b> (RBAC, next class). You can read every Secret in your namespace.</p>
+        <p><b>At work:</b> nobody writes Secret files. The password lives in <b>AWS Secrets Manager</b>; the <b>External Secrets Operator</b> reads it and creates the Kubernetes Secret. The repo holds only the reference. Env vars are still copied at start – Pods still need a restart.</p>
+        <p style="font-family:var(--mono);font-size:13.5px;color:var(--muted)">Secrets Manager → ESO → Kubernetes Secret → Pod env vars</p>
+        <p><b>Order matters:</b> ConfigMap → Secret → <code>postgres.yaml</code> (Pod + Service <code>db</code>) → the app. App first → it can't resolve <code>db</code> → CrashLoopBackOff.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="span note strong" id="nDecode">
+    <h3>🔎 Pod status decoder – read the STATUS, find where it broke</h3>
+    <p>Every Pod goes through the same 5 steps. The status word tells you <b>which step failed</b> – and that tells you where to look. Click a status to jump to its box on the map.</p>
+<pre class="dec-term"><span class="d">$ kubectl get pods
+NAME     READY   STATUS                       RESTARTS</span>
+web-a1   0/1     <span style="color:var(--cp);font-weight:600">Pending</span>                      0
+web-b2   0/1     <span style="color:var(--orange);font-weight:600">ImagePullBackOff</span>             0
+web-c3   0/1     <span style="color:var(--cfg);font-weight:600">CreateContainerConfigError</span>   0
+web-d4   0/1     <span style="color:var(--red);font-weight:600">CrashLoopBackOff</span>             5
+web-e5   0/1     <span style="color:var(--green);font-weight:600">Running</span>                      0   <span class="d">← running, but not Ready</span></pre>
+    <div class="dec">
+      <div class="stg" style="--c:var(--cp)"><span class="sn">Step 1 · Schedule</span><h4>Pick a node</h4>
+        <button class="bdg" data-go="sched">Pending</button><span class="lk">describe → Events</span>
+        <ul><li><b>No node has room</b> for the Pod's <b>requests</b> (they must fit on one node) → on this cluster Auto Mode adds one. Wait a minute.</li><li>Still stuck? Read the <code>FailedScheduling</code> event – capacity, a <b>taint</b>, or a node not Ready yet.</li><li><b>No Pod at all?</b> That's the quota → <code>describe rs</code>.</li><li>Waiting for its <b>PVC</b>? → <code>describe pvc</code>.</li></ul></div>
+      <div class="stg" style="--c:var(--orange)"><span class="sn">Step 2 · Pull image</span><h4>Download from ECR</h4>
+        <button class="bdg" data-go="rt2">ImagePullBackOff</button><span class="lk">describe → Events</span>
+        <ul><li><code>not found</code> → wrong image or tag. Fix the <code>image:</code> line.</li><li><code>forbidden</code> → your ECR repository policy is missing.</li></ul></div>
+      <div class="stg" style="--c:var(--cfg)"><span class="sn">Step 3 · Create container</span><h4>Plug in settings</h4>
+        <button class="bdg" data-go="oCm">CreateContainerConfigError</button><span class="lk">describe → Events</span>
+        <ul><li><code>configmap "…" not found</code> / <code>secret "…" not found</code> → fix the name.</li><li>A key is missing inside it → fix <code>secretKeyRef.key</code>.</li></ul></div>
+      <div class="stg" style="--c:var(--red)"><span class="sn">Step 4 · Run</span><h4>PID 1 must keep running</h4>
+        <button class="bdg" data-go="proc1">CrashLoopBackOff</button><span class="lk">logs --previous</span>
+        <ul><li><code>exec format error</code> → arm64 image. Build with <code>--platform linux/amd64</code>.</li><li><code>KeyError: 'DB_HOST'</code> / can't resolve <code>db</code> → missing setting, or Postgres not deployed first.</li><li>Liveness probe failing → kubelet restarts it on purpose.</li><li><code>OOMKilled</code> in <code>describe</code> → went past its memory limit.</li></ul></div>
+      <div class="stg" style="--c:var(--green)"><span class="sn">Step 5 · Ready</span><h4>Readiness probe passes</h4>
+        <button class="bdg" data-go="probe1">Running · READY 0/1</button><span class="lk">describe → Events</span>
+        <ul><li>Probe <code>path</code>/<code>port</code> wrong (e.g. <code>/health</code> → 404) → no traffic, no restart.</li><li>New version never ready → stuck rollout, old Pods keep serving.</li></ul></div>
+    </div>
+    <div class="dec-split">
+      <div><b>Steps 1–3: the app never ran</b> → no app logs. Use <code>kubectl describe pod &lt;name&gt;</code> and read Events at the bottom.</div>
+      <div><b>Steps 4–5: the app ran</b> → <code>kubectl logs</code> (add <code>--previous</code> after a crash) tells the story.</div>
+    </div>
+  </div>
+
+  <div class="span note strong" id="nRbac" style="border-color:var(--rb)">
+    <h3>🛂 RBAC, piece by piece (Session 10) – a Secret is only as safe as the list of who can read it</h3>
+    <p>Kubernetes has <b>no user accounts of its own</b>. On EKS your AWS sign-in gets you in (check 1), then RBAC – the cluster's own permission rules – decides what you may do (check 2). Same idea as Scale's IAM, with one word, <b>Role</b>, meaning something different.</p>
+    <div class="sgrid" style="grid-template-columns:560px 1fr 1fr">
+      <div class="ycol"><b>role-pod-reader.yaml – WHAT</b>
+<pre class="yaml"><span class="k">apiVersion</span>: <span class="v">rbac.authorization.k8s.io/v1</span><span class="n">1</span>
+<span class="k">kind</span>: <span class="v">Role</span>
+<span class="k">metadata</span>:
+  <span class="k">name</span>: <span class="v">pod-reader</span>
+  <span class="k">namespace</span>: <span class="v">&lt;namespace&gt;</span>
+<span class="k">rules</span>:<span class="n">2</span>
+- <span class="k">apiGroups</span>: <span class="v">[""]</span><span class="n">3</span>
+  <span class="k">resources</span>: <span class="v">["pods"]</span><span class="n">4</span>
+  <span class="k">verbs</span>: <span class="v">["get", "list", "watch"]</span><span class="n">5</span></pre>
+        <b>rolebinding – WHO and WHERE</b>
+<pre class="yaml"><span class="k">kind</span>: <span class="v">RoleBinding</span>
+<span class="k">metadata</span>:
+  <span class="k">name</span>: <span class="v">student-edit</span>
+  <span class="k">namespace</span>: <span class="v">&lt;namespace&gt;</span><span class="n">6</span>
+<span class="k">roleRef</span>:<span class="n">7</span>
+  <span class="k">kind</span>: <span class="v">ClusterRole</span>
+  <span class="k">name</span>: <span class="v">edit</span>
+<span class="k">subjects</span>:<span class="n">8</span>
+- <span class="k">kind</span>: <span class="v">User</span>
+  <span class="k">name</span>: <span class="v">student:&lt;namespace&gt;</span></pre>
+      </div>
+      <ol class="yl" style="columns:1">
+        <li><span>1</span><p><code>rbac.authorization.k8s.io/v1</code> – the RBAC API group. Don't memorize the YAML: the docs page "Using RBAC Authorization" has each object.</p></li>
+        <li><span>2</span><p><code>rules</code> – a list of <b>allows</b>. There is no deny: what no rule allows is refused.</p></li>
+        <li><span>3</span><p><code>apiGroups: [""]</code> – <code>""</code> is the <b>core group</b> (Pods, ConfigMaps, Secrets, Services) – not "everything".</p></li>
+        <li><span>4</span><p><code>resources</code> – which kinds. <code>["*"]</code> = every kind in the group.</p></li>
+        <li><span>5</span><p><code>verbs</code> – <code>get</code> = one object by name, <code>list</code> = all of them (<code>kubectl get pods</code> needs <b>list</b>), <code>watch</code> = wait for changes. A Role with only <code>get</code> refuses <code>kubectl get pods</code>.</p></li>
+        <li><span>6</span><p><code>namespace</code> – a RoleBinding is namespaced and lands wherever you apply it. Forget <code>-n</code> and it's in the wrong place.</p></li>
+        <li><span>7</span><p><code>roleRef</code> – <b>what</b>: the Role or ClusterRole being given. A RoleBinding to a missing Role gives nothing until it exists.</p></li>
+        <li><span>8</span><p><code>subjects</code> – <b>who</b>: a <code>User</code> (a person, via AWS) or a <code>ServiceAccount</code> (a program).</p></li>
+        <li><span>!</span><p><b>A Role alone gives nothing.</b> Only the binding makes it count – just like an IAM policy that isn't attached.</p></li>
+      </ol>
+      <div class="ycol" style="gap:16px">
+        <table class="t">
+          <tr><th>Error</th><th>Check that failed</th></tr>
+          <tr><td><code>You must be logged in to the server (Unauthorized)</code></td><td><b>AWS</b>: the cluster doesn't know who you are (no access entry / expired login)</td></tr>
+          <tr><td><code>Forbidden: User "student:you" cannot list resource "secrets" … in the namespace "x"</code></td><td><b>RBAC</b>: it knows you; no rule allows it. Read it as <b>who · what · where</b></td></tr>
+        </table>
+        <table class="t">
+          <tr><th>Binding → points to</th><th>Applies in</th></tr>
+          <tr><td>RoleBinding → Role</td><td>one namespace</td></tr>
+          <tr><td>RoleBinding → ClusterRole</td><td>only the RoleBinding's namespace (<b>this is you</b>)</td></tr>
+          <tr><td>ClusterRoleBinding → ClusterRole</td><td>every namespace</td></tr>
+          <tr><td>ClusterRoleBinding → Role</td><td>not allowed</td></tr>
+        </table>
+        <table class="t">
+          <tr><th>In your namespace</th><th>You (edit)</th><th>Claude Code (view)</th></tr>
+          <tr><td>Pods, logs, events, ConfigMaps</td><td>read</td><td>read</td></tr>
+          <tr><td>Secrets</td><td>read</td><td><b>no</b></td></tr>
+          <tr><td>exec into a Pod</td><td>yes</td><td><b>no</b></td></tr>
+          <tr><td>Create, change, delete</td><td>yes</td><td><b>no</b></td></tr>
+          <tr><td>Roles, RoleBindings</td><td>no</td><td>no</td></tr>
+        </table>
+        <p><b>Least privilege:</b> every person, program and AI gets only what its job needs. Class example <code>report-bot</code>: its own ServiceAccount + Role <code>configmap-reader</code> (get/list/watch ConfigMaps) + a RoleBinding. <code>can-i get configmaps</code> → yes; <code>get secrets</code> → no; <code>delete configmaps</code> → no.</p>
+        <p><b>Two "roles", don't mix them:</b> IAM role <code>Containers26a</code> gets you <b>in</b>; ClusterRole <code>edit</code> says what you may do <b>inside</b>.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="span note strong" id="nEso" style="border-color:var(--cfg)">
+    <h3>🗝️ External Secrets, piece by piece (Session 11) – commit the address of the password, never the password</h3>
+    <p>A Secret is base64, and <code>.gitignore</code> also hides it from your <b>team</b> (if it's deleted while you're off, nobody can recreate it). So the value lives in <b>AWS Secrets Manager</b>, Git holds only its path, and a controller copies it in.</p>
+    <div class="sgrid" style="grid-template-columns:560px 1fr 1fr">
+      <div class="ycol"><b>externalsecret-investment-app.yaml</b>
+<pre class="yaml"><span class="k">apiVersion</span>: <span class="v">external-secrets.io/v1</span><span class="n">1</span>
+<span class="k">kind</span>: <span class="v">ExternalSecret</span>
+<span class="k">metadata</span>:
+  <span class="k">name</span>: <span class="v">investment-app-secret</span>
+<span class="k">spec</span>:
+  <span class="k">secretStoreRef</span>:<span class="n">2</span>
+    <span class="k">name</span>: <span class="v">aws-secrets-manager</span>
+  <span class="k">refreshInterval</span>: <span class="v">1h</span><span class="n">3</span>
+  <span class="k">target</span>:<span class="n">4</span>
+    <span class="k">name</span>: <span class="v">investment-app-secret</span>
+  <span class="k">dataFrom</span>:<span class="n">5</span>
+  - <span class="k">extract</span>:
+      <span class="k">key</span>: <span class="v">/26a/&lt;namespace&gt;/investment-app</span></pre>
+      </div>
+      <ol class="yl" style="columns:1">
+        <li><span>1</span><p><code>external-secrets.io/v1</code> – the <b>operator's own</b> API group; Kubernetes itself doesn't have this kind. Your <code>edit</code> ClusterRole already allows it.</p></li>
+        <li><span>2</span><p><code>secretStoreRef</code> – which SecretStore to use: it knows the <b>region</b> and <b>how to sign in</b> to AWS. Being on AWS doesn't give the cluster AWS permissions.</p></li>
+        <li><span>3</span><p><code>refreshInterval: 1h</code> – re-read AWS every hour and <b>update the Secret</b>. Running Pods still keep the old value.</p></li>
+        <li><span>4</span><p><code>target.name</code> – the normal Secret to write. Night 1's name, so the Deployments don't change at all.</p></li>
+        <li><span>5</span><p><code>dataFrom.extract.key</code> – the <b>path</b> in Secrets Manager. <code>extract</code> copies <b>every key</b> there: <code>DB_PASSWORD</code> and <code>FINNHUB_KEY</code>. Leave <code>&lt;namespace&gt;</code> in by mistake → not synced.</p></li>
+      </ol>
+      <div class="ycol" style="gap:16px">
+        <p style="font-family:var(--mono);font-size:13.5px;line-height:1.7;white-space:pre-line;background:var(--codebg);border-radius:8px;padding:12px">ExternalSecret (your ns, in Git: a PATH)
+ ↓ names
+SecretStore aws-secrets-manager (region + sign-in)
+ ↓ uses
+ServiceAccount secrets-reader → IAM role (only /26a/&lt;your-ns&gt;/)
+ ↓ operator signs in to AWS as that role
+Secrets Manager /26a/&lt;your-ns&gt;/investment-app
+ ↓ operator writes, re-reads every 1h
+Secret investment-app-secret (normal Secret)
+ ↓ copied once when the container starts
+Pod env vars</p>
+        <table class="t">
+          <tr><th>Rotation</th><th></th></tr>
+          <tr><td>10:00</td><td>password changed in Secrets Manager</td></tr>
+          <tr><td>≤ 11:00</td><td>operator re-reads → updates the Secret. Running containers: <b>still the old value</b></td></tr>
+          <tr><td>then</td><td><code>kubectl rollout restart deploy/investment-app</code> → new Pods read the new value</td></tr>
+        </table>
+        <p><b>A classmate's path:</b> Kubernetes <b>accepts</b> the ExternalSecret (you may create one in your namespace) – <b>AWS refuses</b> the read: <code>SecretSyncedError</code>, and <code>describe externalsecret</code> shows <code>AccessDeniedException … not authorized to perform: secretsmanager:GetSecretValue</code>. Read it as who · what · where · answer.</p>
+        <p><b>Debug loop:</b> <code>kubectl get externalsecret</code> → <code>describe externalsecret</code> (Events) → operator logs in ns <code>external-secrets</code> → the secret itself in AWS.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="span note strong" id="nRes" style="border-color:var(--res)">
+    <h3>📏 Requests & limits, piece by piece (Session 11) – what a Pod may use on a shared node</h3>
+    <p>A node is an EC2 instance with a fixed amount of CPU and memory, shared by Pods from <b>any</b> namespace. Without limits, one busy Pod can eat the node and starve its neighbours. So every container says up front how much it needs (<b>request</b>) and how far it may go (<b>limit</b>).</p>
+    <div class="sgrid" style="grid-template-columns:560px 1fr 1fr">
+      <div class="ycol"><b>on each container (Deployment → template → spec → containers)</b>
+<pre class="yaml"><span class="tpl" style="background:var(--res-bg);border-color:var(--res)"><span class="k">resources</span>:<span class="n">1</span>
+  <span class="k">requests</span>:<span class="n">2</span>
+    <span class="k">cpu</span>: <span class="v">100m</span><span class="n">3</span>
+    <span class="k">memory</span>: <span class="v">128Mi</span><span class="n">4</span>
+  <span class="k">limits</span>:<span class="n">5</span>
+    <span class="k">cpu</span>: <span class="v">250m</span>
+    <span class="k">memory</span>: <span class="v">256Mi</span></span></pre>
+        <p style="font-size:13.5px;color:var(--muted)">These values show the shape – yours come from measuring. Class lab: <code>kubectl patch deployment investment-app --type=strategic --patch-file investment-app-resources.patch.yaml</code></p>
+      </div>
+      <ol class="yl" style="columns:1">
+        <li><span>1</span><p><code>resources</code> – per <b>container</b>, beside <code>image</code> and the probes. Every replacement Pod from the template gets it.</p></li>
+        <li><span>2</span><p><code>requests</code> – read by the <b>scheduler</b>: "place me where at least this is free". Reserves room; it doesn't use CPU and doesn't cap use.</p></li>
+        <li><span>3</span><p><code>cpu: 100m</code> – millicores: <b>1000m = 1 core</b>, 250m = a quarter. <code>m</code> is for CPU only.</p></li>
+        <li><span>4</span><p><code>memory: 128Mi</code> – mebibytes: <b>1024Mi = 1Gi</b>. <code>Mi</code> is not "milli".</p></li>
+        <li><span>5</span><p><code>limits</code> – enforced on the <b>node</b> while running. Must be ≥ the request. Actual use (<code>kubectl top</code>) can be above the request, <b>never above the limit</b>.</p></li>
+      </ol>
+      <div class="ycol" style="gap:16px">
+        <table class="t">
+          <tr><th></th><th>CPU limit reached</th><th>Memory limit exceeded</th></tr>
+          <tr><td>What happens</td><td><b>Throttled</b>: extra work waits, keeps running</td><td><b>OOMKilled</b>: the container is killed</td></tr>
+          <tr><td>Then</td><td>slower answers (latency)</td><td>kubelet restarts the container in the <b>same Pod</b> (same name, same IP)</td></tr>
+          <tr><td>Evidence</td><td>throttling metrics + response times</td><td><code>RESTARTS</code> ↑ · <code>describe</code>: <code>Last State: Terminated, Reason: OOMKilled</code></td></tr>
+        </table>
+        <p><b>Placement:</b> a request must fit on <b>one</b> node. Node A and node B each have 400m free → a 600m Pod fits on neither → <code>Pending</code>, <code>FailedScheduling</code> (not enough capacity). Each node's <b>allocatable</b> is what's left after its own services (kubelet, containerd, kube-proxy).</p>
+        <p><b>Measure, then set:</b> <code>kubectl top pods -l app=investment-app</code> at startup, normal and peak (one <code>top</code> is a snapshot). Requests from what you saw; memory limit above the highest use + headroom (peak 2 → give 2.5). You pay for the EC2 node either way – good requests pack more Pods per node.</p>
+        <p>A slow app isn't proof of throttling – it may be the code. Check throttling numbers first. <b>Next:</b> LimitRange, ResourceQuota and the HorizontalPodAutoscaler.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="span note strong" id="nScale" style="border-color:var(--res)">
+    <h3>📈 Namespace limits & the HPA, piece by piece (Session 12) – read the event on the object that failed</h3>
+    <p>The investment app finally gets its requests and limits – with <code>kubectl patch</code>, which changes the <b>cluster</b>, not your file. Then the namespace's own rules (LimitRange, ResourceQuota), and two kinds of scaling: the HPA adds Pods, Karpenter adds nodes.</p>
+    <div class="sgrid" style="grid-template-columns:560px 1fr 1fr">
+      <div class="ycol"><b>investment-app-resources.patch.yaml</b>
+<pre class="yaml"><span class="k">spec</span>:<span class="n">1</span>
+  <span class="k">template</span>:
+    <span class="k">spec</span>:
+      <span class="k">containers</span>:
+      - <span class="k">name</span>: <span class="v">investment-app</span><span class="n">2</span>
+        <span class="k">resources</span>:
+          <span class="k">requests</span>:
+            <span class="k">cpu</span>: <span class="v">100m</span>
+            <span class="k">memory</span>: <span class="v">128Mi</span>
+          <span class="k">limits</span>:
+            <span class="k">cpu</span>: <span class="v">250m</span>
+            <span class="k">memory</span>: <span class="v">256Mi</span></pre>
+<pre class="yaml" style="margin-top:6px"><span class="c">$ kubectl patch deployment investment-app --type=strategic \
+    --patch-file investment-app-resources.patch.yaml</span><span class="n">3</span></pre>
+        <b>an HPA like the class demo (standard shape)</b>
+<pre class="yaml"><span class="k">apiVersion</span>: <span class="v">autoscaling/v2</span><span class="n">4</span>
+<span class="k">kind</span>: <span class="v">HorizontalPodAutoscaler</span>
+<span class="k">metadata</span>:
+  <span class="k">name</span>: <span class="v">unit5-cpu</span>
+<span class="k">spec</span>:
+  <span class="k">scaleTargetRef</span>:<span class="n">5</span>
+    <span class="k">apiVersion</span>: <span class="v">apps/v1</span>
+    <span class="k">kind</span>: <span class="v">Deployment</span>
+    <span class="k">name</span>: <span class="v">unit5-cpu</span>
+  <span class="k">minReplicas</span>: <span class="v">1</span>
+  <span class="k">maxReplicas</span>: <span class="v">2</span>
+  <span class="k">metrics</span>:
+  - <span class="k">type</span>: <span class="v">Resource</span>
+    <span class="k">resource</span>:
+      <span class="k">name</span>: <span class="v">cpu</span>
+      <span class="k">target</span>:
+        <span class="k">type</span>: <span class="v">Utilization</span>
+        <span class="k">averageUtilization</span>: <span class="v">60</span><span class="n">6</span></pre>
+      </div>
+      <ol class="yl" style="columns:1">
+        <li><span>1</span><p>A patch file has <b>no <code>apiVersion</code>/<code>kind</code></b>. It starts at the path it changes; Kubernetes walks the live YAML by indentation and merges the values in.</p></li>
+        <li><span>2</span><p>The container is matched <b>by name</b>, so only <code>investment-app</code>'s <code>resources</code> change. Template changed → a <b>rollout</b> (new ReplicaSet). 2 replicas × 100m = 200m requested.</p></li>
+        <li><span>3</span><p><b>Patch changes etcd, not your file.</b> A teammate's later <code>kubectl apply -f</code> with the old file undoes it. Put the same <code>resources:</code> in the file and push.</p></li>
+        <li><span>4</span><p><code>autoscaling/v2</code> – the HPA's API group. It's a controller that edits the Deployment's <code>replicas</code> for you.</p></li>
+        <li><span>5</span><p><code>scaleTargetRef</code> – which Deployment to scale, between <code>minReplicas</code> and <code>maxReplicas</code>.</p></li>
+        <li><span>6</span><p><code>averageUtilization: 60</code> – percent <b>of the request</b>. Demo Pod requests 50m → 60% = 30m. Use 200m on a 100m request = 200% → add Pods. Needs working metrics (<code>kubectl top</code>); a first <code>&lt;unknown&gt;</code> is normal.</p></li>
+      </ol>
+      <div class="ycol" style="gap:16px">
+        <table class="t">
+          <tr><th>Symptom</th><th>Describe this</th><th>Look for</th></tr>
+          <tr><td>Pod <b>Pending</b></td><td><code>describe pods -l app=…</code></td><td><code>FailedScheduling: Insufficient cpu</code> / untolerated taint</td></tr>
+          <tr><td><b>No Pod</b> at all</td><td><code>describe rs -l app=…</code></td><td><code>FailedCreate: exceeded quota</code></td></tr>
+          <tr><td>Container <b>restarted</b></td><td><code>describe pod &lt;pod&gt;</code></td><td><code>Last State: Terminated, Reason: OOMKilled</code></td></tr>
+        </table>
+        <table class="t">
+          <tr><th>Pending reason</th><th>Waits for</th></tr>
+          <tr><td>Not enough capacity for the <b>request</b></td><td>room, or a new node (Karpenter)</td></tr>
+          <tr><td>Placement rule – e.g. every node has a <b>taint</b> (bug spray) the Pod doesn't <b>tolerate</b></td><td>you to fix the rule</td></tr>
+          <tr><td>The right node exists but isn't Ready yet</td><td>a few minutes</td></tr>
+        </table>
+        <table class="t">
+          <tr><th></th><th>LimitRange</th><th>ResourceQuota</th></tr>
+          <tr><td>Checks</td><td>each <b>container</b></td><td>the <b>namespace total</b></td></tr>
+          <tr><td>Says</td><td>"no container may ask for more than X" + fills in defaults</td><td>"the namespace may not ask for more than Y in total"</td></tr>
+          <tr><td>Over it</td><td>Pod rejected (403)</td><td>Pod never created (FailedCreate on the RS)</td></tr>
+        </table>
+        <p style="font-family:var(--mono);font-size:13.5px">traffic ↑ → CPU ↑ → HPA raises replicas → Pods that don't fit are Pending → Karpenter adds a node</p>
+        <p><b>What more Pods can't fix:</b> the database is down → every replica loses it. <b>Readiness</b> fails → no traffic. <b>Liveness should not</b> fail for a DB outage – restarting app containers doesn't repair the DB.</p>
+        <p>💡 OOMKilled doesn't always mean the container hit its <b>own</b> limit: if the Pods on a node together use more memory than the node has, a container can be killed below its limit.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="span note strong" id="nSto" style="border-color:var(--sto)">
+    <h3>💾 Storage, piece by piece (Session 13) – the Pod is temporary, the claim keeps the data</h3>
+    <p>Files a container writes without a volume sit on the node's disk and are <b>gone when the Pod is replaced</b> (ephemeral). Fine for the stateless web app – its data is in the DB. Fatal for Postgres. Class demo: create <code>trades</code>, delete the Pod → <code>relation "trades" does not exist</code>. With a claim → <code>buy | 150.00</code> survives.</p>
+    <div class="sgrid" style="grid-template-columns:560px 1fr 1fr">
+      <div class="ycol"><b>pvc.yaml (standard shape)</b>
+<pre class="yaml"><span class="k">apiVersion</span>: <span class="v">v1</span>
+<span class="k">kind</span>: <span class="v">PersistentVolumeClaim</span>
+<span class="k">metadata</span>:
+  <span class="k">name</span>: <span class="v">postgres-data-unit6</span>
+<span class="k">spec</span>:
+  <span class="k">accessModes</span>: <span class="v">["ReadWriteOnce"]</span><span class="n">1</span>
+  <span class="k">storageClassName</span>: <span class="v">unit6-ebs</span><span class="n">2</span>
+  <span class="k">resources</span>:
+    <span class="k">requests</span>:
+      <span class="k">storage</span>: <span class="v">1Gi</span><span class="n">3</span></pre>
+        <b>postgres-persistent.yaml (the Pod part)</b>
+<pre class="yaml"><span class="k">containers</span>:
+- <span class="k">name</span>: <span class="v">postgres</span>
+  <span class="k">volumeMounts</span>:<span class="n">4</span>
+  - <span class="k">name</span>: <span class="v">database-files</span>
+    <span class="k">mountPath</span>: <span class="v">/var/lib/postgresql/data</span>
+<span class="k">volumes</span>:<span class="n">5</span>
+- <span class="k">name</span>: <span class="v">database-files</span>
+  <span class="k">persistentVolumeClaim</span>:
+    <span class="k">claimName</span>: <span class="v">postgres-data-unit6</span></pre>
+      </div>
+      <ol class="yl" style="columns:1">
+        <li><span>1</span><p><code>accessModes</code> – <code>ReadWriteOnce</code> = one <b>node</b> reads and writes (the EBS default). <code>ReadWriteMany</code> needs shared storage like <b>EFS</b>. <code>ReadWriteOncePod</code> = one Pod in the whole cluster.</p></li>
+        <li><span>2</span><p><code>storageClassName</code> – which template makes the disk. A name that doesn't exist → the claim stays Pending; <code>describe pvc</code> says why.</p></li>
+        <li><span>3</span><p><code>storage: 1Gi</code> – the size. This class has <code>allowVolumeExpansion: false</code>, so it can't grow later.</p></li>
+        <li><span>4</span><p><code>volumeMounts</code> (container level) – <b>where</b> inside the container. Postgres keeps its files under <code>/var/lib/postgresql/data</code>, now the EBS disk.</p></li>
+        <li><span>5</span><p><code>volumes</code> (Pod level) – <b>which claim</b>. Same <code>name</code> as the mount links the two. PVC and Deployment can share one file with <code>---</code>.</p></li>
+      </ol>
+      <div class="ycol" style="gap:16px">
+        <p style="font-family:var(--mono);font-size:13.5px">apply PVC → StorageClass → provisioner creates an EBS disk → recorded as a PV → PVC bound → Pod mounts the claim</p>
+        <table class="t">
+          <tr><th>Action</th><th>What happens to the data</th></tr>
+          <tr><td>Replace the Pod</td><td>claim and disk stay – new Pod, same data</td></tr>
+          <tr><td>Delete the claim, policy <code>Delete</code></td><td>disk and data deleted (dev/test)</td></tr>
+          <tr><td>Delete the claim, policy <code>Retain</code></td><td>disk stays until an admin deletes it – <b>charges continue</b> (prod)</td></tr>
+          <tr><td>Delete the namespace</td><td>its claims are deleted; their reclaim policies apply</td></tr>
+        </table>
+        <table class="t">
+          <tr><th></th><th>Deployment</th><th>StatefulSet</th></tr>
+          <tr><td>Pod names</td><td>random hash, new each time</td><td><code>postgres-0</code>, <code>-1</code> – stable</td></tr>
+          <tr><td>Storage</td><td>replicas share one claim (RWO breaks with &gt;1 node)</td><td><b>one claim per Pod</b> (<code>volumeClaimTemplates</code>)</td></tr>
+          <tr><td>Scaling</td><td>all at once</td><td>one at a time, in order</td></tr>
+          <tr><td>Good for</td><td>stateless apps; a 1-replica DB works</td><td>databases, other stateful apps</td></tr>
+        </table>
+        <p><b>Reality check:</b> a disk doesn't <b>run</b> a database – backups, replication, failover and upgrades are still yours, and a shared cluster's noisy neighbours can starve it. So most teams keep production databases on <b>RDS</b>, outside the cluster – same reason as Scale Sessions 05–06.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="span note strong" id="nJob" style="border-color:var(--sto)">
+    <h3>✅ Jobs & CronJobs, piece by piece (Session 13) – work that finishes</h3>
+    <p>A <b>Deployment</b> keeps something running forever. A <b>Job</b> runs a task <b>until it succeeds</b> (exit code 0) and stops. A <b>CronJob</b> creates a new Job on a schedule.</p>
+    <div class="sgrid" style="grid-template-columns:560px 1fr 1fr">
+      <div class="ycol"><b>schema-job.yaml</b>
+<pre class="yaml"><span class="k">apiVersion</span>: <span class="v">batch/v1</span><span class="n">1</span>
+<span class="k">kind</span>: <span class="v">Job</span>
+<span class="k">metadata</span>:
+  <span class="k">name</span>: <span class="v">unit6-schema</span>
+<span class="k">spec</span>:
+  <span class="k">backoffLimit</span>: <span class="v">2</span><span class="n">2</span>
+  <span class="k">ttlSecondsAfterFinished</span>: <span class="v">300</span><span class="n">3</span>
+  <span class="k">template</span>:<span class="n">4</span>
+    <span class="k">spec</span>:
+      <span class="k">restartPolicy</span>: <span class="v">Never</span><span class="n">5</span>
+      <span class="k">containers</span>:
+      - <span class="k">name</span>: <span class="v">schema</span>
+        <span class="k">image</span>: <span class="v">postgres:16</span>   <span class="c"># supplies psql</span></pre>
+        <b>a CronJob</b>
+<pre class="yaml"><span class="k">apiVersion</span>: <span class="v">batch/v1</span>
+<span class="k">kind</span>: <span class="v">CronJob</span>
+<span class="k">spec</span>:
+  <span class="k">schedule</span>: <span class="v">"0 2 * * *"</span><span class="n">6</span>
+  <span class="k">timeZone</span>: <span class="v">"Etc/UTC"</span>
+  <span class="k">jobTemplate</span>:<span class="n">7</span>
+    <span class="k">spec</span>: <span class="c"># the Job spec goes here</span></pre>
+      </div>
+      <ol class="yl" style="columns:1">
+        <li><span>1</span><p><code>batch/v1</code> – the API group for Jobs and CronJobs.</p></li>
+        <li><span>2</span><p><code>backoffLimit: 2</code> – two retries after failures, then the Job is failed: <code>BackoffLimitExceeded</code>.</p></li>
+        <li><span>3</span><p><code>ttlSecondsAfterFinished: 300</code> – delete the Job and its Pods 5 min after it finishes. <b>A Pod's logs go with it</b> – read them first.</p></li>
+        <li><span>4</span><p><code>template</code> – the Pod to create, like in a Deployment.</p></li>
+        <li><span>5</span><p><code>restartPolicy: Never</code> – each retry is a <b>new Pod</b>, so the failed Pods' logs stay to read.</p></li>
+        <li><span>6</span><p><code>schedule</code> – minute, hour, day of month, month, day of week. <code>"0 2 * * *"</code> = daily 02:00. Use crontab.guru or AI instead of guessing.</p></li>
+        <li><span>7</span><p><code>jobTemplate</code> – the Job it creates each time (Pod template, retries…).</p></li>
+      </ol>
+      <div class="ycol" style="gap:16px">
+        <p style="font-family:var(--mono);font-size:13.5px">Job → Pod → task runs → exit 0 = Complete · non-zero = failed attempt → new Pod (up to backoffLimit)</p>
+        <table class="t">
+          <tr><th>Class commands</th><th>Does</th></tr>
+          <tr><td><code>kubectl create configmap unit6-schema --from-file=schema.sql --dry-run=client -o yaml | kubectl apply -f -</code></td><td>create-or-update the ConfigMap in one line (SQL isn't secret)</td></tr>
+          <tr><td><code>kubectl wait --for=condition=complete job/unit6-schema --timeout=180s</code></td><td>wait until the Job finished</td></tr>
+          <tr><td><code>kubectl logs job/unit6-schema</code></td><td>what <code>psql</code> printed</td></tr>
+        </table>
+        <p><b>Order is yours:</b> Kubernetes does not make the Deployment wait for the Job. Check <code>Complete</code>, then deploy the app – otherwise the app answers <b>HTTP 500</b> (no tables).</p>
+        <p><b>Safe to repeat:</b> <code>CREATE TABLE IF NOT EXISTS</code> keeps the existing table (<code>relation "trades" already exists, skipping</code>). A corrected run needs a <b>fresh</b> Job: delete and re-apply.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="span note strong" id="nFails">
+    <h3>🧯 What breaks where – read the error, find the box</h3>
+    <p>Each error belongs to one box on this board. Click the box tag to jump there. First places to look: <code>docker logs</code> on the Mac, <code>kubectl describe pod</code> (Events) and <code>kubectl logs</code> on the cluster.</p>
+    <div class="fails">
+      <div class="fail"><span class="sym">Cannot connect to the Docker daemon</span><button class="at" data-go="dockside">Docker side</button><p>The CLI is fine; the daemon isn't running. Start Docker Desktop.</p></div>
+      <div class="fail"><span class="sym">exec format error</span><button class="at" data-go="build">docker build</button><p>The chip, not the OS: arm64 image on amd64 nodes. On the cluster: <code>CrashLoopBackOff</code>, and <b>logs</b> shows one line – <code>exec /usr/local/bin/gunicorn: exec format error</code>. Rebuild with <code>--platform linux/amd64</code>, push a new tag.</p></div>
+      <div class="fail"><span class="sym">tag invalid … already exists</span><button class="at" data-go="yourEcr">your ECR</button><p>Nothing's broken – the IMMUTABLE repo won't overwrite <code>v1</code>. Push <code>v2</code>.</p></div>
+      <div class="fail"><span class="sym">ErrImagePull / ImagePullBackOff</span><button class="at" data-go="rt2">containerd</button><p>The node can't fetch the image. <b>describe</b> Events say why: <code>not found</code> = wrong tag (e.g. <code>v0</code>), <code>forbidden</code> = your repo policy is missing. BackOff = it keeps retrying, waiting longer. <code>logs</code> has nothing – no container started.</p></div>
+      <div class="fail"><span class="sym">Forbidden … namespace "default"</span><button class="at" data-go="api">API server</button><p>Your context has no namespace, so kubectl asked about <code>default</code>, where you have no permissions. <code>kubectl config set-context --current --namespace=…</code></p></div>
+      <div class="fail"><span class="sym">Pending</span><button class="at" data-go="sched">scheduler</button><p>No node yet. On this cluster Auto Mode adds a node when none has room – wait a minute, then <code>describe</code>.</p></div>
+      <div class="fail"><span class="sym">ContainerCreating</span><button class="at" data-go="rt1">containerd</button><p>Has a node; the image is being pulled. Normal for a few seconds.</p></div>
+      <div class="fail"><span class="sym">CrashLoopBackOff · RESTARTS ↑</span><button class="at" data-go="proc1">PID 1</button><p>The container starts and PID 1 exits, over and over; the kubelet waits longer each time (up to 5 min). <b>logs</b> shows why, e.g. <code>KeyError: 'DB_HOST'</code> – the file set no DB variables. Add <code>--previous</code> for the last crash.</p></div>
+      <div class="fail"><span class="sym">selector does not match template labels</span><button class="at" data-go="oDep">Deployment</button><p>The API server refuses the file; nothing is created. The two <code>app:</code> labels must be identical.</p></div>
+      <div class="fail"><span class="sym">FailedCreate: exceeded quota · get pods shows nothing</span><button class="at" data-go="oRq">ResourceQuota</button><p>The namespace total (8 Pods, 500m CPU requests, 1Gi memory requests…) would be exceeded, so the ReplicaSet <b>creates no Pod</b> – not Pending. <code>kubectl describe rs -l app=…</code>. Clean up or lower requests; a new node can't help.</p></div>
+      <div class="fail"><span class="sym">403 Forbidden · maximum … per Container</span><button class="at" data-go="oLr">LimitRange</button><p>A container asks for more than the namespace's per-container max (1 CPU / 1Gi). Lower it. The max is not a default.</p></div>
+      <div class="fail"><span class="sym">My patch disappeared</span><button class="at" data-go="nScale">kubectl patch</button><p>Someone ran <code>kubectl apply -f</code> with the old file – patch changed the cluster, not Git. Put the change in the file and push.</p></div>
+      <div class="fail"><span class="sym">HPA stuck at &lt;unknown&gt; / never scales</span><button class="at" data-go="oHpa">HPA</button><p>No CPU <b>request</b> (no percentage), metrics not working (<code>kubectl top</code> fails), or simply no load. First <code>&lt;unknown&gt;</code> for a minute is normal.</p></div>
+      <div class="fail"><span class="sym">FailedScheduling … untolerated taint</span><button class="at" data-go="sched">placement rule</button><p>Every node carries a taint the Pod doesn't tolerate. Waiting won't help – fix the rule (toleration) or run on other nodes.</p></div>
+      <div class="fail"><span class="sym">curl &lt;pod-ip&gt;:8080 times out</span><button class="at" data-go="nWhere">Pod IP</button><p>Not broken: the Pod IP is inside the cluster's network and your Mac is outside it. Reach the cluster only through the API server.</p></div>
+      <div class="fail"><span class="sym">Deleted Pod never came back</span><button class="at" data-go="nStart">ownership</button><p>It was a bare Pod – no ReplicaSet counts it. Use a Deployment.</p></div>
+      <div class="fail"><span class="sym">scale 3 → apply → back to 2</span><button class="at" data-go="oRs">ReplicaSet</button><p>No error: last write wins. <code>kubectl scale</code> changed the cluster, not your file. Edit <code>replicas</code> in the file and apply.</p></div>
+      <div class="fail"><span class="sym">docker stop 10 s · delete pod ~32 s</span><button class="at" data-go="dockerfile">Dockerfile</button><p>Shell-form <code>CMD</code>: <code>sh</code> is PID 1 and swallows SIGTERM, so the app never hears it. Docker kills after 10 s (exit 137); Kubernetes after its 30 s grace period. Exec form: ~3 s.</p></div>
+      <div class="fail"><span class="sym">InvalidImageName</span><button class="at" data-go="nYaml">manifest</button><p>The <code>image:</code> line isn't a real address – e.g. the placeholder <code>IMAGE_URI</code> was left in the file. Paste the full ECR URI and apply again.</p></div>
+      <div class="fail"><span class="sym">curl http://drill → nothing · EndpointSlice empty</span><button class="at" data-go="oEps">Service selector</button><p>The Service's selector matches no Pod (<code>app: dril</code>). Accepted with <b>no error</b>. Fix the label so it equals the Pods' label exactly.</p></div>
+      <div class="fail"><span class="sym">Connection refused (via the Service)</span><button class="at" data-go="nSvc">targetPort</button><p>Endpoints are listed, but <code>targetPort</code> isn't where the app listens. Nothing listens there in the Pod. Set it to 8080.</p></div>
+      <div class="fail"><span class="sym">curl http://drill from Mac: Could not resolve host</span><button class="at" data-go="kp1">ClusterIP</button><p>Not broken: ClusterIP and the cluster DNS work only inside the cluster. Use <code>kubectl exec client -- curl …</code> or <code>port-forward svc/drill 8000:80</code>.</p></div>
+      <div class="fail"><span class="sym">exceeded quota … services.loadbalancers=0</span><button class="at" data-go="nlb">NLB</button><p>An NLB costs money by the hour, so student namespaces allow none. Your quota: 8 Pods, 5 Services, 1 Ingress, 0 node ports.</p></div>
+      <div class="fail"><span class="sym">lost connection to pod (port-forward)</span><button class="at" data-go="pf">port-forward</button><p>port-forward picked <b>one</b> Pod, and that Pod was replaced. Start it again. The Service itself keeps answering.</p></div>
+      <div class="fail"><span class="sym">Token has expired</span><button class="at" data-go="sso">sign in</button><p>The SSO session lasts a day. <code>aws sso login --profile 312-cluster</code>, then check <code>kubectl config get-contexts</code>.</p></div>
+      <div class="fail"><span class="sym">https://… fails, http:// works (NLB)</span><button class="at" data-go="nlb">NLB</button><p>The Session 07 NLB listens on 80 with no certificate. With the Ingress, HTTPS ends at the shared ALB.</p></div>
+      <div class="fail"><span class="sym">READY 0/1 · Readiness probe failed … 404</span><button class="at" data-go="probe1">readiness</button><p>The probe's <code>path</code> isn't a route the image has (<code>/health</code> on drill). Pod gets no traffic; a rollout <b>stops</b> and old Pods keep serving. Fix the path, apply again.</p></div>
+      <div class="fail"><span class="sym">exceeded its progress deadline</span><button class="at" data-go="nProbe">stuck rollout</button><p>After 10 min of new Pods never getting ready. Nothing rolled back on its own – apply the fixed file; the bad ReplicaSet goes to 0.</p></div>
+      <div class="fail"><span class="sym">Liveness probe failed · RESTARTS ↑</span><button class="at" data-go="probe1">liveness</button><p>The kubelet restarts the container each time; then CrashLoopBackOff (10 s → … 5 min). Check the app, never its DB.</p></div>
+      <div class="fail"><span class="sym">Forbidden: pod updates may not change fields</span><button class="at" data-go="nProbe">bare Pod</button><p>Most fields of a running Pod can't change (e.g. its probe). Delete and re-apply – or use a Deployment, which swaps Pods for you.</p></div>
+      <div class="fail"><span class="sym">ValidatingAdmissionPolicy … denied request</span><button class="at" data-go="nIng">Ingress host</button><p>Host must be <code>&lt;your namespace&gt;.k8s.312school.com</code>, class <code>alb</code>, one rule, one path, one Service.</p></div>
+      <div class="fail"><span class="sym">404 · server: awselb/2.0 · empty body</span><button class="at" data-go="alb">shared ALB</button><p>No rule matched your host. Check <code>kubectl get ingress drill</code> has an ADDRESS (~1 min) and the host is spelled right.</p></div>
+      <div class="fail"><span class="sym">Wrong port in the Ingress</span><button class="at" data-go="oIng">Ingress</button><p>Keep <code>number: 80</code>. A port the Service doesn't have stops the controller updating the shared ALB for <b>everyone</b> – silently.</p></div>
+      <div class="fail"><span class="sym">relation "trades" does not exist (after a Pod restart)</span><button class="at" data-go="podDb">ephemeral</button><p>The database wrote to the container's own files, which die with the Pod. Mount a PVC at <code>/var/lib/postgresql/data</code>. Data lost earlier doesn't come back.</p></div>
+      <div class="fail"><span class="sym">PVC Pending</span><button class="at" data-go="oPvc">PVC</button><p>Normal until a Pod uses it (<code>WaitForFirstConsumer</code>). Still Pending <b>after</b> the Pod exists → <code>kubectl describe pvc</code> (e.g. the StorageClass name doesn't exist).</p></div>
+      <div class="fail"><span class="sym">2nd replica can't attach the volume</span><button class="at" data-go="ebs">ReadWriteOnce</button><p>An EBS claim is ReadWriteOnce – one node at a time – and each DB replica needs its own disk anyway. Use a StatefulSet (one claim per Pod), or EFS for many writers.</p></div>
+      <div class="fail"><span class="sym">Job 0/1 · BackoffLimitExceeded</span><button class="at" data-go="oJob">Job</button><p>All attempts failed. <code>kubectl describe job</code>, then the Pod logs – class case: <code>could not translate host name "unit6-db"</code> (Service missing). Fix, then delete and re-apply the Job.</p></div>
+      <div class="fail"><span class="sym">App gives HTTP 500 · no tables</span><button class="at" data-go="oJob">Job first</button><p>The app was deployed before the schema Job completed. Kubernetes doesn't order them – <code>kubectl wait --for=condition=complete</code> first.</p></div>
+      <div class="fail"><span class="sym">docker push: image does not exist locally</span><button class="at" data-go="build">"$VAR"</button><p>The shell didn't expand the variable. Write <code>"$REVISED_IMAGE"</code> in double quotes, and build from the right folder.</p></div>
+      <div class="fail"><span class="sym">PVC stuck in Terminating</span><button class="at" data-go="oPvc">claim in use</button><p>A claim waits until its Pod stops using it – give it a few minutes. With <code>Retain</code> the disk stays afterwards and keeps costing money.</p></div>
+      <div class="fail"><span class="sym">SecretSyncedError · AccessDeniedException</span><button class="at" data-go="oStore">SecretStore / IAM</button><p>The operator couldn't read AWS: wrong path (<code>&lt;namespace&gt;</code> left in), the secret doesn't exist, or it's a classmate's path. <code>kubectl describe externalsecret</code> → Events say which.</p></div>
+      <div class="fail"><span class="sym">Password rotated, app still uses the old one</span><button class="at" data-go="oOp">refreshInterval</button><p>The operator updated the Secret (within 1h), but env vars were copied at start. <code>kubectl rollout restart deploy/investment-app</code>.</p></div>
+      <div class="fail"><span class="sym">OOMKilled · Exit Code 137 · RESTARTS ↑</span><button class="at" data-go="res1">memory limit</button><p>The container went past its memory limit and was killed; the kubelet restarted it in the same Pod. <code>describe</code> → Last State; <code>logs --previous</code>. Raise the limit or fix the leak. It can also happen below the limit if the whole node runs out of memory.</p></div>
+      <div class="fail"><span class="sym">App slow, but nothing crashes</span><button class="at" data-go="res1">CPU limit</button><p>Maybe <b>throttled</b> at its CPU limit – or the app's own code. Check throttling numbers and response times before raising the limit.</p></div>
+      <div class="fail"><span class="sym">Pending · FailedScheduling · Insufficient cpu</span><button class="at" data-go="sched">requests</button><p>No single node has the Pod's <b>request</b> free (it can't be split across nodes). Lower the request, or wait for Auto Mode to add a node.</p></div>
+      <div class="fail"><span class="sym">You must be logged in to the server (Unauthorized)</span><button class="at" data-go="authz">check 1 · AWS</button><p>The cluster doesn't know who you are: SSO expired, wrong profile, or the IAM role has no <b>access entry</b>. <code>aws sso login</code>, then <code>kubectl auth whoami</code>.</p></div>
+      <div class="fail"><span class="sym">Forbidden … cannot list resource "secrets" in namespace "x"</span><button class="at" data-go="oRb">check 2 · RBAC</button><p>It knows you, but no RoleBinding allows that verb there – e.g. a classmate's namespace. Read who · what · where. <code>kubectl auth can-i list secrets -n x</code>.</p></div>
+      <div class="fail"><span class="sym">Made a Role, still "no"</span><button class="at" data-go="nRbac">RoleBinding</button><p>A Role alone gives nothing – add the RoleBinding, in the <b>right namespace</b>. Only <code>get</code> in the Role? <code>kubectl get pods</code> needs <code>list</code>.</p></div>
+      <div class="fail"><span class="sym">Claude Code: pods is forbidden … readonly:…</span><button class="at" data-go="cc">read-only on purpose</button><p>Working as designed: the read-only profile has <code>view</code>. Let it find the problem; apply the fix yourself with your own profile.</p></div>
+      <div class="fail"><span class="sym">CreateContainerConfigError</span><button class="at" data-go="oCm">ConfigMap name</button><p>The kubelet couldn't build the settings: <code>configmap "investment-app-configs" not found</code> (an extra s). <b>No logs</b> – the app never ran. Read <code>describe</code> events. Not a crash.</p></div>
+      <div class="fail"><span class="sym">Edited the ConfigMap, app still shows AAPL</span><button class="at" data-go="oCopy">copied at start</button><p>Values are copied only when a container starts. <code>kubectl rollout restart deploy/investment-app</code>, then <code>exec -- printenv TICKER</code>.</p></div>
+      <div class="fail"><span class="sym">apply refuses the ConfigMap</span><button class="at" data-go="nCfg">data: values</button><p>A number without quotes (<code>DB_PORT: 5432</code>). Every value in <code>data:</code> must be text: <code>"5432"</code>. Or it's <code>immutable: true</code> – delete and recreate.</p></div>
+      <div class="fail"><span class="sym">App CrashLoopBackOff · can't resolve db</span><button class="at" data-go="podDb">postgres first</button><p>The app started before Postgres and its Service <code>db</code> existed. Deploy <code>postgres.yaml</code> first. Fixed the name but no Secret? Starts, then crashes – now <code>logs</code> has the app's error.</p></div>
+      <div class="fail"><span class="sym">curl db fails from another namespace</span><button class="at" data-go="oDns">DNS name</button><p>A short name only works inside your own namespace. From elsewhere: <code>db.&lt;namespace&gt;</code> or the full <code>.svc.cluster.local</code> name.</p></div>
+      <div class="fail"><span class="sym">"The Secret is hidden, right?"</span><button class="at" data-go="oSec">base64</button><p>No. <code>kubectl get secret … -o jsonpath='{.data.DB_PASSWORD}' | base64 -d</code> prints it. Never commit the Secret file; put it in <code>.gitignore</code>.</p></div>
+      <div class="fail"><span class="sym">Name or service not known (db)</span><button class="at" data-go="localrun">app-net</button><p>Both containers must be on the same user-defined network. No rebuild – rerun with <code>--network app-net</code>.</p></div>
+    </div>
+  </div>
+
+  <div class="span row" style="flex-wrap:wrap;row-gap:40px">
+    <div class="note" id="nStatus" style="width:520px">
+      <h3>🚦 Pod status – what <code>kubectl get pods</code> is telling you</h3>
+      <table class="t">
+        <tr><td><code>Pending</code></td><td>Stored, no node yet (scheduler / Auto Mode)</td></tr>
+        <tr><td><code>ContainerCreating</code></td><td>Has a node; pulling the image</td></tr>
+        <tr><td><code>Running</code> · <code>READY 1/1</code></td><td>Containers ready / containers in the Pod</td></tr>
+        <tr><td><code>Running</code> · <code>READY 0/1</code></td><td>Started, but the <b>readiness probe</b> fails → gets no traffic</td></tr>
+        <tr><td><code>RESTARTS 3</code></td><td>The kubelet restarted the container 3 times in this Pod</td></tr>
+        <tr><td><code>Terminating</code></td><td>Being deleted (watch it with <code>kubectl get pods -w</code>)</td></tr>
+      </table>
+      <p><code>kubectl describe pod</code> Events tell the same story: <b>Scheduled → Pulling → Pulled → Created → Started</b>.</p>
+    </div>
+    <div class="note" id="nCorr" style="width:540px">
+      <h3>✏️ Fixing a common wrong idea</h3>
+      <p>Wrong: <span class="red">"A container dies instantly without a Pod; inside a Pod it lives longer."</span></p>
+      <p>A container lives exactly as long as its <b>PID 1</b> runs, with or without Kubernetes. With plain <code>docker run</code> it then stays <b>Exited</b> until someone starts it.</p>
+      <p>What the Pod adds: Kubernetes never runs a bare container – <b style="color:var(--green)">every container runs inside a Pod, and the Pod is the unit Kubernetes schedules and manages.</b> When PID 1 exits, the kubelet restarts the container in the same Pod.</p>
+      <p><b style="color:var(--orange)">Extra context – not from class:</b> that's the Pod's <code>restartPolicy</code>, <code>Always</code> by default.</p>
+    </div>
+    <div class="note blue" id="nWhere" style="width:440px">
+      <h3>🔎 Check: where does my Pod run?</h3>
+      <p><code>kubectl get pods -o wide</code></p>
+      <p><b>Proves:</b> the Pod's IP and its NODE (the EC2 instance).</p>
+      <p><b>Does not prove:</b> that your Mac can reach that IP. <code>curl --max-time 5 &lt;pod-ip&gt;:8080</code> times out – the Pod IP is on the cluster's network (a private address in the school's VPC). Same idea as RDS in a private subnet.</p>
+    </div>
+    <div class="note" id="nNs" style="width:560px">
+      <h3>🏷️ Namespace</h3>
+      <p>A <b>set of object names inside one cluster</b>: your room in the shared house. Your Pods, your quota (<b>8 Pods at once</b>) and your permissions live in it. One typo in <code>kubectl delete pod</code> can't remove someone else's app.</p>
+      <p><b>Not a machine and not a network.</b> Pods from many namespaces share nodes, and yours can be on several nodes – so it's drawn as a tag, not a box.</p>
+      <p><code>default</code> exists on every cluster; you have no permissions there → <span class="red">Forbidden</span> until <code>set-context</code>. Then <code>No resources found</code> = working and empty.</p>
+    </div>
+    <div class="note blue" id="nNodes" style="width:420px">
+      <h3>🔎 Check: which nodes exist?</h3>
+      <p><code>kubectl get nodes</code></p>
+      <p><b>Proves:</b> the worker machines exist and are Ready – NAME (instance id), STATUS, ROLES, AGE, VERSION. The control plane never shows up.</p>
+      <p><b>Does not prove:</b> anything about your Pods.</p>
+    </div>
+    <div class="note" id="nRoll" style="width:620px">
+      <h3>🔄 Rolling update & rollout undo</h3>
+      <p><code>kubectl set image deployment/drill drill=&lt;registry&gt;/drill:v2</code> (<code>drill=</code> is the <b>container</b> name). Any change under <code>template</code> → the Deployment makes a <b>new ReplicaSet</b> and swaps one Pod at a time, so some Pods answer the whole time.</p>
+      <div class="mini">
+        <div class="h">ReplicaSet</div><div class="h">start</div><div class="h">step 1</div><div class="h">step 2</div><div class="h">done</div>
+        <div><b>#1</b> (v1)</div><div>2</div><div>1</div><div>0</div><div>0 – <b>kept</b></div>
+        <div><b>#2</b> (v2)</div><div>0</div><div>1</div><div>2</div><div>2</div>
+      </div>
+      <p><code>kubectl rollout status deploy/drill</code> waits for it. <code>kubectl rollout undo deploy/drill</code> scales the old ReplicaSet back up. Pod names change – don't depend on them. <code>scale</code>, <code>set image</code> and <code>undo</code> change the <b>cluster only</b>; the next <code>apply</code> of your file wins. Scale twin: the instance refresh.</p>
+    </div>
+    <div class="note blue" id="nDebug" style="width:600px">
+      <h3>🩺 A Pod isn't running? get → describe → logs</h3>
+      <table class="t">
+        <tr><td><code>kubectl get pods</code></td><td>The <b>status word</b> – tells you which command to run next</td></tr>
+        <tr><td><code>kubectl describe pod &lt;name&gt;</code></td><td>The <b>Events</b>: what the cluster did (Scheduled → Pulling → Failed / Created / BackOff)</td></tr>
+        <tr><td><code>kubectl logs &lt;name&gt;</code></td><td>What the <b>process printed</b>. Never started → nothing to show</td></tr>
+      </table>
+      <table class="t" style="margin-top:4px">
+        <tr><th>Class pod</th><th>Status</th><th>Image or process?</th><th>Read it in</th></tr>
+        <tr><td><code>image-pull</code></td><td>ImagePullBackOff</td><td>image (can't be fetched)</td><td>describe</td></tr>
+        <tr><td><code>wrong-arch</code></td><td>CrashLoopBackOff</td><td>image (wrong processor)</td><td>logs</td></tr>
+        <tr><td><code>missing-env</code></td><td>CrashLoopBackOff</td><td>process (missing config)</td><td>logs</td></tr>
+      </table>
+      <p>The cluster's failures happen before the process exists – so describe comes before logs. Clean up first: the quota is 8 Pods.</p>
+    </div>
+    <div class="note" id="nRegion" style="width:520px">
+      <h3>🌍 Region, AZs & EKS vs ECS</h3>
+      <p>An EKS cluster lives in <b>one Region</b> (<code>us-east-1</code>), with nodes across <b>several AZs</b> – one AZ failing doesn't stop it. Another Region = a second cluster. Multi-AZ alone doesn't keep your app up: replicas, placement, capacity and an owning controller matter.</p>
+      <p><b>EKS</b> = managed Kubernetes (per-cluster hourly fee + nodes billed as EC2; same skills on GKE/AKS). <b>ECS</b> = AWS-only, says <b>task / service</b> where Kubernetes says <b>Pod / Deployment</b>.</p>
+    </div>
+  </div>
+ </div>
+</div>
+
+<div class="bar">
+  <div class="grp">
+    <button id="zOut" aria-label="Zoom out">−</button><span id="zoomPct">100%</span><button id="zIn" aria-label="Zoom in">+</button><button id="zFit">Fit</button>
+    <select id="jump" aria-label="Jump to">
+      <option value="">Jump to…</option>
+      <option value="title">The whole stage in one line</option>
+      <option value="nTrans">Scale ↔ Docker ↔ Kubernetes</option>
+      <option value="dockside">Mac: Docker side</option>
+      <option value="kside">Mac: kubectl side</option>
+      <option value="yourAcct">Your AWS account (ECR)</option>
+      <option value="cp">Control plane</option>
+      <option value="objs">Deployment → ReplicaSet → Pods</option>
+      <option value="node1">Node 1</option>
+      <option value="node2">Node 2</option>
+      <option value="nYaml">The manifests, piece by piece</option>
+      <option value="nSvc">The Service, piece by piece</option>
+      <option value="oSvc">Service · EndpointSlice · DNS</option>
+      <option value="alb">Users → shared ALB / NLB</option>
+      <option value="nProbe">Probes, piece by piece</option>
+      <option value="nIng">The Ingress, piece by piece</option>
+      <option value="nCfg">ConfigMaps & Secrets, piece by piece</option>
+      <option value="podInv">investment-app + Postgres Pods</option>
+      <option value="nRbac">RBAC, piece by piece</option>
+      <option value="authz">The two checks (AWS + RBAC)</option>
+      <option value="nEso">External Secrets, piece by piece</option>
+      <option value="nRes">Requests & limits, piece by piece</option>
+      <option value="nScale">Namespace limits & the HPA</option>
+      <option value="karp">Karpenter (more nodes)</option>
+      <option value="nSto">Storage, piece by piece</option>
+      <option value="nJob">Jobs & CronJobs</option>
+      <option value="ebs">Postgres + its EBS disk</option>
+      <option value="nDecode">Pod status decoder</option>
+      <option value="nFails">What breaks where</option>
+      <option value="nDebug">get → describe → logs</option>
+      <option value="nRoll">Rolling update & undo</option>
+      <option value="nStatus">Pod status</option>
+    </select>
+    <button id="quiz" aria-pressed="false" title="Blur the explanations; click a box to check yourself">Self-test</button>
+  </div>
+  <div class="stepbox" aria-live="polite"><span id="stepTitle">Steps: from app.py to users</span><span id="stepBody">Press Start to follow the numbers on the board.</span></div>
+  <div class="grp"><button id="sPrev" disabled>Back</button><button id="sNext" class="pri">Start</button></div>
+</div>
+
+<script>
+const view=document.getElementById('view'),world=document.getElementById('world');
+let s=1,tx=0,ty=0,moved=false;
+const apply=()=>{world.style.transform=`translate(${tx}px,${ty}px) scale(${s})`;document.getElementById('zoomPct').textContent=Math.round(s*100)+'%';};
+const clamp=v=>Math.min(2,Math.max(.1,v));
+function zoomAt(ns,cx,cy){ns=clamp(ns);tx=cx-(cx-tx)*ns/s;ty=cy-(cy-ty)*ns/s;s=ns;apply();}
+const barH=()=>document.querySelector('.bar').offsetHeight;
+function fit(){const W=world.offsetWidth,H=world.offsetHeight,vw=innerWidth,vh=innerHeight-barH();
+  if(vw<700){s=.36;tx=0;ty=0;}else{s=clamp(Math.min(vw/W,vh/H)*.98);tx=(vw-W*s)/2;ty=Math.max(0,(vh-H*s)/2);}apply();}
+document.getElementById('zIn').onclick=()=>zoomAt(s*1.25,innerWidth/2,(innerHeight-barH())/2);
+document.getElementById('zOut').onclick=()=>zoomAt(s/1.25,innerWidth/2,(innerHeight-barH())/2);
+document.getElementById('zFit').onclick=fit;
+view.addEventListener('wheel',e=>{e.preventDefault();if(e.ctrlKey||e.metaKey){zoomAt(s*Math.exp(-e.deltaY*.01),e.clientX,e.clientY);}else{tx-=e.deltaX;ty-=e.deltaY;apply();}},{passive:false});
+const pts=new Map();let pinch=null,downAt=null;
+view.addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;view.setPointerCapture(e.pointerId);pts.set(e.pointerId,{x:e.clientX,y:e.clientY});downAt={x:e.clientX,y:e.clientY};moved=false;view.classList.add('dragging');
+  if(pts.size===2){const[a,b]=[...pts.values()];pinch={d:Math.hypot(a.x-b.x,a.y-b.y),s};}});
+view.addEventListener('pointermove',e=>{if(!pts.has(e.pointerId))return;const p=pts.get(e.pointerId);
+  if(downAt&&Math.hypot(e.clientX-downAt.x,e.clientY-downAt.y)>5)moved=true;
+  if(pts.size===1){tx+=e.clientX-p.x;ty+=e.clientY-p.y;apply();}
+  pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(pts.size===2&&pinch){const[a,b]=[...pts.values()];zoomAt(pinch.s*Math.hypot(a.x-b.x,a.y-b.y)/pinch.d,(a.x+b.x)/2,(a.y+b.y)/2);}});
+const up=e=>{
+  if(pts.size===1&&!moved&&document.body.classList.contains('quiz')){const el=document.elementFromPoint(e.clientX,e.clientY)?.closest('.card,.note,.box,.fail');if(el)el.classList.toggle('shown');}
+  pts.delete(e.pointerId);if(pts.size<2)pinch=null;if(!pts.size)view.classList.remove('dragging');};
+view.addEventListener('pointerup',up);view.addEventListener('pointercancel',e=>{pts.delete(e.pointerId);view.classList.remove('dragging');});
+
+/* ---------- wires ---------- */
+function R(id){const el=document.getElementById(id),r=el.getBoundingClientRect(),w=world.getBoundingClientRect();
+  return{x:(r.left-w.left)/s,y:(r.top-w.top)/s,w:r.width/s,h:r.height/s};}
+function P(id,side,f=.5){const r=R(id);return side==='t'?[r.x+r.w*f,r.y]:side==='b'?[r.x+r.w*f,r.y+r.h]:side==='l'?[r.x,r.y+r.h*f]:[r.x+r.w,r.y+r.h*f];}
+// [from, side, frac, to, side, frac, label, labelStyle, opts]
+const W=[
+ // Mac: Docker side
+ ['dockerfile','b',.12,'build','t',.12,'read top to bottom','r'],
+ ['build','b',.12,'image','t',.12,'saves layers','r'],
+ ['image','b',.12,'localrun','t',.12,'<code>docker run</code> → one process','r'],
+ ['image','r',.5,'yourEcr','l',.25,'<span class="num">3</span><code>docker login</code> → <code>docker tag</code> → <code>docker push</code>','c',{mine:1,mid:.45}],
+ // Mac: kubectl side
+ ['sso','b',.12,'kcfg','t',.12,'<code>update-kubeconfig</code> (once per laptop) writes the context','r'],
+ ['kcfg','b',.12,'kctl','t',.12,'kubectl reads the current context on every command','r'],
+ ['yaml','t',.12,'kctl','b',.12,'<code>kubectl apply -f deployment-drill.yaml</code> reads the file','r'],
+ ['pf','r',.5,'api','l',.85,'<span class="num">13</span>port-forward tunnel (through the API server)','c',{mid:.32}],
+ ['api','b',.8,'pod1','t',.15,'tunnel → one Pod :8080','r',{soft:1,belowId:'objs',pad:30}],
+ ['kctl','r',.5,'api','l',.5,'<span class="num">6</span>HTTPS request (every kubectl command)','c',{mid:.18}],
+ // your account
+ ['yourEcr','b',.5,'policy','t',.5,'who may pull','r'],
+ ['policy','b',.5,'rt2','b',.3,'cross-account pull of <b>your</b> image (needs both halves)','c',{mine:1,belowId:'schoolEcr',pad:70}],
+ // control plane
+ ['api','r',.5,'etcd','l',.5,'stores the object','a'],
+ ['ctrl','t',.5,'api','t',.5,'<span class="num">8</span>watch what exists, compare, ask for fixes','a',{over:40}],
+ ['etcd','b',.5,'objs','t',.08,'','',{soft:1}],
+ ['oDep','r',.5,'oRs','l',.5,'creates','a'],
+ ['oRs','r',.5,'oPods','l',.5,'owns · counts','a'],
+ ['ctrl','b',.5,'objs','t',.93,'','',{soft:1}],
+ ['api','b',.92,'kub1','t',.5,'<span class="num">10</span>the kubelet learns its Pods from the API server and reports status back','r',{both:1,belowId:'objs',pad:60}],
+ ['objs','b',.75,'node2','t',.25,'<span class="num">9</span>scheduler picks a node','r',{midY:.6}],
+ // nodes
+ ['kub1','b',.5,'rt1','t',.5,'"start this Pod\'s container"','r'],
+ ['rt1','l',.5,'ctr1','r',.5,'starts the container from the image','c'],
+ ['kub2','b',.5,'rt2','t',.5,'',''],
+ ['rt2','l',.5,'ctr2','r',.5,'starts it','c'],
+ ['schoolEcr','r',.3,'rt1','r',.5,'','',{lane:'node1',inset:-17}],
+ ['schoolEcr','r',.7,'rt2','b',.7,'image pull','a',{L:'h'}],
+ // Session 07
+ ['oDns','r',.5,'oSvc','l',.5,'name → ClusterIP','a',{svc:1}],
+ ['oSvc','r',.5,'oEps','l',.5,'<code>selector: app: drill</code>','a',{svc:1}],
+ ['oPods','b',.5,'oEps','t',.5,'matching Pods\' IPs (kept up to date)','r',{soft:1}],
+ ['podClient','r',.4,'kp1','l',.5,'<code>curl http://drill</code> → DNS → <code>172.20.x.x:80</code>','c',{svc:1,mid:.5}],
+ ['kp1','r',.5,'pod2','l',.6,'rewritten to a random Pod <code>:8080</code>','c',{svc:1,mid:.55}],
+ ['users','r',.5,'alb','l',.5,'HTTPS','a',{svc:1}],
+ ['oEps','b',.5,'oCtl','t',.5,'ready IPs, copied ahead of time','r',{soft:1}],
+ ['nlb','r',.5,'pod2','r',.92,'<span class="num">18</span>NLB target group = Pod IPs','r',{svc:1,lane:'acct',inset:26}],
+ ['alb','t',.85,'pod2','r',.55,'<span class="num">21</span>rule → target group of <b>ready</b> Pod IPs → straight to a Pod :8080','r',{svc:1,lane:'acct',inset:12,top:30}],
+ ['kub1','l',.5,'probe1','r',.5,'','',{prb:1,mid:.3}],
+ // Session 09
+ ['kub2','b',.15,'podInv','r',.35,'<span class="num">24</span>copies ConfigMap + Secret into env vars at start','r',{cfg:1,lane:'node2',inset:14,top:0,skip:1}],
+ ['oCm','r',.5,'oSec','l',.5,'','',{soft:1}],
+ ['podInv','t',.85,'podDb','b',.85,'<code>DB_HOST=db</code>','r',{cfg:1}],
+ // Session 10
+ ['api','b',.2,'authz','t',.3,'every request','r',{rb:1}],
+ ['oRb','r',.5,'oCr','l',.5,'roleRef','a',{rb:1}],
+ ['cc','r',.5,'api','l',.95,'<span class="num">27</span>read-only requests (user readonly:&lt;ns&gt;)','c',{rb:1,mid:.06}],
+ // Session 11
+ ['oEs','r',.5,'oOp','l',.5,'names store + path','a',{cfg:1}],
+ ['oStore','l',.5,'oOp','r',.5,'region + IAM sign-in','a',{cfg:1}],
+ ['oOp','t',.5,'oSec','b',.5,'<span class="num">28</span>writes the normal Secret · every 1h','r',{cfg:1}],
+ // Session 12
+ ['oLr','r',.5,'oRq','l',.5,'sum','a',{res:1}],
+ ['oHpa','t',.5,'oSa','b',.5,'','',{skip:1}],
+ // Session 13
+ ['oPvc','r',.5,'oPv','l',.5,'bound 1:1','a',{sto:1}],
+ ['oSc','l',.5,'oPv','r',.5,'creates','a',{sto:1}],
+ ['podDb','r',.5,'ebs','r',.5,'<span class="num">34</span>mounts the claim','r',{sto:1,lane:'podInv',inset:-24}],
+ // note links
+ ['nStart','b',.5,'nTrans','b',.05,'','',{soft:1,straight:1,skip:1}],
+];
+function draw(){
+  const g=document.getElementById('paths'),L=document.getElementById('labels');g.innerHTML='';L.innerHTML='';
+  const svg=document.getElementById('wires');svg.setAttribute('width',world.offsetWidth);svg.setAttribute('height',world.offsetHeight);
+  for(const[a,as,af,b,bs,bf,label,ls,o={}]of W){
+    if(o.skip)continue;
+    const[ax,ay]=P(a,as,af),[bx,by]=P(b,bs,bf);let pts,lx,ly;
+    if(o.straight){pts=[[ax,ay],[bx,by]];lx=(ax+bx)/2;ly=(ay+by)/2;}
+    else if(o.over){const top=Math.min(ay,by)-o.over;pts=[[ax,ay],[ax,top],[bx,top],[bx,by]];lx=(ax+bx)/2;ly=top;}
+    else if(o.lane&&o.top){const r=R(o.lane),X=r.x+r.w-o.inset,Y=ay-o.top;pts=[[ax,ay],[ax,Y],[X,Y],[X,by],[bx,by]];lx=X;ly=(Y+by)/2;}
+    else if(o.lane){const r=R(o.lane),X=r.x+r.w-o.inset;pts=[[ax,ay],[X,ay],[X,by],[bx,by]];lx=X;ly=(ay+by)/2;}
+    else if(o.belowId){const r=R(o.belowId),Y=r.y+r.h+o.pad;pts=[[ax,ay],[ax,Y],[bx,Y],[bx,by]];lx=(ax+bx)/2;ly=Y;}
+    else if(o.L==='h'){pts=[[ax,ay],[bx,ay],[bx,by]];lx=(ax+bx)/2;ly=ay;}
+    else if((as==='l'||as==='r')&&(bs==='l'||bs==='r')){const mx=ax+(bx-ax)*(o.mid??.5);pts=[[ax,ay],[mx,ay],[mx,by],[bx,by]];lx=mx;ly=(ay+by)/2;}
+    else{const my=ay+(by-ay)*(o.midY??.5);pts=[[ax,ay],[ax,my],[bx,my],[bx,by]];
+      if(Math.abs(ax-bx)<3){lx=ax;ly=(ay+by)/2;}else{lx=bx;ly=(my+by)/2;}}
+    const p=document.createElementNS('http://www.w3.org/2000/svg','path');
+    p.setAttribute('d','M'+pts.map(q=>q.join(',')).join(' L'));
+    if(o.soft)p.setAttribute('class','soft');
+    else{const m=o.mine?'url(#ahm)':o.svc?'url(#ahs)':o.prb?'url(#ahp)':o.cfg?'url(#ahc)':o.rb?'url(#ahr)':o.res?'url(#ahx)':o.sto?'url(#ahd)':'url(#ah)';if(o.mine)p.setAttribute('class','mine');if(o.svc)p.setAttribute('class','svcw');if(o.prb)p.setAttribute('class','prbw');if(o.cfg)p.setAttribute('class','cfgw');if(o.rb)p.setAttribute('class','rbw');if(o.res)p.setAttribute('class','resw');if(o.sto)p.setAttribute('class','stow');p.setAttribute('marker-end',m);if(o.both)p.setAttribute('marker-start',m);}
+    g.appendChild(p);
+    if(label){const d=document.createElement('div');d.className='wl '+ls+(o.mine?' mine':'')+(o.svc?' svcw':'')+(o.prb?' prbw':'')+(o.cfg?' cfgw':'')+(o.rb?' rbw':'')+(o.res?' resw':'')+(o.sto?' stow':'');d.innerHTML=label;d.style.left=lx+'px';d.style.top=ly+'px';L.appendChild(d);}
+  }
+}
+
+/* ---------- steps ---------- */
+const STEPS=[
+ [['dockerfile','build'],'1 · Build the image on your Mac','docker build --platform linux/amd64 -t investment-app:v1 . reads the Dockerfile top to bottom and saves layers. amd64 because the cluster\'s nodes are amd64 and your Mac is arm64.'],
+ [['localrun'],'2 · Test it locally','docker run starts one process (PID 1 = gunicorn) on Docker Desktop\'s Linux VM. With a postgres container on app-net, the app finds "db" by name. Nothing restarts it if it stops.'],
+ [['image','yourEcr'],'3 · Push to your ECR','docker login (12 h), tag the image with the full ECR address, docker push. The repo is IMMUTABLE, so v1 can never be overwritten.'],
+ [['policy'],'4 · Let the school\'s cluster pull it','Your repository policy names arn:aws:iam::SCHOOL_ACCOUNT_ID:role/containers-26a-node. The school\'s side (the role\'s ECR read policy) is already done. Both halves are needed.'],
+ [['sso','kcfg'],'5 · Sign in and point kubectl','aws sso login --profile 312-cluster (once a day). The context containers-26a holds the cluster, your identity and your namespace my-namespace.'],
+ [['kctl','yaml'],'6 · kubectl apply -f deployment-drill.yaml','kubectl reads the context and sends the file\'s contents over HTTPS to the API server. The file stays on your Mac.'],
+ [['api','etcd'],'7 · API server checks and stores','Who are you, are you allowed in your namespace, is the YAML valid (selector = template labels)? If yes, the Deployment is saved in etcd and apply returns. Nothing runs yet.'],
+ [['ctrl','objs'],'8 · Controllers make the records','The Deployment controller creates a ReplicaSet; the ReplicaSet controller sees 0 of 2 Pods and creates 2 Pod objects. They are Pending – no node yet.'],
+ [['sched','node2'],'9 · Scheduler picks nodes','Each Pod without a node gets one, spread across nodes. If none has room, EKS Auto Mode adds a node first (a minute or more).'],
+ [['kub1','rt1','schoolEcr'],'10 · kubelet and containerd start it','The kubelet sees a Pod assigned to its node and tells containerd to start it. containerd pulls the image from ECR. Status: ContainerCreating.'],
+ [['pod1'],'11 · Running','The container starts, gunicorn is PID 1 on port 8080. The kubelet reports Running, READY 1/1. kubectl get pods -o wide shows the Pod IP and the node.'],
+ [['ctrl','oRs','nStart'],'12 · Reconcile, forever','gunicorn exits → the kubelet restarts the container in the same Pod (same name, same IP). A Pod is deleted → the ReplicaSet creates a new one (new name, new IP). kubectl scale changes the cluster, not your file – the next apply sets it back.'],
+ [['pf'],'13 · Check it answers: port-forward','kubectl port-forward deploy/drill 8000:8080, then curl localhost:8000 in a second terminal. Laptop port first. The tunnel runs through the API server to one Pod – your Mac still has no route to the Pod network.'],
+ [['nRoll','oRs'],'14 · Ship v2, and undo it','kubectl set image deployment/drill drill=…/drill:v2 makes a new ReplicaSet and swaps Pods one at a time; the old ReplicaSet stays at 0. kubectl rollout undo deploy/drill scales it back up.'],
+ [['nDebug'],'15 · When a Pod won\'t run','Read it in order: get (the status word) → describe (what the cluster did) → logs (what the process printed). ImagePullBackOff lives in describe; exec format error and KeyError live in logs.'],
+ [['oSvc','oEps','oDns'],'16 · Give the Pods one name: the Service','kubectl apply -f service-drill.yaml. The Service drill gets a fixed ClusterIP; its selector app: drill finds the Pods and the EndpointSlice lists their IPs. Delete a Pod → one IP in the EndpointSlice changes, the Service stays the same.'],
+ [['podClient','kp1','pod2'],'17 · Call it from inside','kubectl exec client -- curl -s http://drill. CoreDNS turns drill into 172.20.x.x; the kube-proxy rule on the client\'s node rewrites it to a random drill Pod on :8080 (the targetPort).'],
+ [['users','nlb'],'18 · Open it to users: LoadBalancer','type: LoadBalancer + the internet-facing annotation → AWS builds an NLB whose target group is the Pod IPs. A Route 53 CNAME points a real name at it. Students\' quota is 0, so this was shown in Eldiiar\'s namespace.'],
+ [['probe1','kub1'],'19 · Probes: is the app really OK?','The kubelet runs a readinessProbe (GET / :8080 every 5 s) on the container. 3 fails in a row → not ready → no traffic, no restart. A livenessProbe that fails makes the kubelet restart the container instead.'],
+ [['nProbe','oEps'],'20 · The stuck rollout protects users','Apply a file whose new Pod never gets ready (wrong path /health → 404): the rollout stops at the first new Pod, READY 0/1, its address sits in the EndpointSlice as Ready: false, and the old Pods keep serving. Apply the fixed file.'],
+ [['users','alb','oIng','oCtl'],'21 · Your own hostname: the Ingress','kubectl apply -f ingress-drill.yaml adds one rule to the shared ALB: my-namespace.k8s.312school.com → Service drill :80. HTTPS ends at the ALB; the rule\'s target group holds the ready Pod IPs, so each request goes straight to a Pod.'],
+ [['oCm','oSec'],'22 · Settings out of the image: ConfigMap + Secret','kubectl apply the ConfigMap (DB_HOST, DB_PORT "5432", DB_NAME, DB_USER, TICKER) and the Secret (DB_PASSWORD, FINNHUB_KEY). Both are records in etcd, in your namespace. The Secret is only base64 – who may read it is what protects it.'],
+ [['podDb','podInv'],'23 · Postgres first, then the app','postgres.yaml takes POSTGRES_USER/DB/PASSWORD one key at a time from the same two objects and creates the Service db. Then the app: envFrom brings every ConfigMap key, secretKeyRef brings the two secrets. Check with describe (where from) and exec -- env (real values).'],
+ [['oCopy','kub2','podInv'],'24 · Changed a setting? Restart the Pods','The kubelet copied the values when the container started – there is no sync. Edit TICKER to MSFT and the app still shows AAPL until kubectl rollout restart deploy/investment-app replaces the Pods one by one.'],
+ [['authz','api'],'25 · Every request is checked twice','Check 1 (AWS): your token was signed by IAM role Containers26a; an access entry turns it into user student:my-namespace – no entry → Unauthorized. Check 2 (RBAC): does a RoleBinding allow this verb on this resource here? No → Forbidden.'],
+ [['oRb','oCr','oSa'],'26 · Your rights: RoleBinding → ClusterRole edit','RoleBinding student-edit gives you the built-in ClusterRole edit in your namespace only. A Role says what, a binding says who and where; there is no deny. Programs get rights the same way, through their own ServiceAccount.'],
+ [['cc','authz'],'27 · Claude Code: can read, can\'t change','A separate profile (312-cluster-readonly) and kubeconfig (~/.kube/readonly) sign it in as readonly:<ns> with ClusterRole view: no Secrets, no exec, no changes. It finds the problem; you apply the fix.'],
+ [['oEs','oStore','oOp','oSec'],'28 · The password out of Git: External Secrets','You commit only an ExternalSecret with the path /26a/<ns>/investment-app. The operator signs in to AWS through the SecretStore and your namespace\'s IAM role, reads Secrets Manager, and writes the normal Secret investment-app-secret – re-reading every hour. After a rotation, rollout restart.'],
+ [['res1','sched'],'29 · Requests: where the Pod may land','Each container declares requests (cpu 100m, memory 128Mi). The scheduler places the Pod only on a node where that much is still free – on one node; it can\'t split a Pod. Nowhere fits → Pending until Auto Mode adds a node.'],
+ [['res1','nRes'],'30 · Limits: how far it may go','At the CPU limit the container is throttled (slower, keeps running). Past the memory limit it is OOMKilled and the kubelet restarts it in the same Pod. Measure with kubectl top before choosing numbers.'],
+ [['oLr','oRq','nScale'],'31 · The namespace\'s rules: LimitRange + ResourceQuota','kubectl patch gives the investment app requests 100m/128Mi and limits 250m/256Mi (cluster only – update the file too). The LimitRange fills in missing values and rejects anything over 1 CPU / 1Gi per container; the ResourceQuota caps the namespace total – over it, no Pod is created (FailedCreate on the ReplicaSet).'],
+ [['oHpa','oDep'],'32 · More traffic, more Pods: the HPA','The HPA reads CPU use ÷ request × 100 and raises the Deployment\'s replicas past the target (60% in class, 1–2 replicas). No CPU request means no percentage, so no CPU scaling.'],
+ [['karp','sched'],'33 · More Pods than room: Karpenter','New Pods that fit nowhere stay Pending; Karpenter (inside EKS Auto Mode) sees them and launches an EC2 node. HPA = Pods, Karpenter = machines. Neither fixes a quota refusal – or a dead database.'],
+ [['oPvc','oPv','oSc','ebs','podDb'],'34 · Data that survives: PVC → PV → EBS','Without a volume, Postgres loses its table when the Pod is replaced. A PVC asks for 1Gi ReadWriteOnce from StorageClass unit6-ebs; when the Pod first uses it, the provisioner creates an EBS disk in the Pod\'s AZ and records it as a PV. The Pod mounts the claim at /var/lib/postgresql/data – a replacement Pod finds the same data.'],
+ [['oJob','nJob'],'35 · Work that finishes: a Job','The schema Job runs psql with schema.sql (from a ConfigMap) until exit 0, with 2 retries. Kubernetes doesn\'t make the app wait – check Complete, then deploy the app. Read logs before the Job is cleaned up.'],
+ [['oCron','oSts'],'36 · On a schedule: CronJob · and StatefulSets','A CronJob creates a new Job on a schedule ("0 2 * * *" = daily 02:00). A StatefulSet gives stable names and one claim per Pod for databases – though most teams keep production DBs on RDS.'],
+];
+let step=-1;
+function focusOn(ids){const rs=ids.map(R);const x1=Math.min(...rs.map(r=>r.x)),y1=Math.min(...rs.map(r=>r.y)),x2=Math.max(...rs.map(r=>r.x+r.w)),y2=Math.max(...rs.map(r=>r.y+r.h));
+  const vw=innerWidth,vh=innerHeight-barH();s=clamp(Math.min(.95,Math.min(vw/(x2-x1+160),vh/(y2-y1+160))));
+  tx=vw/2-(x1+x2)/2*s;ty=vh/2-(y1+y2)/2*s;
+  if(!matchMedia('(prefers-reduced-motion:reduce)').matches){world.style.transition='transform .45s ease';setTimeout(()=>world.style.transition='',500);}apply();}
+function lit(ids){document.querySelectorAll('.lit').forEach(e=>e.classList.remove('lit'));ids.forEach(i=>document.getElementById(i)?.classList.add('lit'));}
+function render(){
+  const t=document.getElementById('stepTitle'),b=document.getElementById('stepBody'),n=document.getElementById('sNext'),pv=document.getElementById('sPrev');
+  if(step<0){lit([]);t.textContent='Steps: from app.py to users';b.textContent='Press Start to follow the numbers on the board.';n.textContent='Start';pv.disabled=true;fit();return;}
+  const[ids,ti,bo]=STEPS[step];lit(ids);t.textContent=ti;b.textContent=bo;n.textContent=step===STEPS.length-1?'Finish':'Next';pv.disabled=step===0;focusOn(ids);}
+document.getElementById('sNext').onclick=()=>{step=step>=STEPS.length-1?-1:step+1;render();};
+document.getElementById('sPrev').onclick=()=>{if(step>0){step--;render();}};
+
+/* jump + chips + self-test */
+function go(id){if(!id)return;lit([id]);focusOn([id]);setTimeout(()=>lit([]),2200);}
+document.getElementById('jump').onchange=e=>{go(e.target.value);e.target.value='';};
+document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();go(b.dataset.go);}));
+document.getElementById('quiz').onclick=e=>{const on=document.body.classList.toggle('quiz');e.currentTarget.setAttribute('aria-pressed',on);
+  document.querySelectorAll('.shown').forEach(x=>x.classList.remove('shown'));
+  document.getElementById('stepTitle').textContent=on?'Self-test is on':'Steps: from app.py to users';
+  document.getElementById('stepBody').textContent=on?'Explain each box out loud from its title, then click the box to check yourself.':'Press Start to follow the numbers on the board.';};
+
+function init(){draw();if(step<0)fit();}
+apply();
+(document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(init);
+setTimeout(init,1200);
+addEventListener('resize',()=>{if(step<0)fit();});
+</script>
+
+</body></html>

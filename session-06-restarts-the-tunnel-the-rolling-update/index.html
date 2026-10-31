@@ -1,0 +1,360 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Session 06: Restarts, the tunnel, the rolling update, and a pod that won&#x27;t start</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EEF2F7; --surface:#FFFFFF; --ink:#1B2A41; --muted:#56657C; --line:#C9D3E1;
+  --blue:#2459C8; --blue-soft:#DCE6FA;
+  --ok:#1F8A5B; --ok-soft:#D8F0E4;
+  --warn:#A86A00; --warn-soft:#FBEBC9;
+  --bad:#B83A30; --bad-soft:#F7DCD8;
+  --code-bg:#1B2A41; --code-ink:#E6ECF5;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1724; --surface:#172234; --ink:#E4EAF3; --muted:#9AA8BD; --line:#2C3B53;
+    --blue:#7FA6F5; --blue-soft:#1E3157;
+    --ok:#5CCB94; --ok-soft:#163A2B;
+    --warn:#E8B04D; --warn-soft:#3A2D12;
+    --bad:#F08A80; --bad-soft:#3E1C1A;
+    --code-bg:#0B111B; --code-ink:#DCE4F0;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1724; --surface:#172234; --ink:#E4EAF3; --muted:#9AA8BD; --line:#2C3B53;
+  --blue:#7FA6F5; --blue-soft:#1E3157;
+  --ok:#5CCB94; --ok-soft:#163A2B;
+  --warn:#E8B04D; --warn-soft:#3A2D12;
+  --bad:#F08A80; --bad-soft:#3E1C1A;
+  --code-bg:#0B111B; --code-ink:#DCE4F0;
+  color-scheme:dark;
+}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 72px)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:21;background:var(--bg)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size:17px;line-height:1.6}
+code,pre,.mono{font-family:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace}
+code{font-size:.88em;background:var(--blue-soft);padding:.1em .35em;border-radius:4px}
+.wrap{max-width:980px;margin:0 auto;padding:40px 20px 80px}
+header{margin-bottom:36px}
+h1{font-size:clamp(2rem,5vw,3rem);line-height:1.1;margin:.2em 0 .4em;letter-spacing:-.01em}
+.sub{color:var(--muted);margin:0;max-width:62ch}
+.rule-line{margin-top:24px;display:flex;flex-wrap:wrap;gap:12px}
+.rule-line div{flex:1 1 260px;padding:14px 16px;border-left:5px solid;background:var(--surface);border-radius:0 8px 8px 0}
+.rule-line .r{border-color:var(--ok)} .rule-line .l{border-color:var(--bad)}
+.rule-line strong{display:block;font-size:1.1rem}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;display:flex;flex-wrap:nowrap;gap:8px;overflow-x:auto;
+  margin:0 -20px;padding:10px 20px;background:var(--bg);border-bottom:1px solid var(--line);scrollbar-width:thin}
+@media(min-width:900px){nav{flex-wrap:wrap}}
+nav a{white-space:nowrap}
+nav a.active{background:var(--blue);color:var(--surface);border-color:var(--blue)}
+nav a{color:var(--blue);text-decoration:none;border:1px solid var(--line);padding:4px 12px;border-radius:999px;font-size:.92rem;background:var(--surface)}
+nav a:hover{border-color:var(--blue)}
+section{margin-top:56px}
+h2{font-size:1.6rem;margin:0 0 .3em;line-height:1.2}
+h3{font-size:1.15rem;margin:1.4em 0 .3em}
+p{max-width:70ch}
+.lede{color:var(--muted);margin-top:0}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px}
+button{font:inherit;font-size:.95rem;cursor:pointer;border-radius:8px;border:1px solid var(--line);
+  background:var(--surface);color:var(--ink);padding:8px 14px}
+button:hover{border-color:var(--blue)}
+button.primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+:root[data-theme="dark"] button.primary{color:#0F1724}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) button.primary{color:#0F1724}}
+button.danger{border-color:var(--bad);color:var(--bad)}
+button:focus-visible,a:focus-visible,summary:focus-visible,select:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+button:disabled{opacity:.45;cursor:not-allowed}
+.opts button:disabled{opacity:.7}
+.opts button.right:disabled,.opts button.nope:disabled{opacity:1}
+.controls{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;align-items:center}
+
+/* simulator */
+.sim{display:grid;grid-template-columns:1fr;gap:16px}
+@media(min-width:760px){.sim{grid-template-columns:1.25fr 1fr}}
+.rs{border:1px dashed var(--line);border-radius:10px;padding:12px;margin-bottom:12px;transition:opacity .4s}
+.rs.zero{opacity:.55}
+.rs-head{display:flex;justify-content:space-between;gap:8px;font-size:.9rem;color:var(--muted);margin-bottom:8px;flex-wrap:wrap}
+.rs-head b{color:var(--ink)}
+.pods{display:flex;flex-wrap:wrap;gap:10px;min-height:76px}
+.pod{width:150px;border-radius:10px;padding:10px;border:2px solid;font-size:.85rem;line-height:1.35;transition:opacity .5s, transform .3s}
+.pod .n{font-family:"JetBrains Mono",monospace;font-size:.78rem;word-break:break-all}
+.pod .st{font-weight:700;font-size:1rem}
+.pod.ready{border-color:var(--ok);background:var(--ok-soft)}
+.pod.notready{border-color:var(--warn);background:var(--warn-soft)}
+.pod.starting{border-color:var(--line);background:var(--bg)}
+.pod.term{border-color:var(--bad);background:var(--bad-soft);opacity:.6}
+.pod.flash{transform:scale(1.06)}
+.empty{color:var(--muted);font-size:.9rem;align-self:center}
+.log{background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:12px 14px;font-size:.8rem;
+  height:330px;overflow-y:auto;line-height:1.5}
+.log div{white-space:pre-wrap;word-break:break-word}
+.log .w{color:#F4BE5B} .log .e{color:#F49088} .log .g{color:#7FDCA8} .log .c{color:#8FB2F7}
+.users{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:.92rem;color:var(--muted);flex-wrap:wrap}
+.status-pill{display:inline-block;padding:2px 10px;border-radius:999px;font-weight:700;font-size:.85rem}
+.pill-ok{background:var(--ok-soft);color:var(--ok)} .pill-warn{background:var(--warn-soft);color:var(--warn)} .pill-bad{background:var(--bad-soft);color:var(--bad)}
+
+/* liveness */
+.live-grid{display:grid;grid-template-columns:1fr;gap:16px}
+@media(min-width:760px){.live-grid{grid-template-columns:280px 1fr}}
+.bigpod{border:2px solid var(--line);border-radius:14px;padding:18px;text-align:left}
+.bigpod .row{display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding:6px 0;font-size:.95rem}
+.bigpod .row:last-child{border:none}
+.bigpod .val{font-family:"JetBrains Mono",monospace;font-weight:600}
+select{font:inherit;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.backoff{display:flex;gap:4px;align-items:flex-end;height:90px;margin-top:14px}
+.backoff span{flex:1;background:var(--blue-soft);border-radius:4px 4px 0 0;position:relative;transition:background .3s}
+.backoff span.on{background:var(--bad)}
+.backoff-labels{display:flex;gap:4px;font-size:.72rem;color:var(--muted)}
+.backoff-labels span{flex:1;text-align:center}
+
+/* tables */
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:.95rem}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--bg);font-weight:700}
+tr:last-child td{border-bottom:none}
+
+/* request path */
+.path{display:flex;flex-direction:column;gap:0;margin-top:12px}
+.hop{display:grid;grid-template-columns:44px 1fr;gap:14px;position:relative;padding-bottom:18px}
+.hop .dot{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-weight:700;
+  background:var(--surface);border:2px solid var(--blue);color:var(--blue);z-index:1}
+.hop::before{content:"";position:absolute;left:21px;top:44px;bottom:0;width:2px;background:var(--line)}
+.hop:last-child::before{display:none}
+.hop h4{margin:8px 0 2px;font-size:1.05rem}
+.hop p{margin:0;color:var(--muted)}
+.hop.https .dot{border-color:var(--ok);color:var(--ok)}
+.tag{display:inline-block;font-size:.78rem;padding:1px 8px;border-radius:999px;margin-left:6px;vertical-align:2px}
+.tag.enc{background:var(--ok-soft);color:var(--ok)} .tag.plain{background:var(--warn-soft);color:var(--warn)}
+.note{border-left:4px solid var(--blue);background:var(--blue-soft);padding:12px 16px;border-radius:0 8px 8px 0;margin:16px 0;max-width:70ch}
+
+pre{background:var(--code-bg);color:var(--code-ink);padding:14px 16px;border-radius:10px;overflow-x:auto;font-size:.82rem;line-height:1.55;margin:10px 0}
+pre .cm{color:#8A9AB5}
+
+details{background:var(--surface);border:1px solid var(--line);border-radius:10px;margin-bottom:8px}
+summary{cursor:pointer;padding:12px 16px;font-weight:700}
+details > div{padding:0 16px 14px}
+.wrong{color:var(--bad);text-decoration:line-through;text-decoration-thickness:1px}
+
+/* quiz */
+.q{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:14px}
+.q p.prompt{font-weight:700;margin-top:0}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opts button{text-align:left;padding:10px 14px}
+.opts button.right{border-color:var(--ok);background:var(--ok-soft)}
+.opts button.nope{border-color:var(--bad);background:var(--bad-soft)}
+.explain{margin-top:10px;color:var(--muted);display:none}
+.explain.show{display:block}
+.score{font-weight:700}
+footer{margin-top:64px;color:var(--muted);font-size:.9rem}
+
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.tabs button[aria-selected="true"]{background:var(--blue);color:var(--surface);border-color:var(--blue)}
+.tabpane{display:none}.tabpane.show{display:block}
+.timeline{list-style:none;padding:0;margin:0;counter-reset:t}
+.timeline li{counter-increment:t;position:relative;padding:14px 18px 14px 64px;margin-bottom:10px;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.timeline li h4{margin:0 0 4px;font-size:1.08rem}
+.timeline li p{margin:0;color:var(--ink);max-width:68ch}
+.timeline li::before{content:counter(t);position:absolute;left:16px;top:14px;width:32px;height:32px;border-radius:50%;
+  background:var(--blue-soft);color:var(--blue);font-weight:700;display:grid;place-items:center;font-size:.9rem}
+.timeline details{margin:0}
+.yaml-toggle .ln{display:block;transition:background .2s,opacity .2s}
+.yaml-toggle.focus .ln{opacity:.35}
+.yaml-toggle.focus .ln.hl{opacity:1;background:rgba(127,166,245,.18)}
+.flow{display:flex;flex-direction:column;gap:6px;margin:14px 0;max-width:620px}
+.flow div{padding:10px 14px;border-radius:8px;border:1px solid var(--line);background:var(--surface)}
+.flow .arrow{border:none;background:none;padding:0 0 0 18px;color:var(--muted)}
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px}
+.compare > div{border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--bg)}
+.lbs{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.lbs span{display:inline-block;padding:3px 8px;border-radius:6px;font-size:.8rem;font-family:"JetBrains Mono",monospace}
+.lb-many span{background:var(--bad-soft);color:var(--bad)}
+.lb-one span{background:var(--ok-soft);color:var(--ok)}
+.form-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:14px}
+@media(min-width:640px){.form-grid{grid-template-columns:1fr 1fr}}
+.form-grid label{display:flex;flex-direction:column;font-size:.9rem;color:var(--muted);gap:4px}
+.form-grid input{font:inherit;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.verdict{padding:12px 16px;border-radius:8px;font-size:.9rem}
+.verdict.ok{background:var(--ok-soft);color:var(--ok)} .verdict.no{background:var(--bad-soft);color:var(--bad)} .verdict.warn{background:var(--warn-soft);color:var(--warn)}
+.step{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:12px}
+.step.done{border-color:var(--ok)}
+.step-head{display:flex;gap:12px;align-items:flex-start}
+.step-head input{width:22px;height:22px;margin-top:3px;accent-color:var(--ok);flex:none}
+.step-head h4{margin:0;font-size:1.05rem}
+.step-head p{margin:2px 0 0;color:var(--muted)}
+.step pre{margin:10px 0 6px}
+.step details{border:none;background:var(--bg)}
+.step summary{font-weight:400;color:var(--blue);padding:8px 12px}
+.progress{height:8px;background:var(--line);border-radius:999px;overflow:hidden;margin:10px 0 18px}
+.progress div{height:100%;background:var(--ok);width:0;transition:width .3s}
+.cards2{display:grid;grid-template-columns:1fr;gap:14px}
+@media(min-width:720px){.cards2{grid-template-columns:1fr 1fr}}
+.cards2 > div{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.cards2 h3{margin-top:0}
+.cards2 ul{margin:0;padding-left:20px}
+.cards2 li{margin-bottom:6px}
+.fixbox{border:1.5px solid var(--warn);border-radius:14px;padding:12px;background:var(--warn-soft)}
+.fixbox td:first-child{width:44%;color:var(--muted)}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+
+.term{background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:12px 14px;font-family:"JetBrains Mono",monospace;font-size:.8rem;line-height:1.5;overflow-x:auto;white-space:pre}
+.chip{display:inline-block;padding:3px 10px;border-radius:999px;font-size:.85rem;font-weight:700}
+.chip.ok{background:var(--ok-soft);color:var(--ok)}.chip.warn{background:var(--warn-soft);color:var(--warn)}.chip.bad{background:var(--bad-soft);color:var(--bad)}.chip.idle{background:var(--bg);color:var(--muted);border:1px solid var(--line)}
+.lab-row{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:12px}
+.lab-row label{display:flex;gap:6px;align-items:center;font-size:.95rem}
+.lab-row input[type=checkbox]{width:18px;height:18px;accent-color:var(--blue)}
+.layers{display:flex;flex-direction:column;gap:6px}
+.layer{display:flex;justify-content:space-between;gap:10px;padding:8px 12px;border-radius:8px;border:1px solid var(--line);font-family:"JetBrains Mono",monospace;font-size:.82rem;flex-wrap:wrap}
+.layer.cached{background:var(--ok-soft);border-color:var(--ok)}.layer.rebuilt{background:var(--warn-soft);border-color:var(--warn)}.layer.none{background:var(--bg);color:var(--muted)}
+.journey{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.journey .hopbox{padding:10px 14px;border-radius:10px;border:2px solid var(--line);background:var(--surface);font-weight:700;transition:all .3s}
+.journey .hopbox.on{border-color:var(--blue);background:var(--blue-soft);color:var(--blue)}
+.journey .ar{color:var(--muted)}
+</style></head><body><div class="wrap">
+<header><p class="sub">Containers &amp; Orchestration, the end of unit 2</p><h1>Session 06: Restarts, the tunnel, the rolling update, and a pod that won't start</h1><p class="sub">Last class built the chain Deployment → ReplicaSet → Pods. Today showed what that chain does when things change or break: who restarts what, how to reach a pod from your laptop (port-forward), how a new version replaces the old one with no downtime (rolling update and undo), why one Dockerfile line makes pods take 30 seconds to die, and how to read a pod that isn't Running: get → describe → logs.</p><div class="rule-line"><div class="r"><strong>Kubelet → containers. ReplicaSet → pods.</strong>A restart keeps the name and IP. A replacement gets new ones.</div><div class="l"><strong>Describe before logs.</strong>No container, no logs.</div></div></header>
+<nav aria-label="Sections"><a href="#timeline">What we did</a><a href="#yaml">-o yaml</a><a href="#restarts">Who restarts what</a><a href="#pf">port-forward</a><a href="#rolling">Rolling update</a><a href="#stop">Stop signal</a><a href="#debug">Debug a pod</a><a href="#cmdargs">command &amp; args</a><a href="#fixes">Corrections</a><a href="#demo">Redo the demo</a><a href="#commands">Commands</a><a href="#wrapup">Stressed &amp; homework</a><a href="#quiz">Check yourself</a></nav>
+<section id="timeline"><h2>What we actually did, in order</h2><p class="lede">Thu, Oct 8, 2026, with Maher ("Mo"), plus after-class with Bakhtiyar. Deck slides 20–32, the end of unit 2.</p><ol class="timeline"><li><h4>Recap</h4><p>Applied <code>deployment-drill.yaml</code>, showed the ReplicaSet it created with <code>k get rs -o yaml</code>, and scaled to 3.</p></li><li><h4>-o yaml on anything</h4><p>Created a namespace <code>mo</code> from the command line (no file), then printed its YAML.</p></li><li><h4>Two things restart things</h4><p>Kubelet vs ReplicaSet, using <code>k get pods -o wide</code> to show the pod's IP.</p></li><li><h4>Fixed InvalidImageName</h4><p>Pasted the real image URI from the README and re-applied. The file said 2 replicas, so the 3rd pod went away.</p></li><li><h4>port-forward</h4><p><code>curl &lt;pod-ip&gt;</code> timed out; <code>port-forward 8000:8080</code> + <code>curl localhost:8000</code> printed "Hello from the drill app".</p></li><li><h4>Rolling update</h4><p>Drawn on a whiteboard, then live: set image to v2, <code>rollout status</code>, curl showed "version 2", then <code>rollout undo</code> back to v1.</p></li><li><h4>Timed deletes</h4><p>Exec-form pod gone in about 2.5 s; shell-form pod took about 32 s.</p></li><li><h4>Break, then broken/</h4><p>Applied three broken pods and read them with get, describe and logs.</p></li><li><h4>ENTRYPOINT/CMD vs command/args</h4><p>Applied <code>command-args.yaml</code> (status Completed), then a longer whiteboard explanation after a classmate said ENTRYPOINT was never covered.</p></li><li><h4>After class with Bakhtiyar</h4><p>Redid slides 20–23 slowly: the label mismatch error, delete-a-pod with <code>-w</code> in a second terminal, scale, port-forward, rolling update and undo.</p></li></ol></section>
+<section id="yaml"><h2>Everything in the cluster is stored as YAML (-o yaml)</h2><p><b>Problem:</b> something is running, but you have no file for it (a teammate made it, or it was made with a command). <code>kubectl get &lt;kind&gt; &lt;name&gt; -o yaml</code> prints the object the cluster has stored. It works on anything: pods, deployments, ReplicaSets, namespaces.</p><p>Like <code>cat</code> for cluster objects. It also shows extra fields Kubernetes adds: status, timestamps, the pod-template hash. Exam use (CKA-style): some fields can't be changed in place, so you copy the YAML into a file, edit it, delete the old object and apply the new one. You don't write ReplicaSets yourself; the Deployment creates them.</p><div class="note">The cluster's copy is the truth. Your file is only what you asked for last time.</div><h3>The file wins: apply after scale</h3><p><code>kubectl scale deploy/drill --replicas=3</code> changes the count stored in the cluster. <code>kubectl apply -f</code> then compares your file to the stored object and changes what differs: file says 2 → back to 2, no warning. Same as Terraform's apply. Manual commands (scale, set image, rollout undo) change the cluster, never your local file. Real work edits the file and applies it.</p></section>
+<section id="restarts"><h2>Two things restart things</h2><div class="tbl-wrap"><table><tr><th></th><th>The kubelet</th><th>The ReplicaSet's controller</th></tr><tr><td>What it is</td><td>The agent on every node</td><td>The control-plane loop that keeps the count</td></tr><tr><td>Acts when</td><td>A container exits</td><td>A pod is gone (deleted, or its node died)</td></tr><tr><td>What it does</td><td>Restarts the container in the same pod</td><td>Creates a brand-new pod</td></tr><tr><td>Name / IP</td><td>Same name, same IP; RESTARTS +1</td><td>New name (new hash), new IP</td></tr><tr><td>Scale equivalent</td><td><code>Restart=always</code> in your systemd unit</td><td>The Auto Scaling group replacing an instance</td></tr></table></div><p>The IP belongs to the pod, not the container. That's why a container restart keeps it. The kubelet knows nothing about the count; the ReplicaSet knows nothing about processes.</p><h3>Lab: crash a container vs delete a pod</h3><div class="panel"><div class="controls"><button class="primary" id="c6crash">Crash the container in pod 1</button><button id="c6del">kubectl delete pod (pod 1)</button><button id="c6rr">Reset</button></div><div class="pods" id="c6pods"></div><div class="term" id="c6out" style="margin-top:12px;min-height:60px"></div></div></section>
+<section id="pf"><h2>port-forward: a tunnel from your laptop to one pod</h2><p><b>Problem:</b> pods live on the cluster's private network. Your laptop has no route there, so <code>curl &lt;pod-ip&gt;:8080</code> times out. <b>Fix:</b> kubectl already talks to the API server, so the API server carries the connection for you.</p><pre>curl localhost:8000 → kubectl (your laptop :8000) → API server → pod :8080 → back the same way</pre><div class="tbl-wrap"><table><tr><th>Detail</th><th>Meaning</th></tr><tr><td><code>8000:8080</code></td><td>Laptop port first, then the containerPort from the file</td></tr><tr><td><code>deploy/drill</code></td><td>Picks one of the Deployment's pods</td></tr><tr><td>Foreground</td><td>It stays running. Curl from a second terminal. Ctrl+C closes the tunnel, and curl then says <code>Couldn't connect to server</code>.</td></tr><tr><td>Use</td><td>Check an app answers (page renders, /health responds) before anyone else can reach it</td></tr><tr><td>Not SSH</td><td>It doesn't put you inside the container. <code>kubectl exec</code> does that, later.</td></tr><tr><td>Not for users</td><td>Unit 3's Service gives pods a lasting address</td></tr></table></div></section>
+<section id="rolling"><h2>The rolling update, and the undo</h2><p><b>Problem:</b> replacing every pod at once means downtime. A rolling update always keeps some pods answering. Any change under <code>template</code> starts a rollout: image, env var, command, a pod label. Changing <code>replicas</code> does not.</p><div class="panel"><div class="controls"><button class="primary" id="c6v2">kubectl set image … drill:v2</button><button id="c6undo">kubectl rollout undo</button></div><div class="sim" style="grid-template-columns:1fr 1fr"><div class="rs"><div class="rs-head"><span>ReplicaSet #1 <b>v1</b></span><span id="c6n1"></span></div><div class="pods" id="c6rs1"></div></div><div class="rs"><div class="rs-head"><span>ReplicaSet #2 <b>v2</b></span><span id="c6n2"></span></div><div class="pods" id="c6rs2"></div></div></div><div class="term" id="c6rlog" style="margin-top:10px;min-height:70px"></div></div><p>The old ReplicaSet stays at 0 pods: that's what <code>rollout undo</code> goes back to. After a rollout, restart port-forward, because the old tunnel went to a pod that no longer exists. Scale equivalent: the instance refresh with its minimum healthy percentage.</p><div class="note">The old ReplicaSet isn't deleted. It's kept at zero so you can roll back.</div></section>
+<section id="stop"><h2>The stop signal: exec form vs shell form</h2><p>PID 1 = the first process in the container (Session 01). SIGTERM = the polite "please stop" signal. <b>Grace period</b> = how long Kubernetes waits after sending SIGTERM to PID 1 before it force-kills with SIGKILL. 30 s by default.</p><div class="tbl-wrap"><table><tr><th></th><th>Exec form</th><th>Shell form</th></tr><tr><td>CMD line</td><td><code>CMD ["gunicorn", "--bind", "0.0.0.0:8080", "app:app"]</code></td><td><code>CMD gunicorn --bind 0.0.0.0:8080 app:app</code></td></tr><tr><td>PID 1</td><td>gunicorn itself</td><td><code>/bin/sh -c</code>; gunicorn is its child</td></tr><tr><td>On SIGTERM</td><td>gunicorn hears it, finishes, exits</td><td>The shell doesn't pass it on. gunicorn never hears it.</td></tr><tr><td>Delete took</td><td>about 3 s</td><td>about 32 s (waits out the full 30, then SIGKILL)</td></tr></table></div><div class="note">Every rollout and every scale-down waits that extra 30 s per shell-form pod. Use exec form (square brackets).</div></section>
+<section id="debug"><h2>Reading a pod that isn't Running: get → describe → logs</h2><div class="tbl-wrap"><table><tr><th>#</th><th>Command</th><th>Tells you</th></tr><tr><td>1</td><td><code>kubectl get pods</code></td><td>The status word. It tells you which command to run next, not what's wrong.</td></tr><tr><td>2</td><td><code>kubectl describe pod &lt;name&gt;</code></td><td>The Events block: what the cluster did to the pod, step by step, and where it failed</td></tr><tr><td>3</td><td><code>kubectl logs &lt;name&gt;</code></td><td>What the process printed. No process started = nothing to show.</td></tr></table></div><div class="note">Cluster failures happen before the process exists, so describe comes before logs.</div><h3>Lab: diagnose the three broken pods</h3><p class="lede">Pick a pod, then run the three commands in order. The verdict appears once you find the cause.</p><div class="panel"><div class="controls"><select id="c6bp"><option value="image-pull">image-pull</option><option value="wrong-arch">wrong-arch</option><option value="missing-env">missing-env</option></select><button id="c6g">kubectl get pods</button><button id="c6d">kubectl describe pod</button><button id="c6l">kubectl logs</button></div><div class="term" id="c6bout" style="min-height:110px"></div><p id="c6verdict" style="margin:10px 0 0"></p></div><div class="tbl-wrap"><table><tr><th>Pod</th><th>Status</th><th>Cause</th><th>Shown by</th><th>Image or process?</th></tr><tr><td>image-pull</td><td>ImagePullBackOff</td><td>Tag v0 doesn't exist → not found</td><td>describe</td><td>Image (can't be fetched)</td></tr><tr><td>wrong-arch</td><td>CrashLoopBackOff</td><td><code>exec format error</code>: built for arm64 (Mac), nodes are amd64</td><td>logs (one line)</td><td>Image (wrong processor)</td></tr><tr><td>missing-env</td><td>CrashLoopBackOff</td><td><code>KeyError: 'DB_HOST'</code>, "Worker failed to boot"</td><td>logs</td><td>Process (app config)</td></tr></table></div><p><b>ErrImagePull</b> = the pull failed. <b>ImagePullBackOff</b> = it keeps retrying with longer waits. If the ECR repo policy from unit 1 is missing, the status is the same but the Failed line says <b>forbidden</b> instead of not found. Pod not yours? <code>kubectl get pod image-pull -o yaml</code> shows the exact image name to look up in ECR; typos in the tag are common.</p><p><b>CrashLoopBackOff</b> = the container starts and exits. The kubelet restarts it with growing waits (up to 5 min), and RESTARTS climbs each time you look. Fix for wrong-arch: <code>docker build --platform linux/amd64 ...</code> (from unit 1).</p></section>
+<section id="cmdargs"><h2>command and args replace ENTRYPOINT and CMD</h2><p><b>ENTRYPOINT</b> (Dockerfile) = the program the container always runs. <b>CMD</b> = its default arguments. With no ENTRYPOINT, CMD is the whole command.</p><pre>ENTRYPOINT ["echo", "hello"]
+CMD ["world"]          # container prints: hello world</pre><div class="tbl-wrap"><table><tr><th>Dockerfile</th><th>Pod file</th><th>Override at docker run</th></tr><tr><td>ENTRYPOINT</td><td><code>command</code></td><td><code>docker run --entrypoint ...</code> (harder)</td></tr><tr><td>CMD</td><td><code>args</code></td><td>Just add arguments after the image (easy)</td></tr></table></div><p>Set only <code>args: ["Mo"]</code> on the image above → ENTRYPOINT stays → prints <code>hello Mo</code>. Why: change what a container runs without rebuilding and re-pushing the image.</p><p><code>restartPolicy: Never</code> = don't restart a container that exits, so the pod shows <b>Completed</b> instead of CrashLoopBackOff. <code>command: ["sleep", "3600"]</code> gives you a pod that stays up to exec into. vs <code>docker exec</code>: exec is you going inside to type commands; ENTRYPOINT/CMD is the container running something on its own.</p><div class="note">command = ENTRYPOINT. args = CMD.</div></section>
+<section id="fixes"><h2>Where the notes correct what was said live</h2>
+<p class="lede">Left: what was said in class. Right: the correct version from the site notes and deck.</p>
+<div class="fixbox"><div class="tbl-wrap"><table><tr><th>Said in class</th><th>Correct version (site notes and deck)</th></tr><tr><td>"If you want a grace period, use shell form"</td><td><b>Backwards.</b> Shell form takes the grace period away from the app. It never gets SIGTERM and is killed without warning after 30 s. <b>Exec form</b> is what lets the app finish its open requests.</td></tr><tr><td>"The kubelet sends a signal to the control plane to restart the container"</td><td>The kubelet <b>restarts the container itself</b>, without asking the control plane first. It only reports status.</td></tr><tr><td>"The nodes are ARM64 Linux, not Mac"</td><td>The nodes are <b>amd64</b>. A Mac builds <b>linux/arm64</b> images.</td></tr><tr><td>"CMD is the fallback if ENTRYPOINT fails"</td><td>CMD is <b>ENTRYPOINT's default arguments</b>, or the whole command when there's no ENTRYPOINT</td></tr><tr><td>"docker build --entrypoint"</td><td>It's <code>docker <b>run</b> --entrypoint</code></td></tr></table></div></div></section><section id="demo"><h2>Redo the demo yourself</h2>
+<p class="lede">In <code>02-the-cluster-and-the-loop/</code>. Quota: 8 pods, so do the steps in order. Tick each step as you finish it; your ticks stay in this browser.</p>
+<h3>Before you start</h3><div class="note" style="max-width:none">kubectl connected to the school cluster (<code>kubectl config get-contexts</code> shows containers-26a as current) and set to your own namespace, not default. The containers repo pulled. In every file you apply, replace the literal <code>IMAGE_URI</code> with the URI from that folder's README: <code>drill:v1</code> for deployment-drill.yaml, pod.yaml and command-args.yaml; <code>drill:shell</code> for pod-shell-form.yaml; the URIs listed for the broken/ files.</div>
+<p style="margin-bottom:0"><b id="demoCount">0 of 9 steps done</b></p><div class="progress"><div id="demoBar"></div></div>
+<div class="step" data-i="0"><div class="step-head"><input type="checkbox" aria-label="Mark step 1 done"><div><h4>1. Apply the Deployment and look at its ReplicaSet</h4><p></p></div></div>
+<pre>kubectl apply -f deployment-drill.yaml
+kubectl get deploy,rs,pods
+kubectl get rs -o yaml</pre>
+<details><summary>What you should see</summary><div><p>Two <code>drill-&lt;hash&gt;-&lt;id&gt;</code> pods Running. The pods carry the RS's hash; the YAML shows kind ReplicaSet, replicas: 2.</p></div></details></div>
+<div class="step" data-i="1"><div class="step-head"><input type="checkbox" aria-label="Mark step 2 done"><div><h4>2. Break the label, read the refusal, fix it</h4><p>Change <code>template.metadata.labels.app</code> to something else and apply.</p></div></div>
+<pre>kubectl apply -f deployment-drill.yaml</pre>
+<details><summary>What you should see</summary><div><p><code>selector does not match template labels</code>. The API server refuses; old pods keep running. Change it back.</p></div></details></div>
+<div class="step" data-i="2"><div class="step-head"><input type="checkbox" aria-label="Mark step 3 done"><div><h4>3. Delete a pod and watch it come back</h4><p>Two terminals.</p></div></div>
+<pre>kubectl get pods -w                       # terminal 2
+kubectl delete pod &lt;one-drill-pod&gt;         # terminal 1</pre>
+<details><summary>What you should see</summary><div><p>In terminal 2, the old pod Terminating and a new one with a new name going to Running.</p></div></details></div>
+<div class="step" data-i="3"><div class="step-head"><input type="checkbox" aria-label="Mark step 4 done"><div><h4>4. Scale, then let the file win</h4><p></p></div></div>
+<pre>kubectl scale deploy/drill --replicas=3
+kubectl apply -f deployment-drill.yaml    # file says 2: back to two, no error</pre>
+<details><summary>What you should see</summary><div><p>Three pods, then two.</p></div></details></div>
+<div class="step" data-i="4"><div class="step-head"><input type="checkbox" aria-label="Mark step 5 done"><div><h4>5. Open the tunnel and curl</h4><p></p></div></div>
+<pre>kubectl get pods -o wide                  # note a pod IP
+curl &lt;pod-ip&gt;:8080                        # times out
+kubectl port-forward deploy/drill 8000:8080   # terminal 1
+curl localhost:8000                       # terminal 2</pre>
+<details><summary>What you should see</summary><div><p><code>Hello from the drill app</code>. Ctrl+C the tunnel and curl fails with <code>Couldn't connect to server</code>.</p></div></details></div>
+<div class="step" data-i="5"><div class="step-head"><input type="checkbox" aria-label="Mark step 6 done"><div><h4>6. Rolling update to v2, then undo</h4><p><code>drill=</code> is the CONTAINER name.</p></div></div>
+<pre>kubectl set image deployment/drill drill=&lt;registry&gt;/drill:v2
+kubectl rollout status deploy/drill
+kubectl get rs                            # old RS at 0, new RS at 2
+kubectl port-forward deploy/drill 8000:8080   # restart it
+curl localhost:8000                       # version 2
+kubectl rollout undo deploy/drill</pre>
+<details><summary>What you should see</summary><div><p>After the undo, restart port-forward and curl prints the v1 message. <code>kubectl describe pod</code> shows the v1 image.</p></div></details></div>
+<div class="step" data-i="6"><div class="step-head"><input type="checkbox" aria-label="Mark step 7 done"><div><h4>7. Time the two deletes</h4><p></p></div></div>
+<pre>kubectl apply -f pod.yaml -f pod-shell-form.yaml
+time kubectl delete pod drill             # exec form
+time kubectl delete pod drill-shell       # shell form</pre>
+<details><summary>What you should see</summary><div><p>The <code>real</code> line at the bottom: about 3 s vs about 32 s.</p></div></details></div>
+<div class="step" data-i="7"><div class="step-head"><input type="checkbox" aria-label="Mark step 8 done"><div><h4>8. command and args</h4><p></p></div></div>
+<pre>kubectl apply -f command-args.yaml
+kubectl get pod command-args
+kubectl logs command-args</pre>
+<details><summary>What you should see</summary><div><p>STATUS <b>Completed</b>, and logs showing command and args replaced CMD.</p></div></details></div>
+<div class="step" data-i="8"><div class="step-head"><input type="checkbox" aria-label="Mark step 9 done"><div><h4>9. The broken pods, read in order</h4><p>Make room first.</p></div></div>
+<pre>kubectl delete pod drill drill-shell --ignore-not-found
+kubectl apply -f broken/
+kubectl get pods
+kubectl describe pod image-pull
+kubectl logs image-pull
+kubectl logs wrong-arch
+kubectl logs missing-env
+kubectl get pods missing-env              # RESTARTS higher each time</pre>
+<details><summary>What you should see</summary><div><p>Each cause in one place: describe for the image pull (<code>drill:v0: not found</code>), logs for the other two (<code>exec format error</code>, <code>KeyError: 'DB_HOST'</code>).</p></div></details></div>
+<h3>If it goes wrong</h3><div class="tbl-wrap"><table><tr><th>Error</th><th>Meaning</th></tr><tr><td><code>InvalidImageName</code></td><td>You left the literal IMAGE_URI in the file</td></tr><tr><td>Pods stuck Pending / quota exceeded</td><td>You hit the 8-pod limit. Delete drill/drill-shell before broken/.</td></tr><tr><td><code>unable to listen on port 8000</code></td><td>Another port-forward (or app) already uses it. Ctrl+C the old one.</td></tr><tr><td>Things land in default</td><td>Your context isn't set to your namespace. Add <code>-n &lt;ns&gt;</code> or fix the context.</td></tr></table></div>
+<h3>Clean up</h3><pre>kubectl get all                           # everything in your namespace
+kubectl delete -f . -f broken/ --ignore-not-found
+kubectl get pods                          # No resources found</pre><p>A pod Terminating for 30 s is the shell-form pod waiting out its grace period. Nothing here bills you: the cluster is the school's.</p>
+<button id="demoReset">Clear my ticks</button></section><section id="commands"><h2>Commands and config that came up</h2><div class="tbl-wrap"><table><tr><th>Command</th><th>What it does</th></tr><tr><td><code>kubectl get &lt;kind&gt; &lt;name&gt; -o yaml</code></td><td>Print the object the cluster stores</td></tr><tr><td><code>kubectl get rs</code></td><td>List ReplicaSets</td></tr><tr><td><code>kubectl get pods -o wide</code></td><td>Pods plus their IP and node</td></tr><tr><td><code>kubectl get pods -w</code></td><td>Watch pod changes live</td></tr><tr><td><code>kubectl create namespace &lt;name&gt;</code></td><td>Make a namespace with no file</td></tr><tr><td><code>kubectl scale deploy/drill --replicas=3</code></td><td>Change the stored count</td></tr><tr><td><code>kubectl port-forward deploy/drill 8000:8080</code></td><td>Tunnel laptop :8000 → a pod's :8080</td></tr><tr><td><code>kubectl set image deployment/drill drill=&lt;uri&gt;:v2</code></td><td>Change a container's image → rollout</td></tr><tr><td><code>kubectl rollout status deploy/drill</code></td><td>Wait for / confirm the rollout</td></tr><tr><td><code>kubectl rollout undo deploy/drill</code></td><td>Go back to the previous ReplicaSet</td></tr><tr><td><code>time kubectl delete pod &lt;name&gt;</code></td><td>Delete and measure how long it took</td></tr><tr><td><code>kubectl describe pod &lt;name&gt;</code></td><td>Details + the Events block</td></tr><tr><td><code>kubectl logs &lt;pod&gt;</code></td><td>What the process printed</td></tr><tr><td><code>kubectl config get-contexts</code></td><td>Which cluster/namespace you're pointed at</td></tr><tr><td><code>docker build --platform linux/amd64 -t &lt;image&gt; .</code></td><td>Build for the cluster's processors on a Mac</td></tr></table></div><p><code>k</code> is the alias for kubectl the instructors use.</p></section><section id="wrapup"><h2>What the instructor stressed, and what's next</h2><div class="cards2"><div><h3>Stressed in class</h3><ul><li>Look it up in the Kubernetes docs. Every resource has an example manifest there; Mo copies from it instead of memorizing.</li><li>Never run things in default. At work everything lives in a namespace.</li><li>Describe before logs. No container, no logs.</li><li>Typos in image tags cause a lot of real ImagePullBackOffs. Compare letter by letter.</li><li>An image built on your Mac won't run on the cluster by default. Build with <code>--platform linux/amd64</code>.</li><li>Bakhtiyar: the commands that matter most right now are apply, get, delete, plus knowing your two resources, pod and deployment. The rest comes with practice.</li></ul></div><div><h3>Homework</h3><ul><li>The after-class steps in your namespace, in the README's order (the demo above).</li><li>The four questions (slide 30), answered with the page closed: (1) What happens after <code>kubectl apply</code> returns? Who stores the object, who compares it with what's running, and when does that stop? (2) A Deployment file has <code>app: drill</code> twice. What does each copy do, and what does the API server do when they disagree? (3) ImagePullBackOff, exec format error, CrashLoopBackOff with a KeyError: image or process, and did describe or logs show it? (4) Where does kubectl run, and where does the pod run? Why does the EC2 console show one and not the other?</li><li>The assignment (slide 32): your own image as a Deployment from your own ECR repo; a rolling update and undo between two tags of your own image; the investment app beside Postgres (<code>postgres.yaml</code> + <code>deployment-investment-app.yaml</code>) until <code>/health</code> answers through port-forward; the three broken pods diagnosed in writing.</li><li>No deadline was stated. Mo takes leftover questions at Saturday office hours.</li></ul></div><div><h3>Worth replaying in the recording</h3><ul><li>The whiteboard rolling update: pods added and removed one at a time between two ReplicaSets.</li><li>The two timed deletes, 2.5 s vs 32 s, side by side.</li><li>After-class: Bakhtiyar's two-terminal <code>get pods -w</code> while deleting and scaling. Slower and clearer than in class.</li></ul></div><div><h3>Left unclear</h3><ul><li>ENTRYPOINT was new to several students (the Docker unit covered only CMD vs RUN). The live explanation ran long. Use the table above, and bring questions Saturday.</li><li>missing-env wasn't demoed: Mo had no investment-app image. You'll run it with your own.</li><li><code>kubectl exec</code> was mentioned but saved for later.</li><li>The grace period can be changed, but how was skipped ("don't worry about it now").</li></ul></div></div></section><section id="quiz"><h2>Check yourself</h2><p class="lede">Pick an answer to see why. Score: <span class="score" id="score">0 / 0</span></p><div id="quizArea"></div></section>
+<footer>Built from your Session 06 recap. </footer></div>
+<script>
+(function(){
+ const $=id=>document.getElementById(id);const rnd=()=>Math.random().toString(36).slice(2,7);const ip=()=>'10.20.'+(1+Math.floor(Math.random()*9))+'.'+(2+Math.floor(Math.random()*250));
+ let ps;function reset(){ps=[{name:'drill-6d4f9b-'+rnd(),ip:ip(),r:0},{name:'drill-6d4f9b-'+rnd(),ip:ip(),r:0}];$('c6out').textContent='Two pods from the ReplicaSet. Crash one, or delete one.';draw()}
+ function draw(){$('c6pods').innerHTML=ps.map((p,i)=>`<div class="pod ready${p.flash?' flash':''}"><div class="n">${p.name}</div><div class="st">1/1 Running</div><div>IP ${p.ip}<br>RESTARTS ${p.r}</div></div>`).join('')}
+ $('c6crash').onclick=()=>{const p=ps[0];p.r++;p.flash=1;draw();setTimeout(()=>{p.flash=0;draw()},300);$('c6out').textContent='Container exited → the KUBELET restarted it in the same pod.\nSame name, same IP ('+p.ip+'), RESTARTS '+p.r+'. The control plane was not asked.'};
+ $('c6del').onclick=()=>{const old=ps[0];ps[0]={name:'drill-6d4f9b-'+rnd(),ip:ip(),r:0,flash:1};draw();setTimeout(()=>{ps[0].flash=0;draw()},300);$('c6out').textContent='Pod '+old.name+' is gone → the REPLICASET counted 1 of 2 and created a new pod.\nNew name '+ps[0].name+', new IP '+ps[0].ip+', RESTARTS back to 0.'};
+ $('c6rr').onclick=reset;reset();
+ let a=[],b=[],run=0;const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+ function rdraw(){const cell=(x,v)=>x.map(p=>`<div class="pod ${p.st==='Running'?'ready':(p.st==='Terminating'?'term':'notready')}"><div class="n">${p.n}</div><div class="st">${p.st}</div><div>${v}</div></div>`).join('')||'<span class="empty">0 pods (kept)</span>';
+  $('c6rs1').innerHTML=cell(a,'v1');$('c6rs2').innerHTML=cell(b,'v2');$('c6n1').textContent=a.filter(p=>p.st!=='Terminating').length+' pods';$('c6n2').textContent=b.filter(p=>p.st!=='Terminating').length+' pods'}
+ function rlog(t){$('c6rlog').textContent+=t+'\n';$('c6rlog').scrollTop=1e9}
+ async function roll(from,to,label){const my=++run;$('c6rlog').textContent='';
+  if(!from.length){rlog('Nothing to roll: already on '+label+'.');return}
+  for(let i=0;i<2;i++){const p={n:'drill-'+rnd(),st:'ContainerCreating'};to.push(p);rdraw();rlog('new ReplicaSet: +1 pod ('+label+')');await sleep(900);if(my!==run)return;p.st='Running';rdraw();
+   const o=from.find(x=>x.st==='Running');if(o){o.st='Terminating';rdraw();rlog('old ReplicaSet: -1 pod');await sleep(700);if(my!==run)return;from.splice(from.indexOf(o),1);rdraw()}}
+  rlog('deployment "drill" successfully rolled out. Old ReplicaSet kept at 0. Restart port-forward!')}
+ $('c6v2').onclick=()=>roll(a,b,'v2');$('c6undo').onclick=()=>roll(b,a,'v1 (undo)');
+ a=[{n:'drill-'+rnd(),st:'Running'},{n:'drill-'+rnd(),st:'Running'}];rdraw();rlog('Running v1 with 2 pods. Press set image.');
+ const B={'image-pull':{g:'image-pull    0/1   ImagePullBackOff   0',d:'Events:\n  Normal   Scheduled  assigned to i-0b0e…\n  Normal   Pulling    Pulling image "…/drill:v0"\n  Warning  Failed     Failed to pull image "…/drill:v0": not found\n  Warning  Failed     Error: ErrImagePull\n  Normal   BackOff    Back-off pulling image',l:'Error from server (BadRequest): container "drill" in pod "image-pull" is waiting to start: trying and failing to pull image',v:'Found by DESCRIBE. Image problem: tag v0 doesn\'t exist. No process ever started, so logs have nothing.',key:'d'},
+  'wrong-arch':{g:'wrong-arch    0/1   CrashLoopBackOff   4',d:'Events:\n  Normal   Pulled     Successfully pulled image\n  Normal   Created    Created container\n  Normal   Started    Started container\n  Warning  BackOff    Back-off restarting failed container',l:'exec /usr/local/bin/gunicorn: exec format error',v:'Found by LOGS. Image problem: built for arm64 on a Mac, nodes are amd64. Rebuild with --platform linux/amd64.',key:'l'},
+  'missing-env':{g:'missing-env   0/1   CrashLoopBackOff   5',d:'Events:\n  Normal   Pulled     Successfully pulled image\n  Normal   Started    Started container\n  Warning  BackOff    Back-off restarting failed container',l:'Traceback (most recent call last):\n  ...\nKeyError: \'DB_HOST\'\n[ERROR] Worker failed to boot.',v:'Found by LOGS. Process problem: the app\'s config is missing DB_HOST.',key:'l'}};
+ function show(k){const p=B[$('c6bp').value],m={g:'$ kubectl get pods\n',d:'$ kubectl describe pod '+$('c6bp').value+'\n',l:'$ kubectl logs '+$('c6bp').value+'\n'};$('c6bout').textContent=m[k]+p[k];
+  $('c6verdict').innerHTML=k===p.key?'<span class="chip ok">Cause found</span> '+p.v:(k==='g'?'The status word tells you which command to run next.':'<span class="chip warn">Not here</span> Try the other command.')}
+ $('c6g').onclick=()=>show('g');$('c6d').onclick=()=>show('d');$('c6l').onclick=()=>show('l');$('c6bp').onchange=()=>{$('c6bout').textContent='';$('c6verdict').textContent=''};
+})();
+
+
+(function(){
+  const nav=document.querySelector('nav');const links=[...nav.querySelectorAll('a')];
+  const map=new Map(links.map(l=>[l.getAttribute('href').slice(1),l]));
+  const obs=new IntersectionObserver(es=>{es.forEach(e=>{if(!e.isIntersecting)return;
+    links.forEach(l=>l.classList.remove('active'));const l=map.get(e.target.id);
+    if(l){l.classList.add('active');nav.scrollTo({left:Math.max(0,l.offsetLeft-20),behavior:'smooth'})}})},
+    {rootMargin:'-25% 0px -65% 0px'});
+  map.forEach((l,id)=>{const el=document.getElementById(id);if(el)obs.observe(el)});
+})();
+(function(){
+  const KEY='s06-demo';let done={};
+  try{done=JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(e){done={}}
+  const steps=[...document.querySelectorAll('#demo .step')];
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(done))}catch(e){}}
+  function upd(){const n=steps.filter(s=>done[s.dataset.i]).length;
+    document.getElementById('demoCount').textContent=n+' of '+steps.length+' steps done';
+    document.getElementById('demoBar').style.width=(n/steps.length*100)+'%';}
+  steps.forEach(s=>{const cb=s.querySelector('input');cb.checked=!!done[s.dataset.i];s.classList.toggle('done',cb.checked);
+    cb.onchange=()=>{done[s.dataset.i]=cb.checked;s.classList.toggle('done',cb.checked);save();upd()};});
+  document.getElementById('demoReset').onclick=()=>{done={};save();steps.forEach(s=>{s.querySelector('input').checked=false;s.classList.remove('done')});upd()};
+  upd();
+})();
+(function(){
+  const Q=[{"q": "A pod shows RESTARTS 4, same name and IP as an hour ago. Who acted?", "o": ["The ReplicaSet", "The kubelet, restarting the container in place", "The scheduler"], "a": 1, "e": "A container restart keeps the pod's name and IP. A missing pod gets a new pod with a new hash and IP from the ReplicaSet."}, {"q": "Every rollout takes minutes longer, and pods sit in Terminating for about 30 s each. What do you check?", "o": ["The image tag", "The Dockerfile CMD: probably shell form", "The namespace"], "a": 1, "e": "The shell is PID 1 and doesn't pass SIGTERM on, so Kubernetes waits the full 30 s grace period."}, {"q": "CrashLoopBackOff; describe shows the image pulled and the container started. Next command?", "o": ["kubectl describe again", "kubectl logs", "kubectl delete"], "a": 1, "e": "The process ran, so it printed something: exec format error (image) or a Python traceback like KeyError (process)."}, {"q": "ImagePullBackOff. Which command shows the cause?", "o": ["kubectl logs", "kubectl describe pod (Events)", "kubectl get rs"], "a": 1, "e": "No process ever started, so there are no logs. The Events say not found or forbidden."}, {"q": "After rollout undo, what happens to ReplicaSet #2?", "o": ["It's deleted", "It's kept at 0 pods", "It keeps its pods"], "a": 1, "e": "Both ReplicaSets are kept, so you can switch either way."}, {"q": "Which change starts a rolling update?", "o": ["replicas: 2 \u2192 3", "Changing the image under template", "Renaming the file"], "a": 1, "e": "Any change under template starts a rollout. Changing replicas only scales."}, {"q": "In port-forward deploy/drill 8000:8080, which number is the laptop port?", "o": ["8000", "8080", "Neither"], "a": 0, "e": "Laptop port first, then the container port."}, {"q": "In a pod file, which field replaces the Dockerfile's ENTRYPOINT?", "o": ["args", "command", "image"], "a": 1, "e": "command = ENTRYPOINT, args = CMD."}];
+  const area=document.getElementById('quizArea'),scoreEl=document.getElementById('score');let answered=0,right=0;
+  Q.forEach((item,i)=>{const box=document.createElement('div');box.className='q';
+    const p=document.createElement('p');p.className='prompt';p.textContent=(i+1)+'. '+item.q;box.appendChild(p);
+    const opts=document.createElement('div');opts.className='opts';const ex=document.createElement('p');ex.className='explain';ex.textContent=item.e;
+    item.o.forEach((t,j)=>{const b=document.createElement('button');b.textContent=t;
+      b.onclick=()=>{if(box.dataset.done)return;box.dataset.done=1;answered++;
+        if(j===item.a){right++;b.classList.add('right')}else{b.classList.add('nope');opts.children[item.a].classList.add('right')}
+        [...opts.children].forEach(x=>x.disabled=true);ex.classList.add('show');scoreEl.textContent=right+' / '+answered;};
+      opts.appendChild(b);});
+    box.appendChild(opts);box.appendChild(ex);area.appendChild(box);});
+})();
+</script></body></html>

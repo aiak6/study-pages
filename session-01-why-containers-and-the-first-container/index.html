@@ -1,0 +1,333 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Session 01: Why containers, and the first container</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EEF2F7; --surface:#FFFFFF; --ink:#1B2A41; --muted:#56657C; --line:#C9D3E1;
+  --blue:#2459C8; --blue-soft:#DCE6FA;
+  --ok:#1F8A5B; --ok-soft:#D8F0E4;
+  --warn:#A86A00; --warn-soft:#FBEBC9;
+  --bad:#B83A30; --bad-soft:#F7DCD8;
+  --code-bg:#1B2A41; --code-ink:#E6ECF5;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1724; --surface:#172234; --ink:#E4EAF3; --muted:#9AA8BD; --line:#2C3B53;
+    --blue:#7FA6F5; --blue-soft:#1E3157;
+    --ok:#5CCB94; --ok-soft:#163A2B;
+    --warn:#E8B04D; --warn-soft:#3A2D12;
+    --bad:#F08A80; --bad-soft:#3E1C1A;
+    --code-bg:#0B111B; --code-ink:#DCE4F0;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1724; --surface:#172234; --ink:#E4EAF3; --muted:#9AA8BD; --line:#2C3B53;
+  --blue:#7FA6F5; --blue-soft:#1E3157;
+  --ok:#5CCB94; --ok-soft:#163A2B;
+  --warn:#E8B04D; --warn-soft:#3A2D12;
+  --bad:#F08A80; --bad-soft:#3E1C1A;
+  --code-bg:#0B111B; --code-ink:#DCE4F0;
+  color-scheme:dark;
+}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 72px)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:21;background:var(--bg)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size:17px;line-height:1.6}
+code,pre,.mono{font-family:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace}
+code{font-size:.88em;background:var(--blue-soft);padding:.1em .35em;border-radius:4px}
+.wrap{max-width:980px;margin:0 auto;padding:40px 20px 80px}
+header{margin-bottom:36px}
+h1{font-size:clamp(2rem,5vw,3rem);line-height:1.1;margin:.2em 0 .4em;letter-spacing:-.01em}
+.sub{color:var(--muted);margin:0;max-width:62ch}
+.rule-line{margin-top:24px;display:flex;flex-wrap:wrap;gap:12px}
+.rule-line div{flex:1 1 260px;padding:14px 16px;border-left:5px solid;background:var(--surface);border-radius:0 8px 8px 0}
+.rule-line .r{border-color:var(--ok)} .rule-line .l{border-color:var(--bad)}
+.rule-line strong{display:block;font-size:1.1rem}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;display:flex;flex-wrap:nowrap;gap:8px;overflow-x:auto;
+  margin:0 -20px;padding:10px 20px;background:var(--bg);border-bottom:1px solid var(--line);scrollbar-width:thin}
+@media(min-width:900px){nav{flex-wrap:wrap}}
+nav a{white-space:nowrap}
+nav a.active{background:var(--blue);color:var(--surface);border-color:var(--blue)}
+nav a{color:var(--blue);text-decoration:none;border:1px solid var(--line);padding:4px 12px;border-radius:999px;font-size:.92rem;background:var(--surface)}
+nav a:hover{border-color:var(--blue)}
+section{margin-top:56px}
+h2{font-size:1.6rem;margin:0 0 .3em;line-height:1.2}
+h3{font-size:1.15rem;margin:1.4em 0 .3em}
+p{max-width:70ch}
+.lede{color:var(--muted);margin-top:0}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px}
+button{font:inherit;font-size:.95rem;cursor:pointer;border-radius:8px;border:1px solid var(--line);
+  background:var(--surface);color:var(--ink);padding:8px 14px}
+button:hover{border-color:var(--blue)}
+button.primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+:root[data-theme="dark"] button.primary{color:#0F1724}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) button.primary{color:#0F1724}}
+button.danger{border-color:var(--bad);color:var(--bad)}
+button:focus-visible,a:focus-visible,summary:focus-visible,select:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+button:disabled{opacity:.45;cursor:not-allowed}
+.opts button:disabled{opacity:.7}
+.opts button.right:disabled,.opts button.nope:disabled{opacity:1}
+.controls{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;align-items:center}
+
+/* simulator */
+.sim{display:grid;grid-template-columns:1fr;gap:16px}
+@media(min-width:760px){.sim{grid-template-columns:1.25fr 1fr}}
+.rs{border:1px dashed var(--line);border-radius:10px;padding:12px;margin-bottom:12px;transition:opacity .4s}
+.rs.zero{opacity:.55}
+.rs-head{display:flex;justify-content:space-between;gap:8px;font-size:.9rem;color:var(--muted);margin-bottom:8px;flex-wrap:wrap}
+.rs-head b{color:var(--ink)}
+.pods{display:flex;flex-wrap:wrap;gap:10px;min-height:76px}
+.pod{width:150px;border-radius:10px;padding:10px;border:2px solid;font-size:.85rem;line-height:1.35;transition:opacity .5s, transform .3s}
+.pod .n{font-family:"JetBrains Mono",monospace;font-size:.78rem;word-break:break-all}
+.pod .st{font-weight:700;font-size:1rem}
+.pod.ready{border-color:var(--ok);background:var(--ok-soft)}
+.pod.notready{border-color:var(--warn);background:var(--warn-soft)}
+.pod.starting{border-color:var(--line);background:var(--bg)}
+.pod.term{border-color:var(--bad);background:var(--bad-soft);opacity:.6}
+.pod.flash{transform:scale(1.06)}
+.empty{color:var(--muted);font-size:.9rem;align-self:center}
+.log{background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:12px 14px;font-size:.8rem;
+  height:330px;overflow-y:auto;line-height:1.5}
+.log div{white-space:pre-wrap;word-break:break-word}
+.log .w{color:#F4BE5B} .log .e{color:#F49088} .log .g{color:#7FDCA8} .log .c{color:#8FB2F7}
+.users{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:.92rem;color:var(--muted);flex-wrap:wrap}
+.status-pill{display:inline-block;padding:2px 10px;border-radius:999px;font-weight:700;font-size:.85rem}
+.pill-ok{background:var(--ok-soft);color:var(--ok)} .pill-warn{background:var(--warn-soft);color:var(--warn)} .pill-bad{background:var(--bad-soft);color:var(--bad)}
+
+/* liveness */
+.live-grid{display:grid;grid-template-columns:1fr;gap:16px}
+@media(min-width:760px){.live-grid{grid-template-columns:280px 1fr}}
+.bigpod{border:2px solid var(--line);border-radius:14px;padding:18px;text-align:left}
+.bigpod .row{display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding:6px 0;font-size:.95rem}
+.bigpod .row:last-child{border:none}
+.bigpod .val{font-family:"JetBrains Mono",monospace;font-weight:600}
+select{font:inherit;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.backoff{display:flex;gap:4px;align-items:flex-end;height:90px;margin-top:14px}
+.backoff span{flex:1;background:var(--blue-soft);border-radius:4px 4px 0 0;position:relative;transition:background .3s}
+.backoff span.on{background:var(--bad)}
+.backoff-labels{display:flex;gap:4px;font-size:.72rem;color:var(--muted)}
+.backoff-labels span{flex:1;text-align:center}
+
+/* tables */
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:.95rem}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--bg);font-weight:700}
+tr:last-child td{border-bottom:none}
+
+/* request path */
+.path{display:flex;flex-direction:column;gap:0;margin-top:12px}
+.hop{display:grid;grid-template-columns:44px 1fr;gap:14px;position:relative;padding-bottom:18px}
+.hop .dot{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-weight:700;
+  background:var(--surface);border:2px solid var(--blue);color:var(--blue);z-index:1}
+.hop::before{content:"";position:absolute;left:21px;top:44px;bottom:0;width:2px;background:var(--line)}
+.hop:last-child::before{display:none}
+.hop h4{margin:8px 0 2px;font-size:1.05rem}
+.hop p{margin:0;color:var(--muted)}
+.hop.https .dot{border-color:var(--ok);color:var(--ok)}
+.tag{display:inline-block;font-size:.78rem;padding:1px 8px;border-radius:999px;margin-left:6px;vertical-align:2px}
+.tag.enc{background:var(--ok-soft);color:var(--ok)} .tag.plain{background:var(--warn-soft);color:var(--warn)}
+.note{border-left:4px solid var(--blue);background:var(--blue-soft);padding:12px 16px;border-radius:0 8px 8px 0;margin:16px 0;max-width:70ch}
+
+pre{background:var(--code-bg);color:var(--code-ink);padding:14px 16px;border-radius:10px;overflow-x:auto;font-size:.82rem;line-height:1.55;margin:10px 0}
+pre .cm{color:#8A9AB5}
+
+details{background:var(--surface);border:1px solid var(--line);border-radius:10px;margin-bottom:8px}
+summary{cursor:pointer;padding:12px 16px;font-weight:700}
+details > div{padding:0 16px 14px}
+.wrong{color:var(--bad);text-decoration:line-through;text-decoration-thickness:1px}
+
+/* quiz */
+.q{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:14px}
+.q p.prompt{font-weight:700;margin-top:0}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opts button{text-align:left;padding:10px 14px}
+.opts button.right{border-color:var(--ok);background:var(--ok-soft)}
+.opts button.nope{border-color:var(--bad);background:var(--bad-soft)}
+.explain{margin-top:10px;color:var(--muted);display:none}
+.explain.show{display:block}
+.score{font-weight:700}
+footer{margin-top:64px;color:var(--muted);font-size:.9rem}
+
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.tabs button[aria-selected="true"]{background:var(--blue);color:var(--surface);border-color:var(--blue)}
+.tabpane{display:none}.tabpane.show{display:block}
+.timeline{list-style:none;padding:0;margin:0;counter-reset:t}
+.timeline li{counter-increment:t;position:relative;padding:14px 18px 14px 64px;margin-bottom:10px;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.timeline li h4{margin:0 0 4px;font-size:1.08rem}
+.timeline li p{margin:0;color:var(--ink);max-width:68ch}
+.timeline li::before{content:counter(t);position:absolute;left:16px;top:14px;width:32px;height:32px;border-radius:50%;
+  background:var(--blue-soft);color:var(--blue);font-weight:700;display:grid;place-items:center;font-size:.9rem}
+.timeline details{margin:0}
+.yaml-toggle .ln{display:block;transition:background .2s,opacity .2s}
+.yaml-toggle.focus .ln{opacity:.35}
+.yaml-toggle.focus .ln.hl{opacity:1;background:rgba(127,166,245,.18)}
+.flow{display:flex;flex-direction:column;gap:6px;margin:14px 0;max-width:620px}
+.flow div{padding:10px 14px;border-radius:8px;border:1px solid var(--line);background:var(--surface)}
+.flow .arrow{border:none;background:none;padding:0 0 0 18px;color:var(--muted)}
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px}
+.compare > div{border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--bg)}
+.lbs{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.lbs span{display:inline-block;padding:3px 8px;border-radius:6px;font-size:.8rem;font-family:"JetBrains Mono",monospace}
+.lb-many span{background:var(--bad-soft);color:var(--bad)}
+.lb-one span{background:var(--ok-soft);color:var(--ok)}
+.form-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:14px}
+@media(min-width:640px){.form-grid{grid-template-columns:1fr 1fr}}
+.form-grid label{display:flex;flex-direction:column;font-size:.9rem;color:var(--muted);gap:4px}
+.form-grid input{font:inherit;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.verdict{padding:12px 16px;border-radius:8px;font-size:.9rem}
+.verdict.ok{background:var(--ok-soft);color:var(--ok)} .verdict.no{background:var(--bad-soft);color:var(--bad)} .verdict.warn{background:var(--warn-soft);color:var(--warn)}
+.step{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:12px}
+.step.done{border-color:var(--ok)}
+.step-head{display:flex;gap:12px;align-items:flex-start}
+.step-head input{width:22px;height:22px;margin-top:3px;accent-color:var(--ok);flex:none}
+.step-head h4{margin:0;font-size:1.05rem}
+.step-head p{margin:2px 0 0;color:var(--muted)}
+.step pre{margin:10px 0 6px}
+.step details{border:none;background:var(--bg)}
+.step summary{font-weight:400;color:var(--blue);padding:8px 12px}
+.progress{height:8px;background:var(--line);border-radius:999px;overflow:hidden;margin:10px 0 18px}
+.progress div{height:100%;background:var(--ok);width:0;transition:width .3s}
+.cards2{display:grid;grid-template-columns:1fr;gap:14px}
+@media(min-width:720px){.cards2{grid-template-columns:1fr 1fr}}
+.cards2 > div{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.cards2 h3{margin-top:0}
+.cards2 ul{margin:0;padding-left:20px}
+.cards2 li{margin-bottom:6px}
+.fixbox{border:1.5px solid var(--warn);border-radius:14px;padding:12px;background:var(--warn-soft)}
+.fixbox td:first-child{width:44%;color:var(--muted)}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+
+.term{background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:12px 14px;font-family:"JetBrains Mono",monospace;font-size:.8rem;line-height:1.5;overflow-x:auto;white-space:pre}
+.chip{display:inline-block;padding:3px 10px;border-radius:999px;font-size:.85rem;font-weight:700}
+.chip.ok{background:var(--ok-soft);color:var(--ok)}.chip.warn{background:var(--warn-soft);color:var(--warn)}.chip.bad{background:var(--bad-soft);color:var(--bad)}.chip.idle{background:var(--bg);color:var(--muted);border:1px solid var(--line)}
+.lab-row{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:12px}
+.lab-row label{display:flex;gap:6px;align-items:center;font-size:.95rem}
+.lab-row input[type=checkbox]{width:18px;height:18px;accent-color:var(--blue)}
+.layers{display:flex;flex-direction:column;gap:6px}
+.layer{display:flex;justify-content:space-between;gap:10px;padding:8px 12px;border-radius:8px;border:1px solid var(--line);font-family:"JetBrains Mono",monospace;font-size:.82rem;flex-wrap:wrap}
+.layer.cached{background:var(--ok-soft);border-color:var(--ok)}.layer.rebuilt{background:var(--warn-soft);border-color:var(--warn)}.layer.none{background:var(--bg);color:var(--muted)}
+.journey{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.journey .hopbox{padding:10px 14px;border-radius:10px;border:2px solid var(--line);background:var(--surface);font-weight:700;transition:all .3s}
+.journey .hopbox.on{border-color:var(--blue);background:var(--blue-soft);color:var(--blue)}
+.journey .ar{color:var(--muted)}
+</style></head><body><div class="wrap">
+<header><p class="sub">Containers &amp; Orchestration, the first class of stage 3</p><h1>Session 01: Why containers, and the first container</h1><p class="sub">In Scale you ran the investment app as a monolith on EC2 machines built from AMIs and set up by a boot script. This stage repackages that app as an image and runs it as a container, which is how most companies run software now, usually on Kubernetes (EKS). Today was vocabulary plus one first container.</p><div class="rule-line"><div class="r"><strong>When PID 1 exits, the container stops.</strong>A container is one process. No process, no container.</div><div class="l"><strong>A container is not a small VM.</strong>A VM boots its own kernel. A container uses the host's.</div></div></header>
+<nav aria-label="Sections"><a href="#timeline">What we did</a><a href="#arch">Architectures</a><a href="#why">Works on my machine</a><a href="#pid">Process &amp; PID 1</a><a href="#lab">Container lab</a><a href="#image">Image vs container</a><a href="#fixes">Corrections</a><a href="#demo">Redo the demo</a><a href="#commands">Commands</a><a href="#wrapup">Stressed &amp; homework</a><a href="#quiz">Check yourself</a></nav>
+<section id="timeline"><h2>What we actually did, in order</h2><p class="lede">Mon, Sep 28, 2026, with Eldiiar, plus after-class with Bakhtiyar. Deck slides 1–15.</p><ol class="timeline"><li><h4>Stage layout</h4><p>7 units over about 3 weeks. Eldiiar teaches this week, Maher next week, and Eldiiar returns in week 3. The end goal is the investment app as containerized microservices on EKS, using one shared cluster in 312 School's AWS account. Finish the setup page (Docker Desktop now, kubectl later).</p></li><li><h4>Monolith vs microservices vs serverless</h4><p>Drawn on the whiteboard, with the investment app as the monolith example.</p></li><li><h4>Stash as the real example</h4><p>Eldiiar's company runs microservices, but it still runs a legacy monolith too, and he explained why.</p></li><li><h4>Theory</h4><p>Process, kernel, distributions, PID 1, then Docker, Dockerfile, image, repository and container.</p></li><li><h4>Docker Desktop</h4><p>He quit it to show the <code>Cannot connect to the Docker daemon</code> error, then restarted it.</p></li><li><h4>First container</h4><p><code>docker run -it --rm python:3.12-slim bash</code>, a look around inside, <code>docker ps</code> from a second terminal, then <code>exit</code>.</p></li><li><h4>A container that stops by itself</h4><p><code>sleep 120</code> as PID 1, then <code>-d</code> and <code>docker exec</code>.</p></li><li><h4>After class with Bakhtiyar</h4><p>He repeated the demo, fixed a classmate's stuck install (Rosetta), and showed <code>docker stop</code> → <code>docker rm</code>.</p></li></ol></section>
+<section id="arch"><h2>Monolith vs microservices: why this stage exists</h2><div class="tbl-wrap"><table><tr><th></th><th>Monolith</th><th>Microservices</th><th>Serverless</th></tr><tr><td>Shape</td><td>One codebase, one deploy</td><td>Small services, one job each</td><td>Just your code</td></tr><tr><td>Changing one feature</td><td>Redeploy everything, coordinated with every team</td><td>That team deploys only its service</td><td>Upload new code</td></tr><tr><td>Cost</td><td>Slow and risky as it grows</td><td>More pieces to run and connect</td><td>You don't control the servers</td></tr><tr><td>Your example</td><td>The investment app</td><td>Stash: onboarding, bank services, Money Coach, transfers</td><td>Lambda (Scale 18)</td></tr></table></div><p>Eldiiar's estimate: roughly 90–95% of companies use microservices today, but you'll meet all three styles.</p><p>A new company with strong engineers usually starts with microservices. An old one migrates piece by piece, or leaves a stable monolith alone when the payoff isn't worth the cost.</p><p><b>Blue-green deployment:</b> build the replacement next to the old system, move traffic over, then shut the old one down.</p><div class="note">Microservices almost always run as containers. That's why this stage starts with the container.</div></section>
+<section id="why"><h2>The problem containers solve: "works on my machine"</h2><p>Before containers, every machine had its own installed Python and libraries. The laptop has 3.12, the test server has 3.9, and the app fails in QA.</p><p>An image carries the app together with its Python and libraries. Any machine with Docker and a Linux kernel runs it the same way.</p></section>
+<section id="pid"><h2>Process, kernel, PID 1</h2><div class="tbl-wrap"><table><tr><th>Word</th><th>Plain meaning</th></tr><tr><td>Process</td><td>A running program</td></tr><tr><td>Kernel</td><td>The core of the OS. It runs processes and controls their access to the hardware.</td></tr><tr><td>Distribution</td><td>A kernel plus one set of programs. Amazon Linux uses <code>dnf</code> and Debian uses <code>apt</code>, on the same kind of kernel.</td></tr><tr><td>PID 1</td><td>The first process. On EC2 it's systemd. Inside a container, PID 1 is whatever command you started it with, like <code>bash</code> or <code>sleep 300</code>.</td></tr></table></div><div class="note"><b>When PID 1 exits, the container stops.</b> Try it in the lab below.</div></section>
+<section id="lab"><h2>Lab: watch PID 1 decide when a container stops</h2><p class="lede">Pick a command and flags, then run it. Use the buttons to exit bash, let time pass, stop or remove containers, and watch <code>docker ps</code> and <code>docker ps -a</code> change.</p><div class="panel"><div class="lab-row"><label>Command (becomes PID 1) <select id="c1cmd"><option value="bash">bash, with -it (interactive)</option><option value="sleep 60">sleep 60, with -d (background)</option><option value="sleep 300">sleep 300, with -d (background)</option></select></label><label><input type="checkbox" id="c1rm" checked> --rm (delete when it stops)</label></div><div class="controls"><button class="primary" id="c1run">docker run</button><button id="c1exit">type exit in bash</button><button id="c1ff">wait 1 minute</button><button id="c1stop">docker stop (all)</button><button id="c1rmv">docker rm (stopped)</button><button id="c1reset">Reset</button></div><div class="sim"><div><h4 style="margin:0 0 6px">docker ps</h4><div class="term" id="c1ps"></div><h4 style="margin:12px 0 6px">docker ps -a</h4><div class="term" id="c1psa"></div></div><div class="log mono" id="c1log" style="height:300px"></div></div></div><div class="note">What to notice: with <code>--rm</code>, a stopped container vanishes from <code>docker ps -a</code> too. Without it, it stays as <b>Exited</b> until you <code>docker rm</code> it. And <code>docker rm</code> refuses a running container.</div></section>
+<section id="image"><h2>Image vs container (and vs AMI)</h2><div class="flow"><div>app code + libraries</div><div class="arrow">↓ Dockerfile + docker build</div><div><b>IMAGE</b>: a packaged filesystem + a start command. No kernel, nothing running.</div><div class="arrow">↓ docker run</div><div><b>CONTAINER</b>: one process, on the kernel the machine already has</div></div><p>One image can start many containers. A <b>repository</b> is where images are stored: Docker Hub is public; ECR is AWS's private one, and this unit uses it.</p><div class="tbl-wrap"><table><tr><th></th><th>AMI</th><th>Image</th></tr><tr><td>Kernel</td><td>Yes, a full OS</td><td>None</td></tr><tr><td>Starts</td><td>Boots a machine, in minutes</td><td>Starts a process, in about a second</td></tr></table></div><div class="note">A container is not a small VM. A VM boots its own kernel; a container uses the host's. On a Mac, Docker Desktop runs one Linux VM, and every container uses its kernel.</div></section>
+<section id="fixes"><h2>Where the notes correct what was said live</h2>
+<p class="lede">Left: what was said in class. Right: the correct version from the site notes and deck.</p>
+<div class="fixbox"><div class="tbl-wrap"><table><tr><th>Said in class</th><th>Correct version (site notes and deck)</th></tr><tr><td>"The container borrows a piece of macOS"</td><td>On a Mac, Docker Desktop runs <b>one Linux VM</b>, and every container uses its kernel. The Mac's own kernel is <b>Darwin</b>.</td></tr><tr><td>"Containers don't work on Windows"</td><td>They do, through <b>WSL 2</b> (a Linux VM)</td></tr><tr><td>"kernel_task is PID 1 on the Mac"</td><td><code>kernel_task</code> is <b>PID 0</b>; <code>launchd</code> is <b>PID 1</b></td></tr><tr><td>"PID 1 on Debian is bash"</td><td>Debian uses <b>systemd</b>. In the slim image, PID 1 is just <b>the command you ran</b>.</td></tr></table></div></div></section><section id="demo"><h2>Redo the demo yourself</h2>
+<p class="lede">Everything stays on your laptop, so this costs nothing. Tick each step as you finish it; your ticks stay in this browser.</p>
+<h3>Before you start</h3><div class="note" style="max-width:none">Docker Desktop installed and running.</div>
+<p style="margin-bottom:0"><b id="demoCount">0 of 6 steps done</b></p><div class="progress"><div id="demoBar"></div></div>
+<div class="step" data-i="0"><div class="step-head"><input type="checkbox" aria-label="Mark step 1 done"><div><h4>1. Check that Docker is alive</h4><p>Any answer, even an empty table, means the daemon is running.</p></div></div>
+<pre>docker ps</pre>
+<details><summary>What you should see</summary><div><p>Column headers like <code>CONTAINER ID IMAGE ...</code>. If you get <code>Cannot connect to the Docker daemon</code>, start Docker Desktop.</p></div></details></div>
+<div class="step" data-i="1"><div class="step-head"><input type="checkbox" aria-label="Mark step 2 done"><div><h4>2. Run a public image and go inside it</h4><p><code>-it</code> = interactive terminal, <code>--rm</code> = delete on exit, <code>bash</code> replaces the start command and becomes PID 1.</p></div></div>
+<pre>docker run -it --rm python:3.12-slim bash</pre>
+<details><summary>What you should see</summary><div><p><code>Unable to find image ... locally</code> the first time, then a pull. Your prompt changes to something like <code>root@3f2a9c1d7e4b:/#</code>.</p></div></details></div>
+<div class="step" data-i="2"><div class="step-head"><input type="checkbox" aria-label="Mark step 3 done"><div><h4>3. Look around inside</h4><p>Note the kernel version down.</p></div></div>
+<pre>ls /                  # bin boot etc ... a normal Linux file tree
+cat /etc/os-release   # Debian
+uname -r              # kernel version
+top                   # &quot;command not found&quot;: the slim image leaves it out</pre>
+<details><summary>What you should see</summary><div><p>A normal Linux file tree, Debian, a kernel version, and <code>top: command not found</code>.</p></div></details></div>
+<div class="step" data-i="3"><div class="step-head"><input type="checkbox" aria-label="Mark step 4 done"><div><h4>4. Open a second terminal on the laptop</h4><p>Leave the container running; <code>docker</code> doesn't exist inside it.</p></div></div>
+<pre>docker ps                                  # your container: id, image, &quot;bash&quot;, random name
+docker top &lt;container-id&gt;                  # its processes: just bash
+uname -r                                   # the Mac&#x27;s kernel (Darwin), which is different
+docker run --rm python:3.12-slim uname -r  # same kernel as step 3</pre>
+<details><summary>What you should see</summary><div><p>Both container readings match each other, and the Mac's reading doesn't match them.</p></div></details></div>
+<div class="step" data-i="4"><div class="step-head"><input type="checkbox" aria-label="Mark step 5 done"><div><h4>5. Exit and check that it's gone</h4><p>Type <code>exit</code> in the first terminal, then:</p></div></div>
+<pre>docker ps -a</pre>
+<details><summary>What you should see</summary><div><p>Not there: bash exited → container stopped → <code>--rm</code> deleted it.</p></div></details></div>
+<div class="step" data-i="5"><div class="step-head"><input type="checkbox" aria-label="Mark step 6 done"><div><h4>6. Run a container in the background that stops itself</h4><p><code>docker exec</code> gets a shell inside, like SSH.</p></div></div>
+<pre>docker run -d python:3.12-slim sleep 300    # prints the id; your terminal stays free
+docker exec -it &lt;container-id&gt; bash         # get a shell inside
+exit
+docker ps                                   # still running (sleep is PID 1)</pre>
+<details><summary>What you should see</summary><div><p>After 5 minutes, <code>docker ps</code> is empty and <code>docker ps -a</code> shows it as <b>Exited</b>.</p></div></details></div>
+<h3>If it goes wrong</h3><div class="tbl-wrap"><table><tr><th>Error</th><th>Meaning</th></tr><tr><td><code>Cannot connect to the Docker daemon</code></td><td>Docker Desktop isn't running</td></tr><tr><td>Docker Desktop stuck on "starting" (Apple chip)</td><td>Install the Rosetta update, restart the Mac, try again</td></tr><tr><td><code>docker rm</code> refuses</td><td>The container is still running. Run <code>docker stop</code> first.</td></tr></table></div>
+<h3>Clean up</h3><pre>docker stop &lt;container-id&gt;; docker rm &lt;container-id&gt;   # any leftovers
+docker rmi python:3.12-slim                            # optional: delete the ~145 MB image</pre>
+<button id="demoReset">Clear my ticks</button></section><section id="commands"><h2>Commands and config that came up</h2><div class="tbl-wrap"><table><tr><th>Command</th><th>What it does</th></tr><tr><td><code>docker ps</code></td><td>Running containers</td></tr><tr><td><code>docker ps -a</code></td><td>All containers, stopped ones too</td></tr><tr><td><code>docker images</code></td><td>Local images and their sizes</td></tr><tr><td><code>docker run -it --rm &lt;image&gt; bash</code></td><td>Start a container with a shell inside; deleted on exit</td></tr><tr><td><code>docker run -d &lt;image&gt; sleep 300</code></td><td>Run in the background (detached)</td></tr><tr><td><code>docker exec -it &lt;id&gt; bash</code></td><td>Open a shell inside a running container</td></tr><tr><td><code>docker top &lt;id&gt;</code></td><td>A container's processes</td></tr><tr><td><code>docker stop &lt;id&gt;</code> / <code>docker rm &lt;id&gt;</code></td><td>Stop it / delete it</td></tr><tr><td><code>sudo systemctl start docker</code></td><td>Start Docker on a Linux server (no Desktop there)</td></tr></table></div><h3>Cheat sheet from the class notes (listed for later, not demoed)</h3><div class="tbl-wrap"><table><tr><th>Command</th><th>What it does</th></tr><tr><td><code>docker version</code></td><td>Client and daemon versions</td></tr><tr><td><code>docker pull nginx:1.23</code></td><td>Download an image without running it</td></tr><tr><td><code>docker run -d --name web-app nginx:1.23</code></td><td>Background, with your own name instead of a random one</td></tr><tr><td><code>docker run -d -p 9000:80 --name web-app nginx:1.23</code></td><td>Laptop port 9000 → container port 80</td></tr><tr><td><code>docker logs &lt;id&gt;</code></td><td>What the container printed</td></tr><tr><td><code>docker start &lt;id&gt;</code></td><td>Start a stopped container again</td></tr></table></div></section><section id="wrapup"><h2>What the instructor stressed, and what's next</h2><div class="cards2">
+<div><h3>Stressed in class</h3><ul><li>No architecture is "the best." Companies choose based on what they need. Expect monoliths, microservices and hybrids at work.</li><li>Don't go deep on Docker itself. At work you'll mostly handle containers through Kubernetes and kubectl. You still need these basics.</li><li>Image size matters. Bigger images start slower, which is why you pick slim.</li><li>Finish the setup page. The class won't wait for you.</li><li>Feeling confused for a day or two is normal. Write your questions down and use Claude to explain things again.</li></ul></div>
+<div><h3>Homework</h3><ul><li>Due Wednesday: pick any public image on Docker Hub (official ones are marked), run it, and look inside with the commands above.</li><li>Finish everything on the setup page.</li></ul></div>
+<div><h3>Worth replaying in the recording</h3><ul><li>The split-terminal moment: inside the container on one side, <code>docker ps</code> on the laptop on the other.</li><li>The <code>sleep 120</code> container dying on screen: PID 1 finishes and the container disappears.</li><li>After class: Bakhtiyar's <code>docker stop</code> → <code>docker rm</code> on a container without <code>--rm</code>.</li></ul></div>
+<div><h3>Left unclear</h3><ul><li>The transcript says <code>python:3.10-slim</code>, but the notes and deck use <code>3.12-slim</code>. This page uses 3.12.</li><li>The deck's "Map" tab (Scale resource ↔ Kubernetes equivalent) isn't live yet.</li></ul></div></div></section><section id="quiz"><h2>Check yourself</h2><p class="lede">Pick an answer to see why. Score: <span class="score" id="score">0 / 0</span></p><div id="quizArea"></div></section>
+<footer>Built from your Session 01 recap. </footer></div>
+<script>
+(function(){
+ const $=id=>document.getElementById(id);let cs=[];
+ const names=['eager_curie','brave_turing','sleepy_hopper','quirky_lovelace','jolly_knuth'];
+ function log(t,c){const d=document.createElement('div');if(c)d.className=c;d.textContent=t;$('c1log').appendChild(d);$('c1log').scrollTop=1e9}
+ const hdr='CONTAINER ID   IMAGE              COMMAND       STATUS';
+ function row(c){return c.id+'   python:3.12-slim   '+('"'+c.cmd+'"').padEnd(13)+' '+(c.status==='Up'?'Up':'Exited (0)')}
+ function render(){const up=cs.filter(c=>c.status==='Up');$('c1ps').textContent=[hdr,...up.map(row)].join('\n');$('c1psa').textContent=[hdr,...cs.map(row)].join('\n')}
+ function stopC(c,why){c.status='Exited';log(why,'w');if(c.rm){cs=cs.filter(x=>x!==c);log('--rm: container '+c.id+' deleted automatically','g')}else log('Container '+c.id+' stays as Exited (no --rm)')}
+ $('c1run').onclick=()=>{const cmd=$('c1cmd').value,rm=$('c1rm').checked;const id=Math.random().toString(16).slice(2,14);
+  const c={id,cmd,rm,status:'Up',left:cmd==='bash'?Infinity:+cmd.split(' ')[1],name:names[Math.floor(Math.random()*names.length)]};cs.push(c);
+  log('$ docker run '+(cmd==='bash'?'-it':'-d')+(rm?' --rm':'')+' python:3.12-slim '+cmd,'c');
+  log(cmd==='bash'?'root@'+id+':/#   (you are inside; PID 1 = bash)':id+'   (PID 1 = '+cmd+', terminal stays free)');render()};
+ $('c1exit').onclick=()=>{const b=cs.filter(c=>c.status==='Up'&&c.cmd==='bash');if(!b.length){log('No running bash container to exit.');return}
+  b.forEach(c=>{log('root@'+c.id+':/# exit','c');stopC(c,'bash (PID 1) exited → container stopped')});render()};
+ $('c1ff').onclick=()=>{log('... 1 minute passes ...','c');cs.filter(c=>c.status==='Up'&&isFinite(c.left)).forEach(c=>{c.left-=60;if(c.left<=0)stopC(c,c.cmd+' (PID 1) finished → container '+c.id+' stopped');else log(c.cmd+' still running in '+c.id+' ('+c.left+'s left)')});render()};
+ $('c1stop').onclick=()=>{const up=cs.filter(c=>c.status==='Up');log('$ docker stop '+(up.map(c=>c.id).join(' ')||'(nothing running)'),'c');up.forEach(c=>stopC(c,'Stopped '+c.id));render()};
+ $('c1rmv').onclick=()=>{const up=cs.filter(c=>c.status==='Up');if(up.length)log('Error: cannot remove a running container '+up[0].id+'. Stop it first.','e');
+  const ex=cs.filter(c=>c.status==='Exited');ex.forEach(c=>log('$ docker rm '+c.id,'c'));cs=cs.filter(c=>c.status==='Up');if(!ex.length&&!up.length)log('Nothing to remove.');render()};
+ $('c1reset').onclick=()=>{cs=[];$('c1log').innerHTML='';log('Fresh start. Pick a command and press docker run.','g');render()};
+ $('c1reset').onclick();
+})();
+
+
+(function(){
+  const nav=document.querySelector('nav');const links=[...nav.querySelectorAll('a')];
+  const map=new Map(links.map(l=>[l.getAttribute('href').slice(1),l]));
+  const obs=new IntersectionObserver(es=>{es.forEach(e=>{if(!e.isIntersecting)return;
+    links.forEach(l=>l.classList.remove('active'));const l=map.get(e.target.id);
+    if(l){l.classList.add('active');nav.scrollTo({left:Math.max(0,l.offsetLeft-20),behavior:'smooth'})}})},
+    {rootMargin:'-25% 0px -65% 0px'});
+  map.forEach((l,id)=>{const el=document.getElementById(id);if(el)obs.observe(el)});
+})();
+(function(){
+  const KEY='s01-demo';let done={};
+  try{done=JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(e){done={}}
+  const steps=[...document.querySelectorAll('#demo .step')];
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(done))}catch(e){}}
+  function upd(){const n=steps.filter(s=>done[s.dataset.i]).length;
+    document.getElementById('demoCount').textContent=n+' of '+steps.length+' steps done';
+    document.getElementById('demoBar').style.width=(n/steps.length*100)+'%';}
+  steps.forEach(s=>{const cb=s.querySelector('input');cb.checked=!!done[s.dataset.i];s.classList.toggle('done',cb.checked);
+    cb.onchange=()=>{done[s.dataset.i]=cb.checked;s.classList.toggle('done',cb.checked);save();upd()};});
+  document.getElementById('demoReset').onclick=()=>{done={};save();steps.forEach(s=>{s.querySelector('input').checked=false;s.classList.remove('done')});upd()};
+  upd();
+})();
+(function(){
+  const Q=[{"q": "You run docker run -d python:3.12-slim sleep 60 and check docker ps two minutes later. Where is the container?", "o": ["Still running in docker ps", "Gone from docker ps, but in docker ps -a as Exited", "Deleted completely"], "a": 1, "e": "sleep 60 was PID 1. When it finished, the container stopped. Without --rm it stays listed in docker ps -a."}, {"q": "Why does a container start in about a second when an EC2 instance takes minutes?", "o": ["Containers use a faster processor", "A container boots nothing: it's one process on a kernel that's already running", "Images are always smaller than 1 MB"], "a": 1, "e": "An AMI carries a full OS and has to boot a machine. A container just starts a process."}, {"q": "The payments team at a monolith company must wait for next week's maintenance window to ship a small fix. What removes that wait?", "o": ["Serverless only", "Microservices: payments becomes its own service with its own deploys", "A bigger EC2 instance"], "a": 1, "e": "The team ships alone. The cost is more pieces to run and connect."}, {"q": "On a Mac, which kernel do your containers use?", "o": ["Darwin, the Mac's kernel", "The kernel of the Linux VM that Docker Desktop runs", "Each container brings its own kernel"], "a": 1, "e": "Docker Desktop runs one Linux VM. Every container uses its kernel, which is why uname -r differs from the Mac's."}, {"q": "What's inside an image?", "o": ["A full OS with its own kernel", "A packaged filesystem plus a start command, no kernel", "A running process"], "a": 1, "e": "An image is a template that sits there until you run it. The kernel comes from the host."}, {"q": "docker rm refuses to delete a container. Most likely why?", "o": ["It's still running; run docker stop first", "The image is missing", "You need sudo"], "a": 0, "e": "docker rm only removes stopped containers (or use rm -f, which stops it first)."}, {"q": "Inside the python:3.12-slim container, top says \"command not found\". Why?", "o": ["Docker is broken", "The slim image leaves extra tools out to stay small", "top only works on Macs"], "a": 1, "e": "Slim images skip extras. Smaller image = faster start, fewer tools when it breaks."}];
+  const area=document.getElementById('quizArea'),scoreEl=document.getElementById('score');let answered=0,right=0;
+  Q.forEach((item,i)=>{const box=document.createElement('div');box.className='q';
+    const p=document.createElement('p');p.className='prompt';p.textContent=(i+1)+'. '+item.q;box.appendChild(p);
+    const opts=document.createElement('div');opts.className='opts';const ex=document.createElement('p');ex.className='explain';ex.textContent=item.e;
+    item.o.forEach((t,j)=>{const b=document.createElement('button');b.textContent=t;
+      b.onclick=()=>{if(box.dataset.done)return;box.dataset.done=1;answered++;
+        if(j===item.a){right++;b.classList.add('right')}else{b.classList.add('nope');opts.children[item.a].classList.add('right')}
+        [...opts.children].forEach(x=>x.disabled=true);ex.classList.add('show');scoreEl.textContent=right+' / '+answered;};
+      opts.appendChild(b);});
+    box.appendChild(opts);box.appendChild(ex);area.appendChild(box);});
+})();
+</script></body></html>

@@ -1,0 +1,705 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>The Request's Journey</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+
+<style>
+  :root {
+    /* light palette (cool slate with a chosen teal accent) */
+    --ground: #eef2f6;
+    --surface: #ffffff;
+    --surface-2: #f6f8fa;
+    --ink: #16222e;
+    --muted: #55697b;
+    --faint: #8497a6;
+    --line: #d9e1e8;
+    --line-strong: #c2ced8;
+    --accent: #0d7d84;
+    --accent-soft: #d5eceb;
+    --accent-ink: #075258;
+    --flow: #178c96;
+    --good: #1a7f43;
+    --good-soft: #d8efe0;
+    --warn: #a85e08;
+    --warn-soft: #f7e7ce;
+    --bad: #bb3a2e;
+    --bad-soft: #f6ddd8;
+    --shadow: 0 1px 2px rgba(20,34,46,.06), 0 8px 24px rgba(20,34,46,.06);
+    --shadow-sm: 0 1px 2px rgba(20,34,46,.06);
+    --radius: 14px;
+    --radius-sm: 9px;
+    --maxw: 1080px;
+    --mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+    --sans: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+    --display: "Bricolage Grotesque", var(--sans);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #0c141c;
+      --surface: #121e28;
+      --surface-2: #16232f;
+      --ink: #e6eef4;
+      --muted: #9aacba;
+      --faint: #6d8090;
+      --line: #24343f;
+      --line-strong: #32454f;
+      --accent: #35c2c0;
+      --accent-soft: #123536;
+      --accent-ink: #7fded9;
+      --flow: #2fb3b4;
+      --good: #4cc27f;
+      --good-soft: #123020;
+      --warn: #e3a94e;
+      --warn-soft: #33260f;
+      --bad: #e58573;
+      --bad-soft: #35190f;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.35);
+      --shadow-sm: 0 1px 2px rgba(0,0,0,.3);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #0c141c;
+    --surface: #121e28;
+    --surface-2: #16232f;
+    --ink: #e6eef4;
+    --muted: #9aacba;
+    --faint: #6d8090;
+    --line: #24343f;
+    --line-strong: #32454f;
+    --accent: #35c2c0;
+    --accent-soft: #123536;
+    --accent-ink: #7fded9;
+    --flow: #2fb3b4;
+    --good: #4cc27f;
+    --good-soft: #123020;
+    --warn: #e3a94e;
+    --warn-soft: #33260f;
+    --bad: #e58573;
+    --bad-soft: #35190f;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.35);
+    --shadow-sm: 0 1px 2px rgba(0,0,0,.3);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding-inline: 20px; }
+
+  h1, h2, h3 { font-family: var(--display); font-weight: 700; text-wrap: balance; line-height: 1.12; letter-spacing: -.01em; margin: 0; }
+  p { margin: 0; }
+  a { color: var(--accent-ink); }
+  code, .mono { font-family: var(--mono); }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--accent-ink);
+    font-weight: 600;
+  }
+
+  /* ---------- HERO ---------- */
+  header.hero {
+    background:
+      radial-gradient(120% 140% at 88% -10%, var(--accent-soft) 0%, transparent 55%),
+      var(--surface);
+    border-bottom: 1px solid var(--line);
+  }
+  .hero-inner { padding-block: 46px 40px; display: grid; gap: 20px; }
+  .hero h1 { font-size: clamp(34px, 6vw, 60px); font-weight: 800; letter-spacing: -.025em; }
+  .hero .lede { font-size: clamp(17px, 2.2vw, 20px); color: var(--muted); max-width: 60ch; }
+  .hero .lede b { color: var(--ink); font-weight: 600; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+  .tag {
+    font-family: var(--mono); font-size: 12px; letter-spacing: .02em;
+    padding: 5px 11px; border-radius: 999px; border: 1px solid var(--line-strong);
+    color: var(--muted); background: var(--surface-2);
+  }
+
+  /* ---------- NAV ---------- */
+  nav.toc { position: sticky; top: 0; z-index: 20; background: color-mix(in srgb, var(--ground) 88%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+  .toc-inner { display: flex; gap: 6px; overflow-x: auto; padding-block: 10px; scrollbar-width: thin; }
+  .toc a {
+    flex: 0 0 auto; text-decoration: none; color: var(--muted); font-size: 13.5px; font-weight: 600;
+    padding: 7px 13px; border-radius: 999px; border: 1px solid transparent; white-space: nowrap;
+  }
+  .toc a:hover { color: var(--ink); background: var(--surface-2); }
+  .toc .num { font-family: var(--mono); color: var(--accent); margin-right: 6px; font-size: 12px; }
+
+  /* ---------- SECTION ---------- */
+  section { padding-block: 52px; border-bottom: 1px solid var(--line); }
+  .sec-head { display: grid; gap: 10px; margin-bottom: 30px; max-width: 68ch; }
+  .sec-head h2 { font-size: clamp(24px, 3.4vw, 34px); }
+  .sec-head p { color: var(--muted); font-size: 16.5px; }
+  .kicker { display: flex; align-items: baseline; gap: 12px; }
+  .kicker .idx { font-family: var(--mono); font-size: 13px; color: var(--accent); font-weight: 600; letter-spacing: .08em; }
+
+  /* ---------- FLOW DIAGRAM ---------- */
+  .diagram { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 24px; overflow: hidden; }
+  .zone { border: 1.5px dashed var(--line-strong); border-radius: var(--radius-sm); padding: 26px 16px 16px; position: relative; }
+  .zone + .zone { margin-top: 26px; }
+  .zone-label {
+    position: absolute; top: -11px; left: 14px; background: var(--surface); padding: 0 9px;
+    font-family: var(--mono); font-size: 11.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); font-weight: 600;
+  }
+  .zone.vpc { border-color: var(--accent); background: linear-gradient(180deg, var(--accent-soft) 0%, transparent 22%); }
+  .zone.vpc > .zone-label { color: var(--accent-ink); }
+
+  .flow { display: flex; flex-wrap: wrap; align-items: stretch; gap: 6px; }
+  .node {
+    flex: 1 1 130px; min-width: 128px; background: var(--surface-2); border: 1px solid var(--line-strong);
+    border-radius: var(--radius-sm); padding: 12px 13px; display: grid; gap: 5px; align-content: start;
+  }
+  .node .n-role { font-family: var(--mono); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--faint); }
+  .node .n-name { font-weight: 700; font-size: 15px; line-height: 1.15; }
+  .node .n-desc { font-size: 12.5px; color: var(--muted); line-height: 1.4; }
+  .node .ports { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px; }
+  .port { font-family: var(--mono); font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 6px; background: var(--accent-soft); color: var(--accent-ink); }
+  .port.ssh { background: var(--warn-soft); color: var(--warn); }
+  .port.db { background: color-mix(in srgb, var(--ink) 8%, transparent); color: var(--muted); }
+  .arrow { flex: 0 0 auto; align-self: center; color: var(--flow); font-size: 20px; display: grid; place-items: center; padding: 0 2px; }
+  @media (max-width: 620px) {
+    .flow { flex-direction: column; }
+    .node { min-width: 0; }
+    .arrow { transform: rotate(90deg); padding: 2px 0; }
+  }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 18px; font-size: 13px; color: var(--muted); }
+  .legend span { display: inline-flex; align-items: center; gap: 7px; }
+  .legend .port { font-size: 11px; }
+
+  /* ---------- CARDS / GRID ---------- */
+  .grid { display: grid; gap: 16px; }
+  .grid.two { grid-template-columns: repeat(2, 1fr); }
+  .grid.three { grid-template-columns: repeat(3, 1fr); }
+  @media (max-width: 760px) { .grid.two, .grid.three { grid-template-columns: 1fr; } }
+
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow-sm); display: grid; gap: 10px; align-content: start; }
+  .card h3 { font-size: 18px; }
+  .card p { font-size: 14.5px; color: var(--muted); }
+  .card .pin { font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--accent-ink); font-weight: 600; }
+  .card.sg-app { border-top: 3px solid var(--accent); }
+  .card.sg-alb { border-top: 3px solid var(--flow); }
+  .card.sg-db { border-top: 3px solid var(--warn); }
+
+  /* myth callout */
+  .callout { display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: start; border-radius: var(--radius); padding: 16px 18px; border: 1px solid; }
+  .callout .ic { font-family: var(--display); font-weight: 800; font-size: 18px; width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; }
+  .callout.myth { background: var(--bad-soft); border-color: color-mix(in srgb, var(--bad) 40%, transparent); }
+  .callout.myth .ic { background: var(--bad); color: #fff; }
+  .callout.truth { background: var(--good-soft); border-color: color-mix(in srgb, var(--good) 40%, transparent); }
+  .callout.truth .ic { background: var(--good); color: #fff; }
+  .callout.tip { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
+  .callout.tip .ic { background: var(--accent); color: #fff; }
+  .callout b { color: var(--ink); }
+  .callout p { font-size: 14.5px; color: var(--muted); }
+  .callout-stack { display: grid; gap: 12px; }
+
+  /* ---------- TABLE ---------- */
+  .table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow-sm); }
+  table { border-collapse: collapse; width: 100%; min-width: 560px; background: var(--surface); font-size: 14px; }
+  th, td { text-align: left; padding: 12px 15px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  thead th { background: var(--surface-2); font-family: var(--mono); font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  tbody tr:last-child td { border-bottom: none; }
+  td .mono { color: var(--ink); font-weight: 600; }
+  .status-pill { font-family: var(--mono); font-weight: 600; font-size: 12.5px; padding: 3px 9px; border-radius: 6px; white-space: nowrap; display: inline-block; }
+  .sp-good { background: var(--good-soft); color: var(--good); }
+  .sp-warn { background: var(--warn-soft); color: var(--warn); }
+  .sp-bad  { background: var(--bad-soft); color: var(--bad); }
+  .where { font-weight: 600; color: var(--ink); }
+
+  /* ---------- TROUBLESHOOT STEPS ---------- */
+  .steps { display: grid; gap: 14px; }
+  .step { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow-sm); padding: 18px 20px; display: grid; grid-template-columns: auto 1fr; gap: 18px; align-items: start; }
+  .step .badge { font-family: var(--display); font-weight: 800; font-size: 20px; width: 42px; height: 42px; border-radius: 11px; background: var(--accent-soft); color: var(--accent-ink); display: grid; place-items: center; }
+  .step .body { display: grid; gap: 10px; }
+  .step h3 { font-size: 17px; }
+  .step .cmd { font-family: var(--mono); font-size: 13.5px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; color: var(--ink); overflow-x: auto; }
+  .step .cmd .c-prompt { color: var(--accent); user-select: none; }
+  .step .q { font-size: 14.5px; color: var(--muted); }
+  .step .q b { color: var(--ink); }
+  @media (max-width: 520px) { .step { grid-template-columns: 1fr; } .step .badge { width: 36px; height: 36px; font-size: 17px; } }
+
+  /* ---------- HEALTH CHECK SPLIT ---------- */
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 760px) { .split { grid-template-columns: 1fr; } }
+  .hc { border-radius: var(--radius); border: 1px solid var(--line); padding: 20px; background: var(--surface); box-shadow: var(--shadow-sm); display: grid; gap: 12px; align-content: start; }
+  .hc.tg { border-top: 3px solid var(--flow); }
+  .hc.asg { border-top: 3px solid var(--accent); }
+  .hc .who { font-family: var(--mono); font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--faint); }
+  .hc h3 { font-size: 19px; }
+  .hc .asks { font-style: italic; color: var(--ink); font-size: 15.5px; }
+  .hc ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 14px; display: grid; gap: 6px; }
+  .probe-note { margin-top: 16px; }
+
+  /* mini stat row */
+  .duo { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+  @media (max-width: 560px) { .duo { grid-template-columns: 1fr; } }
+  .tile { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 15px 17px; background: var(--surface-2); display: grid; gap: 4px; }
+  .tile .t-num { font-family: var(--mono); font-weight: 600; font-size: 22px; color: var(--accent-ink); }
+  .tile .t-lab { font-weight: 700; font-size: 14.5px; }
+  .tile .t-desc { font-size: 13px; color: var(--muted); }
+
+  /* ---------- Q&A ---------- */
+  details.qa { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow-sm); overflow: hidden; }
+  details.qa + details.qa { margin-top: 12px; }
+  details.qa summary { cursor: pointer; padding: 17px 20px; font-weight: 700; font-family: var(--display); font-size: 16.5px; list-style: none; display: flex; gap: 12px; align-items: flex-start; }
+  details.qa summary::-webkit-details-marker { display: none; }
+  details.qa summary .qnum { font-family: var(--mono); font-size: 13px; color: var(--accent); flex: 0 0 auto; margin-top: 2px; }
+  details.qa summary .chev { margin-left: auto; color: var(--faint); transition: transform .2s; flex: 0 0 auto; }
+  details.qa[open] summary .chev { transform: rotate(180deg); }
+  details.qa .ans { padding: 0 20px 18px 20px; color: var(--muted); font-size: 14.5px; display: grid; gap: 10px; border-top: 1px solid var(--line); padding-top: 14px; }
+  details.qa .ans b { color: var(--ink); }
+  details.qa .ans .mono { color: var(--accent-ink); font-weight: 600; }
+
+  .inline-note { font-size: 13px; color: var(--faint); margin-top: 10px; }
+  .lead-in { color: var(--muted); font-size: 15px; margin-bottom: 18px; max-width: 68ch; }
+
+  footer { padding-block: 40px 60px; }
+  footer p { color: var(--faint); font-size: 13.5px; max-width: 60ch; }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+</style>
+
+<header class="hero">
+  <div class="wrap hero-inner">
+    <span class="eyebrow">AWS · 3-tier web app · interview prep</span>
+    <h1>The Request's Journey</h1>
+    <p class="lede">One packet, from the URL you type to the row the app reads in the database — and the exact <b>three commands</b> and <b>three security groups</b> you'll be asked about when something breaks. Built to clear up the confusion, not add to it.</p>
+    <div class="meta-row">
+      <span class="tag">312 · Scale track</span>
+      <span class="tag">Route 53 → ALB → EC2 → RDS</span>
+      <span class="tag">ping · dig · curl</span>
+      <span class="tag">health checks</span>
+    </div>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Sections">
+  <div class="wrap toc-inner">
+    <a href="#picture"><span class="num">01</span>The whole picture</a>
+    <a href="#sg"><span class="num">02</span>Security groups</a>
+    <a href="#alb"><span class="num">03</span>The load balancer</a>
+    <a href="#troubleshoot"><span class="num">04</span>Troubleshooting</a>
+    <a href="#health"><span class="num">05</span>Health checks</a>
+    <a href="#interview"><span class="num">06</span>Interview questions</a>
+  </div>
+</nav>
+
+<main class="wrap">
+
+  <!-- ============ 01 THE WHOLE PICTURE ============ -->
+  <section id="picture">
+    <div class="sec-head">
+      <div class="kicker"><span class="idx">01</span><span class="eyebrow">End to end</span></div>
+      <h2>What actually happens when someone opens your site</h2>
+      <p>Follow one request left to right. Notice the dashed boxes — they show <b>where</b> each piece lives. That "where" is the part that trips everyone up.</p>
+    </div>
+
+    <div class="diagram">
+      <!-- public internet -->
+      <div class="flow">
+        <div class="node">
+          <span class="n-role">User</span>
+          <span class="n-name">Browser</span>
+          <span class="n-desc">Types <span class="mono">aiturgan.space</span></span>
+        </div>
+        <div class="arrow" aria-hidden="true">→</div>
+        <div class="node">
+          <span class="n-role">DNS · Route 53</span>
+          <span class="n-name">Name → address</span>
+          <span class="n-desc">"Which IP is this domain?" Answers with the load balancer's address.</span>
+        </div>
+        <div class="arrow" aria-hidden="true">→</div>
+      </div>
+
+      <!-- VPC zone -->
+      <div class="zone vpc" style="margin-top:6px;">
+        <span class="zone-label">Your VPC — your private slice of AWS</span>
+
+        <div class="zone">
+          <span class="zone-label">Public subnet</span>
+          <div class="flow">
+            <div class="node" style="border-color:var(--flow);">
+              <span class="n-role">Front door</span>
+              <span class="n-name">ALB</span>
+              <span class="n-desc">Application Load Balancer. Ends HTTPS here, then forwards inward.</span>
+              <div class="ports"><span class="port">80</span><span class="port">443</span></div>
+            </div>
+            <div class="arrow" aria-hidden="true">→</div>
+            <div class="node">
+              <span class="n-role">Target group</span>
+              <span class="n-name">The routing list</span>
+              <span class="n-desc">The list of healthy EC2s the ALB is allowed to send traffic to.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="zone">
+          <span class="zone-label">Private subnet</span>
+          <div class="flow">
+            <div class="node" style="border-color:var(--accent);">
+              <span class="n-role">Compute</span>
+              <span class="n-name">EC2 + nginx</span>
+              <span class="n-desc">Your app runs here. nginx serves the pages.</span>
+              <div class="ports"><span class="port">80</span><span class="port ssh">22 SSH</span></div>
+            </div>
+            <div class="arrow" aria-hidden="true">→</div>
+            <div class="node" style="border-color:var(--warn);">
+              <span class="n-role">Data</span>
+              <span class="n-name">RDS</span>
+              <span class="n-desc">The Postgres database. Only the app is allowed to talk to it.</span>
+              <div class="ports"><span class="port db">5432</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="legend">
+        <span><span class="port">80 / 443</span> web traffic (HTTP / HTTPS)</span>
+        <span><span class="port ssh">22</span> SSH — you logging in</span>
+        <span><span class="port db">5432</span> Postgres — app to database</span>
+      </div>
+    </div>
+
+    <div class="callout tip" style="margin-top:20px;">
+      <div class="ic">↳</div>
+      <div>
+        <p><b>The one-sentence version to say out loud:</b> Route 53 turns the name into the load balancer's address; the ALB is the public front door; it forwards inward across subnets to the EC2 running your app; the app talks to RDS. Security groups are the gate at each hop.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 02 SECURITY GROUPS ============ -->
+  <section id="sg">
+    <div class="sec-head">
+      <div class="kicker"><span class="idx">02</span><span class="eyebrow">The part you kept second-guessing</span></div>
+      <h2>Where security groups actually live</h2>
+      <p>You had this half-right and half-tangled. Let's nail it: a security group is a <b>per-resource firewall</b>, not a VPC setting.</p>
+    </div>
+
+    <div class="callout-stack" style="margin-bottom:24px;">
+      <div class="callout myth">
+        <div class="ic">✕</div>
+        <div><p><b>The myth:</b> "Security groups are attached to the VPC." The VPC is just the private network — the address space where everything lives. It has no ports to open.</p></div>
+      </div>
+      <div class="callout truth">
+        <div class="ic">✓</div>
+        <div><p><b>The truth:</b> Each security group is <b>associated with a resource</b> — the ALB, the EC2, the RDS. It decides which traffic that <i>one</i> resource accepts. They live <i>inside</i> the VPC, but they attach to the resource, not the network.</p></div>
+      </div>
+    </div>
+
+    <p class="lead-in">So the answer to "how many security groups?" is normally <b>three</b> — one guarding each tier. Here's each one and, crucially, what it lets in and from <i>where</i>:</p>
+
+    <div class="grid three">
+      <div class="card sg-alb">
+        <span class="pin">On the ALB</span>
+        <h3>Load balancer SG</h3>
+        <p><b>Lets in:</b> <span class="mono">80</span> and <span class="mono">443</span> from <span class="mono">0.0.0.0/0</span> — anywhere. This is the public door, so the whole internet is allowed to knock.</p>
+      </div>
+      <div class="card sg-app">
+        <span class="pin">On the EC2</span>
+        <h3>App SG</h3>
+        <p><b>Lets in:</b> <span class="mono">80</span> <i>only from the ALB's SG</i>, plus <span class="mono">22</span> for your SSH. The public can't reach the EC2 directly — only through the front door.</p>
+      </div>
+      <div class="card sg-db">
+        <span class="pin">On the RDS</span>
+        <h3>Database SG</h3>
+        <p><b>Lets in:</b> <span class="mono">5432</span> <i>only from the App SG</i>. Nothing else on earth can open the database. Not you, not the internet.</p>
+      </div>
+    </div>
+
+    <div class="callout tip" style="margin-top:22px;">
+      <div class="ic">?</div>
+      <div>
+        <p><b>Why does the DB group point at the App group instead of an IP range?</b> This is a real interview question and you almost had it. If you hard-code the EC2's IP and that instance restarts or gets replaced, the IP changes and the database locks out your app. Referencing the <i>App SG</i> means "whoever is currently the app can connect" — it keeps working no matter how many times instances come and go. That's the whole idea behind <b>least privilege</b> chaining: open the smallest door, to a role, not an address.</p>
+      </div>
+    </div>
+
+    <div class="table-scroll" style="margin-top:22px;">
+      <table>
+        <thead>
+          <tr><th>Port</th><th>Protocol</th><th>Lives on</th><th>Source allowed</th><th>Why</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="mono">443</span></td><td>HTTPS</td><td>ALB SG</td><td>Anywhere (0.0.0.0/0)</td><td>Secure public traffic — the real front door</td></tr>
+          <tr><td><span class="mono">80</span></td><td>HTTP</td><td>ALB SG</td><td>Anywhere (0.0.0.0/0)</td><td>Plain traffic, gets redirected up to 443</td></tr>
+          <tr><td><span class="mono">80</span></td><td>HTTP</td><td>App SG (EC2)</td><td>ALB SG only</td><td>Inside the VPC it's already trusted — no need to re-encrypt</td></tr>
+          <tr><td><span class="mono">22</span></td><td>SSH</td><td>App SG (EC2)</td><td>Your IP (ideally)</td><td>So you can log into the instance</td></tr>
+          <tr><td><span class="mono">5432</span></td><td>Postgres</td><td>DB SG (RDS)</td><td>App SG only</td><td>Only the app tier reaches the data tier</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ 03 THE LOAD BALANCER ============ -->
+  <section id="alb">
+    <div class="sec-head">
+      <div class="kicker"><span class="idx">03</span><span class="eyebrow">Inside the front door</span></div>
+      <h2>Listener, forward, redirect — and why 443 becomes 80</h2>
+      <p>The security group only answers one question: <i>is this traffic allowed in at all?</i> Once it's in, the <b>listener</b> takes over and decides what to do with it.</p>
+    </div>
+
+    <div class="grid two">
+      <div class="card">
+        <span class="pin">Action: forward</span>
+        <h3>Forward → target group</h3>
+        <p>The normal path. The <span class="mono">443</span> listener hands the request to the <b>target group</b>, which passes it to a healthy EC2. "Go to my app." This is what serves your actual pages.</p>
+      </div>
+      <div class="card">
+        <span class="pin">Action: redirect</span>
+        <h3>Redirect → somewhere else</h3>
+        <p>The listener tells the browser "go knock on a different door instead." The classic use: the <span class="mono">80</span> listener redirects to <span class="mono">443</span> so plain HTTP visitors get bumped up to HTTPS. The browser comes back on the secure door.</p>
+      </div>
+    </div>
+
+    <div class="callout tip" style="margin-top:20px;">
+      <div class="ic">↔</div>
+      <div>
+        <p><b>Why HTTPS (443) turns into plain HTTP (80) inside:</b> the ALB <b>terminates TLS</b> — it does the decrypting right at the front door using your ACM certificate. Once traffic is inside your own VPC it's already on a trusted private network, so re-encrypting to the EC2 buys little. The ALB receives on 443, then forwards on 80 to the instance. That's why the EC2's SG only needs 80 open, not 443.</p>
+      </div>
+    </div>
+
+    <div class="callout truth" style="margin-top:14px;">
+      <div class="ic">✓</div>
+      <div>
+        <p><b>What the certificate actually does:</b> the ACM cert (the thing you "requested and verified") doesn't do the encrypting by itself — it <b>proves the domain is yours</b>. The encrypting is done by the TLS protocol underneath. Cert = identity/ownership; TLS = the lock. Two different jobs people mash together.</p>
+      </div>
+    </div>
+
+    <div class="callout tip" style="margin-top:14px;">
+      <div class="ic">i</div>
+      <div>
+        <p><b>Don't confuse the two "redirects."</b> The <i>ALB redirect action</i> (80 → 443) and a <i>301 from curl</i> are the same idea seen from two sides: the server telling the browser "use the other address." When you <span class="mono">curl</span> your HTTP URL and see <span class="mono">301</span>, that <i>is</i> the ALB redirect doing its job — not an error.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 04 TROUBLESHOOTING ============ -->
+  <section id="troubleshoot">
+    <div class="sec-head">
+      <div class="kicker"><span class="idx">04</span><span class="eyebrow">The interview favorite</span></div>
+      <h2>"The site's down" — walk me through it</h2>
+      <p>Always go in this order, outside-in. Each command answers <b>one</b> question, and each failure points at a <b>different place</b> to go fix.</p>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="badge">1</div>
+        <div class="body">
+          <h3>ping — is anything reachable at all?</h3>
+          <div class="cmd"><span class="c-prompt">$ </span>ping aiturgan.space</div>
+          <p class="q"><b>Answers:</b> is my own internet up, and does the name resolve to something that responds? It's the "is the patient breathing" check before anything fancy. <span style="color:var(--faint)">(Note: many AWS setups block ping/ICMP on purpose, so no reply isn't always a real failure — but it's still where you start.)</span></p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="badge">2</div>
+        <div class="body">
+          <h3>dig / nslookup — does DNS point to the right place?</h3>
+          <div class="cmd"><span class="c-prompt">$ </span>dig aiturgan.space      <span style="color:var(--faint)"># or: nslookup aiturgan.space</span></div>
+          <p class="q"><b>Answers:</b> what IP does this domain actually resolve to? <b>dig</b> and <b>nslookup</b> do the same core job — look up the address behind a name. If the answer is wrong, empty, or points at an old IP, the fix lives in <b class="where">Route 53</b> — update the record so the domain points at your load balancer.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="badge">3</div>
+        <div class="body">
+          <h3>curl — does the server answer, and with what?</h3>
+          <div class="cmd"><span class="c-prompt">$ </span>curl -I https://aiturgan.space    <span style="color:var(--faint)"># -I = headers only, -v = verbose, -L = follow redirects</span></div>
+          <p class="q"><b>Answers:</b> is the server actually responding, and what status code does it give back? This is where DNS is fine but something deeper is wrong. The <b>status code tells you which layer to blame</b> — that's the table below.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec-head" style="margin-top:38px; margin-bottom:18px;">
+      <h2 style="font-size:22px;">Reading the curl result: where do I go next?</h2>
+      <p>This is the answer to your real question — "if curl fails, <i>which</i> piece of AWS do I troubleshoot?"</p>
+    </div>
+
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th>What curl does</th><th>Means</th><th>Go troubleshoot →</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="status-pill sp-warn">hangs / times out</span></td>
+            <td>The request left but nothing ever replied. A gate silently dropped the packet.</td>
+            <td><span class="where">Security group.</span> A port isn't open for that source. Traffic isn't refused — it's dropped, so it just hangs. Check the ALB SG (80/443 from anywhere) and the App SG (80 from the ALB SG).</td>
+          </tr>
+          <tr>
+            <td><span class="status-pill sp-good">200 OK</span></td>
+            <td>Everything worked. The page came back.</td>
+            <td><span class="where">Nothing — you're healthy.</span></td>
+          </tr>
+          <tr>
+            <td><span class="status-pill sp-good">301 / 302</span></td>
+            <td>Redirect. Almost always HTTP → HTTPS. This is normal after you add the certificate.</td>
+            <td><span class="where">Nothing's broken.</span> Add <span class="mono">-L</span> to follow it and you'll land on 200.</td>
+          </tr>
+          <tr>
+            <td><span class="status-pill sp-bad">404 Not Found</span></td>
+            <td>Server answered, but nginx couldn't find that file. The traffic got all the way in.</td>
+            <td><span class="where">The EC2 / nginx.</span> The HTML file for that page is missing or in the wrong folder. SSH in and check nginx's web root.</td>
+          </tr>
+          <tr>
+            <td><span class="status-pill sp-bad">500 Internal Server Error</span></td>
+            <td>The app itself crashed while handling the request. Traffic reached the app.</td>
+            <td><span class="where">The app on the EC2</span> (and often <b>RDS</b>). Check app logs. A very common cause: the app can't reach the database — so check the DB security group (5432 from the App SG).</td>
+          </tr>
+          <tr>
+            <td><span class="status-pill sp-bad">502 / 503</span></td>
+            <td>The ALB answered, but it has no healthy instance to forward to.</td>
+            <td><span class="where">Target group health.</span> The EC2s are failing their health check, so the target group is empty. Jump to section 05.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout tip" style="margin-top:20px;">
+      <div class="ic">◎</div>
+      <div>
+        <p><b>The mental model to carry into the interview:</b> you troubleshoot <b>outside-in, following the request's path</b>. Hang = a <i>gate</i> (security group). An error <i>code</i> = you got past the gates and something <i>inside</i> answered — now the number tells you whether it's nginx (404), the app/DB (500), or no healthy target (502/503).</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 05 HEALTH CHECKS ============ -->
+  <section id="health">
+    <div class="sec-head">
+      <div class="kicker"><span class="idx">05</span><span class="eyebrow">Your weak spot — now cleared</span></div>
+      <h2>Two health checks, one probe</h2>
+      <p>The confusion was real: the target group <i>and</i> the auto scaling group both "check health." Here's the clean version — they read the <b>same probe</b> but do <b>different jobs</b> with the answer.</p>
+    </div>
+
+    <div class="split">
+      <div class="hc tg">
+        <span class="who">Target group</span>
+        <h3>Should I route traffic here?</h3>
+        <p class="asks">"Are you well enough to get visitors right now?"</p>
+        <ul>
+          <li>If an instance fails, the target group <b>stops sending it traffic</b>.</li>
+          <li>The instance <b>keeps running</b> — it's just taken out of rotation.</li>
+          <li>Reroutes those visitors to the healthy instances instead.</li>
+        </ul>
+      </div>
+      <div class="hc asg">
+        <span class="who">Auto scaling group</span>
+        <h3>Should I replace this box?</h3>
+        <p class="asks">"Are you broken enough that I should kill you and launch a fresh one?"</p>
+        <ul>
+          <li>If an instance fails, the ASG <b>terminates it and launches a replacement</b>.</li>
+          <li>It's the only one that creates and destroys instances.</li>
+          <li>Keeps the fleet at the desired count of healthy machines.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout truth probe-note">
+      <div class="ic">✓</div>
+      <div>
+        <p><b>The precise version:</b> there's usually <b>one HTTP probe</b> — the target group hitting something like <span class="mono">/health</span> every 30 seconds. The target group reads the result to decide <i>routing</i>. The ASG (set to health check type <span class="mono">ELB</span>) reads the <i>same</i> verdict to decide <i>replacement</i>. Same probe, two readers, two different actions.</p>
+      </div>
+    </div>
+
+    <div class="callout tip" style="margin-top:14px;">
+      <div class="ic">?</div>
+      <div>
+        <p><b>"Can an instance be healthy to one but not the other?" → Yes.</b> That's exactly why they're separate. Set the ASG's health check type to <span class="mono">EC2</span> and it only checks "is the machine booted?" — while the target group checks "does the app actually answer?" So an instance can be a running box (healthy to the ASG) whose app is broken (unhealthy to the target group). Set the ASG type to <span class="mono">ELB</span> and you tell it "trust the load balancer's opinion" — now they agree.</p>
+      </div>
+    </div>
+
+    <div class="duo">
+      <div class="tile">
+        <span class="t-num">interval</span>
+        <span class="t-lab">Health check interval (≈30s)</span>
+        <span class="t-desc">How <b>often</b> the probe runs. Every 30 seconds, "you still ok?"</span>
+      </div>
+      <div class="tile">
+        <span class="t-num">grace</span>
+        <span class="t-lab">Health check grace period (≈300s)</span>
+        <span class="t-desc">How long the ASG <b>waits after launching</b> a new instance before it starts judging it — so a booting machine isn't killed for being slow to start.</span>
+      </div>
+    </div>
+    <p class="inline-note">Easy to mix up: <b>interval</b> = how frequently checks happen; <b>grace period</b> = a one-time head start for a brand-new instance. Different clocks.</p>
+
+    <div class="sec-head" style="margin-top:34px; margin-bottom:14px;">
+      <h2 style="font-size:20px;">What makes an instance "unhealthy" in the first place</h2>
+    </div>
+    <div class="grid three">
+      <div class="card"><p><b>Wrong port.</b> The health check points at a port the app isn't listening on.</p></div>
+      <div class="card"><p><b>Wrong status code.</b> The probe expects <span class="mono">200</span> but the app returns something else (a <span class="mono">301</span> or <span class="mono">500</span> at <span class="mono">/health</span>).</p></div>
+      <div class="card"><p><b>App listens on localhost only.</b> It answers on <span class="mono">127.0.0.1</span> but not on the interface the ALB reaches.</p></div>
+      <div class="card"><p><b>Security group blocks the probe.</b> The health check traffic can't get through to the instance.</p></div>
+      <div class="card"><p><b>Grace period too short.</b> The app needs longer to boot than the ASG waits, so it's killed mid-startup.</p></div>
+      <div class="card"><p><b>Wrong path.</b> The probe hits <span class="mono">/health</span> but that route doesn't exist, so it gets a 404.</p></div>
+    </div>
+  </section>
+
+  <!-- ============ 06 INTERVIEW ============ -->
+  <section id="interview">
+    <div class="sec-head">
+      <div class="kicker"><span class="idx">06</span><span class="eyebrow">Say it out loud</span></div>
+      <h2>Practice questions with model answers</h2>
+      <p>The three your group worked through, written the way you'd actually answer them. Try covering the answer and saying it first.</p>
+    </div>
+
+    <details class="qa">
+      <summary><span class="qnum">Q1</span><span>Walk me through what happens from a user typing the URL to the app reading from the database.</span><span class="chev" aria-hidden="true">▾</span></summary>
+      <div class="ans">
+        <p>The browser asks <b>DNS (Route 53)</b> to turn the domain into an address, and gets back the <b>load balancer's</b> address. The request hits the <b>ALB on 443</b>, where the <b>security group</b> allows it in and the <b>listener terminates TLS</b> using the ACM certificate.</p>
+        <p>The listener <b>forwards</b> the request to the <b>target group</b>, which picks a <b>healthy EC2</b> and sends it on <b>port 80</b> inside the VPC. The <b>app on the EC2</b> handles it, and when it needs data it connects to <b>RDS on 5432</b> — allowed because the database's security group trusts the app's security group. The response travels back out the same way.</p>
+      </div>
+    </details>
+
+    <details class="qa">
+      <summary><span class="qnum">Q2</span><span>You've got three security groups chained together. Why does the RDS security group reference the app security group as its source instead of an IP range?</span><span class="chev" aria-hidden="true">▾</span></summary>
+      <div class="ans">
+        <p>Because instances are disposable. If I hard-coded the EC2's IP and that instance restarted or the auto scaling group replaced it, the IP would change and the database would lock out my app.</p>
+        <p>Referencing the <b>app's security group</b> means "allow whichever instance is currently the app," so it keeps working no matter how many times instances come and go. It's also <b>least privilege</b> — I'm opening 5432 to a specific role, not to a broad range of addresses.</p>
+      </div>
+    </details>
+
+    <details class="qa">
+      <summary><span class="qnum">Q3</span><span>There are two health checks — one on the target group, one on the auto scaling group. Why two? Can an instance be healthy to one but not the other?</span><span class="chev" aria-hidden="true">▾</span></summary>
+      <div class="ans">
+        <p>They answer different questions. The <b>target group</b> asks "should I send traffic here?" — if an instance fails, it just stops routing to it but leaves it running. The <b>auto scaling group</b> asks "should I replace this box?" — if it fails, the ASG terminates it and launches a fresh one. Routing versus replacement.</p>
+        <p><b>Yes, an instance can be healthy to one and not the other.</b> If the ASG's health check type is <span class="mono">EC2</span>, it only checks whether the machine is booted, while the target group checks whether the app actually responds — so a running box with a dead app is healthy to the ASG but unhealthy to the target group. Setting the ASG type to <span class="mono">ELB</span> makes it defer to the load balancer so they line up.</p>
+      </div>
+    </details>
+
+    <details class="qa">
+      <summary><span class="qnum">Q4</span><span>A user says the site is hanging — it never loads, no error. Where do you look?</span><span class="chev" aria-hidden="true">▾</span></summary>
+      <div class="ans">
+        <p>Hanging with no error usually means a packet is being <b>silently dropped</b> — the signature of a <b>security group</b>. If it were refused I'd get an error fast; dropping means it just waits. I'd check that the ALB's SG allows 80/443 from the internet and that the EC2's SG allows 80 from the ALB's SG.</p>
+        <p>To confirm the path I'd work outside-in: <span class="mono">ping</span> to see if anything responds, <span class="mono">dig</span> to confirm DNS points at the load balancer, then <span class="mono">curl -v</span> to see exactly how far the request gets before it stalls.</p>
+      </div>
+    </details>
+
+    <details class="qa">
+      <summary><span class="qnum">Q5</span><span>curl returns 502/503. What's going on and how do you fix it?</span><span class="chev" aria-hidden="true">▾</span></summary>
+      <div class="ans">
+        <p>The ALB is up and answering, but it has <b>no healthy target to forward to</b> — the target group is effectively empty. So the problem is instance health, not networking.</p>
+        <p>I'd check the target group's health check: is it pointing at the right <b>port</b> and <b>path</b>, does the app return <b>200</b> there, is the app listening on the right interface (not just localhost), and is the <b>grace period</b> long enough for the app to boot. If the app is genuinely crashing, I'd SSH in and read the logs.</p>
+      </div>
+    </details>
+  </section>
+
+  <footer>
+    <p>Built for the 312 Scale-track study group — the request path, the three commands, the three security groups, and the health-check split you kept circling back to. Reopen it before the mock interview and say the answers out loud.</p>
+  </footer>
+
+</main>
+
+</body></html>

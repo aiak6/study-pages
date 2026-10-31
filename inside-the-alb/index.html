@@ -1,0 +1,350 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Inside the ALB</title>
+<style>
+  :root {
+    --bg: #eef1f5;
+    --surface: #ffffff;
+    --surface-2: #f5f7fb;
+    --ink: #16202f;
+    --muted: #5c6b80;
+    --line: #d6dde7;
+    --listener: #2b6cb0;
+    --rule: #2f855a;
+    --tg: #c05621;
+    --allow: #2e8b57;
+    --deny: #c1445a;
+    --navy: #1c2836;
+    --font: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1620;
+      --surface: #1a2534;
+      --surface-2: #131d2a;
+      --ink: #e6ecf4;
+      --muted: #9aa8bc;
+      --line: #2c3a4d;
+      --listener: #6ba3e0;
+      --rule: #5fce9b;
+      --tg: #e8894f;
+      --allow: #4cc38a;
+      --deny: #e2788b;
+      --navy: #0c141e;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1620;
+    --surface: #1a2534;
+    --surface-2: #131d2a;
+    --ink: #e6ecf4;
+    --muted: #9aa8bc;
+    --line: #2c3a4d;
+    --listener: #6ba3e0;
+    --rule: #5fce9b;
+    --tg: #e8894f;
+    --allow: #4cc38a;
+    --deny: #e2788b;
+    --navy: #0c141e;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font);
+    line-height: 1.55;
+  }
+  .wrap {
+    max-width: 880px;
+    margin: 0 auto;
+    padding-inline: 20px;
+    padding-block: 40px 56px;
+  }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--listener);
+    margin: 0 0 8px;
+  }
+  h1 {
+    font-size: clamp(26px, 4vw, 34px);
+    line-height: 1.1;
+    text-wrap: balance;
+    margin: 0 0 10px;
+    letter-spacing: -0.01em;
+  }
+  .lede {
+    color: var(--muted);
+    max-width: 64ch;
+    margin: 0 0 30px;
+    font-size: 16px;
+  }
+
+  /* flow spine */
+  .stage {
+    background: var(--surface);
+    border: 1.5px solid var(--tone);
+    border-left-width: 5px;
+    border-radius: 12px;
+    padding: 18px 20px;
+  }
+  .stage.listener { --tone: var(--listener); }
+  .stage.rule { --tone: var(--rule); }
+  .stage.tg { --tone: var(--tg); }
+  .stage.targets { --tone: var(--allow); }
+  .entry {
+    background: var(--navy);
+    color: #eaf0f8;
+    border-radius: 10px;
+    padding: 12px 18px;
+    font-family: var(--mono);
+    font-size: 13.5px;
+    text-align: center;
+  }
+  .entry .lbl { color: #9fb2c9; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; display:block; margin-bottom: 3px; }
+  .stage-head {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 4px;
+    flex-wrap: wrap;
+  }
+  .stage-head h2 {
+    margin: 0;
+    font-size: 18px;
+    color: var(--tone);
+    letter-spacing: -0.01em;
+  }
+  .stage-head .tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 1px 9px;
+  }
+  .stage .job { color: var(--muted); font-size: 13.5px; font-style: italic; margin: 0 0 14px; }
+
+  .rows { display: grid; gap: 9px; }
+  .row {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    gap: 12px;
+    align-items: baseline;
+    font-size: 14px;
+  }
+  .row .k { color: var(--muted); font-size: 12.5px; }
+  .row .v { font-family: var(--mono); font-size: 13px; }
+  .row .v em { font-family: var(--font); font-style: normal; color: var(--muted); font-size: 12.5px; }
+
+  .connector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 8px 0;
+  }
+  .connector .txt { font-size: 12px; color: var(--muted); font-family: var(--mono); }
+  .connector .arw { color: var(--muted); font-size: 18px; line-height: 1; }
+
+  /* rules table */
+  table { width: 100%; border-collapse: collapse; margin: 4px 0 12px; font-size: 13.5px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  td.pri { font-family: var(--mono); font-weight: 600; color: var(--rule); white-space: nowrap; }
+  td .cond, td .act { font-family: var(--mono); font-size: 12.5px; }
+  tr.def td { color: var(--muted); }
+  .table-wrap { overflow-x: auto; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+  .chip {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 2px 8px;
+  }
+  .sub { font-size: 12.5px; color: var(--muted); margin: 12px 0 4px; }
+  .sub strong { color: var(--ink); }
+
+  /* health check block */
+  .hc {
+    background: var(--surface-2);
+    border: 1px dashed var(--tg);
+    border-radius: 9px;
+    padding: 12px 14px;
+    margin-top: 12px;
+  }
+  .hc h3 { margin: 0 0 8px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--tg); }
+  .hc .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 6px 16px; }
+  .hc .g { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; border-bottom: 1px dotted var(--line); padding-bottom: 3px; }
+  .hc .g span:first-child { color: var(--muted); font-size: 12.5px; }
+  .hc .g span:last-child { font-family: var(--mono); font-size: 12.5px; }
+
+  /* targets */
+  .target-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 4px; }
+  .target {
+    border: 1.5px solid var(--allow);
+    border-radius: 10px;
+    padding: 12px 14px;
+    background: var(--surface);
+  }
+  .target.drain { border-color: var(--deny); border-style: dashed; }
+  .target .name { font-family: var(--mono); font-weight: 600; font-size: 13.5px; }
+  .target .meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .pill {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 20px;
+    padding: 1px 9px;
+    margin-top: 8px;
+  }
+  .pill.ok { color: var(--allow); border: 1px solid var(--allow); }
+  .pill.bad { color: var(--deny); border: 1px solid var(--deny); }
+
+  .callout {
+    background: color-mix(in srgb, var(--tg) 9%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--tg) 35%, var(--line));
+    border-radius: 12px;
+    padding: 16px 18px;
+    font-size: 14.5px;
+    margin-top: 28px;
+  }
+  .callout strong { color: var(--tg); }
+  code {
+    font-family: var(--mono);
+    font-size: 0.88em;
+    background: color-mix(in srgb, var(--ink) 8%, var(--surface));
+    padding: 1px 5px;
+    border-radius: 5px;
+  }
+  @media (max-width: 520px) {
+    .row { grid-template-columns: 1fr; gap: 2px; }
+    .target-row { grid-template-columns: 1fr; }
+  }
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+<div class="wrap">
+  <p class="eyebrow">AWS · Application Load Balancer</p>
+  <h1>Inside the ALB: listener → rule → target group</h1>
+  <p class="lede">In the big picture these are three small boxes. But they're really a chain: the <strong>listener</strong> catches the connection, its <strong>rules</strong> decide where it should go, and the <strong>target group</strong> is the pool it gets sent to. Here's what actually lives inside each one, following one request all the way down.</p>
+
+  <div class="entry">
+    <span class="lbl">a request arrives</span>
+    GET https://investmentapp.example.com/portfolio &nbsp;·&nbsp; TCP 443
+  </div>
+
+  <div class="connector"><span class="arw">▼</span><span class="txt">hits the listener on its port</span></div>
+
+  <!-- LISTENER -->
+  <div class="stage listener">
+    <div class="stage-head">
+      <h2>Listener</h2>
+      <span class="tag">one per protocol + port</span>
+    </div>
+    <p class="job">"I watch a port. When a connection comes in, I run my rules."</p>
+    <div class="rows">
+      <div class="row"><span class="k">watches</span><span class="v">HTTPS : 443</span></div>
+      <div class="row"><span class="k">TLS terminates here</span><span class="v">ACM cert attached to this listener <em>→ EC2s behind it only speak plain HTTP</em></span></div>
+      <div class="row"><span class="k">SSL policy</span><span class="v">ELBSecurityPolicy-TLS13-1-2-… <em>which TLS versions / ciphers are allowed</em></span></div>
+      <div class="row"><span class="k">holds</span><span class="v">an ordered list of rules + one default action</span></div>
+      <div class="row"><span class="k">companion :80</span><span class="v">HTTP : 80 → redirect 301 to https <em>so http:// visitors get bumped to https</em></span></div>
+    </div>
+  </div>
+
+  <div class="connector"><span class="arw">▼</span><span class="txt">listener evaluates its rules, top priority first</span></div>
+
+  <!-- RULES -->
+  <div class="stage rule">
+    <div class="stage-head">
+      <h2>Rules</h2>
+      <span class="tag">IF condition → THEN action</span>
+    </div>
+    <p class="job">"Checked in priority order. The FIRST rule that matches wins — the rest are skipped."</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Priority</th><th>IF (conditions)</th><th>THEN (action)</th></tr></thead>
+        <tbody>
+          <tr><td class="pri">1</td><td><span class="cond">path-pattern = /api/*</span></td><td><span class="act">forward → api-tg</span></td></tr>
+          <tr><td class="pri">2</td><td><span class="cond">host-header = investmentapp.example.com</span></td><td><span class="act">forward → app-tg</span></td></tr>
+          <tr class="def"><td class="pri">default</td><td><span class="cond">(anything not matched above)</span></td><td><span class="act">forward → app-tg</span> <em>(or fixed-response 404)</em></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="sub"><strong>Conditions</strong> you can match on:</p>
+    <div class="chips">
+      <span class="chip">host-header</span><span class="chip">path-pattern</span><span class="chip">http-header</span><span class="chip">http-request-method</span><span class="chip">query-string</span><span class="chip">source-ip</span>
+    </div>
+    <p class="sub"><strong>Actions</strong> a rule can take:</p>
+    <div class="chips">
+      <span class="chip">forward</span><span class="chip">redirect</span><span class="chip">fixed-response</span><span class="chip">authenticate-oidc / cognito</span>
+    </div>
+    <p class="sub">Lower priority number = evaluated first. The <strong>default rule</strong> always exists and catches anything no rule matched — there's no such thing as an unhandled request.</p>
+  </div>
+
+  <div class="connector"><span class="arw">▼</span><span class="txt">matched rule forwards to a target group</span></div>
+
+  <!-- TARGET GROUP -->
+  <div class="stage tg">
+    <div class="stage-head">
+      <h2>Target Group</h2>
+      <span class="tag">a pool + a health check</span>
+    </div>
+    <p class="job">"I'm a list of targets. I only hand requests to the ones currently passing their health check."</p>
+    <div class="rows">
+      <div class="row"><span class="k">target type</span><span class="v">instance <em>(could be ip or lambda instead)</em></span></div>
+      <div class="row"><span class="k">reaches targets on</span><span class="v">HTTP : 80 <em>plain http — TLS already terminated at the ALB</em></span></div>
+      <div class="row"><span class="k">algorithm</span><span class="v">round_robin <em>(or least_outstanding_requests)</em></span></div>
+      <div class="row"><span class="k">membership</span><span class="v"><em>the Auto Scaling Group registers / deregisters instances here as it scales</em></span></div>
+    </div>
+    <div class="hc">
+      <h3>Health check — the gate for who gets traffic</h3>
+      <div class="grid">
+        <div class="g"><span>path</span><span>/health</span></div>
+        <div class="g"><span>port / protocol</span><span>traffic-port · HTTP</span></div>
+        <div class="g"><span>interval</span><span>30 s</span></div>
+        <div class="g"><span>timeout</span><span>5 s</span></div>
+        <div class="g"><span>healthy threshold</span><span>3 passes</span></div>
+        <div class="g"><span>unhealthy threshold</span><span>2 fails</span></div>
+        <div class="g"><span>success matcher</span><span>HTTP 200</span></div>
+        <div class="g"><span>result</span><span>unhealthy = pulled out</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="connector"><span class="arw">▼</span><span class="txt">load-balanced across HEALTHY targets only</span></div>
+
+  <!-- TARGETS -->
+  <div class="stage targets">
+    <div class="stage-head">
+      <h2>Registered targets</h2>
+      <span class="tag">the actual EC2s</span>
+    </div>
+    <div class="target-row">
+      <div class="target">
+        <div class="name">aws_instance.app["a"]</div>
+        <div class="meta">public subnet · AZ a</div>
+        <span class="pill ok">● healthy — receiving</span>
+      </div>
+      <div class="target drain">
+        <div class="name">aws_instance.app["b"]</div>
+        <div class="meta">public subnet · AZ b</div>
+        <span class="pill bad">● failed check — draining</span>
+      </div>
+    </div>
+    <p class="sub">A failing target is removed from rotation until it passes again; when one is deliberately deregistered, the ALB waits out the <strong>deregistration delay</strong> (connection draining) so in-flight requests finish first.</p>
+  </div>
+
+  <div class="callout">
+    <strong>This health-check block is what you measured in Assignment 05.</strong> Your ~59 s failure window ≈ <code>unhealthy threshold (2) × interval (30 s)</code> — how long until a dead target gets pulled out. Your ~143 s recovery ≈ <code>healthy threshold (3) × interval (30 s)</code> plus the time to boot and register the replacement. Change the numbers in this block and those windows move with them.
+  </div>
+</div>
+
+</body></html>

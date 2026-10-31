@@ -1,0 +1,266 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Build and Deploy</title>
+<style>
+  :root {
+    --bg:#eef1f5; --ink:#16202f; --muted:#5c6b80;
+    --font:"IBM Plex Sans", system-ui, -apple-system, sans-serif;
+    --mono:"IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --bg:#0f1620; --ink:#e6ecf4; --muted:#9aa8bc; }
+  }
+  :root[data-theme="dark"] { --bg:#0f1620; --ink:#e6ecf4; --muted:#9aa8bc; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font-family:var(--font); line-height:1.5; }
+  .wrap { max-width:1220px; margin:0 auto; padding-inline:16px; padding-block:34px 48px; }
+  .eyebrow { font-family:var(--mono); font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:#2563b0; margin:0 0 6px; }
+  h1 { font-size:clamp(24px,3.6vw,32px); margin:0 0 8px; letter-spacing:-.01em; text-wrap:balance; }
+  .note { color:var(--muted); max-width:66ch; margin:0 0 22px; font-size:15px; }
+  figure { margin:0; background:#eef1f6; border:1px solid #d6dde7; border-radius:14px; padding:12px; overflow-x:auto; }
+  figure svg { display:block; width:100%; height:auto; min-width:1000px; }
+  figcaption { font-size:13px; color:var(--muted); margin-top:10px; }
+
+  .card{fill:#ffffff}.navy{fill:#1c2b3a}
+  .s-repo{stroke:#b45309}.s-cfg{stroke:#7c3aed}.s-plan{stroke:#2563b0}
+  .s-state{stroke:#b23a86}.s-env{stroke:#2f8f4e}.s-dep{stroke:#0f766e}
+  .f-repo{fill:#b45309}.f-cfg{fill:#7c3aed}.f-plan{fill:#2563b0}
+  .f-state{fill:#b23a86}.f-env{fill:#2f8f4e}.f-dep{fill:#0f766e}
+  .ink{fill:#16202f}.mut{fill:#5c6b80}.wht{fill:#eef2f7}.wht2{fill:#aebccd}
+  .bad{fill:#c1445a}.good{fill:#1e7a4a}
+  .b2{stroke-width:2}.b15{stroke-width:1.5}
+  .arw{stroke:#6b7a8d;stroke-width:1.9;fill:none}
+  .tt{font:700 15px var(--font)}.tt13{font:700 13px var(--font)}.tt12{font:700 12px var(--font)}
+  .bd{font:400 12.5px var(--font)}.bd11{font:400 11px var(--font)}
+  .mono{font:500 11.5px var(--mono)}
+  .lab{font:700 13px var(--font);letter-spacing:.06em}
+  .mid{text-anchor:middle}.end{text-anchor:end}.it{font-style:italic}
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<div class="wrap">
+  <p class="eyebrow">Scale · Session 2</p>
+  <h1>How the system gets built and changed</h1>
+  <p class="note">The architecture picture shows the system <em>running</em>. This one shows how it got there: from the repository, through Terraform and its state, into three environments, and out again as a deploy.</p>
+
+  <figure>
+    <svg viewBox="0 0 1500 1320" role="img" aria-label="The build and deploy pipeline. Band 1 repository: feature branch to pull request to main, with a gitignore listing state files and secrets that must never be committed. Band 2 the configuration: provider, resource, variable, output and data source, read as a whole folder and ordered by a dependency graph. Band 3 plan then apply, showing create, update in place, destroy and recreate, and destroy. Band 4 state: an S3 bucket with one object per environment, never in git, protected by a lock so only one apply runs at a time. Band 5 environments: dev, staging and production root directories each with their own state key, all calling one shared module, producing three separate running systems. Band 6 changing it: edit the template, a new launch template version, an instance refresh, minimum healthy percentage, and draining, with a note that rollback does not undo a database migration.">
+      <defs>
+        <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <polygon points="0,0 10,5 0,10" fill="#6b7a8d"/>
+        </marker>
+      </defs>
+
+      <!-- ============ 1 REPOSITORY ============ -->
+      <rect class="card s-repo b2" x="60" y="60" width="1380" height="200" rx="12"/>
+      <text class="lab f-repo" x="80" y="90">1 · REPOSITORY</text>
+      <text class="bd mut" x="230" y="90">git — changes are reviewed here before they can reach anything real</text>
+
+      <rect class="card s-repo b15" x="90" y="112" width="250" height="76" rx="8"/>
+      <text class="tt13 mid f-repo" x="215" y="140">feature branch</text>
+      <text class="bd11 mid mut" x="215" y="159">your work, off to the side,</text>
+      <text class="bd11 mid mut" x="215" y="175">started from main</text>
+
+      <line class="arw" x1="344" y1="150" x2="396" y2="150" marker-end="url(#ah)"/>
+
+      <rect class="card s-repo b15" x="400" y="112" width="310" height="76" rx="8"/>
+      <text class="tt13 mid f-repo" x="555" y="140">pull request</text>
+      <text class="bd11 mid mut" x="555" y="159">the diff shown for review — a second pair</text>
+      <text class="bd11 mid mut" x="555" y="175">of eyes, and where checks run</text>
+
+      <line class="arw" x1="714" y1="150" x2="766" y2="150" marker-end="url(#ah)"/>
+
+      <rect class="card s-repo b15" x="770" y="112" width="250" height="76" rx="8"/>
+      <text class="tt13 mid f-repo" x="895" y="140">main</text>
+      <text class="bd11 mid mut" x="895" y="159">the one branch that gets</text>
+      <text class="bd11 mid mut" x="895" y="175">applied to real infrastructure</text>
+
+      <rect class="card b15" x="1070" y="108" width="350" height="84" rx="8" style="stroke:#c1445a"/>
+      <text class="tt12" x="1088" y="130" style="fill:#c1445a">.gitignore — never commit these</text>
+      <text class="mono ink" x="1088" y="150">terraform.tfstate*   ·   .terraform/</text>
+      <text class="mono ink" x="1088" y="168">*.tfvars with secrets   ·   .env   ·   keys</text>
+      <text class="bd11 mut" x="1088" y="184">one at the repo root covers every folder below</text>
+
+      <text class="bd mut" x="90" y="218">Your push is rejected because someone pushed first → <tspan class="ink">pull (fetch + merge), resolve, push again.</tspan> Never force-push a shared branch: it rewrites history other people already have.</text>
+      <text class="bd bad" x="90" y="242">A secret that was ever pushed is in the history forever. Deleting the file in a later commit does not remove it — you must rotate the secret.</text>
+
+      <!-- ============ 2 CONFIGURATION ============ -->
+      <rect class="card s-cfg b2" x="60" y="290" width="1380" height="212" rx="12"/>
+      <text class="lab f-cfg" x="80" y="320">2 · THE CONFIGURATION</text>
+      <text class="bd mut" x="290" y="320">a folder of .tf files describing the finished result — not a list of steps to run</text>
+
+      <rect class="card s-cfg b15" x="90" y="342" width="250" height="88" rx="8"/>
+      <text class="tt13 mid f-cfg" x="215" y="366">provider</text>
+      <text class="bd11 mid mut" x="215" y="386">the plugin that knows one</text>
+      <text class="bd11 mid mut" x="215" y="402">cloud's API — the same API</text>
+      <text class="bd11 mid mut" x="215" y="418">the console and CLI call</text>
+
+      <rect class="card s-cfg b15" x="360" y="342" width="250" height="88" rx="8"/>
+      <text class="tt13 mid f-cfg" x="485" y="366">resource</text>
+      <text class="bd11 mid mut" x="485" y="386">one thing that must exist:</text>
+      <text class="bd11 mid mut" x="485" y="402">a subnet, an instance, a rule.</text>
+      <text class="bd11 mid mut" x="485" y="418">A type + a name you choose</text>
+
+      <rect class="card s-cfg b15" x="630" y="342" width="250" height="88" rx="8"/>
+      <text class="tt13 mid f-cfg" x="755" y="366">variable</text>
+      <text class="bd11 mid mut" x="755" y="386">a value passed in,</text>
+      <text class="bd11 mid mut" x="755" y="402">so the same code can</text>
+      <text class="bd11 mid mut" x="755" y="418">build a different copy</text>
+
+      <rect class="card s-cfg b15" x="900" y="342" width="250" height="88" rx="8"/>
+      <text class="tt13 mid f-cfg" x="1025" y="366">output</text>
+      <text class="bd11 mid mut" x="1025" y="386">a value read back out</text>
+      <text class="bd11 mid mut" x="1025" y="402">after apply — the only way</text>
+      <text class="bd11 mid mut" x="1025" y="418">to see inside a module</text>
+
+      <rect class="card s-cfg b15" x="1170" y="342" width="250" height="88" rx="8"/>
+      <text class="tt13 mid f-cfg" x="1295" y="366">data source</text>
+      <text class="bd11 mid mut" x="1295" y="386">something looked up,</text>
+      <text class="bd11 mid mut" x="1295" y="402">never created or destroyed</text>
+      <text class="bd11 mid mut" x="1295" y="418">— e.g. the newest AMI</text>
+
+      <text class="bd ink" x="90" y="458">Terraform reads the <tspan style="font-weight:600">whole folder at once</tspan>. The order lines sit in the file means nothing — it builds a dependency graph from the references between resources, creates in that order, and destroys in reverse.</text>
+      <text class="bd mut" x="90" y="482">That is what a description buys you over a setup script: run it twice and the second run does nothing, because the result already matches.</text>
+
+      <!-- ============ 3 PLAN -> APPLY ============ -->
+      <rect class="card s-plan b2" x="60" y="532" width="880" height="248" rx="12"/>
+      <text class="lab f-plan" x="80" y="562">3 · PLAN → APPLY</text>
+      <text class="bd mut" x="240" y="562">the list of changes, shown before any change is made</text>
+
+      <text class="mono good" x="90" y="596">+</text>
+      <text class="tt12 ink" x="120" y="596">create</text>
+      <text class="bd mut" x="300" y="596">a new resource appears</text>
+
+      <text class="mono f-plan" x="90" y="622">~</text>
+      <text class="tt12 ink" x="120" y="622">update in place</text>
+      <text class="bd mut" x="300" y="622">a setting the API can change live — usually safe</text>
+
+      <text class="mono bad" x="90" y="648">-/+</text>
+      <text class="tt12 bad" x="120" y="648">destroy and recreate</text>
+      <text class="bd bad" x="300" y="648">the one to stop and read</text>
+
+      <text class="bd mut" x="120" y="668">the resource is replaced: new id, new IP, and anything written on its disk is gone</text>
+
+      <text class="mono bad" x="90" y="696">-</text>
+      <text class="tt12 ink" x="120" y="696">destroy</text>
+      <text class="bd mut" x="300" y="696">removed entirely</text>
+
+      <text class="bd ink" x="90" y="726">Read a plan from the summary line up — <tspan class="mono">3 to add, 1 to change, 1 to destroy</tspan>.</text>
+      <text class="bd ink" x="90" y="746">If the destroy count is not what you expected, do not type yes.</text>
+      <text class="bd mut" x="90" y="768">A run can fail midway with some resources already created — state records them, so re-plan and read it before retrying.</text>
+
+      <!-- ============ 4 STATE ============ -->
+      <rect class="card s-state b2" x="970" y="532" width="470" height="248" rx="12"/>
+      <text class="lab f-state" x="990" y="562">4 · STATE</text>
+      <text class="bd mut" x="1080" y="562">what Terraform made, and its real ids</text>
+
+      <text class="bd ink" x="990" y="592">an S3 bucket — one object per environment:</text>
+      <text class="mono f-state" x="990" y="614">env/dev/terraform.tfstate</text>
+      <text class="mono f-state" x="990" y="632">env/prod/terraform.tfstate</text>
+
+      <text class="bd mut" x="990" y="662">It maps your resource names to the ids AWS handed</text>
+      <text class="bd mut" x="990" y="678">back. It is the link between the files and the account.</text>
+
+      <text class="bd bad" x="990" y="708">Never in git: it holds values in plain text, and two</text>
+      <text class="bd bad" x="990" y="724">people with different copies is a split brain.</text>
+
+      <rect class="card s-state b15" x="990" y="738" width="430" height="28" rx="6"/>
+      <text class="bd ink" x="1004" y="757">lock — one apply at a time; a second one waits its turn</text>
+
+      <line class="arw" x1="944" y1="650" x2="966" y2="650" marker-end="url(#ah)"/>
+
+      <!-- ============ 5 ENVIRONMENTS ============ -->
+      <rect class="card s-env b2" x="60" y="810" width="1380" height="262" rx="12"/>
+      <text class="lab f-env" x="80" y="840">5 · ENVIRONMENTS</text>
+      <text class="bd mut" x="250" y="840">one codebase, applied more than once — each copy complete, and nobody else depending on it</text>
+
+      <rect class="card s-env b15" x="90" y="862" width="250" height="54" rx="8"/>
+      <text class="tt12 f-env" x="106" y="884">environments/dev</text>
+      <text class="mono mut" x="106" y="903">key = env/dev/…</text>
+
+      <rect class="card s-env b15" x="90" y="926" width="250" height="54" rx="8"/>
+      <text class="tt12 f-env" x="106" y="948">environments/staging</text>
+      <text class="mono mut" x="106" y="967">key = env/staging/…</text>
+
+      <rect class="card s-env b15" x="90" y="990" width="250" height="54" rx="8"/>
+      <text class="tt12 f-env" x="106" y="1012">environments/production</text>
+      <text class="mono mut" x="106" y="1031">key = env/prod/…</text>
+
+      <line class="arw" x1="344" y1="888" x2="474" y2="915" marker-end="url(#ah)"/>
+      <line class="arw" x1="344" y1="952" x2="474" y2="952" marker-end="url(#ah)"/>
+      <line class="arw" x1="344" y1="1016" x2="474" y2="992" marker-end="url(#ah)"/>
+      <text class="bd11 mut mid" x="408" y="935">each calls it</text>
+      <text class="bd11 mut mid" x="408" y="1010">with its own values</text>
+
+      <rect class="card s-env b2" x="478" y="880" width="300" height="148" rx="10"/>
+      <text class="tt mid f-env" x="628" y="908">one module</text>
+      <text class="bd mid mut" x="628" y="930">the shared building blocks</text>
+      <text class="bd mid ink" x="628" y="956">inputs  →  module  →  outputs</text>
+      <text class="bd11 mid mut" x="628" y="982">holds no provider and no backend —</text>
+      <text class="bd11 mid mut" x="628" y="998">the root it is called from supplies those</text>
+
+      <line class="arw" x1="782" y1="915" x2="896" y2="908" marker-end="url(#ah)"/>
+      <line class="arw" x1="782" y1="952" x2="896" y2="966" marker-end="url(#ah)"/>
+      <line class="arw" x1="782" y1="992" x2="896" y2="1024" marker-end="url(#ah)"/>
+
+      <rect class="navy" x="900" y="886" width="180" height="44" rx="7"/>
+      <text class="tt12 mid wht" x="990" y="913">dev system</text>
+      <rect class="navy" x="900" y="944" width="180" height="44" rx="7"/>
+      <text class="tt12 mid wht" x="990" y="971">staging system</text>
+      <rect class="navy" x="900" y="1002" width="180" height="44" rx="7"/>
+      <text class="tt12 mid wht" x="990" y="1029">production system</text>
+
+      <rect class="card s-env b15" x="1110" y="870" width="320" height="180" rx="10"/>
+      <text class="tt12 f-env" x="1126" y="894">what keeps them apart</text>
+      <text class="bd11 ink" x="1126" y="918">• a different state key — two environments</text>
+      <text class="bd11 mut" x="1136" y="934">never share state (ideally different accounts)</text>
+      <text class="bd11 ink" x="1126" y="958">• names that must be unique collide:</text>
+      <text class="bd11 mut" x="1136" y="974">S3 buckets, IAM roles, log groups →</text>
+      <text class="bd11 mut" x="1136" y="990">prefix everything with the environment</text>
+      <text class="bd11 ink" x="1126" y="1014">• moving a resource into a module changes</text>
+      <text class="bd11 mut" x="1136" y="1030">its address, so the plan wants to replace it</text>
+
+      <!-- ============ 6 CHANGING IT ============ -->
+      <rect class="card s-dep b2" x="60" y="1102" width="1380" height="188" rx="12"/>
+      <text class="lab f-dep" x="80" y="1132">6 · CHANGING IT</text>
+      <text class="bd mut" x="230" y="1132">replacing every server without the site going down</text>
+
+      <rect class="card s-dep b15" x="90" y="1152" width="240" height="76" rx="8"/>
+      <text class="tt12 mid f-dep" x="210" y="1176">edit the template</text>
+      <text class="bd11 mid mut" x="210" y="1196">a new AMI, or one line</text>
+      <text class="bd11 mid mut" x="210" y="1212">of the boot script</text>
+
+      <line class="arw" x1="334" y1="1190" x2="366" y2="1190" marker-end="url(#ah)"/>
+
+      <rect class="card s-dep b15" x="370" y="1152" width="240" height="76" rx="8"/>
+      <text class="tt12 mid f-dep" x="490" y="1176">launch template v2</text>
+      <text class="bd11 mid mut" x="490" y="1196">every change is a new</text>
+      <text class="bd11 mid mut" x="490" y="1212">numbered version</text>
+
+      <line class="arw" x1="614" y1="1190" x2="646" y2="1190" marker-end="url(#ah)"/>
+
+      <rect class="card s-dep b15" x="650" y="1152" width="240" height="76" rx="8"/>
+      <text class="tt12 mid f-dep" x="770" y="1176">instance refresh</text>
+      <text class="bd11 mid mut" x="770" y="1196">the ASG replaces its servers</text>
+      <text class="bd11 mid mut" x="770" y="1212">a few at a time</text>
+
+      <line class="arw" x1="894" y1="1190" x2="926" y2="1190" marker-end="url(#ah)"/>
+
+      <rect class="card s-dep b15" x="930" y="1152" width="240" height="76" rx="8"/>
+      <text class="tt12 mid f-dep" x="1050" y="1176">minimum healthy</text>
+      <text class="bd11 mid mut" x="1050" y="1196">how much of the group must</text>
+      <text class="bd11 mid mut" x="1050" y="1212">stay in service meanwhile</text>
+
+      <line class="arw" x1="1174" y1="1190" x2="1206" y2="1190" marker-end="url(#ah)"/>
+
+      <rect class="card s-dep b15" x="1210" y="1152" width="210" height="76" rx="8"/>
+      <text class="tt12 mid f-dep" x="1315" y="1176">draining</text>
+      <text class="bd11 mid mut" x="1315" y="1196">a leaving server finishes</text>
+      <text class="bd11 mid mut" x="1315" y="1212">the requests it already has</text>
+
+      <text class="bd bad" x="90" y="1262">Rollback = point at the old version and refresh again. What it does NOT undo: a database migration that already ran. Old code against a new schema is its own outage.</text>
+    </svg>
+    <figcaption>Three things must be true before a no-downtime replacement is possible: more than one server, a health check that tells the truth about readiness, and draining so in-flight requests finish.</figcaption>
+  </figure>
+</div>
+
+</body></html>

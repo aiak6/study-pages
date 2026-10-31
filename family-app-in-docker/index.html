@@ -1,0 +1,229 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Family App in Docker</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one reading column; sections as stacked "shipping manifest" blocks with a stencilled label; code and tables scroll in place. */
+:root{
+  --bg:#f3f5f7; --surface:#ffffff; --ink:#15202b; --muted:#56657a; --line:#d8dee6;
+  --accent:#c4501b; --accent-soft:#fbe9df; --steel:#1f5f8b; --steel-soft:#e3eef6;
+  --code-bg:#0f1b26; --code-fg:#dbe7f2; --code-cmt:#7f97ad;
+  --good:#2e7d4f; --bad:#b3261e;
+  --f-display:"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --f-body:"Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e151c; --surface:#16202a; --ink:#e6edf3; --muted:#9aabbd; --line:#2a3845;
+  --accent:#f0874f; --accent-soft:#3a2418; --steel:#7ab8e3; --steel-soft:#16303f;
+  --code-bg:#0a1016; --code-fg:#dbe7f2; --code-cmt:#6f879c;
+  --good:#6cc493; --bad:#f08a80; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0e151c; --surface:#16202a; --ink:#e6edf3; --muted:#9aabbd; --line:#2a3845;
+  --accent:#f0874f; --accent-soft:#3a2418; --steel:#7ab8e3; --steel-soft:#16303f;
+  --code-bg:#0a1016; --code-fg:#dbe7f2; --code-cmt:#6f879c;
+  --good:#6cc493; --bad:#f08a80; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:17px/1.6 var(--f-body);padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:28px 64px}
+.wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.15;margin:0}
+h1{font-size:clamp(30px,6vw,44px);font-weight:800;letter-spacing:-.01em}
+h2{font-size:24px;font-weight:800}
+h3{font-size:18px;font-weight:600;margin-top:6px}
+p{margin:0}
+a{color:var(--steel)}
+code{font-family:var(--f-mono);font-size:.86em;background:var(--steel-soft);color:var(--ink);padding:1px 5px;border-radius:4px}
+strong{font-weight:700}
+.eyebrow{font:600 12px/1 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+header{display:flex;flex-direction:column;gap:12px;border-bottom:3px solid var(--ink);padding-bottom:20px}
+.meta{display:flex;flex-wrap:wrap;gap:8px 16px;color:var(--muted);font-size:15px}
+.lede{font-size:19px;max-width:65ch}
+nav{display:flex;flex-wrap:wrap;gap:8px}
+nav a{font:600 13px/1 var(--f-mono);text-decoration:none;color:var(--ink);border:1px solid var(--line);background:var(--surface);padding:8px 10px;border-radius:6px}
+nav a:hover,nav a:focus-visible{border-color:var(--accent);color:var(--accent);outline:none}
+section{display:flex;flex-direction:column;gap:14px;scroll-margin-top:16px}
+section > .label{display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--line);padding-bottom:8px}
+section > .label .tag{font:600 11px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--surface);background:var(--ink);padding:5px 7px;border-radius:3px}
+ul,ol{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px}
+.table{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:15.5px;min-width:480px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:600 12px/1.3 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--bg)}
+tr:last-child td{border-bottom:0}
+blockquote{margin:0;border-left:4px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 8px 8px 0;font-weight:600}
+pre{margin:0;background:var(--code-bg);color:var(--code-fg);font:14px/1.6 var(--f-mono);padding:14px 16px;border-radius:8px;overflow-x:auto}
+pre .c{color:var(--code-cmt)}
+.codebox{position:relative;min-width:0}
+.copy{position:absolute;top:8px;right:8px;font:600 11px/1 var(--f-mono);background:transparent;color:var(--code-cmt);border:1px solid var(--code-cmt);border-radius:4px;padding:5px 7px;cursor:pointer}
+.copy:hover,.copy:focus-visible{color:var(--code-fg);border-color:var(--code-fg);outline:none}
+.flow{font:600 14px/1.5 var(--f-mono);background:var(--steel-soft);color:var(--ink);padding:14px 16px;border-radius:8px;overflow-x:auto;white-space:pre}
+.see{font-size:15px;color:var(--good)}
+.see::before{content:"You should see: ";font-weight:700}
+.warn{border:1px solid var(--bad);border-radius:8px;padding:12px 16px;display:flex;flex-direction:column;gap:10px;background:var(--surface)}
+.warn .eyebrow{color:var(--bad)}
+details{border:1px solid var(--line);background:var(--surface);border-radius:8px}
+details summary{cursor:pointer;padding:12px 16px;font-weight:600;list-style-position:inside}
+details summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:8px}
+details > div{padding:0 16px 14px;display:flex;flex-direction:column;gap:8px}
+.q{display:flex;flex-direction:column;gap:10px}
+.q p.ask{font-weight:600}
+.reread{font-style:italic;color:var(--muted);font-size:15px}
+.golden{border:2px solid var(--ink);border-radius:8px;padding:14px 16px;background:var(--surface);font-size:18px}
+footer{color:var(--muted);font-size:15px;border-top:1px solid var(--line);padding-top:16px}
+@media (prefers-reduced-motion: reduce){*{scroll-behavior:auto!important}}
+html{scroll-behavior:smooth}
+</style>
+
+<div class="wrap">
+<header>
+  <span class="eyebrow">Self-study lab · Containers &amp; Orchestration</span>
+  <h1>Family app in Docker: 3 containers &amp; Compose</h1>
+  <p class="lede">Moved the family app from AWS to <strong>one VM</strong> as 3 containers: database, backend, frontend. First by hand, then with <strong>Docker Compose</strong>.</p>
+</header>
+
+<div class="flow">Browser ──:80──► fam-frontend (nginx) ──/api/──► fam-backend (:3000) ──► fam-db (MySQL) ──► volume
+                         all on one private Docker network</div>
+
+<section>
+  <div class="label"><span class="tag">Glance</span><h2>Key ideas</h2></div>
+  <div class="table"><table>
+    <thead><tr><th>Word</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Image</strong></td><td>Packaged app, built from a <strong>Dockerfile</strong> with <code>docker build</code></td></tr>
+      <tr><td><strong>Container</strong></td><td>A running image (<code>docker run</code>)</td></tr>
+      <tr><td><strong>Network</strong></td><td>Containers find each other <strong>by name</strong> (<code>fam-db</code>, <code>fam-backend</code>)</td></tr>
+      <tr><td><strong>Volume</strong></td><td>Data survives when a container is deleted</td></tr>
+      <tr><td><code>-p 80:80</code></td><td>Opens a port to the outside. Only the frontend has it</td></tr>
+      <tr><td><strong>nginx proxy</strong></td><td>Sends <code>/api/</code> requests to <code>fam-backend:3000</code></td></tr>
+      <tr><td><code>npm ci</code></td><td>Clean install of the exact package versions</td></tr>
+      <tr><td><strong>Compose</strong></td><td>One file + <code>docker compose up -d</code> starts everything</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <div class="label"><span class="tag">Files</span><h2>The files</h2></div>
+  <h3>backend/Dockerfile</h3>
+  <div class="codebox"><pre>FROM node:20-alpine
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev
+COPY src ./src
+EXPOSE 3000
+USER node
+CMD ["node", "src/server.js"]</pre></div>
+  <h3>frontend/Dockerfile (Node builds the site, nginx serves it)</h3>
+  <div class="codebox"><pre>FROM node:20-alpine AS build
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+FROM nginx:1.27-alpine
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /app/dist /usr/share/nginx/html
+EXPOSE 80</pre></div>
+  <h3>frontend/nginx.conf</h3>
+  <div class="codebox"><pre>server {
+  listen 80;
+  root /usr/share/nginx/html;
+  index index.html;
+  location /api/ { proxy_pass http://fam-backend:3000; }
+  location / { try_files $uri $uri/ /index.html; }
+}</pre></div>
+  <p><strong>.dockerignore</strong> (both folders): <code>node_modules</code></p>
+  <h3>docker-compose.yml</h3>
+  <div class="codebox"><pre>services:
+  fam-db:
+    image: mysql:8.0
+    container_name: fam-db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpw
+      MYSQL_DATABASE: famdb
+      MYSQL_USER: famadmin
+      MYSQL_PASSWORD: localpw
+    volumes:
+      - fam-db-data:/var/lib/mysql
+    restart: unless-stopped
+
+  fam-backend:
+    build: ./backend
+    container_name: fam-backend
+    environment:
+      DB_HOST: fam-db
+      DB_USER: famadmin
+      DB_PASSWORD: localpw
+      DB_NAME: famdb
+    depends_on:
+      - fam-db
+    restart: unless-stopped
+
+  fam-frontend:
+    build: ./frontend
+    container_name: fam-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - fam-backend
+    restart: unless-stopped
+
+volumes:
+  fam-db-data:
+    name: fam-db-data</pre></div>
+</section>
+
+<section>
+  <div class="label"><span class="tag">Daily</span><h2>Everyday commands</h2></div>
+  <p>Run inside <code>~/my-family-project/app</code>.</p>
+  <div class="codebox"><pre>docker compose up -d --build              <span class="c"># build + start everything</span>
+docker compose ps                         <span class="c"># what's running</span>
+docker compose logs -f fam-backend        <span class="c"># logs</span>
+docker compose up -d --build fam-backend  <span class="c"># after a code change</span>
+docker compose exec fam-db mysql -ufamadmin -plocalpw famdb   <span class="c"># SQL prompt</span>
+docker compose down                       <span class="c"># remove containers (data stays)</span>
+docker compose down -v                    <span class="c"># also deletes the data!</span></pre></div>
+</section>
+
+<section>
+  <div class="warn">
+    <span class="eyebrow">Gotchas</span>
+    <ul>
+      <li><code>No such container</code>: run the container before checking its logs.</li>
+      <li>Heredoc stuck at <code>&gt;</code>: the paste added spaces before <code>EOF</code>. Use <code>vi</code> instead.</li>
+      <li>YAML needs exact spaces (2 per level, no tabs). Check with <code>docker compose config --quiet</code>.</li>
+      <li>Start the backend before the frontend, or nginx can't find <code>fam-backend</code>.</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <div class="label"><span class="tag">Next</span><h2>What's next</h2></div>
+  <p><code>.env</code> for passwords → healthchecks → push images to a registry → HTTPS → GitHub Actions → Kubernetes</p>
+  <p class="golden"><strong>Containers are disposable.</strong> Data lives in volumes, containers talk by name, and only one door is open.</p>
+</section>
+
+<footer>Same notes in Notion under DevOps / 312 - Notes / Containers &amp; Orchestration.</footer>
+</div>
+
+<script>
+document.querySelectorAll('.codebox').forEach(function(box){
+  var pre = box.querySelector('pre'); var b = document.createElement('button');
+  b.className = 'copy'; b.type = 'button'; b.textContent = 'Copy';
+  b.addEventListener('click', function(){
+    var text = pre.innerText.split('\n').map(function(l){ return l.replace(/\s+#.*$/, ''); }).join('\n').trim();
+    var done = function(){ b.textContent = 'Copied'; setTimeout(function(){ b.textContent = 'Copy'; }, 1500); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(function(){ selectPre(); });
+    } else { selectPre(); }
+    function selectPre(){ var r = document.createRange(); r.selectNodeContents(pre); var s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = 'Selected'; }
+  });
+  box.appendChild(b);
+});
+</script>
+
+</body></html>

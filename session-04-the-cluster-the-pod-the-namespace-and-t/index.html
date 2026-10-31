@@ -1,0 +1,364 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Session 04: The cluster, the pod, the namespace and the context</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EEF2F7; --surface:#FFFFFF; --ink:#1B2A41; --muted:#56657C; --line:#C9D3E1;
+  --blue:#2459C8; --blue-soft:#DCE6FA;
+  --ok:#1F8A5B; --ok-soft:#D8F0E4;
+  --warn:#A86A00; --warn-soft:#FBEBC9;
+  --bad:#B83A30; --bad-soft:#F7DCD8;
+  --code-bg:#1B2A41; --code-ink:#E6ECF5;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1724; --surface:#172234; --ink:#E4EAF3; --muted:#9AA8BD; --line:#2C3B53;
+    --blue:#7FA6F5; --blue-soft:#1E3157;
+    --ok:#5CCB94; --ok-soft:#163A2B;
+    --warn:#E8B04D; --warn-soft:#3A2D12;
+    --bad:#F08A80; --bad-soft:#3E1C1A;
+    --code-bg:#0B111B; --code-ink:#DCE4F0;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1724; --surface:#172234; --ink:#E4EAF3; --muted:#9AA8BD; --line:#2C3B53;
+  --blue:#7FA6F5; --blue-soft:#1E3157;
+  --ok:#5CCB94; --ok-soft:#163A2B;
+  --warn:#E8B04D; --warn-soft:#3A2D12;
+  --bad:#F08A80; --bad-soft:#3E1C1A;
+  --code-bg:#0B111B; --code-ink:#DCE4F0;
+  color-scheme:dark;
+}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 72px)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:21;background:var(--bg)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size:17px;line-height:1.6}
+code,pre,.mono{font-family:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace}
+code{font-size:.88em;background:var(--blue-soft);padding:.1em .35em;border-radius:4px}
+.wrap{max-width:980px;margin:0 auto;padding:40px 20px 80px}
+header{margin-bottom:36px}
+h1{font-size:clamp(2rem,5vw,3rem);line-height:1.1;margin:.2em 0 .4em;letter-spacing:-.01em}
+.sub{color:var(--muted);margin:0;max-width:62ch}
+.rule-line{margin-top:24px;display:flex;flex-wrap:wrap;gap:12px}
+.rule-line div{flex:1 1 260px;padding:14px 16px;border-left:5px solid;background:var(--surface);border-radius:0 8px 8px 0}
+.rule-line .r{border-color:var(--ok)} .rule-line .l{border-color:var(--bad)}
+.rule-line strong{display:block;font-size:1.1rem}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;display:flex;flex-wrap:nowrap;gap:8px;overflow-x:auto;
+  margin:0 -20px;padding:10px 20px;background:var(--bg);border-bottom:1px solid var(--line);scrollbar-width:thin}
+@media(min-width:900px){nav{flex-wrap:wrap}}
+nav a{white-space:nowrap}
+nav a.active{background:var(--blue);color:var(--surface);border-color:var(--blue)}
+nav a{color:var(--blue);text-decoration:none;border:1px solid var(--line);padding:4px 12px;border-radius:999px;font-size:.92rem;background:var(--surface)}
+nav a:hover{border-color:var(--blue)}
+section{margin-top:56px}
+h2{font-size:1.6rem;margin:0 0 .3em;line-height:1.2}
+h3{font-size:1.15rem;margin:1.4em 0 .3em}
+p{max-width:70ch}
+.lede{color:var(--muted);margin-top:0}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px}
+button{font:inherit;font-size:.95rem;cursor:pointer;border-radius:8px;border:1px solid var(--line);
+  background:var(--surface);color:var(--ink);padding:8px 14px}
+button:hover{border-color:var(--blue)}
+button.primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+:root[data-theme="dark"] button.primary{color:#0F1724}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) button.primary{color:#0F1724}}
+button.danger{border-color:var(--bad);color:var(--bad)}
+button:focus-visible,a:focus-visible,summary:focus-visible,select:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+button:disabled{opacity:.45;cursor:not-allowed}
+.opts button:disabled{opacity:.7}
+.opts button.right:disabled,.opts button.nope:disabled{opacity:1}
+.controls{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;align-items:center}
+
+/* simulator */
+.sim{display:grid;grid-template-columns:1fr;gap:16px}
+@media(min-width:760px){.sim{grid-template-columns:1.25fr 1fr}}
+.rs{border:1px dashed var(--line);border-radius:10px;padding:12px;margin-bottom:12px;transition:opacity .4s}
+.rs.zero{opacity:.55}
+.rs-head{display:flex;justify-content:space-between;gap:8px;font-size:.9rem;color:var(--muted);margin-bottom:8px;flex-wrap:wrap}
+.rs-head b{color:var(--ink)}
+.pods{display:flex;flex-wrap:wrap;gap:10px;min-height:76px}
+.pod{width:150px;border-radius:10px;padding:10px;border:2px solid;font-size:.85rem;line-height:1.35;transition:opacity .5s, transform .3s}
+.pod .n{font-family:"JetBrains Mono",monospace;font-size:.78rem;word-break:break-all}
+.pod .st{font-weight:700;font-size:1rem}
+.pod.ready{border-color:var(--ok);background:var(--ok-soft)}
+.pod.notready{border-color:var(--warn);background:var(--warn-soft)}
+.pod.starting{border-color:var(--line);background:var(--bg)}
+.pod.term{border-color:var(--bad);background:var(--bad-soft);opacity:.6}
+.pod.flash{transform:scale(1.06)}
+.empty{color:var(--muted);font-size:.9rem;align-self:center}
+.log{background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:12px 14px;font-size:.8rem;
+  height:330px;overflow-y:auto;line-height:1.5}
+.log div{white-space:pre-wrap;word-break:break-word}
+.log .w{color:#F4BE5B} .log .e{color:#F49088} .log .g{color:#7FDCA8} .log .c{color:#8FB2F7}
+.users{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:.92rem;color:var(--muted);flex-wrap:wrap}
+.status-pill{display:inline-block;padding:2px 10px;border-radius:999px;font-weight:700;font-size:.85rem}
+.pill-ok{background:var(--ok-soft);color:var(--ok)} .pill-warn{background:var(--warn-soft);color:var(--warn)} .pill-bad{background:var(--bad-soft);color:var(--bad)}
+
+/* liveness */
+.live-grid{display:grid;grid-template-columns:1fr;gap:16px}
+@media(min-width:760px){.live-grid{grid-template-columns:280px 1fr}}
+.bigpod{border:2px solid var(--line);border-radius:14px;padding:18px;text-align:left}
+.bigpod .row{display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding:6px 0;font-size:.95rem}
+.bigpod .row:last-child{border:none}
+.bigpod .val{font-family:"JetBrains Mono",monospace;font-weight:600}
+select{font:inherit;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.backoff{display:flex;gap:4px;align-items:flex-end;height:90px;margin-top:14px}
+.backoff span{flex:1;background:var(--blue-soft);border-radius:4px 4px 0 0;position:relative;transition:background .3s}
+.backoff span.on{background:var(--bad)}
+.backoff-labels{display:flex;gap:4px;font-size:.72rem;color:var(--muted)}
+.backoff-labels span{flex:1;text-align:center}
+
+/* tables */
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:.95rem}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--bg);font-weight:700}
+tr:last-child td{border-bottom:none}
+
+/* request path */
+.path{display:flex;flex-direction:column;gap:0;margin-top:12px}
+.hop{display:grid;grid-template-columns:44px 1fr;gap:14px;position:relative;padding-bottom:18px}
+.hop .dot{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-weight:700;
+  background:var(--surface);border:2px solid var(--blue);color:var(--blue);z-index:1}
+.hop::before{content:"";position:absolute;left:21px;top:44px;bottom:0;width:2px;background:var(--line)}
+.hop:last-child::before{display:none}
+.hop h4{margin:8px 0 2px;font-size:1.05rem}
+.hop p{margin:0;color:var(--muted)}
+.hop.https .dot{border-color:var(--ok);color:var(--ok)}
+.tag{display:inline-block;font-size:.78rem;padding:1px 8px;border-radius:999px;margin-left:6px;vertical-align:2px}
+.tag.enc{background:var(--ok-soft);color:var(--ok)} .tag.plain{background:var(--warn-soft);color:var(--warn)}
+.note{border-left:4px solid var(--blue);background:var(--blue-soft);padding:12px 16px;border-radius:0 8px 8px 0;margin:16px 0;max-width:70ch}
+
+pre{background:var(--code-bg);color:var(--code-ink);padding:14px 16px;border-radius:10px;overflow-x:auto;font-size:.82rem;line-height:1.55;margin:10px 0}
+pre .cm{color:#8A9AB5}
+
+details{background:var(--surface);border:1px solid var(--line);border-radius:10px;margin-bottom:8px}
+summary{cursor:pointer;padding:12px 16px;font-weight:700}
+details > div{padding:0 16px 14px}
+.wrong{color:var(--bad);text-decoration:line-through;text-decoration-thickness:1px}
+
+/* quiz */
+.q{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:14px}
+.q p.prompt{font-weight:700;margin-top:0}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opts button{text-align:left;padding:10px 14px}
+.opts button.right{border-color:var(--ok);background:var(--ok-soft)}
+.opts button.nope{border-color:var(--bad);background:var(--bad-soft)}
+.explain{margin-top:10px;color:var(--muted);display:none}
+.explain.show{display:block}
+.score{font-weight:700}
+footer{margin-top:64px;color:var(--muted);font-size:.9rem}
+
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.tabs button[aria-selected="true"]{background:var(--blue);color:var(--surface);border-color:var(--blue)}
+.tabpane{display:none}.tabpane.show{display:block}
+.timeline{list-style:none;padding:0;margin:0;counter-reset:t}
+.timeline li{counter-increment:t;position:relative;padding:14px 18px 14px 64px;margin-bottom:10px;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.timeline li h4{margin:0 0 4px;font-size:1.08rem}
+.timeline li p{margin:0;color:var(--ink);max-width:68ch}
+.timeline li::before{content:counter(t);position:absolute;left:16px;top:14px;width:32px;height:32px;border-radius:50%;
+  background:var(--blue-soft);color:var(--blue);font-weight:700;display:grid;place-items:center;font-size:.9rem}
+.timeline details{margin:0}
+.yaml-toggle .ln{display:block;transition:background .2s,opacity .2s}
+.yaml-toggle.focus .ln{opacity:.35}
+.yaml-toggle.focus .ln.hl{opacity:1;background:rgba(127,166,245,.18)}
+.flow{display:flex;flex-direction:column;gap:6px;margin:14px 0;max-width:620px}
+.flow div{padding:10px 14px;border-radius:8px;border:1px solid var(--line);background:var(--surface)}
+.flow .arrow{border:none;background:none;padding:0 0 0 18px;color:var(--muted)}
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px}
+.compare > div{border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--bg)}
+.lbs{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.lbs span{display:inline-block;padding:3px 8px;border-radius:6px;font-size:.8rem;font-family:"JetBrains Mono",monospace}
+.lb-many span{background:var(--bad-soft);color:var(--bad)}
+.lb-one span{background:var(--ok-soft);color:var(--ok)}
+.form-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:14px}
+@media(min-width:640px){.form-grid{grid-template-columns:1fr 1fr}}
+.form-grid label{display:flex;flex-direction:column;font-size:.9rem;color:var(--muted);gap:4px}
+.form-grid input{font:inherit;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.verdict{padding:12px 16px;border-radius:8px;font-size:.9rem}
+.verdict.ok{background:var(--ok-soft);color:var(--ok)} .verdict.no{background:var(--bad-soft);color:var(--bad)} .verdict.warn{background:var(--warn-soft);color:var(--warn)}
+.step{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:12px}
+.step.done{border-color:var(--ok)}
+.step-head{display:flex;gap:12px;align-items:flex-start}
+.step-head input{width:22px;height:22px;margin-top:3px;accent-color:var(--ok);flex:none}
+.step-head h4{margin:0;font-size:1.05rem}
+.step-head p{margin:2px 0 0;color:var(--muted)}
+.step pre{margin:10px 0 6px}
+.step details{border:none;background:var(--bg)}
+.step summary{font-weight:400;color:var(--blue);padding:8px 12px}
+.progress{height:8px;background:var(--line);border-radius:999px;overflow:hidden;margin:10px 0 18px}
+.progress div{height:100%;background:var(--ok);width:0;transition:width .3s}
+.cards2{display:grid;grid-template-columns:1fr;gap:14px}
+@media(min-width:720px){.cards2{grid-template-columns:1fr 1fr}}
+.cards2 > div{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.cards2 h3{margin-top:0}
+.cards2 ul{margin:0;padding-left:20px}
+.cards2 li{margin-bottom:6px}
+.fixbox{border:1.5px solid var(--warn);border-radius:14px;padding:12px;background:var(--warn-soft)}
+.fixbox td:first-child{width:44%;color:var(--muted)}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+
+.term{background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:12px 14px;font-family:"JetBrains Mono",monospace;font-size:.8rem;line-height:1.5;overflow-x:auto;white-space:pre}
+.chip{display:inline-block;padding:3px 10px;border-radius:999px;font-size:.85rem;font-weight:700}
+.chip.ok{background:var(--ok-soft);color:var(--ok)}.chip.warn{background:var(--warn-soft);color:var(--warn)}.chip.bad{background:var(--bad-soft);color:var(--bad)}.chip.idle{background:var(--bg);color:var(--muted);border:1px solid var(--line)}
+.lab-row{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:12px}
+.lab-row label{display:flex;gap:6px;align-items:center;font-size:.95rem}
+.lab-row input[type=checkbox]{width:18px;height:18px;accent-color:var(--blue)}
+.layers{display:flex;flex-direction:column;gap:6px}
+.layer{display:flex;justify-content:space-between;gap:10px;padding:8px 12px;border-radius:8px;border:1px solid var(--line);font-family:"JetBrains Mono",monospace;font-size:.82rem;flex-wrap:wrap}
+.layer.cached{background:var(--ok-soft);border-color:var(--ok)}.layer.rebuilt{background:var(--warn-soft);border-color:var(--warn)}.layer.none{background:var(--bg);color:var(--muted)}
+.journey{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.journey .hopbox{padding:10px 14px;border-radius:10px;border:2px solid var(--line);background:var(--surface);font-weight:700;transition:all .3s}
+.journey .hopbox.on{border-color:var(--blue);background:var(--blue-soft);color:var(--blue)}
+.journey .ar{color:var(--muted)}
+</style></head><body><div class="wrap">
+<header><p class="sub">Containers &amp; Orchestration, the first Kubernetes class (unit 2)</p><h1>Session 04: The cluster, the pod, the namespace and the context</h1><p class="sub">A bare <code>docker run</code> container stops when its process ends, and nothing starts it again. Kubernetes does for containers what the Auto Scaling group did for EC2: you write down what should exist and it keeps it that way. Today was the vocabulary: the cluster (control plane + nodes), the pod, your namespace on the school's shared cluster, the context that tells kubectl where to talk, and the YAML manifest.</p><div class="rule-line"><div class="r"><strong>Kubernetes knows pods, not containers.</strong>A container is always wrapped in a pod.</div><div class="l"><strong>Two checks before you change anything.</strong><code>get-caller-identity</code> and <code>get-contexts</code>.</div></div></header>
+<nav aria-label="Sections"><a href="#timeline">What we did</a><a href="#why">Why an orchestrator</a><a href="#landscape">Landscape</a><a href="#cluster">Cluster</a><a href="#lab">Journey lab</a><a href="#pod">The pod</a><a href="#ns">Namespace</a><a href="#context">Context</a><a href="#yaml">Manifest &amp; YAML</a><a href="#fixes">Corrections</a><a href="#demo">Redo the demo</a><a href="#commands">Commands</a><a href="#wrapup">Stressed &amp; homework</a><a href="#quiz">Check yourself</a></nav>
+<section id="timeline"><h2>What we actually did, in order</h2><p class="lede">Mon, Oct 5, 2026, with Maher (Bakhtiyar couldn't join). Unit 2 deck, slides 1–11. The hands-on sign-in moved to a separate session with Bakhtiyar.</p><ol class="timeline"><li><h4>Opening Q&amp;A</h4><p>DevOps vs platform engineer vs SRE are mostly the same job with different emphasis. Maher's own focus is automation and building Kubernetes clusters.</p></li><li><h4>Recap of unit 1</h4><p>Image = app files + start command; container = one process; your image sits in ECR in your own account.</p></li><li><h4>The problem</h4><p>A container dies with its process, and re-running containers by hand doesn't scale. The Auto Scaling group already solved this for instances.</p></li><li><h4>The landscape</h4><p>Kubernetes (Google → CNCF, KubeCon), Docker Swarm, Nomad, ECS. Managed versions: EKS, GKE, AKS.</p></li><li><h4>The cluster</h4><p>Control plane (API server, etcd, scheduler, controllers) + nodes, explained with a restaurant kitchen analogy.</p></li><li><h4>Miro drawing</h4><p>Laptop → kubectl → API server → etcd / scheduler → pod on node 1.</p></li><li><h4>The pod</h4><p>The smallest thing Kubernetes runs, and where the image (from ECR) comes in.</p></li><li><h4>Live: kubectl get nodes</h4><p>Then hunting the node in the EKS console (wrong region first; it's us-east-1).</p></li><li><h4>The namespace</h4><p>Rooms in a house; <code>-n</code>; the default namespace.</p></li><li><h4>The context</h4><p>Live <code>aws sso login</code>, <code>update-kubeconfig</code>, <code>current-context</code>, <code>get-contexts</code>, <code>set-context --namespace</code>.</p></li><li><h4>The manifest</h4><p>YAML rules, then live: wrote <code>pod-mole.yaml</code>, <code>kubectl apply -f</code>, <code>get pods</code>, <code>describe pod</code>, <code>delete pod</code>.</p></li></ol></section>
+<section id="why"><h2>Why an orchestrator: the Auto Scaling group, for containers</h2><p><b>Problem:</b> <code>docker run</code> gives one container on one machine. Process exits → container stops. Machine replaced → container gone. Nothing starts it again. A company runs tens of images, several copies each (Stash runs every service this way). Nobody can babysit them by hand.</p><p>You've seen the fix before: the Scale ASG with desired = 2. An instance died, a replacement launched, nobody typed anything. <b>Desired state:</b> you tell Kubernetes "5 copies of my website," and it keeps making reality match.</p><div class="tbl-wrap"><table><tr><th>Kubernetes feature</th><th>What it means</th></tr><tr><td>Self-healing</td><td>A copy crashes → it notices and starts a new one</td></tr><tr><td>Autoscaling</td><td>Traffic spike (Black Friday) → more copies; traffic drops → fewer</td></tr><tr><td>Load balancing</td><td>Spreads requests across all the copies</td></tr></table></div><div class="note">Kubernetes does for containers what the Auto Scaling group did for instances.</div></section>
+<section id="landscape"><h2>The landscape: who makes what</h2><div class="tbl-wrap"><table><tr><th>Program</th><th>Who</th><th>Where it stands</th></tr><tr><td>Kubernetes (K8s)</td><td>Google 2014 → CNCF 2015</td><td>The one in job postings. Managed as EKS (AWS), GKE (Google), AKS (Azure)</td></tr><tr><td>Docker Swarm</td><td>Docker</td><td>Built in, simpler, rarely used</td></tr><tr><td>Nomad</td><td>HashiCorp</td><td>Containers and other programs; small share</td></tr><tr><td>ECS</td><td>AWS</td><td>AWS-only. Says task / service where Kubernetes says pod / Deployment</td></tr></table></div><p><b>CNCF</b> = Cloud Native Computing Foundation, a project, not a company. KubeCon is its yearly conference (NA, Europe, Asia).</p><p>Kubernetes is free. You pay for the machines it runs on, and with EKS you also pay per cluster-hour for AWS to run the control plane. Without a managed service you install, upgrade and connect every part yourself (e.g. kops).</p></section>
+<section id="cluster"><h2>The cluster: control plane + nodes</h2><div class="tbl-wrap"><table><tr><th>Part</th><th>Job</th><th>Kitchen analogy</th></tr><tr><td>API server</td><td>Receives every kubectl command. The only way in.</td><td>The waiter: you never walk into the kitchen</td></tr><tr><td>etcd</td><td>The cluster's record of every object: what should exist</td><td>The waiter's order pad</td></tr><tr><td>Scheduler</td><td>Picks a node for each new pod, spreading them evenly</td><td>The seating host</td></tr><tr><td>Controllers</td><td>Compare what you asked for with what's running, and fix the gap</td><td>Covered Wednesday</td></tr></table></div><p><b>Control plane</b> (a.k.a. master nodes): with EKS, AWS runs it and you never log in. That's what the EKS fee buys.</p><p><b>Node:</b> an EC2 instance that runs your containers. Containers never run on the control plane. More nodes = more money.</p><p>etcd is not your app's database and doesn't hold logs. It's the cluster's memory of what exists and where.</p><div class="note">A cluster is a control plane plus its nodes.</div></section>
+<section id="lab"><h2>Lab: follow one kubectl apply through the cluster</h2><p class="lede">Flip the switches to recreate common first-day problems, then apply. Watch which part answers, and what <code>describe pod</code> Events would say.</p><div class="panel"><div class="lab-row"><label><input type="checkbox" id="c4sso" checked> SSO sign-in still fresh</label><label><input type="checkbox" id="c4ns"> Namespace saved in the context</label><label><input type="checkbox" id="c4img" checked> Image URI is correct</label></div><div class="controls"><button class="primary" id="c4apply">kubectl apply -f pod.yaml</button><button id="c4del">kubectl delete pod drill</button><button id="c4get">kubectl get pods</button></div><div class="journey" id="c4j"><span class="hopbox" data-h="0">Laptop (kubectl)</span><span class="ar">→</span><span class="hopbox" data-h="1">API server</span><span class="ar">→</span><span class="hopbox" data-h="2">etcd</span><span class="ar">→</span><span class="hopbox" data-h="3">Scheduler</span><span class="ar">→</span><span class="hopbox" data-h="4">Node (EC2)</span></div><div class="log mono" id="c4log" style="height:240px;margin-top:14px"></div></div><div class="note">Start with "Namespace saved" unticked: that's the Forbidden error everyone hits on day one. Then tick it and apply again.</div></section>
+<section id="pod"><h2>The pod: the smallest thing Kubernetes runs</h2><p><b>Pod:</b> one or more containers that run together on one node, with one IP. In practice, one pod = one container (yours). Kubernetes never runs a bare container. It's always wrapped in a pod, like a gift wrapped before it's handed over.</p><div class="tbl-wrap"><table><tr><th>A pod is NOT…</th><th>Because</th></tr><tr><td>An EC2 instance</td><td>The node is the EC2 instance. The EC2 console shows the node, never the pod.</td></tr><tr><td>On your laptop</td><td>kubectl runs on the laptop; the pod runs in AWS. Its IP is on the cluster's network, which your laptop can't reach.</td></tr><tr><td>Replaced on its own</td><td>Delete a pod made from its own file and nothing brings it back. Replacing pods is a controller's job (Deployment, Wednesday).</td></tr></table></div><p>Where the image comes in: Dockerfile → <code>docker build</code> → push to ECR (unit 1). The pod's YAML names that image, and the node pulls it.</p><p>If the container's process exits, Kubernetes restarts the container inside the same pod, on the same node. That's why a pod keeps a server running.</p><p>Two extra container types for later: an <b>init container</b> runs once before the main one and exits; a <b>sidecar</b> runs the pod's whole life beside it (e.g. to ship logs).</p><div class="note">The only way to see or touch a pod from your laptop is a kubectl call to the API server.</div></section>
+<section id="ns"><h2>The namespace: your room in the shared house</h2><p>The school runs one cluster (<code>containers-26a</code>). You don't build a cluster; you get a piece of one. A <b>namespace</b> is a set of object names inside one cluster. Your pods, quota and permissions live in yours, named after you.</p><p><b>Why:</b> if everyone could act on every pod, one typo in <code>kubectl delete pod mo2</code> deletes someone else's app.</p><p>Not a machine, not a network. Pods from many namespaces share the same nodes, and one namespace can span several nodes. Your limit: <b>8 pods</b> at once. Every cluster has a <code>default</code> namespace. Companies don't run apps there, and you have no permissions in it.</p><div class="note">Cluster = the house. Namespaces = the rooms. You can only act in a room you have permission for.</div></section>
+<section id="context"><h2>The context: which cluster, as whom, which namespace</h2><p>kubectl reads <code>~/.kube/config</code>. One entry there is a <b>context</b> = a cluster + an identity + a namespace. One context is current, and every command uses it silently. At work you'll have dozens of clusters in that file.</p><p><code>aws eks update-kubeconfig</code> writes the context (once per laptop). <code>--alias</code> gives it a short name instead of a ~170-character ARN.</p><p>The first time, the context has no namespace, so <code>kubectl get pods</code> asks about <code>default</code> and gets Forbidden. Your account isn't broken. Fix once: <code>kubectl config set-context --current --namespace=&lt;you&gt;</code>. It's saved until you change it.</p><div class="note">Read the Forbidden error as four facts: <b>who</b> asked (<code>student:&lt;you&gt;</code>), <b>what</b> (list pods), <b>where</b> (namespace default), <b>the answer</b> (no).</div></section>
+<section id="yaml"><h2>The manifest: what should exist, written in YAML</h2><p><b>Manifest:</b> a text file describing one Kubernetes object. It says what should exist, not steps to run, so line order doesn't matter, unlike a Dockerfile. Dockerfile → image. Manifest → object that uses the image.</p><div class="tbl-wrap"><table><tr><th>YAML rule</th><th>Meaning</th></tr><tr><td>4 top-level keys, always</td><td><code>apiVersion</code>, <code>kind</code>, <code>metadata</code>, <code>spec</code></td></tr><tr><td>Indentation nests</td><td>A line indented under a key belongs to it. Examples use 2 spaces; any number works if consistent.</td></tr><tr><td>Spaces, never tabs</td><td>A tab is an error.</td></tr><tr><td>Key, colon, space</td><td><code>name: nginx</code>. A key with nothing after the colon (<code>spec:</code>) owns the indented lines below.</td></tr><tr><td>A dash = a list item</td><td>A second <code>- name:</code> under <code>containers:</code> adds a second container</td></tr></table></div><pre># pod.yaml
+apiVersion: v1          # which API
+kind: Pod               # which kind of object
+metadata:
+  name: drill           # the pod&#x27;s name
+spec:                   # what it should be
+  containers:
+    - name: drill
+      image: SCHOOL_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/drill:v1
+      ports:
+        - containerPort: 8080</pre><div class="note">Don't memorize manifests; copy the example from the Kubernetes docs and change what you need. But type one per unit from memory, because interviews ask you to.</div></section>
+<section id="fixes"><h2>Where the notes correct what was said live</h2>
+<p class="lede">Left: what was said in class. Right: the correct version from the site notes and deck.</p>
+<div class="fixbox"><div class="tbl-wrap"><table><tr><th>Said in class</th><th>Correct version (site notes and deck)</th></tr><tr><td>"A pod doesn't die; it'll always be there"</td><td>The pod's <b>container restarts</b> inside it. But delete the pod (or lose its node) and <b>nothing recreates it</b>. That's the Deployment's job.</td></tr><tr><td>"ECS runs containers that finish and die"</td><td>An ECS service also <b>keeps a count</b> and replaces stopped copies. It just works only on AWS.</td></tr><tr><td>"A sidecar runs, does something, and disappears"</td><td>That's an <b>init container</b>. A sidecar runs the pod's <b>whole life</b>.</td></tr><tr><td><code>nginx:1.14.2</code> "pulled from ECR"</td><td>Pulled from <b>Docker Hub</b>. Your own app's image comes from ECR.</td></tr><tr><td>"Some systems need three spaces"</td><td><b>Any number of spaces</b> works if it's the same everywhere. Kubernetes examples use two.</td></tr></table></div></div></section><section id="demo"><h2>Redo the demo yourself</h2>
+<p class="lede">Everything runs on the school's cluster, so it costs you nothing. Your repo already has <code>02-the-cluster-and-the-loop/pod.yaml</code>. Tick each step as you finish it; your ticks stay in this browser.</p>
+<h3>Before you start</h3><div class="note" style="max-width:none">The setup page done (AWS CLI, kubectl, the <code>312-cluster</code> profile in <code>~/.aws/config</code>), and your namespace name. Maher asked you to do the first sign-in with Bakhtiyar; after that, redo it alone.</div>
+<p style="margin-bottom:0"><b id="demoCount">0 of 9 steps done</b></p><div class="progress"><div id="demoBar"></div></div>
+<div class="step" data-i="0"><div class="step-head"><input type="checkbox" aria-label="Mark step 1 done"><div><h4>1. Sign in</h4><p>The school's sign-in lasts one day, so this is the first line every class day.</p></div></div>
+<pre>aws sso login --profile 312-cluster              # opens the browser; approve it
+aws sts get-caller-identity --profile 312-cluster # who am I on AWS?</pre>
+<details><summary>What you should see</summary><div><p>A JSON block with <code>Account</code> and an <code>Arn</code> containing your name.</p></div></details></div>
+<div class="step" data-i="1"><div class="step-head"><input type="checkbox" aria-label="Mark step 2 done"><div><h4>2. Point kubectl at the school cluster</h4><p>Once per laptop; it writes the context into <code>~/.kube/config</code>.</p></div></div>
+<pre>aws eks update-kubeconfig --name containers-26a --region us-east-1 \
+  --profile 312-cluster --alias containers-26a
+kubectl config current-context
+kubectl config get-contexts</pre>
+<details><summary>What you should see</summary><div><p><code>containers-26a</code>, with a <code>*</code> next to it and an empty NAMESPACE column.</p></div></details></div>
+<div class="step" data-i="2"><div class="step-head"><input type="checkbox" aria-label="Mark step 3 done"><div><h4>3. Hit the Forbidden error on purpose</h4><p>So you recognize it later.</p></div></div>
+<pre>kubectl get pods</pre>
+<details><summary>What you should see</summary><div><p><code>Error from server (Forbidden): ... User "student:&lt;you&gt;" cannot list resource "pods" ... in the namespace "default"</code></p></div></details></div>
+<div class="step" data-i="3"><div class="step-head"><input type="checkbox" aria-label="Mark step 4 done"><div><h4>4. Save your namespace into the context</h4><p></p></div></div>
+<pre>kubectl config set-context --current --namespace=&lt;your-namespace&gt;
+kubectl get pods
+kubectl config get-contexts      # NAMESPACE column is filled in now</pre>
+<details><summary>What you should see</summary><div><p><code>Context "containers-26a" modified.</code> then <code>No resources found in &lt;your-namespace&gt; namespace.</code></p></div></details></div>
+<div class="step" data-i="4"><div class="step-head"><input type="checkbox" aria-label="Mark step 5 done"><div><h4>5. Look at the cluster</h4><p>If <code>get nodes</code> is refused for your user, that's a permission, not a broken setup; skip it.</p></div></div>
+<pre>kubectl get nodes
+kubectl get namespaces</pre>
+<details><summary>What you should see</summary><div><p>Node names like <code>i-0b0e…</code> with STATUS Ready, and everyone's namespaces plus <code>default</code>.</p></div></details></div>
+<div class="step" data-i="5"><div class="step-head"><input type="checkbox" aria-label="Mark step 6 done"><div><h4>6. Write the pod manifest</h4><p>Type it yourself, spaces only. Maher used nginx:1.14.2 on port 80; the unit uses the school's drill image.</p></div></div>
+<pre># pod.yaml
+apiVersion: v1          # which API
+kind: Pod               # which kind of object
+metadata:
+  name: drill           # the pod&#x27;s name
+spec:                   # what it should be
+  containers:
+    - name: drill
+      image: SCHOOL_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/drill:v1
+      ports:
+        - containerPort: 8080</pre>
+<details><summary>What you should see</summary><div><p>A file with the four top-level keys and the drill image.</p></div></details></div>
+<div class="step" data-i="6"><div class="step-head"><input type="checkbox" aria-label="Mark step 7 done"><div><h4>7. Run the two checks, then apply</h4><p>The file stays on your laptop; its contents go to the API server.</p></div></div>
+<pre>aws sts get-caller-identity --profile 312-cluster   # check 1: which account
+kubectl config get-contexts                         # check 2: which cluster + namespace
+kubectl apply -f pod.yaml
+kubectl get pods -o wide</pre>
+<details><summary>What you should see</summary><div><p><code>pod/drill created</code>, then STATUS ContainerCreating → Running, an IP like <code>10.20.x.x</code>, and a node name.</p></div></details></div>
+<div class="step" data-i="7"><div class="step-head"><input type="checkbox" aria-label="Mark step 8 done"><div><h4>8. Read what the cluster did, step by step</h4><p>Scroll to Events at the bottom.</p></div></div>
+<pre>kubectl describe pod drill</pre>
+<details><summary>What you should see</summary><div><p>Events in order: Scheduled → Pulling → Pulled → Created → Started. That's the whole Miro drawing, in text.</p></div></details></div>
+<div class="step" data-i="8"><div class="step-head"><input type="checkbox" aria-label="Mark step 9 done"><div><h4>9. Delete it and notice nothing replaces it</h4><p></p></div></div>
+<pre>kubectl delete pod drill
+kubectl get pods</pre>
+<details><summary>What you should see</summary><div><p><code>pod "drill" deleted</code>, then an empty list. Wednesday's Deployment is what brings pods back.</p></div></details></div>
+<h3>If it goes wrong</h3><div class="tbl-wrap"><table><tr><th>Error</th><th>Meaning</th></tr><tr><td><code>Forbidden ... in the namespace "default"</code></td><td>No namespace in your context. Step 4, or add <code>-n &lt;your-namespace&gt;</code>.</td></tr><tr><td><code>Token has expired</code> / SSO errors</td><td>The one-day sign-in ran out. Rerun <code>aws sso login --profile 312-cluster</code>.</td></tr><tr><td><code>error converting YAML</code> / <code>found character that cannot start any token</code></td><td>A tab or mixed indentation in the file. Use spaces only.</td></tr><tr><td>Pod stuck in <code>ImagePullBackOff</code></td><td>Wrong image URI, or your own ECR image isn't readable by the cluster's node role (unit 1 repository policy).</td></tr><tr><td>Can't find the node in the EC2 console</td><td>Wrong region. The cluster is in us-east-1; find it in EKS → cluster → Compute tab.</td></tr></table></div>
+<h3>Clean up</h3><pre>kubectl delete pod drill --ignore-not-found   # frees one of your 8 pod slots
+kubectl get pods                              # empty again</pre><p>No AWS resources of your own were created, so nothing else costs money.</p>
+<button id="demoReset">Clear my ticks</button></section><section id="commands"><h2>Commands and config that came up</h2><div class="tbl-wrap"><table><tr><th>Command</th><th>What it does</th></tr><tr><td><code>aws sso login --profile 312-cluster</code></td><td>The school's sign-in; lasts one day</td></tr><tr><td><code>aws sts get-caller-identity --profile 312-cluster</code></td><td>Which AWS account and role you are</td></tr><tr><td><code>aws eks update-kubeconfig --name containers-26a --region us-east-1 --profile 312-cluster --alias containers-26a</code></td><td>Writes the cluster's context into <code>~/.kube/config</code> (once)</td></tr><tr><td><code>kubectl config current-context</code></td><td>The context in use</td></tr><tr><td><code>kubectl config get-contexts</code></td><td>All contexts; <code>*</code> = current; shows NAMESPACE</td></tr><tr><td><code>kubectl config set-context --current --namespace=&lt;ns&gt;</code></td><td>Save a namespace into the current context</td></tr><tr><td><code>kubectl get nodes</code></td><td>One line per node (EC2 instance)</td></tr><tr><td><code>kubectl get namespaces</code></td><td>Every namespace on the cluster</td></tr><tr><td><code>kubectl get pods -n &lt;ns&gt;</code></td><td>Pods in one namespace (<code>-n</code> = <code>--namespace</code>)</td></tr><tr><td><code>kubectl run test-pod --image=nginx -n &lt;ns&gt;</code></td><td>Make a pod without a file (shown, not run)</td></tr><tr><td><code>kubectl apply -f pod.yaml</code></td><td>Send a manifest to the API server</td></tr><tr><td><code>kubectl describe pod &lt;name&gt;</code></td><td>Details + Events (Scheduled, Pulled, Started…)</td></tr><tr><td><code>kubectl delete pod &lt;name&gt;</code></td><td>Delete a pod; nothing recreates a bare pod</td></tr><tr><td><code>kubectl exec</code></td><td>Like docker exec; with 2+ containers you name which one (later)</td></tr><tr><td><code>ls -a</code></td><td>Shows hidden dirs like <code>~/.aws</code> and <code>~/.kube</code></td></tr></table></div><p>Maher types <code>k</code> instead of <code>kubectl</code>; that's a shell alias in his <code>~/.zshrc</code> (<code>alias k=kubectl</code>). Without it, type kubectl.</p></section><section id="wrapup"><h2>What the instructor stressed, and what's next</h2><div class="cards2"><div><h3>Stressed in class</h3><ul><li>Two checks before anything that changes state (apply, delete, scale): <code>get-caller-identity</code> and <code>get-contexts</code>. A team once ran a dev destroy script while the context pointed at production; it took hours to recover.</li><li>You'll rarely touch the control plane at work. Know what each part does; real problems are usually in pods, deployments and the app itself.</li><li>Kubernetes knows pods, not containers. Repeated several times, with the gift-wrap analogy.</li><li>The cluster is on AWS's side of the fence, not your laptop. Your laptop only talks to the API server.</li><li>Don't follow along typing during theory. Listen first, then do the hands-on.</li><li>Don't fight the setup alone; do it when Bakhtiyar is there to fix errors on the spot.</li><li>Kubernetes "sounds hard, but isn't."</li></ul></div><div><h3>Homework</h3><ul><li>Before Wednesday: the sign-in session with Bakhtiyar (time posted in Slack): <code>aws sso login</code>, <code>update-kubeconfig</code>, <code>set-context</code>, until <code>kubectl get pods</code> prints <code>No resources found in &lt;your-namespace&gt;</code>.</li><li>Check your pushed image's architecture: <code>docker image inspect &lt;your-image&gt; --format '{{.Architecture}}'</code> must print <code>amd64</code>. If it prints arm64, rebuild with <code>--platform linux/amd64</code> and push it again as v1.</li><li>Wednesday: everyone types the eight-line Pod from memory, applies it, deletes it, and watches nothing replace it. Then controllers and the Deployment.</li></ul></div><div><h3>Worth replaying in the recording</h3><ul><li>The Miro drawing (about the first third): laptop → API server → etcd → scheduler → node 1. The whole class in one picture.</li><li>The live context setup (last third): <code>aws sso login</code>, <code>update-kubeconfig</code>, then <code>set-context</code> making <code>get pods</code> work.</li><li>The very end: <code>describe pod</code> Events walked line by line against the drawing.</li></ul></div><div><h3>Left unclear</h3><ul><li>Why the node didn't show up in the EC2 instance list at first. Maher hand-waved it; it was found through EKS → cluster → Compute.</li><li><code>kubectl exec</code> into a pod with two containers (the <code>-c</code> flag): deferred.</li><li>Controllers, Deployments and ReplicaSets: deferred to Wednesday.</li><li>The "cluster autoscaler" that replaces dead nodes was named but not explained.</li><li>Whether you can run <code>kubectl get nodes</code> as a student wasn't confirmed live.</li></ul></div></div></section><section id="quiz"><h2>Check yourself</h2><p class="lede">Pick an answer to see why. Score: <span class="score" id="score">0 / 0</span></p><div id="quizArea"></div></section>
+<footer>Built from your Session 04 recap. </footer></div>
+<script>
+(function(){
+ const $=id=>document.getElementById(id);let exists=false,run=0;
+ const hops=[...document.querySelectorAll('#c4j .hopbox')];
+ function log(t,c){const d=document.createElement('div');if(c)d.className=c;d.textContent=t;$('c4log').appendChild(d);$('c4log').scrollTop=1e9}
+ function lit(n){hops.forEach((h,i)=>h.classList.toggle('on',i===n))}
+ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+ $('c4apply').onclick=async()=>{const my=++run;$('c4log').innerHTML='';log('$ kubectl apply -f pod.yaml','c');lit(0);await sleep(500);if(my!==run)return;
+  if(!$('c4sso').checked){log('error: Token has expired. Run aws sso login --profile 312-cluster','e');return}
+  lit(1);await sleep(600);if(my!==run)return;
+  if(!$('c4ns').checked){log('Error from server (Forbidden): User "student:you" cannot create resource "pods" in the namespace "default"','e');log('Four facts: who = student:you, what = create pods, where = default, answer = no.','w');return}
+  if(exists){log('pod/drill unchanged  (the cluster already matches the file)','g');lit(-1);return}
+  log('API server checks the request and stores the Pod.');lit(2);await sleep(600);if(my!==run)return;log('etcd: pod/drill should exist (no node yet)');log('pod/drill created','g');
+  lit(3);await sleep(700);if(my!==run)return;log('Normal  Scheduled  Successfully assigned you/drill to i-0b0e4a…');
+  lit(4);await sleep(700);if(my!==run)return;log('Normal  Pulling    Pulling image "…/drill:v1"');await sleep(700);if(my!==run)return;
+  if(!$('c4img').checked){log('Warning Failed     Failed to pull image: not found','e');log('STATUS ImagePullBackOff. Check the URI, or your repository policy.','w');exists=true;return}
+  log('Normal  Pulled     Successfully pulled image');await sleep(400);log('Normal  Created    Created container drill');await sleep(400);log('Normal  Started    Started container drill','g');exists=true;lit(-1)};
+ $('c4del').onclick=async()=>{const my=++run;log('$ kubectl delete pod drill','c');if(!$('c4ns').checked){log('Forbidden in namespace "default" (set your namespace first)','e');return}
+  if(!exists){log('Error from server (NotFound): pods "drill" not found','e');return}exists=false;log('pod "drill" deleted');await sleep(1200);if(my!==run)return;log('... waiting ... nothing creates a new one. No controller is counting.','w')};
+ $('c4get').onclick=()=>{log('$ kubectl get pods','c');if(!$('c4ns').checked){log('Error from server (Forbidden): cannot list resource "pods" in the namespace "default"','e');return}
+  log(exists?'NAME    READY   STATUS    RESTARTS\ndrill   '+($('c4img').checked?'1/1     Running   0':'0/1     ImagePullBackOff   0'):'No resources found in your namespace.')};
+ log('"Namespace saved" starts unticked, like day one. Press kubectl get pods to see the Forbidden error.','g');
+})();
+
+
+(function(){
+  const nav=document.querySelector('nav');const links=[...nav.querySelectorAll('a')];
+  const map=new Map(links.map(l=>[l.getAttribute('href').slice(1),l]));
+  const obs=new IntersectionObserver(es=>{es.forEach(e=>{if(!e.isIntersecting)return;
+    links.forEach(l=>l.classList.remove('active'));const l=map.get(e.target.id);
+    if(l){l.classList.add('active');nav.scrollTo({left:Math.max(0,l.offsetLeft-20),behavior:'smooth'})}})},
+    {rootMargin:'-25% 0px -65% 0px'});
+  map.forEach((l,id)=>{const el=document.getElementById(id);if(el)obs.observe(el)});
+})();
+(function(){
+  const KEY='s04-demo';let done={};
+  try{done=JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(e){done={}}
+  const steps=[...document.querySelectorAll('#demo .step')];
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(done))}catch(e){}}
+  function upd(){const n=steps.filter(s=>done[s.dataset.i]).length;
+    document.getElementById('demoCount').textContent=n+' of '+steps.length+' steps done';
+    document.getElementById('demoBar').style.width=(n/steps.length*100)+'%';}
+  steps.forEach(s=>{const cb=s.querySelector('input');cb.checked=!!done[s.dataset.i];s.classList.toggle('done',cb.checked);
+    cb.onchange=()=>{done[s.dataset.i]=cb.checked;s.classList.toggle('done',cb.checked);save();upd()};});
+  document.getElementById('demoReset').onclick=()=>{done={};save();steps.forEach(s=>{s.querySelector('input').checked=false;s.classList.remove('done')});upd()};
+  upd();
+})();
+(function(){
+  const Q=[{"q": "You kubectl apply a pod. Which part of the cluster is the ONLY one your laptop talks to?", "o": ["etcd", "The API server", "The node"], "a": 1, "e": "Laptop \u2192 API server \u2192 etcd \u2192 scheduler \u2192 node. Your laptop only ever talks to the API server, over HTTPS."}, {"q": "A classmate gets Forbidden ... in the namespace \"default\" on day one. What happened?", "o": ["Their account is broken", "Their context has no namespace, so kubectl asked about default", "The cluster is down"], "a": 1, "e": "Fix: kubectl config set-context --current --namespace=<their-namespace>, or add -n each time."}, {"q": "You delete a pod you made from pod.yaml. Does Kubernetes start a new one?", "o": ["Yes, always", "No, a bare pod has no controller watching it", "Only after 5 minutes"], "a": 1, "e": "Kubernetes restarts a crashed container inside a pod, but replacing a deleted pod is a controller's job: the Deployment."}, {"q": "What does etcd store?", "o": ["Your app's data", "The cluster's record of every object: what should exist", "Container logs"], "a": 1, "e": "etcd is the cluster's memory, the waiter's order pad. Not your app's database."}, {"q": "Which part picks the node for a new pod?", "o": ["The scheduler", "The API server", "kubectl"], "a": 0, "e": "The scheduler is the seating host. It spreads pods across nodes."}, {"q": "You open the EC2 console. What do you see there?", "o": ["Your pods", "The nodes (EC2 instances), never the pods", "Your namespace"], "a": 1, "e": "Pods run on nodes; only the nodes are EC2 instances."}, {"q": "kubectl apply gives \"found character that cannot start any token\". Most likely cause?", "o": ["Wrong image", "A tab in the YAML", "Expired SSO"], "a": 1, "e": "YAML needs spaces, never tabs. Keep indentation consistent."}, {"q": "What are the four top-level keys of every manifest?", "o": ["name, image, ports, replicas", "apiVersion, kind, metadata, spec", "FROM, RUN, COPY, CMD"], "a": 1, "e": "Every Kubernetes manifest has apiVersion, kind, metadata and spec."}];
+  const area=document.getElementById('quizArea'),scoreEl=document.getElementById('score');let answered=0,right=0;
+  Q.forEach((item,i)=>{const box=document.createElement('div');box.className='q';
+    const p=document.createElement('p');p.className='prompt';p.textContent=(i+1)+'. '+item.q;box.appendChild(p);
+    const opts=document.createElement('div');opts.className='opts';const ex=document.createElement('p');ex.className='explain';ex.textContent=item.e;
+    item.o.forEach((t,j)=>{const b=document.createElement('button');b.textContent=t;
+      b.onclick=()=>{if(box.dataset.done)return;box.dataset.done=1;answered++;
+        if(j===item.a){right++;b.classList.add('right')}else{b.classList.add('nope');opts.children[item.a].classList.add('right')}
+        [...opts.children].forEach(x=>x.disabled=true);ex.classList.add('show');scoreEl.textContent=right+' / '+answered;};
+      opts.appendChild(b);});
+    box.appendChild(opts);box.appendChild(ex);area.appendChild(box);});
+})();
+</script></body></html>

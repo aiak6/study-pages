@@ -1,0 +1,481 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Containers Session 13 Recap</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one reading column; sections as stacked "shipping manifest" blocks with a stencilled label; code and tables scroll in place. */
+:root{
+  --bg:#f3f5f7; --surface:#ffffff; --ink:#15202b; --muted:#56657a; --line:#d8dee6;
+  --accent:#c4501b; --accent-soft:#fbe9df; --steel:#1f5f8b; --steel-soft:#e3eef6;
+  --code-bg:#0f1b26; --code-fg:#dbe7f2; --code-cmt:#7f97ad;
+  --good:#2e7d4f; --bad:#b3261e;
+  --f-display:"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --f-body:"Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e151c; --surface:#16202a; --ink:#e6edf3; --muted:#9aabbd; --line:#2a3845;
+  --accent:#f0874f; --accent-soft:#3a2418; --steel:#7ab8e3; --steel-soft:#16303f;
+  --code-bg:#0a1016; --code-fg:#dbe7f2; --code-cmt:#6f879c;
+  --good:#6cc493; --bad:#f08a80; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0e151c; --surface:#16202a; --ink:#e6edf3; --muted:#9aabbd; --line:#2a3845;
+  --accent:#f0874f; --accent-soft:#3a2418; --steel:#7ab8e3; --steel-soft:#16303f;
+  --code-bg:#0a1016; --code-fg:#dbe7f2; --code-cmt:#6f879c;
+  --good:#6cc493; --bad:#f08a80; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:17px/1.6 var(--f-body);padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:28px 64px}
+.wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.15;margin:0}
+h1{font-size:clamp(30px,6vw,44px);font-weight:800;letter-spacing:-.01em}
+h2{font-size:24px;font-weight:800}
+h3{font-size:18px;font-weight:600;margin-top:6px}
+p{margin:0}
+a{color:var(--steel)}
+code{font-family:var(--f-mono);font-size:.86em;background:var(--steel-soft);color:var(--ink);padding:1px 5px;border-radius:4px}
+strong{font-weight:700}
+.eyebrow{font:600 12px/1 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+header{display:flex;flex-direction:column;gap:12px;border-bottom:3px solid var(--ink);padding-bottom:20px}
+.meta{display:flex;flex-wrap:wrap;gap:8px 16px;color:var(--muted);font-size:15px}
+.lede{font-size:19px;max-width:65ch}
+nav{display:flex;flex-wrap:wrap;gap:8px}
+nav a{font:600 13px/1 var(--f-mono);text-decoration:none;color:var(--ink);border:1px solid var(--line);background:var(--surface);padding:8px 10px;border-radius:6px}
+nav a:hover,nav a:focus-visible{border-color:var(--accent);color:var(--accent);outline:none}
+section{display:flex;flex-direction:column;gap:14px;scroll-margin-top:16px}
+section > .label{display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--line);padding-bottom:8px}
+section > .label .tag{font:600 11px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--surface);background:var(--ink);padding:5px 7px;border-radius:3px}
+ul,ol{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px}
+.table{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:15.5px;min-width:480px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:600 12px/1.3 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--bg)}
+tr:last-child td{border-bottom:0}
+blockquote{margin:0;border-left:4px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 8px 8px 0;font-weight:600}
+pre{margin:0;background:var(--code-bg);color:var(--code-fg);font:14px/1.6 var(--f-mono);padding:14px 16px;border-radius:8px;overflow-x:auto}
+pre .c{color:var(--code-cmt)}
+.codebox{position:relative;min-width:0}
+.copy{position:absolute;top:8px;right:8px;font:600 11px/1 var(--f-mono);background:transparent;color:var(--code-cmt);border:1px solid var(--code-cmt);border-radius:4px;padding:5px 7px;cursor:pointer}
+.copy:hover,.copy:focus-visible{color:var(--code-fg);border-color:var(--code-fg);outline:none}
+.flow{font:600 14px/1.5 var(--f-mono);background:var(--steel-soft);color:var(--ink);padding:14px 16px;border-radius:8px;overflow-x:auto;white-space:pre}
+.step{display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:start}
+.step > .n{font:800 18px/34px var(--f-display);text-align:center;background:var(--ink);color:var(--bg);border-radius:50%;width:34px;height:34px}
+.step > div{min-width:0;display:flex;flex-direction:column;gap:8px}
+.see{font-size:15px;color:var(--good)}
+.see::before{content:"You should see: ";font-weight:700}
+.warn{border:1px solid var(--bad);border-radius:8px;padding:12px 16px;display:flex;flex-direction:column;gap:10px;background:var(--surface)}
+.warn .eyebrow{color:var(--bad)}
+details{border:1px solid var(--line);background:var(--surface);border-radius:8px}
+details summary{cursor:pointer;padding:12px 16px;font-weight:600;list-style-position:inside}
+details summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:8px}
+details > div{padding:0 16px 14px;display:flex;flex-direction:column;gap:8px}
+.q{display:flex;flex-direction:column;gap:10px}
+.q p.ask{font-weight:600}
+.reread{font-style:italic;color:var(--muted);font-size:15px}
+footer{color:var(--muted);font-size:15px;border-top:1px solid var(--line);padding-top:16px}
+@media (prefers-reduced-motion: reduce){*{scroll-behavior:auto!important}}
+html{scroll-behavior:smooth}
+</style>
+
+<div class="wrap">
+<header>
+  <span class="eyebrow">312 School · Cohort 26a · Containers &amp; Orchestration</span>
+  <h1>Session 13: Storage that outlives the pod, and Jobs that finish</h1>
+  <div class="meta"><span>Mon, Oct 26, 2026</span><span>Eldiiar (his last class), plus after-class with Bakhtiyar</span><span>Deck: Storage and Jobs, slides 1–28</span></div>
+  <p class="lede">Unit 6, the last class of Containers. A pod's own files die with the pod, which is fine for the web app but fatal for Postgres. Tonight Postgres got its own <strong>EBS disk</strong> through a <strong>PersistentVolumeClaim</strong>, so a replacement pod finds the same table. Then the <strong>StatefulSet</strong> (stable names, one disk per replica), and finally <strong>Jobs</strong> (run a task until it succeeds, like creating tables before the app starts) and <strong>CronJobs</strong> (a Job on a schedule).</p>
+  <nav aria-label="Sections">
+    <a href="#did">What we did</a><a href="#ideas">Main ideas</a><a href="#corrections">Corrections</a><a href="#demo">Redo the demo</a><a href="#commands">Commands</a><a href="#stressed">Stressed</a><a href="#homework">Homework</a><a href="#check">Check yourself</a>
+  </nav>
+</header>
+
+<section id="did">
+  <div class="label"><span class="tag">Run of show</span><h2>What we actually did</h2></div>
+  <ol>
+    <li><strong>Career talk first:</strong> how you know you're doing fine at a job (you take tickets, finish them, and nobody complains in your 1:1s). Infra work is invisible, but the platform depends on it.</li>
+    <li><strong>Ephemeral storage, live:</strong> created a <code>trades</code> table in a plain Postgres Deployment, deleted the pod, and the table was gone.</li>
+    <li><strong>The three objects:</strong> PV, PVC, StorageClass. Tried a hand-written PV and found it <strong>creates no disk</strong> (it pointed at a local path), so he skipped manual provisioning.</li>
+    <li><strong>Access modes and reclaim policy</strong>, then a break.</li>
+    <li><strong>Persistent storage, live:</strong> applied <code>pvc.yaml</code> (Pending), applied the persistent Postgres Deployment (claim became Bound, EBS gp3 1 GiB appeared in the EC2 console), created the table, deleted the pod, and the table <strong>survived</strong>.</li>
+    <li><strong>Deployment vs StatefulSet</strong> on slides, then "nobody really runs databases in Kubernetes".</li>
+    <li><strong>Jobs and CronJobs:</strong> the schema Job demo failed (<code>unit6-db</code> Service missing, image not rebuilt), so it became homework.</li>
+    <li><strong>After class:</strong> Bakhtiyar rebuilt the app image, pushed it to ECR, hit the same Service error, created the Service, re-ran the Job to <code>Complete</code>, and the app worked through <code>port-forward</code>.</li>
+  </ol>
+</section>
+
+<section id="ideas">
+  <div class="label"><span class="tag">Concepts</span><h2>The main ideas, from zero</h2></div>
+
+  <h3>Ephemeral vs persistent: why Postgres lost its table</h3>
+  <ul>
+    <li><strong>Ephemeral</strong> means short-lived. Containers are meant to die and be replaced.</li>
+    <li>Files a container writes without a volume (<code>/app</code>, <code>/tmp</code>) sit on the node's root EBS disk. A replacement pod starts fresh from the image.</li>
+    <li><strong>Stateless</strong> app (the web app): losing local files is fine, because its real data lives in the database.</li>
+    <li><strong>Stateful</strong> app (Postgres, MySQL, MongoDB, WordPress): losing files means losing data.</li>
+    <li><strong>Persistent storage</strong> gives the pod its own disk with its own lifetime. The pod dies, the disk stays, and the new pod mounts it again.</li>
+  </ul>
+  <div class="table"><table>
+    <thead><tr><th>Where the files live</th><th>Container restarts</th><th>Pod is replaced</th></tr></thead>
+    <tbody>
+      <tr><td>Inside the container, no volume</td><td>Starts fresh</td><td>Starts fresh</td></tr>
+      <tr><td>Persistent volume</td><td>Files remain</td><td>Replacement reuses the disk</td></tr>
+    </tbody>
+  </table></div>
+  <blockquote>Pods come and go. Your data should not.</blockquote>
+  <ul><li>Why companies care: banks and healthcare must keep records for 5–10 years, even after the app is gone. Separate storage makes that possible.</li></ul>
+
+  <h3>The three objects: PVC, StorageClass, PV</h3>
+  <div class="table"><table>
+    <thead><tr><th>Object</th><th>What it is</th><th>Who makes it</th><th>Scope</th></tr></thead>
+    <tbody>
+      <tr><td><strong>PVC</strong> (PersistentVolumeClaim)</td><td>The <strong>request</strong>: size, access mode, StorageClass name</td><td>Developer</td><td>Your namespace</td></tr>
+      <tr><td><strong>StorageClass</strong></td><td>The <strong>template</strong>: provisioner (EBS CSI), disk type (gp3), encryption, reclaim policy, binding mode</td><td>DevOps, once</td><td>Whole cluster</td></tr>
+      <tr><td><strong>PV</strong> (PersistentVolume)</td><td>Kubernetes's <strong>record</strong> of the real disk</td><td>Created automatically</td><td>Whole cluster</td></tr>
+      <tr><td><strong>EBS volume</strong></td><td>The actual disk holding the files</td><td>The provisioner, in AWS</td><td>One AZ</td></tr>
+    </tbody>
+  </table></div>
+  <div class="flow">developer applies PVC → StorageClass → provisioner creates EBS disk
+→ Kubernetes records it as a PV → PVC bound to PV (one-to-one)
+→ pod mounts the claim at a folder</div>
+  <ul>
+    <li><strong>Binding</strong> is strictly one claim to one PV. Kubernetes matches size, access mode and StorageClass. No match, no storage.</li>
+    <li>StorageClass is like the <strong>launch template</strong> for an Auto Scaling group (Scale Session 09): set once, reused for every new disk.</li>
+    <li><strong>Manual provisioning</strong> (admin makes disks and PVs by hand) is old and painful. <strong>Dynamic provisioning</strong> (just the claim) is what you'll use at work.</li>
+  </ul>
+  <blockquote>The claim is the request. The PV is the record. EBS holds the files.</blockquote>
+
+  <h3>Pending is normal: WaitForFirstConsumer</h3>
+  <ul>
+    <li>The class StorageClass <code>unit6-ebs</code> uses <code>volumeBindingMode: WaitForFirstConsumer</code>.</li>
+    <li>The disk is created only when a <strong>pod uses the claim</strong>, so the disk lands in the <strong>same availability zone</strong> as the pod.</li>
+    <li>So a claim with no pod sits at <strong>Pending</strong>, and that's fine. The other mode, <code>Immediate</code>, creates it right away.</li>
+    <li><strong>Pending after the pod exists is a real problem.</strong> Read the events: <code>kubectl describe pvc postgres-data-unit6</code>.</li>
+  </ul>
+
+  <h3>Mounting: two names that must match</h3>
+  <ul>
+    <li><code>volumes:</code> (pod level) names a volume and points it at the claim with <code>claimName</code>.</li>
+    <li><code>volumeMounts:</code> (container level) uses that same <code>name</code> and a <code>mountPath</code>.</li>
+    <li>Postgres keeps its files in <code>/var/lib/postgresql/data</code>, so that folder becomes the EBS disk.</li>
+  </ul>
+
+  <h3>Access modes and reclaim policy</h3>
+  <div class="table"><table>
+    <thead><tr><th>Access mode</th><th>Means</th></tr></thead>
+    <tbody>
+      <tr><td><strong>ReadWriteOnce</strong> (RWO)</td><td>One <strong>node</strong> reads and writes; pods on that node can share it. <strong>The usual mode for EBS.</strong></td></tr>
+      <tr><td>ReadOnlyMany</td><td>Many nodes read, none write</td></tr>
+      <tr><td>ReadWriteMany</td><td>Many nodes read and write. Needs <strong>EFS</strong>; EBS attaches to one node at a time</td></tr>
+      <tr><td>ReadWriteOncePod</td><td>One <strong>pod</strong> in the whole cluster</td></tr>
+    </tbody>
+  </table></div>
+  <div class="table"><table>
+    <thead><tr><th>Action</th><th>What happens to the disk</th></tr></thead>
+    <tbody>
+      <tr><td>Replace the pod</td><td>Claim and disk remain</td></tr>
+      <tr><td>Delete the claim, policy <code>Delete</code></td><td><strong>Disk and data deleted</strong> (dev/test default)</td></tr>
+      <tr><td>Delete the claim, policy <code>Retain</code></td><td>Disk stays until an admin deletes it; <strong>charges continue</strong> (production default)</td></tr>
+      <tr><td>Delete the namespace</td><td>Its claims are deleted; their reclaim policies apply</td></tr>
+    </tbody>
+  </table></div>
+  <blockquote>Persistent storage is not a backup.</blockquote>
+
+  <h3>Deployment vs StatefulSet</h3>
+  <div class="table"><table>
+    <thead><tr><th></th><th>Deployment</th><th>StatefulSet</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Pod names</strong></td><td>Random hash, new on every replacement</td><td>Stable and ordered: <code>postgres-0</code>, <code>postgres-1</code></td></tr>
+      <tr><td><strong>Storage</strong></td><td>Replicas point at the same claim</td><td><strong>One claim per pod</strong>, made from <code>volumeClaimTemplates</code></td></tr>
+      <tr><td><strong>Scaling</strong></td><td>All at once, any order</td><td>One at a time, in order</td></tr>
+      <tr><td><strong>Replacement</strong></td><td>New name</td><td>Same name, <strong>same claim</strong></td></tr>
+      <tr><td><strong>Good for</strong></td><td>Stateless apps; a 1-replica DB works</td><td>Databases and other stateful apps</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li>A StatefulSet does <strong>not</strong> set up replication or backups.</li>
+    <li><strong>Reality check:</strong> most teams run production databases on <strong>RDS</strong>, outside the cluster. A shared cluster means someone else's bad limits can hurt your database, and a disk alone doesn't give you backups, failover, upgrades or multi-AZ. Same reasoning as moving Postgres to RDS in Scale Session 05–06.</li>
+  </ul>
+
+  <h3>Jobs and CronJobs: work that finishes</h3>
+  <div class="flow">Job → creates a pod → task runs → exit 0 = Complete (non-zero = failed attempt)
+CronJob (on schedule) → creates a Job → creates a pod → ... → sleeps until next time</div>
+  <ul>
+    <li>A <strong>Deployment</strong> keeps something running forever. A <strong>Job</strong> runs a task <strong>until it succeeds</strong>, then stops.</li>
+    <li><code>backoffLimit: 2</code> = up to two retries after failures, then the Job is marked failed.</li>
+    <li><code>restartPolicy: Never</code> = each retry gets a <strong>new pod</strong>, so each failed pod's logs stay readable.</li>
+    <li><code>ttlSecondsAfterFinished: 300</code> = Job and its pods are deleted 300 s after finishing. <strong>Logs go with the pod</strong>, so read them first.</li>
+    <li>The class Job: move "create the tables" <strong>out of <code>app.py</code></strong> into a Job that runs <code>schema.sql</code> (from a ConfigMap) with <code>psql</code>. <code>CREATE TABLE IF NOT EXISTS</code> makes reruns safe.</li>
+    <li><strong>Kubernetes doesn't make the Deployment wait for the Job.</strong> You check <code>Complete</code>, then deploy the app.</li>
+    <li><strong>CronJob</strong> = a Job on a schedule. Five fields: minute, hour, day of month, month, day of week. <code>"0 2 * * *"</code> = every day at 02:00 (UTC with <code>timeZone: "Etc/UTC"</code>). Same cron as your Telegram bot (Foundations Class 13).</li>
+    <li>Eldiiar's work example: a daily CronJob counts the days until a <strong>GitHub token</strong> expires and warns at two weeks.</li>
+  </ul>
+  <blockquote>A Deployment keeps serving. A Job finishes. A CronJob makes a new Job on a schedule.</blockquote>
+</section>
+
+<section id="corrections">
+  <div class="warn">
+    <span class="eyebrow">Where the notes correct what was said live</span>
+    <div class="table"><table>
+      <thead><tr><th>Said in class</th><th>Correct version (site notes and deck)</th></tr></thead>
+      <tbody>
+        <tr><td>"Three Deployment replicas share one PV and corrupt it"</td><td>A ReadWriteOnce EBS claim <strong>can't attach</strong> to a replica on another node, and each DB replica needs its own disk anyway</td></tr>
+        <tr><td>"StatefulSet names give apps a stable endpoint; Deployment DNS changes"</td><td>The app reaches the DB through the <strong>Service name</strong>, which never changes. Stable pod names matter when a client needs <strong>one specific replica</strong></td></tr>
+        <tr><td>"Logs remain after the pods are deleted"</td><td><strong>A pod's logs are deleted with the pod.</strong> <code>restartPolicy: Never</code> keeps failed pods around so you can read them</td></tr>
+        <tr><td>TTL "two seconds" / "five minutes"</td><td><code>ttlSecondsAfterFinished: 300</code> = <strong>300 seconds</strong> (5 minutes)</td></tr>
+        <tr><td>"One gigabyte of memory"</td><td>Storage, not memory (he corrected himself)</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<section id="demo">
+  <div class="label"><span class="tag">Hands-on</span><h2>Redo the demo yourself</h2></div>
+  <p><strong>Before you start:</strong> <code>kubectl</code> pointed at the class cluster, the course repo cloned, and your terminal in <code>06-storage-and-jobs/</code>. Set your namespace once: <code>export NAMESPACE=&lt;your-namespace&gt;</code>. For part C you also need Docker running, the AWS CLI logged in, and an ECR repository (Containers Session 03).</p>
+
+  <h3>A. Lose the table (ephemeral)</h3>
+  <div class="step"><span class="n">1</span><div>
+    <p><strong>Run Postgres with no volume and create the table.</strong></p>
+    <div class="codebox"><pre>kubectl -n "$NAMESPACE" apply -f postgres-ephemeral.yaml
+kubectl -n "$NAMESPACE" rollout status deployment/unit6-postgres --timeout=300s
+kubectl -n "$NAMESPACE" exec -i deployment/unit6-postgres -- sh -ec \
+  'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -v ON_ERROR_STOP=1' &lt; schema.sql   <span class="c"># creates trades</span></pre></div>
+    <p class="see"><code>CREATE TABLE</code>.</p>
+  </div></div>
+  <div class="step"><span class="n">2</span><div>
+    <p><strong>Replace the pod, then look for the table.</strong> This is the "pod crashed" moment.</p>
+    <div class="codebox"><pre>kubectl -n "$NAMESPACE" delete pod -l app=unit6-postgres
+kubectl -n "$NAMESPACE" wait --for=condition=Ready pod -l app=unit6-postgres --timeout=300s
+kubectl -n "$NAMESPACE" exec deployment/unit6-postgres -- sh -ec \
+  'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "SELECT side, price FROM trades;"'</pre></div>
+    <p class="see"><code>relation "trades" does not exist</code>. The table was in the old container's files.</p>
+  </div></div>
+
+  <h3>B. Keep the table (persistent)</h3>
+  <div class="step"><span class="n">3</span><div>
+    <p><strong>Check the StorageClass, stop the old Postgres, create the claim.</strong></p>
+    <div class="codebox"><pre>kubectl get storageclass unit6-ebs                                    <span class="c"># made by the admin, once</span>
+kubectl -n "$NAMESPACE" scale deployment/unit6-postgres --replicas=0
+kubectl -n "$NAMESPACE" apply -f pvc.yaml
+kubectl -n "$NAMESPACE" get pvc postgres-data-unit6</pre></div>
+    <p class="see">STATUS <code>Pending</code>. Normal: no pod uses it yet (WaitForFirstConsumer).</p>
+  </div></div>
+  <div class="step"><span class="n">4</span><div>
+    <p><strong>Deploy Postgres with the claim mounted.</strong></p>
+    <div class="codebox"><pre>kubectl -n "$NAMESPACE" apply -f postgres-persistent.yaml   <span class="c"># also defines the Service unit6-db</span>
+kubectl -n "$NAMESPACE" rollout status deployment/unit6-postgres --timeout=300s
+kubectl -n "$NAMESPACE" get pvc,pv</pre></div>
+    <p class="see">the claim <code>Bound</code> to a new PV you never wrote. The pod takes a little longer to start, because AWS is creating the disk. In the EC2 console under Volumes: a new gp3 1 GiB volume.</p>
+  </div></div>
+  <div class="step"><span class="n">5</span><div>
+    <p><strong>Create the table, save a trade, replace the pod, read it back.</strong></p>
+    <div class="codebox"><pre>kubectl -n "$NAMESPACE" exec -i deployment/unit6-postgres -- sh -ec \
+  'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -v ON_ERROR_STOP=1' &lt; schema.sql
+kubectl -n "$NAMESPACE" exec deployment/unit6-postgres -- sh -ec \
+  'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "INSERT INTO trades (side, price) VALUES ('\''buy'\'', 150.00);"'
+kubectl -n "$NAMESPACE" delete pod -l app=unit6-postgres
+kubectl -n "$NAMESPACE" wait --for=condition=Ready pod -l app=unit6-postgres --timeout=300s
+kubectl -n "$NAMESPACE" exec deployment/unit6-postgres -- sh -ec \
+  'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "SELECT side, price FROM trades;"'</pre></div>
+    <p class="see"><code>buy | 150.00</code>. New pod name, same disk, same data.</p>
+  </div></div>
+
+  <h3>C. Create the tables with a Job (the after-class demo)</h3>
+  <div class="step"><span class="n">6</span><div>
+    <p><strong>Make sure the DB Service exists.</strong> This is what broke both live demos.</p>
+    <div class="codebox"><pre>kubectl -n "$NAMESPACE" get svc unit6-db   <span class="c"># missing? re-apply postgres-persistent.yaml</span></pre></div>
+  </div></div>
+  <div class="step"><span class="n">7</span><div>
+    <p><strong>Put <code>schema.sql</code> in a ConfigMap and run the Job.</strong></p>
+    <div class="codebox"><pre>kubectl -n "$NAMESPACE" create configmap unit6-schema \
+  --from-file=schema.sql --dry-run=client -o yaml | \
+  kubectl -n "$NAMESPACE" apply -f -          <span class="c"># create-or-update in one line</span>
+kubectl -n "$NAMESPACE" apply -f schema-job.yaml
+kubectl -n "$NAMESPACE" wait --for=condition=complete job/unit6-schema --timeout=180s
+kubectl -n "$NAMESPACE" logs job/unit6-schema</pre></div>
+    <p class="see"><code>job.batch/unit6-schema condition met</code>, and in the logs <code>relation "trades" already exists, skipping</code> (the table from step 5 is kept).</p>
+  </div></div>
+  <div class="step"><span class="n">8</span><div>
+    <p><strong>Build and push the revised app</strong> (no table creation at startup). Run from <code>06-storage-and-jobs/</code>, not from <code>app/</code>. Follow README section 3 for the exact steps.</p>
+    <div class="codebox"><pre>export REVISED_IMAGE=&lt;account&gt;.dkr.ecr.&lt;region&gt;.amazonaws.com/&lt;repo&gt;:&lt;tag&gt;   <span class="c"># your ECR repo</span>
+<span class="c"># log in with the command your ECR repository shows (aws ecr get-login-password | docker login ...)</span>
+docker build --platform linux/amd64 -t "$REVISED_IMAGE" app/   <span class="c"># quotes around the variable!</span>
+docker push "$REVISED_IMAGE"</pre></div>
+    <p class="see">the push finishing with a digest.</p>
+  </div></div>
+  <div class="step"><span class="n">9</span><div>
+    <p><strong>Deploy the revised app only after the Job is Complete, then open it.</strong> Put your image URI in the revised app's Deployment file (README section 3), apply it, then:</p>
+    <div class="codebox"><pre>kubectl -n "$NAMESPACE" rollout status deployment/unit6-investment-app
+kubectl -n "$NAMESPACE" port-forward &lt;from the README&gt;   <span class="c"># then open http://localhost:8080</span></pre></div>
+    <p class="see">the investment app working; buy and sell go through.</p>
+  </div></div>
+
+  <h3>If it goes wrong</h3>
+  <div class="table"><table>
+    <thead><tr><th>Error</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td>Job logs: <code>could not translate host name "unit6-db"</code></td><td>The Service is missing. Apply <code>postgres-persistent.yaml</code>, then <code>kubectl delete job unit6-schema</code> and apply it again</td></tr>
+      <tr><td>App gives HTTP 500</td><td>The tables don't exist because the Job never completed. Fix the Job; the app didn't need a restart after-class</td></tr>
+      <tr><td><code>docker push</code>: image does not exist locally</td><td>The shell didn't expand the variable. Wrap it in double quotes: <code>"$REVISED_IMAGE"</code></td></tr>
+      <tr><td><code>docker build</code>: <code>app</code> not found</td><td>You're inside <code>app/</code>. Go up to <code>06-storage-and-jobs/</code></td></tr>
+      <tr><td>Claim still Pending after the pod exists</td><td><code>kubectl describe pvc postgres-data-unit6</code> and read the Events (e.g. the StorageClass name doesn't exist)</td></tr>
+      <tr><td>Delete is stuck in <code>Terminating</code></td><td>Normal for storage. The claim waits for its pod to stop using it. Give it a few minutes</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Clean up</h3>
+  <p>The EBS disk costs money while the claim exists. <code>unit6-ebs</code> uses <strong>Delete</strong>, so removing the claim removes the disk.</p>
+  <div class="codebox"><pre>kubectl -n "$NAMESPACE" delete job unit6-schema --ignore-not-found
+kubectl -n "$NAMESPACE" delete -f postgres-persistent.yaml -f pvc.yaml --ignore-not-found
+kubectl -n "$NAMESPACE" get pvc,pv          <span class="c"># your claim and PV should be gone</span></pre></div>
+  <p>Then check EC2 → Volumes that your volume is gone, and delete the revised app Deployment you applied in step 9.</p>
+</section>
+
+<section id="commands">
+  <div class="label"><span class="tag">Reference</span><h2>Commands &amp; config that came up</h2></div>
+  <div class="table"><table>
+    <thead><tr><th>Command</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td><code>k get pv</code> / <code>k get pvc</code> / <code>k get sc</code></td><td>List volumes (cluster), claims (namespace), StorageClasses (cluster)</td></tr>
+      <tr><td><code>k describe pvc &lt;name&gt;</code> / <code>k describe sc &lt;name&gt;</code></td><td>Events at the bottom: why it's Pending, which reclaim policy</td></tr>
+      <tr><td><code>k get jobs</code></td><td><code>COMPLETIONS 0/1</code> = still running or failing; <code>1/1</code> = done</td></tr>
+      <tr><td><code>k describe job &lt;name&gt;</code></td><td>Attempts and <code>BackoffLimitExceeded</code>; the real error is in the <strong>pod's</strong> logs</td></tr>
+      <tr><td><code>k logs job/&lt;name&gt;</code></td><td>Output of the Job's pod</td></tr>
+      <tr><td><code>k wait --for=condition=complete job/&lt;name&gt;</code></td><td>Block until the Job succeeds (use before deploying the app)</td></tr>
+      <tr><td><code>k create configmap X --from-file=f --dry-run=client -o yaml | k apply -f -</code></td><td>Turn a file into a ConfigMap, create or update</td></tr>
+      <tr><td><code>k scale deployment/X --replicas=0</code></td><td>Stop the pods but keep the Deployment</td></tr>
+    </tbody>
+  </table></div>
+  <p><strong>The claim and the mount:</strong></p>
+  <div class="codebox"><pre><span class="c"># pvc.yaml (shape)</span>
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-data-unit6
+spec:
+  accessModes: ["ReadWriteOnce"]
+  storageClassName: unit6-ebs        <span class="c"># ties the claim to the template</span>
+  resources:
+    requests:
+      storage: 1Gi
+
+<span class="c"># postgres-persistent.yaml (the part that matters)</span>
+containers:
+- name: postgres
+  volumeMounts:
+  - name: database-files             <span class="c"># same name as below</span>
+    mountPath: /var/lib/postgresql/data
+volumes:
+- name: database-files
+  persistentVolumeClaim:
+    claimName: postgres-data-unit6   <span class="c"># selects the claim</span></pre></div>
+  <p><strong>StorageClass settings</strong> (made once by the admin): provisioner <code>ebs.csi.aws.com</code>, <code>type: gp3</code>, <code>encrypted</code>, <code>reclaimPolicy: Delete</code>, <code>volumeBindingMode: WaitForFirstConsumer</code>, <code>allowVolumeExpansion</code> (false here).</p>
+  <p><strong>Job and CronJob:</strong></p>
+  <div class="codebox"><pre>apiVersion: batch/v1
+kind: Job
+metadata:
+  name: unit6-schema
+spec:
+  backoffLimit: 2                   <span class="c"># two retries, then failed</span>
+  ttlSecondsAfterFinished: 300      <span class="c"># auto-delete 5 min after finishing</span>
+  template:
+    spec:
+      restartPolicy: Never          <span class="c"># new pod per retry</span>
+      containers:
+      - name: schema
+        image: postgres:16          <span class="c"># supplies psql</span>
+        <span class="c"># command + DB connection + schema ConfigMap mount: see schema-job.yaml</span>
+---
+apiVersion: batch/v1
+kind: CronJob
+spec:
+  schedule: "0 2 * * *"             <span class="c"># every day at 02:00</span>
+  timeZone: "Etc/UTC"
+  jobTemplate:
+    spec:                           <span class="c"># the Job spec goes here</span></pre></div>
+</section>
+
+<section id="stressed">
+  <div class="label"><span class="tag">Emphasis</span><h2>What the instructor stressed</h2></div>
+  <ul>
+    <li><strong>Developers shouldn't touch disks.</strong> DevOps sets up the StorageClass once; developers just write a claim. Self-service, no Jira ticket.</li>
+    <li><strong>Watch the cost anyway.</strong> EBS is cheap, but audit monthly or quarterly for abandoned volumes and teach teams to clean up.</li>
+    <li><strong>Retain in production, Delete in dev/test.</strong></li>
+    <li><strong>Don't run production databases in Kubernetes.</strong> Use RDS. You still need StatefulSets for interviews and certifications.</li>
+    <li><strong>Don't write cron expressions by hand.</strong> Ask AI or crontab.guru.</li>
+    <li>Use AI to debug: that's how both instructors found the missing Service.</li>
+    <li>Install <strong>Freelens</strong> for a visual view of the cluster.</li>
+    <li>Gemini notebooks (NotebookLM-style) can turn a video into slides or a podcast if you learn visually.</li>
+  </ul>
+</section>
+
+<section id="homework">
+  <div class="label"><span class="tag">Practice</span><h2>Homework</h2></div>
+  <ul>
+    <li>Run the <strong>Unit 6 README end to end</strong> in your own namespace: lose the table, keep it with a claim, run the schema Job, build and deploy the revised app. No deadline was given.</li>
+  </ul>
+  <h3>What's next</h3>
+  <ul>
+    <li>This was Eldiiar's last class and the last class of Containers. Marcel takes over on Wednesday: what's left in the program and interview prep. You'll move to <strong>your own clusters</strong>, then CI/CD.</li>
+  </ul>
+  <h3>Worth replaying</h3>
+  <ul>
+    <li><strong><code>k get pvc</code> going from Pending to Bound</strong>, then the new volume appearing in the EC2 console.</li>
+    <li><strong>The table surviving pod deletion</strong>, right after the break.</li>
+    <li><strong>The after-class recording:</strong> Bakhtiyar's full build → push → Job → missing Service → fix → working app. This is the demo the main class couldn't finish.</li>
+  </ul>
+  <h3>Left unclear</h3>
+  <ul>
+    <li><strong>ReadWriteOncePod</strong> was read off a slide; Eldiiar said he's never used it.</li>
+    <li>The hand-written PV demo was abandoned, so manual provisioning was never shown working.</li>
+    <li>The <strong>failing-Job demo</strong> on deck slide 23 (<code>failed-job.yaml</code>) wasn't run.</li>
+    <li>Who created the default <code>gp2</code> StorageClass on the cluster (probably EKS Auto Mode) wasn't confirmed.</li>
+  </ul>
+</section>
+
+<section id="check">
+  <div class="label"><span class="tag">Self-test</span><h2>Check yourself</h2></div>
+  <div class="q">
+    <p class="ask">1. You apply <code>pvc.yaml</code> and <code>k get pvc</code> shows Pending. A teammate says the storage is broken. Are they right?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>Not yet.</strong> With <code>WaitForFirstConsumer</code>, no disk is made until a pod uses the claim, so it lands in the pod's AZ. Pending <em>after</em> the pod exists is a real problem: run <code>k describe pvc</code> and read the Events.</p>
+      <p class="reread">If this one was shaky, reread "Pending is normal."</p>
+    </div></details>
+  </div>
+  <div class="q">
+    <p class="ask">2. You scale your Postgres Deployment (one RWO EBS claim) from 1 to 3 replicas. What goes wrong, and what should you use instead?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>Replicas on other nodes can't attach the disk, and database replicas each need their own disk anyway.</strong> Use a StatefulSet: <code>volumeClaimTemplates</code> gives <code>postgres-0</code>, <code>postgres-1</code>, <code>postgres-2</code> a claim each. Replication is still your job (or use RDS).</p>
+      <p class="reread">If this one was shaky, reread "Deployment vs StatefulSet."</p>
+    </div></details>
+  </div>
+  <div class="q">
+    <p class="ask">3. Your schema Job shows <code>0/1</code> completions, and its logs say <code>could not translate host name "unit6-db"</code>. What's wrong, and what do you do?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>The Job can't find the database Service.</strong> Create the Service (re-apply <code>postgres-persistent.yaml</code>), delete the Job, and apply it again. Only deploy the app after the Job is <code>Complete</code>, because Kubernetes won't wait for you.</p>
+      <p class="reread">If this one was shaky, reread "Jobs and CronJobs."</p>
+    </div></details>
+  </div>
+</section>
+
+<footer>The full study page and 10-question quiz are in Notion under DevOps / 312 - Notes / Containers &amp; Orchestration.</footer>
+</div>
+
+<script>
+document.querySelectorAll('.codebox').forEach(function(box){
+  var pre = box.querySelector('pre'); var b = document.createElement('button');
+  b.className = 'copy'; b.type = 'button'; b.textContent = 'Copy';
+  b.addEventListener('click', function(){
+    var text = pre.innerText.split('\n').map(function(l){ return l.replace(/\s+#.*$/, ''); }).join('\n').trim();
+    var done = function(){ b.textContent = 'Copied'; setTimeout(function(){ b.textContent = 'Copy'; }, 1500); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(function(){ selectPre(); });
+    } else { selectPre(); }
+    function selectPre(){ var r = document.createRange(); r.selectNodeContents(pre); var s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = 'Selected'; }
+  });
+  box.appendChild(b);
+});
+</script>
+
+</body></html>

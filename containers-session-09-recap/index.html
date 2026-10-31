@@ -1,0 +1,431 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Containers Session 09 Recap</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one reading column; sections as stacked "shipping manifest" blocks with a stencilled label; code and tables scroll in place. */
+:root{
+  --bg:#f3f5f7; --surface:#ffffff; --ink:#15202b; --muted:#56657a; --line:#d8dee6;
+  --accent:#c4501b; --accent-soft:#fbe9df; --steel:#1f5f8b; --steel-soft:#e3eef6;
+  --code-bg:#0f1b26; --code-fg:#dbe7f2; --code-cmt:#7f97ad;
+  --good:#2e7d4f; --bad:#b3261e;
+  --f-display:"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --f-body:"Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e151c; --surface:#16202a; --ink:#e6edf3; --muted:#9aabbd; --line:#2a3845;
+  --accent:#f0874f; --accent-soft:#3a2418; --steel:#7ab8e3; --steel-soft:#16303f;
+  --code-bg:#0a1016; --code-fg:#dbe7f2; --code-cmt:#6f879c;
+  --good:#6cc493; --bad:#f08a80; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0e151c; --surface:#16202a; --ink:#e6edf3; --muted:#9aabbd; --line:#2a3845;
+  --accent:#f0874f; --accent-soft:#3a2418; --steel:#7ab8e3; --steel-soft:#16303f;
+  --code-bg:#0a1016; --code-fg:#dbe7f2; --code-cmt:#6f879c;
+  --good:#6cc493; --bad:#f08a80; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:17px/1.6 var(--f-body);padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:28px 64px}
+.wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.15;margin:0}
+h1{font-size:clamp(30px,6vw,44px);font-weight:800;letter-spacing:-.01em}
+h2{font-size:24px;font-weight:800}
+h3{font-size:18px;font-weight:600;margin-top:6px}
+p{margin:0}
+a{color:var(--steel)}
+code{font-family:var(--f-mono);font-size:.86em;background:var(--steel-soft);color:var(--ink);padding:1px 5px;border-radius:4px}
+strong{font-weight:700}
+.eyebrow{font:600 12px/1 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+header{display:flex;flex-direction:column;gap:12px;border-bottom:3px solid var(--ink);padding-bottom:20px}
+.meta{display:flex;flex-wrap:wrap;gap:8px 16px;color:var(--muted);font-size:15px}
+.lede{font-size:19px;max-width:65ch}
+nav{display:flex;flex-wrap:wrap;gap:8px}
+nav a{font:600 13px/1 var(--f-mono);text-decoration:none;color:var(--ink);border:1px solid var(--line);background:var(--surface);padding:8px 10px;border-radius:6px}
+nav a:hover,nav a:focus-visible{border-color:var(--accent);color:var(--accent);outline:none}
+section{display:flex;flex-direction:column;gap:14px;scroll-margin-top:16px}
+section > .label{display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--line);padding-bottom:8px}
+section > .label .tag{font:600 11px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--surface);background:var(--ink);padding:5px 7px;border-radius:3px}
+ul,ol{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px}
+.table{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:15.5px;min-width:480px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:600 12px/1.3 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--bg)}
+tr:last-child td{border-bottom:0}
+blockquote{margin:0;border-left:4px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 8px 8px 0;font-weight:600}
+pre{margin:0;background:var(--code-bg);color:var(--code-fg);font:14px/1.6 var(--f-mono);padding:14px 16px;border-radius:8px;overflow-x:auto}
+pre .c{color:var(--code-cmt)}
+.codebox{position:relative}
+.copy{position:absolute;top:8px;right:8px;font:600 11px/1 var(--f-mono);background:transparent;color:var(--code-cmt);border:1px solid var(--code-cmt);border-radius:4px;padding:5px 7px;cursor:pointer}
+.copy:hover,.copy:focus-visible{color:var(--code-fg);border-color:var(--code-fg);outline:none}
+.flow{font:600 14px/1.5 var(--f-mono);background:var(--steel-soft);color:var(--ink);padding:14px 16px;border-radius:8px;overflow-x:auto;white-space:pre}
+.step{display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:start}
+.step > .n{font:800 18px/34px var(--f-display);text-align:center;background:var(--ink);color:var(--bg);border-radius:50%;width:34px;height:34px}
+.step > div{min-width:0;display:flex;flex-direction:column;gap:8px}
+.see{font-size:15px;color:var(--good)}
+.see::before{content:"You should see: ";font-weight:700}
+.warn{border:1px solid var(--bad);border-radius:8px;padding:12px 16px;display:flex;flex-direction:column;gap:10px;background:var(--surface)}
+.warn .eyebrow{color:var(--bad)}
+details{border:1px solid var(--line);background:var(--surface);border-radius:8px}
+details summary{cursor:pointer;padding:12px 16px;font-weight:600;list-style-position:inside}
+details summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:8px}
+details > div{padding:0 16px 14px;display:flex;flex-direction:column;gap:8px}
+.q{display:flex;flex-direction:column;gap:10px}
+.q p.ask{font-weight:600}
+.reread{font-style:italic;color:var(--muted);font-size:15px}
+footer{color:var(--muted);font-size:15px;border-top:1px solid var(--line);padding-top:16px}
+@media (prefers-reduced-motion: reduce){*{scroll-behavior:auto!important}}
+html{scroll-behavior:smooth}
+</style>
+
+<div class="wrap">
+<header>
+  <span class="eyebrow">312 School · Cohort 26a · Containers &amp; Orchestration · Unit 4, night 1</span>
+  <h1>Session 09: Config, secrets and identity</h1>
+  <div class="meta"><span>Thu, Oct 15, 2026</span><span>Eldiiar (no after-class session)</span><span>Deck: Unit 4, blocks 1–12</span><span>Namespace: <code>my-namespace</code></span></div>
+  <p class="lede">The investment app's settings moved out of its YAML. Ordinary settings went into a <strong>ConfigMap</strong>, and the DB password and Finnhub key went into a <strong>Secret</strong>. The app and Postgres then read both objects as environment variables. A Secret is only <strong>base64, not encrypted</strong>, so what keeps it safe is <strong>who is allowed to read it</strong>. Two failures were shown: a ConfigMap name with a typo, and a ConfigMap edit that the running app never sees. The class opened with a short catch-up on how cluster DNS turns <code>drill</code> into an IP.</p>
+  <nav aria-label="Sections">
+    <a href="#did">What we did</a><a href="#ideas">Main ideas</a><a href="#corrections">Corrections</a><a href="#demo">Redo the demo</a><a href="#commands">Commands</a><a href="#homework">Homework</a><a href="#check">Check yourself</a>
+  </nav>
+</header>
+
+<section id="did">
+  <div class="label"><span class="tag">Run of show</span><h2>What we actually did</h2></div>
+  <ol>
+    <li><strong>Cluster DNS catch-up.</strong> A <code>client</code> pod ran <code>curl drill</code>, then <code>cat /etc/resolv.conf</code>, then curled a Service in another namespace (<code>drill.&lt;namespace&gt;</code>). He used your namespace as the example.</li>
+    <li><strong>Why.</strong> In unit 2's Deployment, <code>DB_PASSWORD</code> and <code>FINNHUB_KEY</code> were typed in plain text, so anyone who can read the repo has them.</li>
+    <li><strong>ConfigMap.</strong> Applied it, then ran <code>get cm</code> (DATA 5) and <code>describe cm</code>. Also covered quoting numbers, <code>immutable: true</code> and <code>kubectl edit</code>.</li>
+    <li><strong>Secret.</strong> <code>describe</code> hides the values, but <code>get -o yaml</code> plus <code>base64 -d</code> shows them in plain text.</li>
+    <li><strong>External Secrets Operator.</strong> Drawn on the board as the way it's done in production.</li>
+    <li><strong>The app first, with no DB</strong> (after the break): CrashLoopBackOff, because there was no <code>db</code> to connect to. He deleted it, applied <code>postgres.yaml</code>, applied the app again, and it ran.</li>
+    <li><strong>Checking.</strong> <code>describe pod</code> shows <em>where</em> each value comes from, and <code>exec … env</code> shows the actual values.</li>
+    <li><strong>Failure 1.</strong> <code>investment-app-configs</code> (extra <strong>s</strong>) gave <code>CreateContainerConfigError</code> with no logs; the reason was in <code>describe</code>. After fixing the name, the app started and crashed, because that file has no Secret.</li>
+    <li><strong>Failure 2.</strong> He changed TICKER from AAPL to MSFT. The ConfigMap changed, but the pod still said AAPL until <code>kubectl rollout restart</code>.</li>
+    <li>Bakhtiyar had a power outage, so there was <strong>no after-class session</strong>. He'll post a practice lab instead.</li>
+  </ol>
+</section>
+
+<section id="ideas">
+  <div class="label"><span class="tag">Concepts</span><h2>The main ideas, from zero</h2></div>
+
+  <h3>Cluster DNS: how <code>drill</code> becomes an IP</h3>
+  <ul>
+    <li><strong>Problem:</strong> pod IPs change, and nobody wants to memorise ClusterIPs.</li>
+    <li><strong>What:</strong> every Service gets the name <code>&lt;service&gt;.&lt;namespace&gt;.svc.cluster.local</code>. The cluster's DNS server, <strong>CoreDNS</strong>, answers it with the ClusterIP.</li>
+    <li><strong>How:</strong> each pod's <code>/etc/resolv.conf</code> has a <code>search</code> line that adds your namespace to short names automatically.</li>
+  </ul>
+  <div class="table"><table>
+    <thead><tr><th>You're calling from…</th><th>Name that works</th></tr></thead>
+    <tbody>
+      <tr><td>Same namespace</td><td><code>drill</code></td></tr>
+      <tr><td>Another namespace</td><td><code>drill.&lt;namespace&gt;</code></td></tr>
+      <tr><td>Anywhere in the cluster</td><td><code>drill.&lt;namespace&gt;.svc.cluster.local</code></td></tr>
+      <tr><td>Your laptop</td><td><strong>None of them.</strong> CoreDNS answers cluster names only.</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li>On <strong>EKS Auto Mode</strong>, AWS runs DNS on each node, so <code>kubectl get pods -n kube-system</code> is empty. On a standard cluster, CoreDNS is a Deployment there.</li>
+    <li>In <code>nslookup</code> output, <code>;; Got recursion not available</code> is a notice you can ignore. The answer is in the Name and Address lines.</li>
+  </ul>
+  <blockquote>Same namespace → short name. Different namespace → add .namespace.</blockquote>
+
+  <h3>Why settings live outside the image</h3>
+  <ul>
+    <li><strong>The same image</strong> runs on your laptop, in testing and in production. Only the settings differ.</li>
+    <li>In Scale that was one file, <code>/etc/investment-app.env</code>. In Kubernetes it becomes <strong>two objects</strong>.</li>
+  </ul>
+  <div class="table"><table>
+    <thead><tr><th>Goes in the ConfigMap (not sensitive)</th><th>Goes in the Secret (sensitive)</th></tr></thead>
+    <tbody><tr><td><code>DB_HOST</code>, <code>DB_PORT</code>, <code>DB_NAME</code>, <code>DB_USER</code>, <code>TICKER</code></td><td><code>DB_PASSWORD</code>, <code>FINNHUB_KEY</code></td></tr></tbody>
+  </table></div>
+  <p><strong>The app's code doesn't change.</strong> It still reads seven environment variables.</p>
+
+  <h3>ConfigMap: settings stored in the cluster</h3>
+  <ul>
+    <li><strong>What:</strong> an object holding <strong>key: value</strong> settings. It belongs to <strong>your namespace</strong>.</li>
+    <li><strong>Where:</strong> in <strong>etcd</strong>, the cluster's record of every object, on the control plane. It is <strong>not on a node and not inside a pod</strong>.</li>
+    <li>Creating one starts nothing. Deleting a pod doesn't delete it, and the reverse is also true. <strong>They have separate lifecycles.</strong></li>
+    <li><strong>Every value is text, so a number needs quotes:</strong> <code>DB_PORT: "5432"</code>. Without the quotes, <code>kubectl apply</code> refuses the file.</li>
+    <li><code>immutable: true</code> locks it. To change a value you then have to delete it and create it again.</li>
+  </ul>
+  <div class="codebox"><pre>apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: investment-app-config
+data:                   <span class="c"># the settings: key, then value</span>
+  DB_HOST: db
+  DB_PORT: "5432"       <span class="c"># in quotes: every value is text</span>
+  DB_NAME: investment_app
+  DB_USER: investment_app
+  TICKER: AAPL</pre></div>
+  <blockquote>A ConfigMap is a separate object in etcd. Pods read it; they don't contain it.</blockquote>
+
+  <h3>Secret: same idea, plus a rule about who can read it</h3>
+  <ul>
+    <li><strong>What:</strong> an object like a ConfigMap, used for passwords and keys, and stored the same way.</li>
+    <li><strong>Why it's a separate kind:</strong> so an access rule can let someone read ConfigMaps <strong>but not Secrets</strong>.</li>
+    <li><code>type: Opaque</code> means <strong>"the keys are yours, and Kubernetes doesn't check them."</strong> Other types: <code>kubernetes.io/tls</code>, <code>kubernetes.io/dockerconfigjson</code>, <code>kubernetes.io/ssh-auth</code>.</li>
+    <li>You write the values under <code>stringData:</code> in plain text, and the cluster stores them under <code>data:</code> in <strong>base64</strong>.</li>
+  </ul>
+  <div class="codebox"><pre>apiVersion: v1
+kind: Secret
+metadata:
+  name: investment-app-secret
+type: Opaque            <span class="c"># keys and values you choose</span>
+stringData:             <span class="c"># the values as you type them</span>
+  DB_PASSWORD: change-me-class-password
+  FINNHUB_KEY: replace-with-your-finnhub-key</pre></div>
+
+  <h3>base64 is not encryption</h3>
+  <ul>
+    <li><strong>base64</strong> writes any data as ordinary text characters. <strong>Anyone can reverse it</strong> with <code>base64 -d</code>.</li>
+    <li><strong>Why Secrets use it:</strong> a Secret can hold binary data (a certificate, a key file), and YAML/JSON can only carry text.</li>
+    <li><code>describe secret</code> shows only key sizes. <strong><code>get secret -o yaml</code> plus <code>base64 -d</code> shows the real password.</strong></li>
+    <li>On EKS, etcd's disk is encrypted with KMS. The API server still <strong>decrypts before answering</strong>, so anyone allowed to read the Secret gets the plain value.</li>
+  </ul>
+  <blockquote>What protects a Secret is who is allowed to read it (RBAC), not base64.</blockquote>
+
+  <h3>How a pod gets the values: copied once, at start</h3>
+  <div class="flow">container starts
+   ↓
+kubelet asks the API server for the ConfigMaps/Secrets the pod names
+   ↓
+sets each key as an env var of the app's process
+   ↓
+the values are now a COPY in memory. Nothing refreshes them while it runs.</div>
+  <ul>
+    <li><code>envFrom</code> + <code>configMapRef</code> → <strong>every</strong> key of the ConfigMap.</li>
+    <li><code>env</code> + <code>valueFrom</code> + <code>secretKeyRef</code> / <code>configMapKeyRef</code> → <strong>one</strong> key. <code>name</code> is the variable inside the container and <code>key</code> is the key in the object; <strong>they can differ.</strong></li>
+    <li>Postgres reuses the same objects: <code>POSTGRES_USER</code> ← <code>DB_USER</code>, <code>POSTGRES_DB</code> ← <code>DB_NAME</code>, <code>POSTGRES_PASSWORD</code> ← <code>DB_PASSWORD</code>. <strong>One source, two consumers.</strong></li>
+  </ul>
+  <blockquote>After you change a ConfigMap or Secret, replace the pods that use it.</blockquote>
+
+  <h3>Production: External Secrets Operator (ESO)</h3>
+  <div class="flow">AWS Secrets Manager (real password)
+   ↓  ESO, a controller in the cluster, reads it on an interval
+Kubernetes Secret (created for you)
+   ↓
+pod env vars</div>
+  <ul>
+    <li>The repo holds only an <code>ExternalSecret</code> <strong>reference</strong>. Nobody writes a Secret file.</li>
+    <li>This is <strong>the last part of unit 4</strong> (night 2).</li>
+  </ul>
+</section>
+
+<section id="corrections">
+  <div class="warn">
+    <span class="eyebrow">Where the notes correct what was said live</span>
+    <div class="table"><table>
+      <thead><tr><th>Said in class</th><th>Correct version (site notes and deck)</th></tr></thead>
+      <tbody>
+        <tr><td>"No encryption at rest; no way to encrypt Secrets in Kubernetes"</td><td>On EKS, <strong>etcd is encrypted on disk with AWS KMS</strong> (default from 1.28; this cluster runs 1.34). The API still returns the plain value to anyone allowed to read it.</td></tr>
+        <tr><td>"Opaque means light can't pass through, so you can't see the values"</td><td>Opaque only means <strong>the keys are yours and Kubernetes doesn't check them</strong>. It <strong>does not</strong> mean the values are hidden.</td></tr>
+        <tr><td>"base64 replaces text with random letters"</td><td>It's a <strong>fixed mapping</strong>: the same input always gives the same output.</td></tr>
+        <tr><td>"ConfigMaps and Secrets are cluster-wide resources"</td><td>They're <strong>namespaced</strong> objects, stored in etcd on the control plane and not on any node.</td></tr>
+        <tr><td>"ESO updates the value, so your pod gets the update too" (Granola: "propagates automatically")</td><td>ESO updates the <strong>Secret</strong>. Env vars are copied at start, so <strong>pods still need a restart</strong>.</td></tr>
+        <tr><td>"ESO is next week"</td><td>The last part of <strong>unit 4</strong> (night 2)</td></tr>
+        <tr><td>rollout restart "deploys two more, then terminates"</td><td>It replaces the pods <strong>one by one</strong>, like a rolling update.</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<section id="demo">
+  <div class="label"><span class="tag">Hands-on</span><h2>Redo the demo yourself</h2></div>
+  <p><strong>Before you start:</strong></p>
+  <ul>
+    <li>Your local copy has only <code>04-config-secrets-identity/README.md</code>. <strong>Pull <code>main</code> first</strong> to get the YAML files.</li>
+    <li>Your investment-app image in <strong>your</strong> ECR, built with <code>--platform linux/amd64</code>. An arm64 image fails with <code>exec format error</code>.</li>
+    <li><code>kubectl</code> signed in to the class cluster, namespace <code>my-namespace</code>.</li>
+    <li>In <strong>both</strong> Deployment files, replace <code>IMAGE_URI</code> with your ECR image URI.</li>
+  </ul>
+
+  <div class="step"><span class="n">1</span><div>
+    <p><strong>Create the ConfigMap.</strong> It holds the five ordinary settings.</p>
+    <div class="codebox"><pre>cd ~/DevOps/containers/04-config-secrets-identity
+kubectl apply -f configmap-investment-app.yaml
+kubectl get cm                               <span class="c"># DATA 5</span>
+kubectl describe cm investment-app-config    <span class="c"># every key and value, plain text</span></pre></div>
+    <p class="see"><code>investment-app-config</code> with <code>DATA 5</code>.</p>
+  </div></div>
+
+  <div class="step"><span class="n">2</span><div>
+    <p><strong>Create the Secret.</strong></p>
+    <div class="codebox"><pre>kubectl apply -f secret-investment-app.yaml
+kubectl get secret investment-app-secret        <span class="c"># TYPE Opaque, DATA 2</span>
+kubectl describe secret investment-app-secret   <span class="c"># sizes only, no values</span></pre></div>
+    <p class="see"><code>Opaque 2</code>, and <code>describe</code> showing bytes, not the password.</p>
+  </div></div>
+
+  <div class="step"><span class="n">3</span><div>
+    <p><strong>Prove it's not encrypted.</strong></p>
+    <div class="codebox"><pre>kubectl get secret investment-app-secret -o yaml     <span class="c"># data: DB_PASSWORD: Y2hhbmdl...</span>
+kubectl get secret investment-app-secret -o jsonpath='{.data.DB_PASSWORD}' | base64 -d</pre></div>
+    <p class="see"><code>change-me-class-password</code> in plain text.</p>
+  </div></div>
+
+  <div class="step"><span class="n">4</span><div>
+    <p><strong>Start Postgres first.</strong> The app connects to <code>db</code> as it starts. With no <code>db</code>, it exits and goes into CrashLoopBackOff.</p>
+    <div class="codebox"><pre>kubectl apply -f postgres.yaml     <span class="c"># Deployment postgres + Service db</span>
+kubectl get pods,svc</pre></div>
+    <p class="see">the <code>postgres-…</code> pod Running and <code>service/db</code> on port 5432.</p>
+  </div></div>
+
+  <div class="step"><span class="n">5</span><div>
+    <p><strong>Start the app.</strong></p>
+    <div class="codebox"><pre>kubectl apply -f deployment-investment-app.yaml
+kubectl rollout status deploy/investment-app</pre></div>
+    <p class="see"><code>deployment "investment-app" successfully rolled out</code>, with 2 pods Running.</p>
+  </div></div>
+
+  <div class="step"><span class="n">6</span><div>
+    <p><strong>Check from outside, then from inside.</strong> <code>describe</code> shows where each value comes from, and <code>exec</code> shows what the app actually has. Everything after <code>--</code> runs inside the container.</p>
+    <div class="codebox"><pre>kubectl describe pod -l app=investment-app
+kubectl exec deploy/investment-app -- env
+kubectl exec deploy/investment-app -- printenv TICKER    <span class="c"># AAPL</span></pre></div>
+    <p class="see"><code>Environment Variables from: investment-app-config ConfigMap</code> and <code>DB_PASSWORD: &lt;set to the key 'DB_PASSWORD' in secret …&gt;</code>. Then <code>env</code> lists the seven values, plus PATH, HOSTNAME and DB_SERVICE_HOST.</p>
+  </div></div>
+
+  <div class="step"><span class="n">7</span><div>
+    <p><strong>Failure 1: the wrong ConfigMap name.</strong></p>
+    <div class="codebox"><pre>kubectl apply -f deployment-investment-app-missing-configmap.yaml
+kubectl get pods -l app=investment-app-broken        <span class="c"># CreateContainerConfigError</span>
+kubectl logs deploy/investment-app-broken            <span class="c"># "waiting to start", no app logs</span>
+kubectl describe pod -l app=investment-app-broken    <span class="c"># Events at the bottom</span>
+kubectl delete -f deployment-investment-app-missing-configmap.yaml</pre></div>
+    <p class="see"><code>Error: configmap "investment-app-configs" not found</code> in the events, while your real app keeps running.</p>
+  </div></div>
+
+  <div class="step"><span class="n">8</span><div>
+    <p><strong>Failure 2: an edit doesn't reach the running pod.</strong></p>
+    <div class="codebox"><pre>kubectl edit configmap investment-app-config             <span class="c"># TICKER: MSFT, save and close</span>
+kubectl exec deploy/investment-app -- printenv TICKER    <span class="c"># still AAPL</span>
+kubectl get pods --watch                                 <span class="c"># in a second terminal</span>
+kubectl rollout restart deploy/investment-app
+kubectl rollout status deploy/investment-app
+kubectl exec deploy/investment-app -- printenv TICKER    <span class="c"># MSFT</span></pre></div>
+    <p class="see">new pods replace the old ones one by one, then <code>MSFT</code>.</p>
+  </div></div>
+
+  <h3>If it goes wrong</h3>
+  <div class="table"><table>
+    <thead><tr><th>Symptom</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td><code>InvalidImageName</code> / <code>ErrImagePull</code></td><td><code>IMAGE_URI</code> is still there, has a typo, or ECR access is missing</td></tr>
+      <tr><td><code>exec format error</code></td><td>The image was built for arm64. Rebuild with <code>--platform linux/amd64</code>.</td></tr>
+      <tr><td>App in <code>CrashLoopBackOff</code></td><td>Postgres or <code>svc/db</code> isn't up yet, or the password is missing. Read <code>kubectl logs</code>.</td></tr>
+      <tr><td><code>kubectl apply</code> refuses the ConfigMap</td><td>An unquoted number under <code>data:</code></td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Clean up</h3>
+  <div class="codebox"><pre>kubectl delete -f . --ignore-not-found
+kubectl get pods,cm,secret     <span class="c"># only kube-root-ca.crt remains, it's in every namespace</span></pre></div>
+</section>
+
+<section id="commands">
+  <div class="label"><span class="tag">Reference</span><h2>Commands that came up</h2></div>
+  <div class="table"><table>
+    <thead><tr><th>Command</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td><code>kubectl get cm</code> / <code>describe cm &lt;name&gt;</code></td><td>List ConfigMaps / show keys and values</td></tr>
+      <tr><td><code>kubectl edit cm &lt;name&gt;</code></td><td>Change the live object</td></tr>
+      <tr><td><code>kubectl get secret &lt;name&gt; -o yaml</code></td><td>Show the base64 values</td></tr>
+      <tr><td><code>kubectl get secret &lt;name&gt; -o jsonpath='{.data.KEY}' | base64 -d</code></td><td>Decode one value</td></tr>
+      <tr><td><code>kubectl describe pod -l app=&lt;label&gt;</code></td><td>Where each env var comes from, plus events</td></tr>
+      <tr><td><code>kubectl exec deploy/&lt;name&gt; -- env</code></td><td>Every env var the app sees</td></tr>
+      <tr><td><code>kubectl exec deploy/&lt;name&gt; -- printenv TICKER</code></td><td>One variable</td></tr>
+      <tr><td><code>kubectl get events</code></td><td>All events in the namespace (noisy)</td></tr>
+      <tr><td><code>kubectl rollout restart deploy/&lt;name&gt;</code></td><td>Replace pods one by one with fresh values</td></tr>
+      <tr><td><code>kubectl exec client -- cat /etc/resolv.conf</code></td><td>The pod's DNS config</td></tr>
+      <tr><td><code>curl drill</code> / <code>curl drill.&lt;namespace&gt;</code></td><td>A Service by its short / cross-namespace name</td></tr>
+    </tbody>
+  </table></div>
+  <div class="codebox"><pre>envFrom:                     <span class="c"># every key of the ConfigMap</span>
+  - configMapRef:
+      name: investment-app-config
+env:                         <span class="c"># one key at a time</span>
+  - name: DB_PASSWORD        <span class="c"># variable inside the container</span>
+    valueFrom:
+      secretKeyRef:
+        name: investment-app-secret
+        key: DB_PASSWORD     <span class="c"># key in the Secret</span></pre></div>
+
+  <h3>What the instructor stressed</h3>
+  <ul>
+    <li><strong>Never push a Secret file with a real password.</strong> Put it in <code>.gitignore</code>. At work you won't even write one, because ESO does it.</li>
+    <li><strong>No logs doesn't mean no clue.</strong> Logs exist only once a container has run. Otherwise, read the events in <code>describe</code>.</li>
+    <li><strong><code>CreateContainerConfigError</code> → check the ConfigMap and Secret names.</strong> It isn't a crash.</li>
+    <li><strong>Editing a ConfigMap does nothing to running pods.</strong> Use <code>rollout restart</code>; deleting pods causes downtime.</li>
+    <li><strong>You won't need the DNS details at work.</strong> In six years he never had to dig into Kubernetes DNS. Just know the short name vs <code>.namespace</code> rule.</li>
+  </ul>
+</section>
+
+<section id="homework">
+  <div class="label"><span class="tag">Due Sat</span><h2>Homework</h2></div>
+  <ul>
+    <li>No formal homework. <strong>Bakhtiyar will post a practice lab.</strong></li>
+    <li>From the notes: run the unit 4 files in your namespace, break the ConfigMap name, change TICKER, then clean up.</li>
+    <li><strong>Next class: Saturday, Oct 17 (night 2).</strong> RBAC (a Role and a binding), <code>kubectl auth can-i</code>, Claude Code with a read-only identity, and External Secrets with AWS Secrets Manager.</li>
+  </ul>
+  <h3>Worth replaying</h3>
+  <ul>
+    <li><strong>The live crash after the break:</strong> the app in CrashLoopBackOff because Postgres wasn't deployed.</li>
+    <li><strong>Failure 1, both halves:</strong> no logs at first, then the app crashing <em>with</em> logs after the name fix.</li>
+    <li><strong>The split-screen <code>rollout restart</code></strong> with <code>--watch</code>, showing old pods staying up until the new ones run.</li>
+  </ul>
+  <h3>Left unclear</h3>
+  <ul>
+    <li>He curled the app from inside a pod and got "doesn't have the host". This wasn't followed up.</li>
+    <li>The <code>options ndots:5</code> line in <code>resolv.conf</code>: he said he didn't remember it.</li>
+    <li>Namespaces were deferred to his personal notes (<code>eddie-personal-note.md</code> in the repo).</li>
+  </ul>
+</section>
+
+<section id="check">
+  <div class="label"><span class="tag">Self-test</span><h2>Check yourself</h2></div>
+  <div class="q">
+    <p class="ask">1. Your teammate says, "Our Secret is safe, <code>kubectl describe</code> doesn't even show the password." What do you tell them?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong><code>describe</code> hides it, but <code>get -o yaml | base64 -d</code> reveals it.</strong> base64 is encoding, not encryption. The only real protection is limiting who may read Secrets (RBAC).</p>
+      <p class="reread">If this one was shaky, reread "base64 is not encryption."</p>
+    </div></details>
+  </div>
+  <div class="q">
+    <p class="ask">2. A new pod is stuck in <code>CreateContainerConfigError</code>, and <code>kubectl logs</code> says "waiting to start". Where do you look, and what's the likely cause?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>In <code>kubectl describe pod</code>, at the events at the bottom.</strong> The app never ran, so there are no logs. The likely cause is a ConfigMap or Secret name the pod refers to that doesn't exist (a typo).</p>
+      <p class="reread">If this one was shaky, reread "How a pod gets the values" and demo step 7.</p>
+    </div></details>
+  </div>
+  <div class="q">
+    <p class="ask">3. You change <code>TICKER</code> to MSFT with <code>kubectl apply</code>. <code>describe cm</code> shows MSFT, but the app still shows AAPL. Why, and what's the zero-downtime fix?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>Env vars are copied only when a container starts.</strong> Run <code>kubectl rollout restart deploy/investment-app</code> to replace the pods one by one.</p>
+      <p class="reread">If this one was shaky, reread "copied once, at start."</p>
+    </div></details>
+  </div>
+</section>
+
+<footer>The full study page and 10-question quiz are in Notion under DevOps / 312 - Notes / Containers &amp; Orchestration.</footer>
+</div>
+
+<script>
+document.querySelectorAll('.codebox').forEach(function(box){
+  var pre = box.querySelector('pre'); var b = document.createElement('button');
+  b.className = 'copy'; b.type = 'button'; b.textContent = 'Copy';
+  b.addEventListener('click', function(){
+    var text = pre.innerText.split('\n').map(function(l){ return l.replace(/\s+#.*$/, ''); }).join('\n').trim();
+    var done = function(){ b.textContent = 'Copied'; setTimeout(function(){ b.textContent = 'Copy'; }, 1500); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(function(){ selectPre(); });
+    } else { selectPre(); }
+    function selectPre(){ var r = document.createRange(); r.selectNodeContents(pre); var s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = 'Selected'; }
+  });
+  box.appendChild(b);
+});
+</script>
+
+</body></html>

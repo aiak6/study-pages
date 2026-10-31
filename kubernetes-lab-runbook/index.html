@@ -1,0 +1,473 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Kubernetes Lab Runbook</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a lab manual — sticky session rail on top, one column of numbered labs, each a terminal block you can copy and tick off */
+:root{
+  --bg:#eef1f4; --paper:#ffffff; --ink:#14202e; --muted:#5b6878; --line:#d5dbe2;
+  --accent:#2f5fd0; --accent-soft:#e3eafb;
+  --term:#101823; --term-fg:#d8e1ec; --term-dim:#7f8ea1; --term-cmt:#8fb3ff;
+  --warn:#9a5b00; --warn-bg:#fff3dc; --ok:#1f7a4d;
+  --f-display:"Familjen Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --f-body:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0d131b; --paper:#141c27; --ink:#e4eaf1; --muted:#93a1b2; --line:#253142;
+  --accent:#7ea2ff; --accent-soft:#1c2a45;
+  --term:#080d13; --term-fg:#d8e1ec; --term-dim:#71819a; --term-cmt:#8fb3ff;
+  --warn:#f2b45a; --warn-bg:#2b2111; --ok:#5fd09a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0d131b; --paper:#141c27; --ink:#e4eaf1; --muted:#93a1b2; --line:#253142;
+  --accent:#7ea2ff; --accent-soft:#1c2a45;
+  --term:#080d13; --term-fg:#d8e1ec; --term-dim:#71819a; --term-cmt:#8fb3ff;
+  --warn:#f2b45a; --warn-bg:#2b2111; --ok:#5fd09a; color-scheme:dark}
+
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--paper)}
+.wrap{max-width:860px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+header.top{padding-block:36px 20px}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(30px,5vw,44px);line-height:1.05;margin:8px 0 10px;text-wrap:balance;letter-spacing:-.01em}
+.lede{color:var(--muted);max-width:62ch;margin:0}
+.progress{display:flex;align-items:center;gap:12px;margin-top:18px;font-family:var(--f-mono);font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.bar{flex:1;max-width:260px;height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--ok);transition:width .3s}
+button.reset{font:inherit;font-size:12px;color:var(--muted);background:none;border:1px solid var(--line);border-radius:4px;padding:3px 8px;cursor:pointer}
+button.reset:hover{color:var(--ink)}
+
+nav.rail{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);border-block:1px solid var(--line)}
+nav.rail .wrap{display:flex;gap:6px;overflow-x:auto;padding-block:8px;scrollbar-width:none}
+nav.rail a{flex:none;font-family:var(--f-mono);font-size:12.5px;text-decoration:none;color:var(--muted);padding:6px 10px;border-radius:4px;white-space:nowrap}
+nav.rail a:hover,nav.rail a:focus-visible{color:var(--ink);background:var(--accent-soft);outline:none}
+nav.rail a b{color:var(--accent);font-weight:500;margin-right:6px}
+
+main{padding-block:28px 64px;display:flex;flex-direction:column;gap:56px}
+section.session{scroll-margin-top:64px;display:flex;flex-direction:column;gap:18px}
+.s-head{display:grid;grid-template-columns:auto 1fr;gap:4px 16px;align-items:baseline;border-bottom:2px solid var(--ink);padding-bottom:12px}
+.s-num{font-family:var(--f-mono);font-size:13px;color:var(--accent);grid-row:span 2}
+.s-head h2{font-family:var(--f-display);font-weight:600;font-size:24px;margin:0;line-height:1.2;text-wrap:balance}
+.s-meta{font-size:13px;color:var(--muted);font-family:var(--f-mono)}
+
+.lab{background:var(--paper);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.lab.done{border-color:color-mix(in srgb,var(--ok) 45%,var(--line))}
+.lab-head{display:flex;align-items:flex-start;gap:12px;padding:14px 16px 10px}
+.lab-head input{appearance:none;flex:none;width:20px;height:20px;margin-top:2px;border:1.5px solid var(--muted);border-radius:4px;cursor:pointer;display:grid;place-content:center;background:var(--paper)}
+.lab-head input:checked{background:var(--ok);border-color:var(--ok)}
+.lab-head input:checked::after{content:"";width:5px;height:10px;border:solid var(--paper);border-width:0 2px 2px 0;transform:translateY(-1px) rotate(45deg)}
+.lab-head input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.lab-title{display:flex;flex-direction:column;gap:2px;min-width:0}
+.lab-title label{font-weight:600;cursor:pointer}
+.lab-title .n{font-family:var(--f-mono);font-size:11.5px;color:var(--muted);letter-spacing:.04em}
+.lab.done .lab-title label{text-decoration:line-through;text-decoration-color:var(--muted)}
+.lab p.why{margin:0;padding:0 16px 12px 48px;color:var(--muted);font-size:14px}
+
+.term{position:relative;background:var(--term);color:var(--term-fg);margin:0 16px 14px;border-radius:5px}
+.term pre{margin:0;padding:14px 16px;overflow-x:auto;font-family:var(--f-mono);font-size:12.8px;line-height:1.65}
+.term .c{color:var(--term-cmt)}
+.term .p{color:var(--term-dim);user-select:none}
+.copy{position:absolute;top:6px;right:6px;font-family:var(--f-mono);font-size:11px;color:var(--term-fg);background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:4px;padding:3px 8px;cursor:pointer}
+.copy:hover{background:rgba(255,255,255,.16)}
+
+ul.expect{margin:0 16px 14px 48px;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px;font-size:14px}
+ul.expect li{padding-left:16px;position:relative}
+ul.expect li::before{content:"→";position:absolute;left:0;color:var(--accent)}
+ul.expect code,.why code,.note code{font-family:var(--f-mono);font-size:12.5px;background:var(--accent-soft);padding:1px 5px;border-radius:3px}
+.note{margin:0 16px 14px;padding:9px 12px;background:var(--warn-bg);color:var(--warn);border-radius:4px;font-size:13.5px}
+.note code{background:transparent;padding:0}
+
+footer{border-top:1px solid var(--line);padding-block:20px 40px;color:var(--muted);font-size:13px}
+
+@media (max-width:520px){
+  .lab p.why,ul.expect{margin-left:16px;padding-left:0}
+  .lab p.why{padding:0 16px 12px}
+  .term{margin-inline:10px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+html{scroll-behavior:smooth}
+</style>
+
+<header class="top"><div class="wrap">
+  <div class="eyebrow">312 School · Containers · cluster containers-26a</div>
+  <h1>Kubernetes Lab Runbook</h1>
+  <p class="lede">Every hands-on part of Sessions 04–13, in the order you run them. Copy a block, run it, check what you should see, then tick the lab off. Your ticks are saved in this browser.</p>
+  <div class="progress"><div class="bar"><i id="barFill"></i></div><span id="count">0 / 0 labs</span><button class="reset" id="resetBtn" type="button">Clear ticks</button></div>
+</div></header>
+
+<nav class="rail" aria-label="Sessions"><div class="wrap" id="rail"></div></nav>
+
+<main class="wrap" id="labs"></main>
+
+<footer><div class="wrap">Namespace <code>my-namespace</code> · quota 8 pods, 5 Services, 1 Ingress · always run the two checks before <code>apply</code>, <code>delete</code> or <code>scale</code>.</div></footer>
+
+<script>
+const S = [
+ {id:"s00", num:"S00", title:"Every class: sign in and point kubectl", meta:"Run first, every class day", labs:[
+  {t:"Sign in and set your namespace", why:"The SSO token lasts one day. Without a namespace, kubectl asks about <code>default</code> and gets Forbidden.",
+   code:`aws sso login --profile 312-cluster
+aws sts get-caller-identity --profile 312-cluster
+aws eks update-kubeconfig --name containers-26a --region us-east-1 \\
+  --profile 312-cluster --alias containers-26a   # once per laptop
+kubectl config set-context --current --namespace=my-namespace
+kubectl config get-contexts
+kubectl get pods
+git pull                                          # each session adds a folder`,
+   expect:["<code>*</code> next to containers-26a with your namespace","set-context says <code>created</code> instead of <code>modified</code>? You're on an empty context: run <code>kubectl config use-context containers-26a</code>","<code>No resources found</code> means working and empty","<code>Forbidden … \"default\"</code> means run set-context again"]}
+ ]},
+ {id:"s04", num:"S04", title:"The cluster and the pod", meta:"Setup and vocabulary", labs:[
+  {t:"Look at the cluster", code:`kubectl get nodes          # nodes = EC2 instances
+kubectl get namespaces`,
+   expect:["Find the node in the console: EKS → containers-26a → Compute (us-east-1)"]},
+  {t:"Check your image is amd64", code:`docker image inspect <your-image> --format '{{.Architecture}}'`,
+   expect:["Must print <code>amd64</code>. If <code>arm64</code>, rebuild with <code>--platform linux/amd64</code> and push as v1"]},
+  {t:"Type pod.yaml from memory", why:"Eight lines with the four top-level keys: apiVersion, kind, metadata, spec. Use spaces, never tabs.",
+   code:`apiVersion: v1
+kind: Pod
+metadata:
+  name: drill
+spec:
+  containers:
+    - name: drill
+      image: <ECR drill:v1 URI>
+      ports:
+        - containerPort: 8080`}
+ ]},
+ {id:"s05", num:"S05", title:"Bare pod, then the Deployment", meta:"02-the-cluster-and-the-loop/", labs:[
+  {t:"Bare pod: delete it and nothing returns", code:`kubectl apply -f pod.yaml
+kubectl get pods -o wide              # IP + NODE
+curl --max-time 5 <pod-ip>:8080       # from laptop
+kubectl logs drill
+kubectl describe pod drill
+kubectl delete pod drill
+kubectl get pods`,
+   expect:["curl times out: the pod network isn't reachable from your laptop","Events: Scheduled → Pulled → Created → Started","After delete: <code>No resources found</code>, still none 10 s later"]},
+  {t:"Deployment: delete a pod and it comes back", code:`kubectl apply -f deployment-drill.yaml
+kubectl get deploy,rs,pods -l app=drill
+kubectl get pods -w                   # terminal 2
+kubectl delete pod drill-<hash>-<id>  # terminal 1`,
+   expect:["Old pod Terminating, new name Pending → ContainerCreating → Running"]},
+  {t:"Break the label", why:"Under <code>template</code>, change <code>app: drill</code> to <code>app: drilx</code>.",
+   code:`kubectl apply -f deployment-drill.yaml   # refused
+# change it back
+kubectl apply -f deployment-drill.yaml   # unchanged`,
+   expect:["<code>selector does not match template labels</code>"]},
+  {t:"Scale vs the file", code:`kubectl scale deploy/drill --replicas=3
+kubectl get rs                            # same RS, DESIRED 3
+kubectl apply -f deployment-drill.yaml    # file says 2`,
+   expect:["Back to two pods with no error. Last write wins"]},
+  {t:"Clean up", code:`kubectl delete -f deployment-drill.yaml -f pod.yaml --ignore-not-found`}
+ ]},
+ {id:"s06", num:"S06", title:"Restarts, port-forward, rollouts, broken pods", meta:"02-the-cluster-and-the-loop/", labs:[
+  {t:"Read what the cluster stores", code:`kubectl get rs -o yaml
+kubectl get pod <pod> -o yaml       # the image the pod really runs`},
+  {t:"port-forward to the Deployment", code:`kubectl port-forward deploy/drill 8000:8080   # terminal 1
+curl localhost:8000                           # terminal 2`,
+   expect:["Hello from the drill app","Ctrl+C in terminal 1, then curl fails: Couldn't connect"]},
+  {t:"Rolling update and undo", code:`kubectl set image deployment/drill drill=<registry>/drill:v2
+kubectl rollout status deploy/drill
+kubectl get rs                                # old 0, new 2
+kubectl port-forward deploy/drill 8000:8080   # restart the tunnel
+curl localhost:8000                           # version 2
+kubectl rollout undo deploy/drill`,
+   expect:["Old ReplicaSet kept at 0 pods; undo scales it back up"]},
+  {t:"Exec form vs shell form", code:`time kubectl delete pod drill          # exec form
+time kubectl delete pod drill-shell    # shell form`,
+   expect:["~3 s vs ~32 s. The shell swallows SIGTERM, so Kubernetes waits the 30 s grace period"]},
+  {t:"Diagnose three broken pods", why:"Read them in this order: get → describe → logs. Delete the timed pods first to stay under 8 pods.",
+   code:`kubectl delete pod drill drill-shell --ignore-not-found
+kubectl apply -f broken/
+kubectl get pods
+kubectl describe pod image-pull
+kubectl logs wrong-arch
+kubectl logs missing-env`,
+   expect:["image-pull: ImagePullBackOff, <code>not found</code> (bad tag), seen in describe","wrong-arch: <code>exec format error</code>, seen in logs","missing-env: <code>KeyError: 'DB_HOST'</code>, seen in logs"]},
+  {t:"command and args override", code:`kubectl apply -f command-args.yaml
+kubectl get pod command-args     # Completed
+kubectl logs command-args`,
+   expect:["command = ENTRYPOINT, args = CMD"]},
+  {t:"Assignment and clean up", why:"Your image as a Deployment · a rollout and undo between two of your tags · investment app + Postgres until <code>/health</code> answers via port-forward · write up the three broken pods.",
+   code:`kubectl delete -f . -f broken/ --ignore-not-found
+kubectl get pods`}
+ ]},
+ {id:"s07", num:"S07", title:"Services and the three types", meta:"03-reaching-the-application/ · scenarios 1–4, 6, 8", labs:[
+  {t:"Pod IPs break", code:`kubectl exec client -- curl -s http://<drill-pod-ip>:8080
+kubectl delete pod <that-pod>
+kubectl exec client -- curl -s --max-time 5 http://<same-ip>:8080
+kubectl get pods -o wide`,
+   expect:["No answer: the replacement has a new IP"]},
+  {t:"Service and EndpointSlice", code:`kubectl apply -f service-drill.yaml
+kubectl get svc drill
+kubectl exec client -- curl -s http://drill
+kubectl get endpointslices -l kubernetes.io/service-name=drill
+kubectl delete pod <one-drill-pod>
+kubectl get endpointslices -l kubernetes.io/service-name=drill
+kubectl get svc drill`,
+   expect:["One IP in the slice changes; the Service's CLUSTER-IP stays the same"]},
+  {t:"Break the Service", why:"Try these two separately, then fix each one.",
+   code:`# 1. wrong targetPort in service-drill.yaml → apply
+kubectl exec client -- curl -s http://drill
+# 2. selector app: dril → apply
+kubectl get endpointslices -l kubernetes.io/service-name=drill`,
+   expect:["Wrong targetPort: <code>Connection refused</code>","Selector typo: empty slice, no error or warning"]},
+  {t:"ClusterIP is inside only", code:`curl http://drill               # from your Mac`,
+   expect:["Could not resolve host"]},
+  {t:"port-forward to the Service", code:`kubectl port-forward svc/drill 8000:80
+curl localhost:8000`},
+  {t:"LoadBalancer is refused", code:`kubectl apply -f service-drill-loadbalancer.yaml`,
+   expect:["Forbidden: exceeded quota, <code>services.loadbalancers=0</code>"]},
+  {t:"DNS from the client pod", code:`kubectl exec client -- cat /etc/resolv.conf
+kubectl exec client -- nslookup drill`,
+   expect:["nameserver 172.20.0.10 (CoreDNS)","drill.my-namespace.svc.cluster.local"]},
+  {t:"Clean up", code:`kubectl delete -f . --ignore-not-found
+kubectl get pods,svc`}
+ ]},
+ {id:"s08", num:"S08", title:"Probes and the Ingress", meta:"03-reaching-the-application/ · scenarios 5, 9", note:"Replace <code>IMAGE_URI</code> in every file, including the wrong-path and liveness files.", labs:[
+  {t:"Readiness and the stuck rollout", code:`kubectl apply -f deployment-drill-readiness.yaml
+kubectl apply -f deployment-drill-readiness-wrong-path.yaml
+kubectl get pods -l app=drill -w
+kubectl rollout status deploy/drill
+kubectl describe pod <new-pod>
+kubectl get rs -l app=drill
+kubectl apply -f deployment-drill-readiness.yaml   # fix`,
+   expect:["New pod Running but READY 0/1; old pods keep serving","<code>Readiness probe failed … statuscode: 404</code>","After the fix, the wrong ReplicaSet scales to 0"]},
+  {t:"A not-ready pod in the EndpointSlice", code:`kubectl describe endpointslices -l kubernetes.io/service-name=drill | grep -E 'Addresses|Ready'
+kubectl exec client -- curl -s http://drill`,
+   expect:["The new pod is listed with <code>Ready: false</code> and gets no traffic"]},
+  {t:"Liveness restarts the container", code:`kubectl apply -f pod-drill-liveness.yaml
+kubectl get pod drill-liveness -w
+kubectl describe pod drill-liveness`,
+   expect:["RESTARTS climbs → CrashLoopBackOff (10 s, 20 s, 40 s … 5 min)","Same pod name and IP"]},
+  {t:"Ingress on your own hostname", code:`kubectl get ingressclass
+kubectl get ingressclassparams alb -o yaml
+kubectl apply -f ingress-drill.yaml
+kubectl get ingress drill                 # ADDRESS after ~1 min
+curl https://my-namespace.k8s.312school.com
+curl -sI http://my-namespace.k8s.312school.com | head -1`,
+   expect:["Hello from the drill app over HTTPS","HTTP returns <code>301</code> to 443"],
+   warn:"Keep <code>port: number: 80</code>. A wrong port freezes the shared ALB for the whole class."},
+  {t:"Clean up", code:`kubectl delete -f . --ignore-not-found
+kubectl get pods,svc,ingress`}
+ ]},
+ {id:"s09", num:"S09", title:"ConfigMaps and Secrets", meta:"04-config-secrets-identity/", note:"Pull <code>main</code> first. Use your own amd64 investment-app image in both Deployment files.", labs:[
+  {t:"Apply in order", why:"Postgres before the app, or the app can't resolve <code>db</code> and crashes.",
+   code:`kubectl apply -f configmap-investment-app.yaml
+kubectl apply -f secret-investment-app.yaml
+kubectl apply -f postgres.yaml
+kubectl apply -f deployment-investment-app.yaml
+kubectl rollout status deploy/investment-app`},
+  {t:"Inspect config and secrets", code:`kubectl get cm
+kubectl describe cm investment-app-config
+kubectl describe secret investment-app-secret
+kubectl get secret investment-app-secret -o jsonpath='{.data.DB_PASSWORD}' | base64 -d
+kubectl describe pod -l app=investment-app
+kubectl exec deploy/investment-app -- env`,
+   expect:["describe secret shows sizes only; base64 -d shows the plain password","describe pod shows where each value comes from; exec env shows the values"]},
+  {t:"Wrong ConfigMap name", code:`kubectl apply -f deployment-investment-app-missing-configmap.yaml
+kubectl get pods -l app=investment-app-broken
+kubectl logs deploy/investment-app-broken
+kubectl describe pod -l app=investment-app-broken
+kubectl delete -f deployment-investment-app-missing-configmap.yaml`,
+   expect:["<code>CreateContainerConfigError</code> with no logs","Events: <code>configmap \"investment-app-configs\" not found</code>"]},
+  {t:"Edit a ConfigMap, then restart", code:`kubectl edit configmap investment-app-config     # TICKER: MSFT
+kubectl exec deploy/investment-app -- printenv TICKER
+kubectl rollout restart deploy/investment-app
+kubectl rollout status deploy/investment-app
+kubectl exec deploy/investment-app -- printenv TICKER`,
+   expect:["Still AAPL before the restart, MSFT after"]},
+  {t:"Clean up", code:`kubectl delete -f . --ignore-not-found
+kubectl get pods,cm,secret       # kube-root-ca.crt stays`}
+ ]},
+ {id:"s10", num:"S10", title:"RBAC: who may do what", meta:"Two checks · Roles & bindings · read-only Claude Code", labs:[
+  {t:"See who the cluster thinks you are", code:`kubectl auth whoami`,
+   expect:["Username <code>student:my-namespace</code>, Groups <code>[students system:authenticated]</code>"]},
+  {t:"Ask what you may do", why:"<code>can-i</code> only answers yes or no. It changes nothing.",
+   code:`kubectl auth can-i get secrets                  # yes
+kubectl auth can-i delete pods                  # yes
+kubectl auth can-i get secrets -n <classmate>   # no
+kubectl get secrets -n <classmate>`,
+   expect:["Forbidden message: read <b>who</b> (<code>User \"student:…\"</code>), <b>what</b> (<code>cannot list resource \"secrets\"</code>), <b>where</b> (the namespace)","Unauthorized = AWS check failed. Forbidden = RBAC check failed"]},
+  {t:"See which ServiceAccount your app runs as", code:`kubectl describe pod -l app=investment-app | grep 'Service Account'
+kubectl get sa`,
+   expect:["<code>default</code>, because the pod names no ServiceAccount"]},
+  {t:"Read the class's RBAC objects", code:`kubectl get clusterrole edit -o yaml     # the rules you get
+kubectl get rolebinding                  # your bindings`,
+   expect:["Your RoleBinding points at ClusterRole <code>edit</code>, in your namespace only"]},
+  {t:"report-bot: least privilege (instructor demo)", why:"Students can't create Roles or use <code>--as</code>, so read along. It shows a Role alone gives nothing until it's bound.",
+   code:`BOT=system:serviceaccount:instructor:report-bot
+kubectl apply -f serviceaccount-report-bot.yaml -f role-configmap-reader.yaml
+kubectl auth can-i get configmaps --as $BOT      # no
+kubectl apply -f rolebinding-report-bot.yaml
+kubectl auth can-i get configmaps --as $BOT      # yes
+kubectl auth can-i get secrets --as $BOT         # no`},
+  {t:"Read-only sign-in for Claude Code", why:"First add the <code>[profile 312-cluster-readonly]</code> block from the setup page and write <code>~/.kube/readonly</code>. Your own kubeconfig stays as it is.",
+   code:`aws sso login --profile 312-cluster-readonly
+KUBECONFIG=~/.kube/readonly kubectl auth whoami
+KUBECONFIG=~/.kube/readonly kubectl auth can-i get secrets
+KUBECONFIG=~/.kube/readonly AWS_PROFILE=312-cluster-readonly claude`,
+   expect:["<code>readonly:my-namespace</code>, and can-i get secrets says <code>no</code>","Ask Claude to create a pod: Forbidden. Ask it to list pods: works"]}
+ ]},
+ {id:"s11", num:"S11", title:"External Secrets, requests and limits", meta:"04-config-secrets-identity/ · 05-health-and-capacity/", labs:[
+  {t:"Read the password the old way", code:`kubectl get secret investment-app-secret -o jsonpath='{.data.DB_PASSWORD}' | base64 -d`,
+   expect:["The plain password. That's why the Secret file can't go in Git"]},
+  {t:"Swap in the ExternalSecret", why:"In <code>externalsecret-investment-app.yaml</code>, replace <code>NAMESPACE</code> in the path with your namespace.",
+   code:`cd 04-config-secrets-identity
+kubectl delete secret investment-app-secret
+kubectl apply -f externalsecret-investment-app.yaml
+kubectl get externalsecret
+kubectl get secret investment-app-secret -o yaml
+kubectl rollout restart deploy/postgres deploy/investment-app`,
+   expect:["<code>SecretSynced</code>, READY <code>True</code>","The Secret now holds DB_PASSWORD and FINNHUB_KEY copied from AWS","<code>InvalidImageName</code>? Set your image in the Deployment file and re-apply"]},
+  {t:"Ask for a classmate's password", why:"Put a classmate's namespace in the path of <code>externalsecret-other-path.yaml</code>.",
+   code:`kubectl apply -f externalsecret-other-path.yaml
+kubectl get externalsecret other-path
+kubectl describe externalsecret other-path
+kubectl delete externalsecret other-path`,
+   expect:["Kubernetes accepts it; AWS refuses: <code>SecretSyncedError</code>","Events: <code>AccessDeniedException … GetSecretValue</code> on their path"]},
+  {t:"Debug a sync that fails", code:`kubectl get externalsecret
+kubectl get secretstore
+kubectl get pods -n external-secrets
+kubectl logs <operator-pod> -n external-secrets`},
+  {t:"Measure before choosing numbers", code:`kubectl top pods -l app=investment-app
+kubectl describe pods -l app=investment-app
+kubectl logs <pod> --previous                # if RESTARTS > 0`,
+   expect:["About <code>1m</code> CPU and <code>81Mi</code> memory: almost idle. One top is a snapshot"]}
+ ]},
+ {id:"s12", num:"S12", title:"Namespace limits and the HPA", meta:"05-health-and-capacity/", labs:[
+  {t:"Patch requests and limits onto the app", code:`cd 05-health-and-capacity
+kubectl get deployment investment-app -o yaml      # resources: {}
+kubectl patch deployment investment-app --type=strategic \\
+  --patch-file investment-app-resources.patch.yaml
+kubectl rollout status deployment/investment-app --timeout=120s
+kubectl get deployment investment-app -o yaml`,
+   expect:["Requests 100m / 128Mi, limits 250m / 256Mi"],
+   warn:"Patch changes the cluster, not your file. Put the same <code>resources:</code> in the YAML, or the next apply undoes it."},
+  {t:"Read your LimitRange", code:`kubectl get limitrange -o yaml
+kubectl get pods -l app=investment-app -o yaml   # what each pod actually got`,
+   expect:["Defaults 50m/64Mi request, 250m/256Mi limit; max 1 CPU / 1Gi per container","A value you wrote is kept. Over the max is refused with 403"]},
+  {t:"Hit the ResourceQuota", code:`kubectl describe resourcequota
+kubectl apply -f deployment-quota-failure.yaml   # asks for 600m CPU
+kubectl get pods -l app=unit5-quota
+kubectl describe rs -l app=unit5-quota
+kubectl delete -f deployment-quota-failure.yaml`,
+   expect:["<code>No resources found</code>: the pod is never created, not even Pending","ReplicaSet events: <code>FailedCreate … exceeded quota</code>"]},
+  {t:"Watch the HPA add a pod", code:`kubectl top pods
+kubectl apply -f deployment-cpu-demo.yaml
+kubectl rollout status deployment/unit5-cpu --timeout=120s
+kubectl apply -f hpa-cpu-demo.yaml
+kubectl get hpa unit5-cpu                       # ~2%/60%, 1 replica
+kubectl apply -f pod-load.yaml
+kubectl get hpa unit5-cpu --watch               # passes 60% → 2 replicas
+kubectl top pods -l app=unit5-cpu
+kubectl describe hpa unit5-cpu
+kubectl logs pod-load
+kubectl delete -f pod-load.yaml`,
+   expect:["<code>&lt;unknown&gt;</code> target at first is normal","Events: <code>SuccessfulRescale … New size: 2</code>; back to 1 after the load stops"]},
+  {t:"Clean up", code:`kubectl delete -f pod-load.yaml -f hpa-cpu-demo.yaml -f deployment-cpu-demo.yaml --ignore-not-found`}
+ ]},
+ {id:"s13", num:"S13", title:"Storage and Jobs", meta:"06-storage-and-jobs/", note:"Run <code>export NAMESPACE=my-namespace</code> first.", labs:[
+  {t:"Lose the table (no volume)", code:`kubectl -n "$NAMESPACE" apply -f postgres-ephemeral.yaml
+kubectl -n "$NAMESPACE" exec -i deployment/unit6-postgres -- sh -ec \\
+  'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -v ON_ERROR_STOP=1' < schema.sql
+kubectl -n "$NAMESPACE" delete pod -l app=unit6-postgres
+kubectl -n "$NAMESPACE" exec deployment/unit6-postgres -- sh -ec \\
+  'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "SELECT side, price FROM trades;"'`,
+   expect:["<code>relation \"trades\" does not exist</code>: the new pod started fresh from the image"]},
+  {t:"Create the claim", code:`kubectl get sc
+kubectl -n "$NAMESPACE" scale deployment/unit6-postgres --replicas=0
+kubectl -n "$NAMESPACE" apply -f pvc.yaml
+kubectl -n "$NAMESPACE" get pvc postgres-data-unit6`,
+   expect:["STATUS <code>Pending</code> is normal: <code>WaitForFirstConsumer</code> waits for a pod"]},
+  {t:"Keep the table (with the claim)", code:`kubectl -n "$NAMESPACE" apply -f postgres-persistent.yaml
+kubectl -n "$NAMESPACE" get pvc,pv
+# create the table and INSERT ('buy', 150.00), then:
+kubectl -n "$NAMESPACE" delete pod -l app=unit6-postgres
+kubectl -n "$NAMESPACE" exec deployment/unit6-postgres -- sh -ec \\
+  'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "SELECT side, price FROM trades;"'`,
+   expect:["Claim <code>Bound</code> to a PV nobody wrote; a new gp3 volume in EC2 → Volumes","<code>buy | 150.00</code> survives the new pod","Claim still Pending after the pod exists? <code>kubectl describe pvc postgres-data-unit6</code>"]},
+  {t:"Build the revised app", why:"The revised <code>app.py</code> no longer creates tables. Log in to ECR first.",
+   code:`export REVISED_IMAGE=<account>.dkr.ecr.us-east-1.amazonaws.com/<repo>:<tag>
+docker build --platform linux/amd64 -t "$REVISED_IMAGE" app/   # run from 06-storage-and-jobs
+docker push "$REVISED_IMAGE"`,
+   expect:["Keep the double quotes around <code>\"$REVISED_IMAGE\"</code>"]},
+  {t:"Run the schema Job", code:`kubectl -n "$NAMESPACE" get svc unit6-db          # must exist first
+kubectl -n "$NAMESPACE" create configmap unit6-schema \\
+  --from-file=schema.sql --dry-run=client -o yaml | kubectl -n "$NAMESPACE" apply -f -
+kubectl -n "$NAMESPACE" apply -f schema-job.yaml
+kubectl -n "$NAMESPACE" wait --for=condition=complete job/unit6-schema --timeout=180s
+kubectl -n "$NAMESPACE" logs job/unit6-schema`,
+   expect:["<code>Complete</code>, then deploy the app. Kubernetes doesn't make the app wait for the Job","<code>could not translate host name \"unit6-db\"</code>: apply the Service, then delete and re-apply the Job","Failed? <code>kubectl get jobs</code> 0/1 → <code>describe job</code> → <code>BackoffLimitExceeded</code>. Read pod logs before cleanup"]},
+  {t:"Deploy the app and test it", code:`# set REVISED_IMAGE in the app Deployment, then apply it
+kubectl -n "$NAMESPACE" port-forward deploy/<app> 8080:8080
+curl localhost:8080`,
+   expect:["HTTP 500 means the tables don't exist yet: run the Job first"]},
+  {t:"Clean up", why:"<code>unit6-ebs</code> uses <code>Delete</code>, so the EBS disk goes with the claim.",
+   code:`kubectl -n "$NAMESPACE" delete job unit6-schema --ignore-not-found
+kubectl -n "$NAMESPACE" delete -f postgres-persistent.yaml -f pvc.yaml --ignore-not-found
+kubectl -n "$NAMESPACE" get pvc,pv`,
+   expect:["Check EC2 → Volumes: the disk should be gone"]}
+ ]}
+];
+
+const KEY="k8s-lab-ticks-v1";
+let ticks={};
+try{ticks=JSON.parse(localStorage.getItem(KEY)||"{}")||{}}catch(e){ticks={}}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(ticks))}catch(e){}};
+
+function highlight(code){
+  const esc=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  return code.split("\n").map(line=>{
+    if(/^\s*#/.test(line)) return `<span class="c">${esc(line)}</span>`;
+    const i=line.indexOf("   #");
+    const j=i<0?line.indexOf("  #"):i;
+    if(j>0) return esc(line.slice(0,j))+`<span class="c">${esc(line.slice(j))}</span>`;
+    return esc(line);
+  }).join("\n");
+}
+function stripComments(code){
+  return code.split("\n").filter(l=>!/^\s*#/.test(l)).map(l=>{const j=l.search(/\s{2,}#/);return j>0?l.slice(0,j).trimEnd():l}).join("\n");
+}
+
+const rail=document.getElementById("rail"), main=document.getElementById("labs");
+let total=0;
+S.forEach(s=>{
+  const a=document.createElement("a"); a.href="#"+s.id; a.innerHTML=`<b>${s.num}</b>${s.title.split(":")[0].split(",")[0]}`; rail.appendChild(a);
+  const sec=document.createElement("section"); sec.className="session"; sec.id=s.id;
+  sec.innerHTML=`<div class="s-head"><span class="s-num">${s.num}</span><h2>${s.title}</h2><span class="s-meta">${s.meta}</span></div>`+(s.note?`<p class="note" style="margin:0">${s.note}</p>`:"");
+  s.labs.forEach((l,i)=>{
+    total++;
+    const id=`${s.id}-${i}`;
+    const el=document.createElement("article"); el.className="lab"+(ticks[id]?" done":"");
+    el.innerHTML=`<div class="lab-head"><input type="checkbox" id="${id}" ${ticks[id]?"checked":""}><div class="lab-title"><span class="n">LAB ${s.num.slice(1)}.${i+1}</span><label for="${id}">${l.t}</label></div></div>`+
+      (l.why?`<p class="why">${l.why}</p>`:"")+
+      `<div class="term"><button class="copy" type="button">Copy</button><pre>${highlight(l.code)}</pre></div>`+
+      (l.expect?`<ul class="expect">${l.expect.map(x=>`<li>${x}</li>`).join("")}</ul>`:"")+
+      (l.warn?`<p class="note">⚠ ${l.warn}</p>`:"");
+    const cb=el.querySelector("input");
+    cb.addEventListener("change",()=>{ticks[id]=cb.checked; if(!cb.checked)delete ticks[id]; el.classList.toggle("done",cb.checked); save(); update();});
+    const btn=el.querySelector(".copy"), pre=el.querySelector("pre");
+    btn.addEventListener("click",()=>{
+      const txt=stripComments(l.code);
+      const done=()=>{btn.textContent="Copied";setTimeout(()=>btn.textContent="Copy",1400)};
+      const fallback=()=>{const r=document.createRange();r.selectNodeContents(pre);const sel=getSelection();sel.removeAllRanges();sel.addRange(r);btn.textContent="Selected"};
+      try{navigator.clipboard.writeText(txt).then(done,fallback)}catch(e){fallback()}
+    });
+    sec.appendChild(el);
+  });
+  main.appendChild(sec);
+});
+function update(){
+  const n=Object.keys(ticks).filter(k=>ticks[k]).length;
+  document.getElementById("count").textContent=`${n} / ${total} labs`;
+  document.getElementById("barFill").style.width=(total?n/total*100:0)+"%";
+}
+document.getElementById("resetBtn").addEventListener("click",()=>{
+  ticks={}; save(); document.querySelectorAll(".lab").forEach(l=>{l.classList.remove("done");l.querySelector("input").checked=false}); update();
+});
+update();
+if(location.hash){const t=document.getElementById(location.hash.slice(1)); if(t) t.scrollIntoView();}
+</script>
+
+</body></html>

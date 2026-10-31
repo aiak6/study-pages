@@ -1,0 +1,377 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Session 12 — Namespace Limits &amp; the HPA</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one reading column; sections as stacked "shipping manifest" blocks with a stencilled label; code and tables scroll in place. */
+:root{
+  --bg:#f3f5f7; --surface:#ffffff; --ink:#15202b; --muted:#56657a; --line:#d8dee6;
+  --accent:#c4501b; --accent-soft:#fbe9df; --steel:#1f5f8b; --steel-soft:#e3eef6;
+  --code-bg:#0f1b26; --code-fg:#dbe7f2; --code-cmt:#7f97ad;
+  --good:#2e7d4f; --bad:#b3261e;
+  --f-display:"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --f-body:"Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e151c; --surface:#16202a; --ink:#e6edf3; --muted:#9aabbd; --line:#2a3845;
+  --accent:#f0874f; --accent-soft:#3a2418; --steel:#7ab8e3; --steel-soft:#16303f;
+  --code-bg:#0a1016; --code-fg:#dbe7f2; --code-cmt:#6f879c;
+  --good:#6cc493; --bad:#f08a80; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0e151c; --surface:#16202a; --ink:#e6edf3; --muted:#9aabbd; --line:#2a3845;
+  --accent:#f0874f; --accent-soft:#3a2418; --steel:#7ab8e3; --steel-soft:#16303f;
+  --code-bg:#0a1016; --code-fg:#dbe7f2; --code-cmt:#6f879c;
+  --good:#6cc493; --bad:#f08a80; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:17px/1.6 var(--f-body);padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:28px 64px}
+.wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.15;margin:0}
+h1{font-size:clamp(30px,6vw,44px);font-weight:800;letter-spacing:-.01em}
+h2{font-size:24px;font-weight:800}
+h3{font-size:18px;font-weight:600;margin-top:6px}
+p{margin:0}
+a{color:var(--steel)}
+code{font-family:var(--f-mono);font-size:.86em;background:var(--steel-soft);color:var(--ink);padding:1px 5px;border-radius:4px}
+strong{font-weight:700}
+.eyebrow{font:600 12px/1 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+header{display:flex;flex-direction:column;gap:12px;border-bottom:3px solid var(--ink);padding-bottom:20px}
+.meta{display:flex;flex-wrap:wrap;gap:8px 16px;color:var(--muted);font-size:15px}
+.lede{font-size:19px;max-width:65ch}
+nav{display:flex;flex-wrap:wrap;gap:8px}
+nav a{font:600 13px/1 var(--f-mono);text-decoration:none;color:var(--ink);border:1px solid var(--line);background:var(--surface);padding:8px 10px;border-radius:6px}
+nav a:hover,nav a:focus-visible{border-color:var(--accent);color:var(--accent);outline:none}
+section{display:flex;flex-direction:column;gap:14px;scroll-margin-top:16px}
+section > .label{display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--line);padding-bottom:8px}
+section > .label .tag{font:600 11px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--surface);background:var(--ink);padding:5px 7px;border-radius:3px}
+ul,ol{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px}
+.table{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:15.5px;min-width:480px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:600 12px/1.3 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--bg)}
+tr:last-child td{border-bottom:0}
+blockquote{margin:0;border-left:4px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 8px 8px 0;font-weight:600}
+pre{margin:0;background:var(--code-bg);color:var(--code-fg);font:14px/1.6 var(--f-mono);padding:14px 16px;border-radius:8px;overflow-x:auto}
+pre .c{color:var(--code-cmt)}
+.codebox{position:relative}
+.copy{position:absolute;top:8px;right:8px;font:600 11px/1 var(--f-mono);background:transparent;color:var(--code-cmt);border:1px solid var(--code-cmt);border-radius:4px;padding:5px 7px;cursor:pointer}
+.copy:hover,.copy:focus-visible{color:var(--code-fg);border-color:var(--code-fg);outline:none}
+.flow{font:600 14px/1.5 var(--f-mono);background:var(--steel-soft);color:var(--ink);padding:14px 16px;border-radius:8px;overflow-x:auto;white-space:pre}
+.step{display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:start}
+.step > .n{font:800 18px/34px var(--f-display);text-align:center;background:var(--ink);color:var(--bg);border-radius:50%;width:34px;height:34px}
+.step > div{min-width:0;display:flex;flex-direction:column;gap:8px}
+.see{font-size:15px;color:var(--good)}
+.see::before{content:"You should see: ";font-weight:700}
+.warn{border:1px solid var(--bad);border-radius:8px;padding:12px 16px;display:flex;flex-direction:column;gap:10px;background:var(--surface)}
+.warn .eyebrow{color:var(--bad)}
+details{border:1px solid var(--line);background:var(--surface);border-radius:8px}
+details summary{cursor:pointer;padding:12px 16px;font-weight:600;list-style-position:inside}
+details summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:8px}
+details > div{padding:0 16px 14px;display:flex;flex-direction:column;gap:8px}
+.q{display:flex;flex-direction:column;gap:10px}
+.q p.ask{font-weight:600}
+.reread{font-style:italic;color:var(--muted);font-size:15px}
+footer{color:var(--muted);font-size:15px;border-top:1px solid var(--line);padding-top:16px}
+@media (prefers-reduced-motion: reduce){*{scroll-behavior:auto!important}}
+html{scroll-behavior:smooth}
+</style>
+
+<div class="wrap">
+<header>
+  <span class="eyebrow">312 School · Cohort 26a · Containers &amp; Orchestration · Notes</span>
+  <h1>Session 12: Namespace limits &amp; the HPA</h1>
+  <div class="meta"><span>Thu, Oct 22, 2026</span><span>Maher (Mo) + after class with Bakhtiyar</span><span>kubectl patch · Pending &amp; taints · LimitRange · ResourceQuota · HPA · Karpenter</span></div>
+  <p class="lede"><em>Unit 5, part 2. Session 11 explained request, use and limit. Tonight the investment app actually gets them, with <code>kubectl patch</code>, which changes the Deployment in the cluster but not your file. Then the namespace's own rules: a <strong>LimitRange</strong> that fills in missing values and rejects anything over a per-container maximum, and a <strong>ResourceQuota</strong> that caps the whole namespace, so a pod over it is never even created. Then scaling: the <strong>HPA</strong> adds pods when CPU (measured against the request) passes a target, and <strong>Karpenter</strong> adds nodes when pods don't fit. It ends on the limit of all that scaling: when the database is down, no number of pods brings the app back.</em></p>
+  <nav aria-label="Sections">
+    <a href="#qr">Quick ref</a><a href="#recap">Recap</a><a href="#patch">Patch</a><a href="#pending">Pending</a><a href="#limitrange">LimitRange</a><a href="#quota">Quota</a><a href="#events">Events</a><a href="#hpa">HPA</a><a href="#live">HPA live</a><a href="#karpenter">Karpenter</a><a href="#db">DB down</a><a href="#next">Next</a><a href="#quiz">Quiz</a>
+  </nav>
+</header>
+
+<section id="qr">
+  <div class="label"><span class="tag">⚡</span><h2>Quick Reference</h2></div>
+  <div class="table"><table>
+    <thead><tr><th>Topic</th><th>Key point</th></tr></thead>
+    <tbody>
+      <tr><td><strong><code>kubectl patch</code></strong></td><td>Merges a fragment into the <strong>live</strong> Deployment (etcd). Your YAML is unchanged → <strong>update the file and push</strong>, or the next <code>apply</code> undoes it</td></tr>
+      <tr><td><strong>Patch file</strong></td><td>Starts at the path it changes (<code>spec.template.spec.containers</code>), no <code>apiVersion</code>/<code>kind</code>. Requests <strong>100m / 128Mi</strong>, limits <strong>250m / 256Mi</strong></td></tr>
+      <tr><td><strong>Pending: 3 reasons</strong></td><td><strong>Not enough capacity</strong> · <strong>placement rule</strong> (e.g. a <strong>taint</strong>) · <strong>node not Ready yet</strong></td></tr>
+      <tr><td><strong>LimitRange</strong></td><td>Per container: <strong>fills in</strong> missing values (50m/64Mi req, 250m/256Mi lim), <strong>rejects</strong> over max (1 CPU / 1Gi) → 403. <strong>Max is not a default</strong></td></tr>
+      <tr><td><strong>ResourceQuota</strong></td><td>Namespace <strong>total</strong> of what pods <em>declare</em>: 500m CPU req, 1Gi mem req, 2 CPU / 2Gi limits, <strong>8 pods</strong></td></tr>
+      <tr><td><strong>Over quota</strong></td><td><strong>No pod is created.</strong> <code>describe rs</code> → <code>FailedCreate: exceeded quota</code>. A new node can't help</td></tr>
+      <tr><td><strong>Read the event on the object that failed</strong></td><td>Pending → <code>describe pods</code> · no pod → <code>describe rs</code> · restarts → <code>Last State: OOMKilled</code></td></tr>
+      <tr><td><strong>HPA</strong></td><td>Changes the Deployment's replicas toward a target. <strong>Utilization = use ÷ request × 100</strong>. No CPU request = no CPU scaling</td></tr>
+      <tr><td><strong>Karpenter</strong></td><td>In EKS Auto Mode: sees <strong>Pending pods that can't fit</strong> → launches an EC2 node. HPA = pods, Karpenter = machines</td></tr>
+      <tr><td><strong>DB down</strong></td><td>More pods don't help. Readiness stops traffic; <strong>liveness should not fail</strong> for a DB outage</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="recap">
+  <div class="label"><span class="tag">🔁</span><h2>Recap: placement vs execution</h2></div>
+  <ul>
+    <li>A <strong>namespace sits on top of all the nodes</strong>. Your pod may land on node 1, 2 or 3, and its container takes CPU and memory from that node (an EC2 instance).</li>
+    <li>With no requests or limits, one pod can eat a whole node and starve every other pod there, from any namespace (Session 11).</li>
+    <li><strong>Placement</strong> = what must fit before a pod starts (requests). <strong>Execution</strong> = what happens at a limit: CPU → <strong>throttled</strong>, memory → <strong>OOMKilled</strong> (the container restarts in the same pod, RESTARTS +1).</li>
+    <li><code>kubectl top pods -l app=investment-app</code> showed <code>1m</code> CPU and <code>81Mi</code>. That's a snapshot, not a history.</li>
+    <li>Two nodes with 400m free each <strong>can't</strong> hold a 600m pod: a pod's request must fit on <strong>one</strong> node.</li>
+  </ul>
+</section>
+
+<section id="patch">
+  <div class="label"><span class="tag">🩹</span><h2>kubectl patch: requests &amp; limits on the running app</h2></div>
+  <div class="codebox"><pre>cd 05-health-and-capacity
+kubectl get deployment investment-app -o yaml       <span class="c"># resources: {}  → nothing declared yet</span>
+kubectl patch deployment investment-app --type=strategic \
+  --patch-file investment-app-resources.patch.yaml
+kubectl rollout status deployment/investment-app --timeout=120s
+kubectl get deployment investment-app -o yaml       <span class="c"># resources now has requests + limits</span></pre></div>
+  <ul>
+    <li><strong>What patch is:</strong> like <code>k edit</code>, without opening vi and scrolling to <code>resources:</code>. You hand Kubernetes only the piece that changes.</li>
+    <li><strong>The patch file doesn't start with <code>apiVersion</code> or <code>kind</code>.</strong> It starts at the place it changes. Kubernetes walks the live YAML by indentation: <code>spec</code> → <code>template</code> → <code>spec</code> → <code>containers</code> → the container <code>name: investment-app</code> → <code>resources</code>, and merges the values in.</li>
+  </ul>
+  <div class="codebox"><pre>spec:
+  template:
+    spec:
+      containers:
+      - name: investment-app
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 250m
+            memory: 256Mi</pre></div>
+  <ul>
+    <li>Two replicas × 100m / 128Mi = <strong>200m CPU and 256Mi</strong> of requests in total.</li>
+    <li>Changing the pod template = a <strong>rollout</strong>: new ReplicaSet, new pod up, old pod down (Session 06). <code>rollout status</code> doesn't do the rollout; it <strong>watches</strong> it, here for up to 120 s.</li>
+    <li>After the patch, <code>top</code> still shows ~1m used, but <strong>100m is reserved</strong> on the node. The scheduler counts the request, not the use.</li>
+    <li>Editing the file and running <code>kubectl apply -f</code> gives exactly the same result. Patch is for changing something in place.</li>
+    <li>💡 Mo's real use: when <code>terraform destroy</code> hangs because a namespace is stuck on its <strong>finalizers</strong>, you patch the finalizers off the namespace so the cluster (and its bill) can go away.</li>
+  </ul>
+  <blockquote>🔑 Patch changes the cluster (etcd), not your file. If a teammate later runs <code>kubectl apply -f</code> with the old file from Git, your patch is gone. Put the same <code>resources:</code> in the file and push it.</blockquote>
+</section>
+
+<section id="pending">
+  <div class="label"><span class="tag">⏳</span><h2>Pending: three reasons a pod has no node</h2></div>
+  <div class="codebox"><pre>kubectl describe pods -l app=investment-app     <span class="c"># Events at the bottom</span></pre></div>
+  <div class="table"><table>
+    <thead><tr><th>Reason</th><th>Means</th><th>Waits for</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Not enough capacity</strong></td><td>No node has the free CPU/memory the <strong>request</strong> asks for</td><td>Room, or a new node</td></tr>
+      <tr><td><strong>Placement rule</strong></td><td>No node matches the pod's requirements, e.g. every node has a <strong>taint</strong> the pod doesn't tolerate</td><td>You to fix the rule</td></tr>
+      <tr><td><strong>Node unavailable</strong></td><td>A suitable node exists but isn't Ready yet (an autoscaler just launched it)</td><td>A few minutes</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li><code>PodScheduled: False</code> + <code>FailedScheduling</code> = no node assigned. The event names the reason.</li>
+    <li><strong>Taint and toleration</strong>, Mo's analogy: a taint is <strong>bug spray on a node</strong>. A pod without a matching <strong>toleration</strong> can't land there; a pod with one can. If every node is "sprayed", the pod stays Pending.</li>
+    <li>Why teams use taints: keep ordinary pods off <strong>GPU nodes</strong>, give one app nodes of its own, or isolate workloads for <strong>security</strong>. Banks and government apps don't want to share a machine. (Affinity and taints get their own class later.)</li>
+    <li>A pod can also be Pending <strong>after</strong> it has a node, while its image downloads.</li>
+  </ul>
+</section>
+
+<section id="limitrange">
+  <div class="label"><span class="tag">📐</span><h2>LimitRange: defaults &amp; a maximum per container</h2></div>
+  <div class="codebox"><pre>kubectl get limitrange -o yaml                         <span class="c"># your namespace's policy</span>
+kubectl get pods -l app=investment-app -o yaml         <span class="c"># the resources each pod actually got</span></pre></div>
+  <ul>
+    <li>A <strong>LimitRange</strong> is a namespace policy, written by the cluster admins. It does two jobs:
+      <ul>
+        <li><strong>Fills in</strong> requests and limits a container didn't declare.</li>
+        <li><strong>Rejects</strong> a container above its maximum (<strong>403 Forbidden</strong>; the pod isn't created).</li>
+      </ul></li>
+  </ul>
+  <div class="table"><table>
+    <thead><tr><th>Student namespace</th><th>CPU</th><th>Memory</th></tr></thead>
+    <tbody>
+      <tr><td>Default <strong>request</strong></td><td>50m</td><td>64Mi</td></tr>
+      <tr><td>Default <strong>limit</strong></td><td>250m</td><td>256Mi</td></tr>
+      <tr><td><strong>Max</strong> per container</td><td>1 (= 1000m)</td><td>1Gi</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li><strong>A value you write is kept:</strong> a 100m request stays 100m. A 2 CPU limit is rejected.</li>
+    <li>Checked only at <strong>admission</strong> (when the pod is created). Lowering the max doesn't touch running pods; only new pods are refused.</li>
+    <li>Two LimitRanges in one namespace: <strong>which defaults apply is unpredictable</strong>. Keep one.</li>
+    <li>CPU written without <code>m</code> (<code>1</code>) means a whole core.</li>
+    <li>The instructor namespace has no LimitRange or quota, which is why Mo and Bakhtiyar ran their demos against a student namespace or saw nothing refused.</li>
+  </ul>
+  <blockquote>🔑 The maximum is not a default.</blockquote>
+</section>
+
+<section id="quota">
+  <div class="label"><span class="tag">🧮</span><h2>ResourceQuota: a total for the whole namespace</h2></div>
+  <div class="codebox"><pre>kubectl describe resourcequota                     <span class="c"># Used vs Hard</span>
+kubectl apply -f deployment-quota-failure.yaml     <span class="c"># asks for 600m CPU</span>
+kubectl get pods -l app=unit5-quota                <span class="c"># No resources found</span>
+kubectl describe rs -l app=unit5-quota             <span class="c"># FailedCreate ... exceeded quota</span>
+kubectl delete -f deployment-quota-failure.yaml</pre></div>
+  <ul>
+    <li>A <strong>ResourceQuota</strong> adds up what every pod in the namespace <strong>declares</strong> (not what it uses) and refuses a new pod that would push the total over the cap.</li>
+    <li>Your namespace: <strong>500m CPU requests, 1Gi memory requests, 2 CPU limits, 2Gi memory limits, 8 pods</strong>. The app and Postgres you already run count toward these.</li>
+    <li>A 600m pod is refused <strong>even in an empty namespace</strong>: 600m &gt; 500m.</li>
+    <li>The Deployment is accepted, but the <strong>ReplicaSet can't create the pod</strong>. So <code>get pods</code> shows <strong>nothing</strong> (not Pending), and the error lives on the ReplicaSet: <code>forbidden: exceeded quota … requested: requests.cpu=600m, used: requests.cpu=0, limited: requests.cpu=500m</code>.</li>
+  </ul>
+  <div class="table"><table>
+    <thead><tr><th></th><th>LimitRange</th><th>ResourceQuota</th></tr></thead>
+    <tbody>
+      <tr><td>Checks</td><td><strong>Each container</strong></td><td><strong>The namespace total</strong></td></tr>
+      <tr><td>Says</td><td>"No single container may ask for more than X"</td><td>"The namespace may not ask for more than Y in total"</td></tr>
+      <tr><td>Over it</td><td>Pod rejected (403)</td><td>Pod never created (FailedCreate on the RS)</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li>You can use both together. LimitRange alone still lets you run 100 pods at 1 CPU each, and the quota stops that.</li>
+    <li>None of the three (container resources, LimitRange, ResourceQuota) is set on a <strong>node</strong>. A node only has its capacity.</li>
+    <li>💡 Why it exists: each team gets its own namespace, and the quota stops one team using the whole cluster and its cost. Mo: when a team hits the quota, the increase goes through <strong>finance and management</strong>, not through you. Expect people to DM you, then your teammate, asking for it anyway.</li>
+  </ul>
+  <blockquote>🔑 A bigger or extra node doesn't help. The quota belongs to the namespace, not to a machine.</blockquote>
+</section>
+
+<section id="events">
+  <div class="label"><span class="tag">🔍</span><h2>Read the event on the object that failed</h2></div>
+  <div class="table"><table>
+    <thead><tr><th>Symptom</th><th>Describe</th><th>Look for</th></tr></thead>
+    <tbody>
+      <tr><td>Pod <strong>Pending</strong></td><td><code>kubectl describe pods -l app=…</code></td><td><code>PodScheduled: False</code>, <code>FailedScheduling: Insufficient cpu</code></td></tr>
+      <tr><td><strong>No new pod</strong> at all</td><td><code>kubectl describe rs -l app=…</code></td><td><code>FailedCreate: exceeded quota</code></td></tr>
+      <tr><td>Container <strong>restarted</strong></td><td><code>kubectl describe pod &lt;pod&gt;</code></td><td><code>Last State: Terminated, Reason: OOMKilled</code></td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li>The <strong>Events</strong> are the last part of every <code>describe</code>. Start there.</li>
+    <li>If the pod comes from a Deployment, you can also describe the Deployment and the ReplicaSet.</li>
+    <li>💡 <strong>OOMKilled doesn't prove the container's own limit caused it.</strong> If the pods on a node together use more memory than the node has, a container can be killed <strong>below</strong> its own limit. Mo's whiteboard example: on a 1Gi node, two pods use 250Mi each and a third grows from 500Mi towards 600Mi. It's killed, restarts at 500Mi, grows again, and is killed again.</li>
+    <li>Mo: "If I were you, I would memorize these." They tell you where to look first.</li>
+  </ul>
+</section>
+
+<section id="hpa">
+  <div class="label"><span class="tag">📈</span><h2>The HPA: more traffic, more pods</h2></div>
+  <div class="flow">traffic rises → each pod does more work → CPU use rises
+→ HPA reads the metrics → raises the Deployment's replicas
+→ the Service spreads requests over more pods</div>
+  <ul>
+    <li>The <strong>Horizontal Pod Autoscaler (HPA)</strong> is a controller that changes a Deployment's <strong>desired pod count</strong> toward a target, between <code>minReplicas</code> and <code>maxReplicas</code>.</li>
+    <li>Same idea as the ASG in Scale Session 09–10 adding an EC2 at 70% CPU. Here it's pods instead of instances.</li>
+    <li>It measures <strong>utilization against the request</strong>:</li>
+  </ul>
+  <div class="flow">utilization = measured CPU ÷ requested CPU × 100
+            = 200m ÷ 100m × 100 = 200%      → target 60% → add pods</div>
+  <ul>
+    <li>It also needs working metrics: if <code>kubectl top</code> fails, the HPA can't see CPU either.</li>
+    <li>In Mo's simulator, the pod count went up at ~60–69%. The pause before the new pod appeared is the pod <strong>starting</strong>.</li>
+    <li>The demo HPA (<code>hpa-cpu-demo.yaml</code>) targets the <code>unit5-cpu</code> Deployment: <strong>60%</strong>, <strong>1–2 replicas</strong>. Its pod requests 50m, so 60% = 30m per pod.</li>
+  </ul>
+  <blockquote>🔑 No CPU request = no percentage = no CPU scaling. Changing the request changes the percentage even when the app's real use doesn't change.</blockquote>
+</section>
+
+<section id="live">
+  <div class="label"><span class="tag">🧪</span><h2>After class: the HPA live (Bakhtiyar)</h2></div>
+  <div class="codebox"><pre>kubectl top pods                                   <span class="c"># metrics must work first</span>
+kubectl apply -f deployment-cpu-demo.yaml          <span class="c"># Deployment + Service unit5-cpu</span>
+kubectl rollout status deployment/unit5-cpu --timeout=120s
+kubectl apply -f hpa-cpu-demo.yaml
+kubectl get hpa unit5-cpu                          <span class="c"># cpu: 2%/60%, REPLICAS 1</span>
+kubectl apply -f pod-load.yaml                     <span class="c"># client that sends requests for 3 minutes</span>
+kubectl get hpa unit5-cpu --watch                  <span class="c"># climbs past 60% → REPLICAS 2</span>
+kubectl top pods -l app=unit5-cpu                  <span class="c"># one pod at ~129m</span>
+kubectl describe hpa unit5-cpu                     <span class="c"># SuccessfulRescale ... New size: 2</span>
+kubectl logs pod-load                              <span class="c"># "completed 690 HTTP requests"</span>
+kubectl delete -f pod-load.yaml                    <span class="c"># load stops → back to 1 pod</span></pre></div>
+  <ul>
+    <li>Without <code>pod-load</code> there's no traffic, so the target sits at ~2% and nothing happens. A first <code>&lt;unknown&gt;</code> target is normal while measurements arrive.</li>
+    <li>The event reason read: <em>cpu resource utilization (percentage of request) above target</em>.</li>
+    <li><code>--watch</code> works on any <code>get</code> (<code>kubectl get pods -w</code> too) and prints every change live.</li>
+    <li>He re-ran the patch first (<code>patched (no change)</code>: Mo had already applied it).</li>
+    <li>His quota demo didn't refuse: the instructor namespace has no quota. In <strong>your</strong> namespace you'll get the refusal.</li>
+  </ul>
+  <div class="codebox"><pre>kubectl delete -f pod-load.yaml -f hpa-cpu-demo.yaml -f deployment-cpu-demo.yaml --ignore-not-found</pre></div>
+</section>
+
+<section id="karpenter">
+  <div class="label"><span class="tag">🖥️</span><h2>Karpenter: when pods don't fit, add a node</h2></div>
+  <div class="flow">HPA raises replicas → scheduler places the pods that fit
+→ a pod fits nowhere → Pending
+→ Karpenter sees it → launches an EC2 worker → node Ready → pod scheduled</div>
+  <ul>
+    <li>Our cluster runs <strong>EKS Auto Mode</strong>, which includes <strong>Karpenter</strong>: a node autoscaler managed by AWS. It watches for <strong>pods that can't fit</strong> and launches EC2 worker nodes, within its configured limits and available AWS capacity.</li>
+    <li><strong>A new node can't fix a quota refusal.</strong> Karpenter might add a node, but the quota still blocks the pod.</li>
+    <li>(Live, Mo described it as watching the nodes' CPU and memory. The deck and notes say it reacts to <strong>pods that can't fit</strong>.)</li>
+  </ul>
+  <blockquote>🔑 The HPA changes the number of pods. Karpenter supplies machines. These are two separate kinds of scaling.</blockquote>
+</section>
+
+<section id="db">
+  <div class="label"><span class="tag">🩺</span><h2>What more pods can't fix: the database is down</h2></div>
+  <ul>
+    <li>If the shared database goes down, <strong>every</strong> replica loses it. One pod or eight pods, it's the same outage. More replicas or more nodes don't help.</li>
+    <li><strong>Readiness</strong> fails → the Service <strong>stops sending traffic</strong> to that pod until it can serve again (Session 08).</li>
+    <li><strong>Liveness</strong> fails → the kubelet <strong>restarts the stuck container</strong>. A database outage <strong>should not</strong> fail liveness, because restarting every app container doesn't repair the database.</li>
+  </ul>
+  <blockquote>🔑 Liveness is for "my app is stuck". Readiness is for "I can't serve right now".</blockquote>
+</section>
+
+<section id="next">
+  <div class="label"><span class="tag">📅</span><h2>Practice &amp; next class</h2></div>
+  <ul>
+    <li>Run the patch, the quota refusal and the HPA hands-on in your own namespace.</li>
+    <li><strong>Lab 113, "CPU and memory, requests and limits"</strong>, in Phase-4 Labs on nextlabs.</li>
+    <li>Bakhtiyar plans HPA labs, and the app will be used in Saturday's session.</li>
+    <li><strong>Next class:</strong> unit 6, <strong>storage and jobs</strong>.</li>
+    <li>Stuck? Read the error, then Claude in the browser, then Claude in the terminal, then Slack.</li>
+    <li>Recap page: <a href="https://claude.ai/artifact/AB7oKfcrUqaS7Zeo5sSkmZ">Containers Session 12 Recap</a></li>
+  </ul>
+  <blockquote>🔑 The golden rule of this class: Read the event on the object that failed. Pending is a node problem, a missing pod is a quota problem, and a restart is a memory problem. The HPA adds pods and Karpenter adds nodes, but neither fixes a quota or a dead database.</blockquote>
+</section>
+
+<section id="quiz">
+  <div class="label"><span class="tag">❓</span><h2>Quiz: Session 12</h2></div>
+  <p><em>Self-test for Containers Session 12. Answer each question out loud first, then open the toggle to check. Score yourself out of 10.</em></p>
+  <div class="q"><p class="ask">Q1. You <code>kubectl patch</code> the Deployment with requests and limits. Next week a teammate runs <code>kubectl apply -f deployment-investment-app.yaml</code> from Git. What happens, and how do you prevent it?</p>
+    <details><summary>Show answer</summary><div><p><strong>Your requests and limits disappear.</strong> Patch changed the object stored in the cluster (etcd), not the file. Applying the old file sends the old desired state (<code>resources: {}</code>), and a new rollout starts without them. Prevent it by putting the same <code>resources:</code> block in the YAML and pushing it, or by making the change in the file and running <code>kubectl apply</code> in the first place.</p></div></details></div>
+  <div class="q"><p class="ask">Q2. Why does the patch file start at <code>spec:</code> and not at <code>apiVersion</code> and <code>kind</code>? How does Kubernetes know where to put <code>resources</code>?</p>
+    <details><summary>Show answer</summary><div><p><strong>Because it's a fragment, not a whole object. Kubernetes merges it at the matching path.</strong> The command already names the object (<code>deployment investment-app</code>). A strategic merge walks the live YAML: <code>spec</code> → <code>template</code> → <code>spec</code> → <code>containers</code> → the item whose <code>name</code> is <code>investment-app</code> → <code>resources</code>. It adds or replaces only what's in the fragment and leaves the rest alone. Matching containers by <code>name</code> (not list position) is what makes it "strategic".</p></div></details></div>
+  <div class="q"><p class="ask">Q3. A pod is Pending. Name the three reasons the scheduler might give, and the one that will fix itself if you just wait.</p>
+    <details><summary>Show answer</summary><div><p><strong>Not enough capacity, a placement rule, or the node isn't Ready yet. The last one fixes itself.</strong></p><ul><li>Not enough capacity: no node has the free CPU/memory the <strong>request</strong> asks for.</li><li>Placement rule: e.g. every node has a <strong>taint</strong> the pod doesn't tolerate. It stays Pending until you fix the rule.</li><li>Node unavailable: a fitting node (e.g. one Karpenter just launched) is still starting. Wait, and the pod gets scheduled.</li></ul><p>All three show as <code>PodScheduled: False</code> / <code>FailedScheduling</code> in <code>describe</code>. Separately, a pod can be Pending on a node while its image downloads.</p></div></details></div>
+  <div class="q"><p class="ask">Q4. Interview: "Your platform has GPU nodes that cost 10× more. How do you stop ordinary pods landing on them?"</p>
+    <details><summary>Show answer</summary><div><p><strong>Taint the GPU nodes, and give a toleration only to the workloads that should run there.</strong> A taint is like bug spray on the node: any pod without a matching toleration is kept off, so ordinary pods schedule elsewhere. The GPU workloads carry the toleration (usually plus a node selector or affinity, so they're also <em>attracted</em> to those nodes). Same tool for isolating a bank's or a government app's workloads on their own nodes.</p></div></details></div>
+  <div class="q"><p class="ask">Q5. Your namespace's LimitRange has a max of 1 CPU and a default request of 50m. Container A declares nothing. Container B declares <code>requests: cpu: 100m</code>. Container C declares <code>limits: cpu: 2</code>. What does each get?</p>
+    <details><summary>Show answer</summary><div><p><strong>A gets the defaults, B keeps its 100m, C is rejected.</strong></p><ul><li>A: request 50m / 64Mi and limit 250m / 256Mi, filled in at admission.</li><li>B: a value you write is kept, so 100m stays 100m (its missing limit gets the 250m default).</li><li>C: 2 CPU is over the 1 CPU max, so the pod is refused with 403 Forbidden. The maximum is a ceiling, not a default.</li></ul></div></details></div>
+  <div class="q"><p class="ask">Q6. LimitRange vs ResourceQuota: what does each one check, and why would an admin use both?</p>
+    <details><summary>Show answer</summary><div><p><strong>LimitRange checks each container; ResourceQuota checks the namespace's total.</strong> LimitRange alone caps every container at, say, 1 CPU, but you could still run 100 such pods and take 100 CPUs. ResourceQuota caps the sum of what everything declares (500m CPU requests, 8 pods…), so one team can't take the whole cluster or its budget. Together they give "no pod too big" and "no team too big". Both count <strong>declarations</strong>, not measured use.</p></div></details></div>
+  <div class="q"><p class="ask">Q7. You apply a Deployment. <code>kubectl get deploy</code> shows <code>0/1</code>, but <code>kubectl get pods</code> shows nothing at all, not even Pending. Where do you look, and would Karpenter adding a node help?</p>
+    <details><summary>Show answer</summary><div><p><strong>Describe the ReplicaSet. And no, a node wouldn't help.</strong> No pod at all means creation was refused before scheduling. <code>kubectl describe rs -l app=…</code> shows <code>FailedCreate … exceeded quota</code> (e.g. requested 600m, limited 500m). The quota belongs to the <strong>namespace</strong>, so a new machine changes nothing. Lower the requests, delete something to free quota, or get the quota raised (through approval, not a DM).</p></div></details></div>
+  <div class="q"><p class="ask">Q8. A container shows <code>Last State: Terminated, Reason: OOMKilled</code>, but its peak memory was well under its 1Gi limit. How is that possible?</p>
+    <details><summary>Show answer</summary><div><p><strong>The node ran out of memory, not the container.</strong> Limits are per container, but the node's RAM is shared. If the other pods on the node together use most of it, a container growing within its own limit can still find no memory left and be killed. So OOMKilled alone doesn't prove the container's own limit caused it. Compare its limit with the node's memory evidence, and set requests honestly so the scheduler doesn't overpack the node.</p></div></details></div>
+  <div class="q"><p class="ask">Q9. A pod requests 50m CPU and uses 40m. The HPA target is 60%. Does it scale out? Now someone "tidies up" the request to 100m with the same use. What happens, and what does that teach you?</p>
+    <details><summary>Show answer</summary><div><p><strong>50m: 80% → scales out. 100m: 40% → doesn't.</strong> The HPA computes use ÷ <strong>request</strong> × 100, so the request is the HPA's ruler. Change the ruler and the same load reads differently. That's why CPU scaling needs a CPU request (no request, no percentage), and why requests and HPA targets must be chosen together.</p></div></details></div>
+  <div class="q"><p class="ask">Q10. Interview: "Traffic triples. Walk me through what Kubernetes does, from the HPA to new hardware, and name one failure that no amount of scaling fixes."</p>
+    <details><summary>Show answer</summary><div><p><strong>HPA adds pods, the scheduler places them, Karpenter adds nodes for the ones that don't fit. A dead database isn't fixed by any of it.</strong></p><ul><li>CPU per pod rises past the HPA target (measured against the request), so the HPA raises the Deployment's replicas, up to <code>maxReplicas</code>.</li><li>The scheduler places the new pods where their requests fit. A pod that fits nowhere goes Pending.</li><li>Karpenter (EKS Auto Mode) sees Pending pods and launches EC2 nodes. The pods get scheduled once the node is Ready.</li><li>Limits still apply: a ResourceQuota can refuse pods regardless of nodes.</li><li>Not fixable by scaling: the shared database being down. Every replica loses it. Readiness should take pods out of the Service; liveness should <strong>not</strong> restart them for it.</li></ul></div></details></div>
+  <p><strong>Scoring:</strong> 9–10: you can size a namespace and scale it under load 🏆 · 7–8: solid 💪 · below 7: reopen the sections above and retry 🔁</p>
+</section>
+
+<footer>The same study page and quiz are in Notion under DevOps / 312 - Notes / Containers &amp; Orchestration.</footer>
+</div>
+
+<script>
+document.querySelectorAll('.codebox').forEach(function(box){
+  var pre = box.querySelector('pre'); var b = document.createElement('button');
+  b.className = 'copy'; b.type = 'button'; b.textContent = 'Copy';
+  b.addEventListener('click', function(){
+    var text = pre.innerText.split('\n').map(function(l){ return l.replace(/\s+#.*$/, ''); }).join('\n').trim();
+    var done = function(){ b.textContent = 'Copied'; setTimeout(function(){ b.textContent = 'Copy'; }, 1500); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(function(){ selectPre(); });
+    } else { selectPre(); }
+    function selectPre(){ var r = document.createRange(); r.selectNodeContents(pre); var s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = 'Selected'; }
+  });
+  box.appendChild(b);
+});
+</script>
+
+</body></html>

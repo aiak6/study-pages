@@ -1,0 +1,335 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Project X Session 02</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one reading column; sections as stacked "shipping manifest" blocks with a stencilled label; code and tables scroll in place. */
+:root{
+  --bg:#f3f5f7; --surface:#ffffff; --ink:#15202b; --muted:#56657a; --line:#d8dee6;
+  --accent:#c4501b; --accent-soft:#fbe9df; --steel:#1f5f8b; --steel-soft:#e3eef6;
+  --code-bg:#0f1b26; --code-fg:#dbe7f2; --code-cmt:#7f97ad;
+  --good:#2e7d4f; --bad:#b3261e;
+  --f-display:"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --f-body:"Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e151c; --surface:#16202a; --ink:#e6edf3; --muted:#9aabbd; --line:#2a3845;
+  --accent:#f0874f; --accent-soft:#3a2418; --steel:#7ab8e3; --steel-soft:#16303f;
+  --code-bg:#0a1016; --code-fg:#dbe7f2; --code-cmt:#6f879c;
+  --good:#6cc493; --bad:#f08a80; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0e151c; --surface:#16202a; --ink:#e6edf3; --muted:#9aabbd; --line:#2a3845;
+  --accent:#f0874f; --accent-soft:#3a2418; --steel:#7ab8e3; --steel-soft:#16303f;
+  --code-bg:#0a1016; --code-fg:#dbe7f2; --code-cmt:#6f879c;
+  --good:#6cc493; --bad:#f08a80; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:17px/1.6 var(--f-body);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 64px}
+.wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.15;margin:0}
+h1{font-size:clamp(30px,6vw,44px);font-weight:800;letter-spacing:-.01em}
+h2{font-size:24px;font-weight:800}
+h3{font-size:18px;font-weight:600;margin-top:6px}
+p{margin:0}
+a{color:var(--steel)}
+code{font-family:var(--f-mono);font-size:.86em;background:var(--steel-soft);color:var(--ink);padding:1px 5px;border-radius:4px}
+strong{font-weight:700}
+.eyebrow{font:600 12px/1 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+header{display:flex;flex-direction:column;gap:12px;border-bottom:3px solid var(--ink);padding-bottom:20px}
+.meta{display:flex;flex-wrap:wrap;gap:8px 16px;color:var(--muted);font-size:15px}
+.lede{font-size:19px;max-width:65ch}
+nav{display:flex;flex-wrap:wrap;gap:8px}
+nav a{font:600 13px/1 var(--f-mono);text-decoration:none;color:var(--ink);border:1px solid var(--line);background:var(--surface);padding:8px 10px;border-radius:6px}
+nav a:hover,nav a:focus-visible{border-color:var(--accent);color:var(--accent);outline:none}
+section{display:flex;flex-direction:column;gap:14px;scroll-margin-top:16px}
+section > .label{display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--line);padding-bottom:8px}
+section > .label .tag{font:600 11px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--surface);background:var(--ink);padding:5px 7px;border-radius:3px}
+ul,ol{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px}
+.table{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:15.5px;min-width:480px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:600 12px/1.3 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--bg)}
+tr:last-child td{border-bottom:0}
+blockquote{margin:0;border-left:4px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 8px 8px 0;font-weight:600}
+pre{margin:0;background:var(--code-bg);color:var(--code-fg);font:14px/1.6 var(--f-mono);padding:14px 16px;border-radius:8px;overflow-x:auto}
+pre .c{color:var(--code-cmt)}
+.codebox{position:relative}
+.copy{position:absolute;top:8px;right:8px;font:600 11px/1 var(--f-mono);background:transparent;color:var(--code-cmt);border:1px solid var(--code-cmt);border-radius:4px;padding:5px 7px;cursor:pointer}
+.copy:hover,.copy:focus-visible{color:var(--code-fg);border-color:var(--code-fg);outline:none}
+.flow{font:600 14px/1.5 var(--f-mono);background:var(--steel-soft);color:var(--ink);padding:14px 16px;border-radius:8px;overflow-x:auto;white-space:pre}
+.step{display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:start}
+.step > .n{font:800 18px/34px var(--f-display);text-align:center;background:var(--ink);color:var(--bg);border-radius:50%;width:34px;height:34px}
+.step > div{min-width:0;display:flex;flex-direction:column;gap:8px}
+.see{font-size:15px;color:var(--good)}
+.see::before{content:"You should see: ";font-weight:700}
+.warn{border:1px solid var(--bad);border-radius:8px;padding:12px 16px;display:flex;flex-direction:column;gap:10px;background:var(--surface)}
+.warn .eyebrow{color:var(--bad)}
+details{border:1px solid var(--line);background:var(--surface);border-radius:8px}
+details summary{cursor:pointer;padding:12px 16px;font-weight:600;list-style-position:inside}
+details summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:8px}
+details > div{padding:0 16px 14px;display:flex;flex-direction:column;gap:8px}
+.q{display:flex;flex-direction:column;gap:10px}
+.q p.ask{font-weight:600}
+.reread{font-style:italic;color:var(--muted);font-size:15px}
+footer{color:var(--muted);font-size:15px;border-top:1px solid var(--line);padding-top:16px}
+@media (prefers-reduced-motion: reduce){*{scroll-behavior:auto!important}}
+html{scroll-behavior:smooth}
+</style>
+
+<div class="wrap">
+<header>
+  <span class="eyebrow">312 School · Cohort 26a · Project X</span>
+  <h1>Session 02: The simulated company, and our first ticket</h1>
+  <div class="meta"><span>Thu, Oct 29, 2026</span><span>Marcel</span><span>No deck · recording + Granola notes</span></div>
+  <p class="lede">Day two of Project X, and the first look inside our pretend company. AI agents now play the whole team, plus <strong>Nadia</strong>, the infrastructure engineer who was here before us. Her app already runs on <strong>ECS Fargate</strong>, AWS's own container service, built with <strong>CloudFormation</strong>, and we'll eventually talk her into moving it to <strong>EKS</strong>. Then a real ticket: QA asks us to "deploy <strong>PR #1</strong> to dev". To do it we have to find out where dev even is, by giving AI the right <strong>context</strong>. Every action has to start with a <strong>situation and a task</strong>.</p>
+  <nav aria-label="Sections">
+    <a href="#ref">Quick reference</a><a href="#company">The company</a><a href="#ecs">ECS vs EKS</a><a href="#convince">Convincing Nadia</a><a href="#star">Situation &amp; task</a><a href="#pr">PRs</a><a href="#context">Context</a><a href="#deploy">Deploy PR #1</a><a href="#tokens">Token cost</a><a href="#homework">Homework</a><a href="#check">Quiz</a>
+  </nav>
+</header>
+
+<section id="ref">
+  <div class="label"><span class="tag">Glance</span><h2>Quick reference</h2></div>
+  <div class="table"><table>
+    <thead><tr><th>Topic</th><th>Key point</th></tr></thead>
+    <tbody>
+      <tr><td><strong>The simulated company</strong></td><td>AI agents play PM (Maya), UX (Riley), front-end/back-end (Sam, Alex), QA (Jordan), security (Casey) and infra (<strong>Nadia</strong>). We are the platform engineer</td></tr>
+      <tr><td><strong>Where work starts</strong></td><td><strong>Slack</strong> (or Teams): channels, threads, DMs. Plus tickets on a board</td></tr>
+      <tr><td><strong>ECS</strong></td><td>AWS's <strong>own</strong> container orchestrator (not Kubernetes). AWS-only. Containers run in <strong>tasks</strong>, replicas come from <strong>ECS services</strong></td></tr>
+      <tr><td><strong>ECS Fargate</strong></td><td><strong>Serverless</strong> ECS: no nodes to manage, pay per container compute</td></tr>
+      <tr><td><strong>CloudFormation</strong></td><td>Like Terraform, but <strong>AWS-native</strong> and AWS-only</td></tr>
+      <tr><td><strong>Situation &amp; Task</strong></td><td>Real work never starts with an action. Interviews use <strong>STAR</strong>: Situation, Task, Action, Result</td></tr>
+      <tr><td><strong>PR</strong></td><td>Pull request: ask to <strong>merge</strong> one branch into another (GitLab calls it <strong>MR</strong>)</td></tr>
+      <tr><td><strong>"Deploy PR #1 to dev"</strong></td><td>Get that <strong>code change</strong> running in the <strong>dev environment</strong>: new image → ECR → update the running service</td></tr>
+      <tr><td><strong>Context engineering</strong></td><td>Hand AI the right files and docs before you ask. Better than a cleverer prompt</td></tr>
+      <tr><td><strong>Agentic AI loves file systems</strong></td><td><code>git clone</code> into a dedicated folder (not <code>~</code>) and launch Claude Code/Codex there</td></tr>
+      <tr><td><strong>Subscription vs API billing</strong></td><td>Subscription is ~20–40x cheaper per token. Enterprises (150+ users) pay per token, so <strong>model choice costs money</strong></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="company">
+  <div class="label"><span class="tag">Setting</span><h2>The simulated company: Slack, roles &amp; onboarding</h2></div>
+  <ul>
+    <li>The course simulates a <strong>small startup</strong>. AI agents act as people, each with a role file (a markdown file that starts "You're Alex, the back-end developer…").</li>
+  </ul>
+  <div class="table"><table>
+    <thead><tr><th>Role</th><th>Name</th></tr></thead>
+    <tbody>
+      <tr><td>Product manager</td><td>Maya</td></tr>
+      <tr><td>UX/UI designer</td><td>Riley</td></tr>
+      <tr><td>Front-end / back-end developers</td><td>Sam, Alex</td></tr>
+      <tr><td>QA engineer</td><td>Jordan</td></tr>
+      <tr><td>Security analyst</td><td>Casey</td></tr>
+      <tr><td>Infrastructure engineer (was here first)</td><td><strong>Nadia</strong></td></tr>
+      <tr><td>Platform engineer</td><td><strong>Us</strong> (Marcel plays it in class)</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li><strong>Your workday starts in Slack</strong>, not email. Check DMs, then your channels, then your tickets. Slack replaced a lot of email: threads, reactions, @mentions, bots, mutable channels.</li>
+    <li>The channels mirror a real company: <strong>company-wide</strong> announcements, <strong>product</strong>, <strong>engineering</strong>, <strong>platform</strong> (requests for us and Nadia), <strong>security</strong>.</li>
+    <li>In class it's a <strong>static page</strong> the agents update, not a real Slack. Marcel will publish it after class.</li>
+    <li><strong>The app</strong> is the paper-trading app again: one stock (AAPL), cash and shares, buy/sell one share, stored per user in <strong>RDS Postgres</strong>. No login yet; <strong>Cognito</strong> sign-in is coming. Think of it as <strong>1%</strong> of what the agents will grow it into.</li>
+  </ul>
+  <blockquote>Most of what you read in a new company's channels isn't about you, and the parts that are might not make sense yet. That's normal: onboarding usually takes 1–3 months.</blockquote>
+</section>
+
+<section id="ecs">
+  <div class="label"><span class="tag">Compare</span><h2>ECS vs EKS: another flavor of orchestration</h2></div>
+  <ul>
+    <li><strong>Container orchestration</strong> = a system that manages containers at scale across many hosts. Kubernetes is the most popular one, not the only one.</li>
+    <li><strong>EKS</strong> = Kubernetes software + AWS-run infra. <strong>ECS</strong> = <strong>AWS's own</strong> software, built from scratch, + AWS-run infra. ECS only runs on AWS.</li>
+  </ul>
+  <div class="table"><table>
+    <thead><tr><th>Kubernetes / EKS</th><th>ECS</th></tr></thead>
+    <tbody>
+      <tr><td>Cluster</td><td>Cluster</td></tr>
+      <tr><td>Pod spec</td><td><strong>Task definition</strong></td></tr>
+      <tr><td>Pod</td><td><strong>Task</strong></td></tr>
+      <tr><td>Deployment (+ Service)</td><td><strong>ECS service</strong> (keeps the desired count, hooks into the ALB target group)</td></tr>
+      <tr><td><code>kubectl</code></td><td>AWS CLI / console / CloudFormation</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li><strong>ECS Fargate</strong> = serverless ECS (same idea as Lambda in Scale Session 18): you don't provision nodes, you just launch tasks and <strong>pay per compute</strong> they use. <strong>Regular ECS</strong> runs on EC2s you control (often an Auto Scaling group), which feels closer to EKS.</li>
+  </ul>
+  <h3>Nadia's current setup</h3>
+  <div class="flow">users → ALB → ECS Fargate task (Flask app) → RDS Postgres
+   around it: VPC + security groups, ECR for the image,
+   Secrets Manager for DB creds, CloudWatch for logs &amp; metrics</div>
+  <blockquote>Kubernetes was one flavor. With AI you can work in a tool you've never touched: ask it to "explain ECS to me as a Kubernetes person".</blockquote>
+</section>
+
+<section id="convince">
+  <div class="label"><span class="tag">Decision</span><h2>Convincing Nadia: why move ECS → EKS?</h2></div>
+  <ul>
+    <li>Nadia's choice <strong>isn't bad</strong>. Setups are rarely "bad"; needs change over time. That's why we have to <strong>convince</strong> her, with reasons.</li>
+  </ul>
+  <h3>For Kubernetes / EKS</h3>
+  <ul>
+    <li><strong>Huge ecosystem</strong>: tools, controllers, community support</li>
+    <li><strong>Not locked to AWS</strong>: easier to move to GCP (say, with startup credits), Azure or on-prem</li>
+    <li><strong>More control over servers</strong> (with EC2 nodes): spot or reserved instances to cut cost, GPU or high-memory instance types</li>
+    <li><strong>Experience</strong>: "I've run big Kubernetes clusters (400 nodes) and I'm more confident there" is a valid reason too</li>
+  </ul>
+  <h3>For ECS</h3>
+  <ul><li><strong>CloudWatch logs and metrics work out of the box</strong>, because both are AWS-made. Kubernetes needs extra setup for that.</li>
+  <li>In a big company the call might be made by an engineering manager, not you. Here, we're the decision makers.</li></ul>
+  <blockquote>Before you use a reason, check it's actually true. A classmate said ECS locks you into paid AWS subscriptions. Marcel pointed out Fargate has no subscription; it's pay-per-use.</blockquote>
+</section>
+
+<section id="star">
+  <div class="label"><span class="tag">Why</span><h2>Situation &amp; task: every action needs a why</h2></div>
+  <ul>
+    <li>Assignments trained us to start from the action ("create an ASG"). Real work <strong>never</strong> starts there, because every action costs <strong>time and money</strong>.</li>
+    <li><strong>STAR</strong> for interview answers: <strong>S</strong>ituation → <strong>T</strong>ask → <strong>A</strong>ction → <strong>R</strong>esult. Never open with the action.</li>
+  </ul>
+  <h3>Example: Amazon Prime Video's monitoring service</h3>
+  <div class="table"><table>
+    <thead><tr><th>Step</th><th>What happened</th></tr></thead>
+    <tbody>
+      <tr><td>Situation</td><td>Video/audio defect monitoring ran serverless on <strong>Step Functions</strong>, swapping video frames through <strong>S3</strong></td></tr>
+      <tr><td>Task</td><td>Costs were high and it couldn't monitor enough streams</td></tr>
+      <tr><td>Action</td><td>Developers rewrote the app; platform engineers moved it to <strong>ECS on EC2</strong>, processing frames directly on the servers</td></tr>
+      <tr><td>Result</td><td><strong>Over 90% cost reduction</strong> and more throughput</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li>As the platform engineer there you'd have built the ECS, ASGs and EC2s, maybe with special instance types (GPU) or tuned system settings.</li>
+    <li>A <strong>Project X matrix</strong> of real situation/task examples by industry is coming, so you can justify things like "I set up the database" or "I built open-source monitoring".</li>
+  </ul>
+</section>
+
+<section id="pr">
+  <div class="label"><span class="tag">Refresher</span><h2>PRs &amp; branches</h2></div>
+  <ul>
+    <li><strong>PR (pull request)</strong> = a request to merge changes from one branch into another. GitLab and Bitbucket call it an <strong>MR (merge request)</strong>.</li>
+  </ul>
+  <div class="flow">edit file → commit to new branch adjust-alarm (not main) → open PR adjust-alarm → main → merge → delete branch</div>
+  <ul>
+    <li>The new branch has all of <code>main</code>'s commits <strong>plus</strong> yours. Opening a PR changes nothing yet; only merging does.</li>
+    <li>He could merge his own PR only because that repo had <strong>no branch protection</strong>. With protection on, someone else has to approve. (Same as Class 32.)</li>
+  </ul>
+  <blockquote>Now we work in a team, even if it's AI agents, so never commit straight to main.</blockquote>
+</section>
+
+<section id="context">
+  <div class="label"><span class="tag">AI</span><h2>Context engineering: how AI finds "dev"</h2></div>
+  <ul>
+    <li><strong>Prompt engineering</strong> = asking the question well. <strong>Context engineering</strong> = handing AI the folder, the handbook and the notes before it answers. A great prompt can't help if AI doesn't have the facts.</li>
+  </ul>
+  <h3>"Where is dev?" Give it context from</h3>
+  <ol>
+    <li><strong>Repositories</strong> (infra, platform, app)</li>
+    <li><strong>Docs</strong>: Confluence, Notion, Google Docs, SharePoint, reached through <strong>MCP</strong> connectors (a later class)</li>
+    <li><strong>Communications</strong>: Slack, onboarding emails</li>
+    <li>Or just <strong>ask a coworker</strong> (Nadia)</li>
+  </ol>
+  <ul><li><strong>Agentic AI loves file systems.</strong> Clone the repo locally instead of pasting a link: it's faster, and it doesn't have to re-clone or go through the GitHub CLI every time.</li></ul>
+  <div class="codebox"><pre>mkdir ~/312-students &amp;&amp; cd ~/312-students   <span class="c"># a dedicated folder, NOT your home folder</span>
+git clone git@github.com:&lt;org&gt;/&lt;infra-repo&gt;.git
+git clone git@github.com:&lt;org&gt;/&lt;app-repo&gt;.git
+<span class="c"># launch Claude Code / Codex from here (both repos) or from one repo</span></pre></div>
+  <ul>
+    <li>Why not <code>~</code>? The agent can reach the folder you launch it from and everything under it. Launching from home exposes <strong>all</strong> your files.</li>
+    <li>The agent still sees <strong>global</strong> things like <code>~/.aws/config</code> and its memory. Marcel's infra README had leaked his account ID and AWS profile name, so he had a sub-agent scrub all the repos and open PRs.</li>
+    <li><strong>Where Claude Code / Codex live:</strong> the <strong>Code tab</strong> in the Claude desktop app (Codex tab in the ChatGPT app), the terminal CLI (<code>claude</code>, <code>codex</code>), or the web Code tab, which runs on the vendor's cloud instead of your machine.</li>
+    <li><strong>Worktrees</strong> are coming in a later class.</li>
+  </ul>
+</section>
+
+<section id="deploy">
+  <div class="label"><span class="tag">Ticket</span><h2>Deploying PR #1 to dev, end to end</h2></div>
+  <ul>
+    <li><strong>The ask (Slack, #platform):</strong> Jordan (QA) → us: "Can you deploy PR #1 to dev today?" He didn't link the repo. The proper move is to ask, or check the linked ticket. There's only one app repo, so we found it.</li>
+    <li><strong>The change (ticket PX-001):</strong> the page shows cash and shares but not the trades behind them. Add a <strong>recent trades</strong> list (latest 10). The developer wrote it, QA tested it (integration + regression tests pass), and the PR was still a <strong>draft</strong>.</li>
+    <li><strong>Translate it:</strong> PR = a code change. Dev = the <strong>dev environment</strong> (a separate account/stage from staging and prod). So: get this code running in dev.</li>
+  </ul>
+  <div class="step"><span class="n">1</span><div><p><strong>Find dev.</strong> Claude Code in the infra repo → README → account, region, ECS cluster <code>project-x-dev</code>.</p></div></div>
+  <div class="step"><span class="n">2</span><div><p><strong>Look at what's running.</strong> AWS CLI → one task (≈ one pod), and its image tag.</p></div></div>
+  <div class="step"><span class="n">3</span><div><p><strong>Plan</strong> in a second session in the app repo, handing it a short summary of the dev environment.</p></div></div>
+  <div class="step"><span class="n">4</span><div><p><strong>Deploy, merge, reply in Slack:</strong> "PR merged and deployed to dev" + link.</p><p class="see">the dev page now shows a recent-trades list under cash and shares.</p></div></div>
+  <h3>Same loop as Kubernetes, different tool</h3>
+  <div class="flow">Kubernetes:  build image v2 → push to ECR → change image in Deployment → rolling update
+ECS here:    build image v2 → push to ECR → CloudFormation change set updates the ECS service</div>
+  <ul>
+    <li><strong>Order chosen:</strong> deploy first, then merge after Jordan accepts. No CI/CD yet, so merging deploys nothing; it just keeps the change in <code>main</code>.</li>
+    <li><strong>Rollback:</strong> the old image is still in <strong>ECR</strong>. The proper way back is to revert the <strong>CloudFormation</strong> change. A direct <code>aws ecs update-service</code> also works, but then CloudFormation no longer matches what's running (drift, like Scale Session 02).</li>
+    <li><strong>Small correction:</strong> Marcel said "kubelet would change the container image". More precisely, the Deployment controller creates a new ReplicaSet with v2 pods, and the <strong>kubelet</strong> on each node pulls and starts them (Containers Session 06).</li>
+    <li><strong>"How can I approve AI's steps in a system I don't know?"</strong> Lower the risk: ask it to explain, have a second model review it, and start in <strong>dev</strong>, where changes are cheap to undo. Humans make mistakes too, so good orgs already have guardrails: separate environments, limited access, multi-person approval for prod.</li>
+    <li>Deploying isn't most of the job. It's one of many request types.</li>
+  </ul>
+</section>
+
+<section id="tokens">
+  <div class="label"><span class="tag">Cost</span><h2>AI subscriptions, usage limits &amp; token cost</h2></div>
+  <ul>
+    <li><strong>Subscription</strong> (Pro/Max, ChatGPT Plus/Pro) vs <strong>usage-based API billing</strong> (pay per token). Subscription is roughly <strong>20–40x cheaper</strong>: ~$100/month can be ~$3,000 worth of API tokens.</li>
+    <li>Companies over ~<strong>150 users</strong> can't buy Team plans; they move to <strong>Enterprise</strong>, which is <strong>usage-based</strong>. Some give employees about <strong>$2,000/month</strong> of tokens.</li>
+    <li>So at work, <strong>model choice is a cost decision</strong>. A simple lookup like "where is dev?" → <strong>Sonnet</strong>, not the biggest model.</li>
+    <li>Chat isn't free either. Every message uses tokens from the same limit.</li>
+    <li><strong>Reading the meters:</strong> Claude shows how much you've <strong>used</strong>; ChatGPT/Codex shows how much you have <strong>left</strong>. 80% in Claude ≈ 20% left; 80% in ChatGPT = 80% left.</li>
+    <li>Burned through Codex limits fast? Start a new Codex session and ask it to go through your usage history and say what used the most tokens.</li>
+    <li>Recap: get personal ChatGPT Plus (~$20); run both this month for extra credits. GPT works faster but makes slightly more mistakes than Claude.</li>
+  </ul>
+</section>
+
+<section id="homework">
+  <div class="label"><span class="tag">Before Sat</span><h2>Homework</h2></div>
+  <ul>
+    <li>Have <strong>Claude Code or Codex running on your machine by Saturday</strong>, with at least one repo cloned into a dedicated folder, and actually work from it.</li>
+    <li>Review: <strong>serverless</strong>, <strong>PRs &amp; branching</strong>, <strong>ECS vs Kubernetes</strong>, <strong>CloudFormation vs Terraform</strong>, and the <strong>image update loop</strong> (build → ECR → deploy).</li>
+    <li>Repo access (Project X app, infra, platform) comes after class. You can recreate Nadia's ECS in your own account from the infra repo, but <strong>only with AI's help</strong>.</li>
+    <li>Saturday: office hours, Q&amp;A, some Kubernetes exam labs, maybe External Secrets again.</li>
+  </ul>
+  <blockquote>The golden rule of this class: work never starts with an action. Find the situation and the task, give AI the right context to find what you don't know, then make the change where it's safe to break.</blockquote>
+</section>
+
+<section id="check">
+  <div class="label"><span class="tag">Self-test</span><h2>Quiz: check yourself</h2></div>
+  <p class="reread">Answer each out loud first, then open the answer. Score yourself out of 10.</p>
+  <div class="q"><p class="ask">1. Jordan from QA posts in #platform: "Can you deploy PR #1 to dev today?" Translate that into plain words. What's the first question you need answered?</p>
+    <details><summary>Show answer</summary><div><p><strong>"Get this code change running in the dev environment."</strong> A PR is a code change waiting to be merged; dev is one of several environments (dev, staging, prod), usually its own account. Before deploying anything you need to know <strong>which repo the PR is in and where dev lives</strong> (account, region, cluster/service). If the request is missing that, ask, or check the linked ticket.</p></div></details></div>
+  <div class="q"><p class="ask">2. Your company runs on ECS and you only know Kubernetes. Map these to ECS: Pod, pod spec, Deployment, kubectl.</p>
+    <details><summary>Show answer</summary><div><p><strong>Pod → task. Pod spec → task definition. Deployment (+ Service) → ECS service. kubectl → AWS CLI / console / CloudFormation.</strong> The ideas match (run containers, keep N replicas, sit behind a load balancer) but it's AWS's own software, not Kubernetes, and it only runs on AWS. Fastest way in: ask AI to "explain this ECS setup to me as a Kubernetes person".</p></div></details></div>
+  <div class="q"><p class="ask">3. ECS on EC2 vs ECS Fargate. What changes for you, and how do you pay?</p>
+    <details><summary>Show answer</summary><div><p><strong>With ECS on EC2 you run the servers; with Fargate you don't.</strong> On EC2 you pick instance types, run an Auto Scaling group and pay for the instances whether they're busy or not (spot/reserved can cut that). On <strong>Fargate</strong> (serverless, like Lambda) you only launch tasks and <strong>pay for the compute the containers use</strong>. Less to manage, less control over the hardware.</p></div></details></div>
+  <div class="q"><p class="ask">4. Interview question: "Why would you move a working app from ECS Fargate to EKS?" Give a balanced answer.</p>
+    <details><summary>Show answer</summary><div><p><strong>Lead with the situation, give real reasons, and admit what you lose.</strong> For EKS: a huge ecosystem of tools and controllers, no lock-in (easier to move to GCP, Azure or on-prem), more control over nodes (spot/reserved, GPU or memory-heavy types), and a team with more Kubernetes experience. Against: ECS gets <strong>CloudWatch logs and metrics out of the box</strong>, while Kubernetes needs extra monitoring setup, and you take on more operations. Never say the old setup was "bad"; needs changed. And check each claim is true (Fargate has no subscription, for example).</p></div></details></div>
+  <div class="q"><p class="ask">5. You tell an interviewer: "I deployed an Auto Scaling group." Why is that weak? Rewrite it in STAR form.</p>
+    <details><summary>Show answer</summary><div><p><strong>It starts with the action, so nobody knows why it mattered.</strong> Every real action costs time and money, so start with the need. <em>Situation:</em> the app ran on one EC2 and went down whenever it failed. <em>Task:</em> keep it up through instance failures and traffic spikes. <em>Action:</em> built a launch template + ASG behind an ALB with health checks. <em>Result:</em> a killed instance was replaced in ~X minutes and users saw no downtime. (Prime Video version: high cost and limited throughput → moved to ECS on EC2 → 90%+ cheaper.)</p></div></details></div>
+  <div class="q"><p class="ask">6. You paste a GitHub link into Claude Code and ask, "Where is our dev environment?" Why is cloning better, and which folder do you launch from?</p>
+    <details><summary>Show answer</summary><div><p><strong>Agentic AI works best on the file system.</strong> With a link it has to go through the internet or re-clone every time. Locally it reads the README, Terraform/CloudFormation and docs instantly. Clone into a <strong>dedicated folder</strong> (<code>~/312-students/</code>) and launch from there or from the repo. <strong>Not from <code>~</code></strong>, because the agent can reach everything under the folder you start it in.</p></div></details></div>
+  <div class="q"><p class="ask">7. Prompt engineering vs context engineering. Why can't a better prompt find your dev account? Name three places that context can come from.</p>
+    <details><summary>Show answer</summary><div><p><strong>A prompt only shapes the question; context supplies the facts.</strong> No model knows your company's account IDs, however well you ask. Give it the facts: <strong>repos</strong> (infra README, IaC), <strong>docs</strong> (Confluence, Notion, Google Docs, SharePoint, through MCP connectors), <strong>communications</strong> (Slack, onboarding emails). Or ask a coworker.</p></div></details></div>
+  <div class="q"><p class="ask">8. Marcel deployed PR #1 to dev before merging it. In a repo with no CI/CD, what does merging do? What would change once CI/CD exists?</p>
+    <details><summary>Show answer</summary><div><p><strong>Without CI/CD, merging just moves the code into <code>main</code>; nothing gets deployed.</strong> The deploy was done by hand (build image → push to ECR → CloudFormation updates the ECS service), so testing in dev first and merging after QA accepts is safe. You still merge so the change isn't lost from <code>main</code>. <strong>With CI/CD</strong>, a merge (or a push to certain branches) triggers the pipeline to build and deploy automatically, so merge order matters a lot more.</p></div></details></div>
+  <div class="q"><p class="ask">9. The new version breaks dev. The app was deployed with CloudFormation. Do you run <code>aws ecs update-service</code> back to the old image or revert the CloudFormation change? Why?</p>
+    <details><summary>Show answer</summary><div><p><strong>Revert through CloudFormation, the tool that owns the resource.</strong> The old image is still in ECR either way. <code>update-service</code> is faster, but then CloudFormation's template says v2 while v1 is running: <strong>drift</strong>, the same problem as clicking in the console behind Terraform's back. The next CloudFormation deploy could quietly put the broken version back. In a real emergency you might do the fast fix first, then bring the code in line right away.</p></div></details></div>
+  <div class="q"><p class="ask">10. Your company gives each engineer an API token budget. You need a quick lookup ("which README mentions dev?"). Which model do you pick, and why does this matter more at work than at home?</p>
+    <details><summary>Show answer</summary><div><p><strong>Use a smaller, cheaper model (e.g. Sonnet) for simple lookups; save the biggest one for hard reasoning.</strong> At home a flat subscription hides the cost, and it's roughly 20–40x cheaper per token anyway. Companies over ~150 users are on <strong>usage-based enterprise billing</strong>, so every token is real money against a budget (some give ~$2,000/month). Choosing the right model is part of being an AI-fluent engineer.</p></div></details></div>
+  <p><strong>Scoring:</strong> 9–10 ready for your first ticket at the startup · 7–8 solid · below 7 reread the sections and retry</p>
+</section>
+
+<footer>The full study page and quiz are in Notion under DevOps / 312 - Notes / 🏁 ProjectX.</footer>
+</div>
+<script>
+document.querySelectorAll('.codebox').forEach(function(box){
+  var pre = box.querySelector('pre'); var b = document.createElement('button');
+  b.className = 'copy'; b.type = 'button'; b.textContent = 'Copy';
+  b.addEventListener('click', function(){
+    var text = pre.innerText.split('\n').map(function(l){ return l.replace(/\s+#.*$/, ''); }).join('\n').trim();
+    var done = function(){ b.textContent = 'Copied'; setTimeout(function(){ b.textContent = 'Copy'; }, 1500); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(function(){ selectPre(); });
+    } else { selectPre(); }
+    function selectPre(){ var r = document.createRange(); r.selectNodeContents(pre); var s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = 'Selected'; }
+  });
+  box.appendChild(b);
+});
+</script>
+
+</body></html>

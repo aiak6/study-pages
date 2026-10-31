@@ -1,0 +1,520 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Containers Session 10 Recap</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one reading column; sections as stacked "shipping manifest" blocks with a stencilled label; code and tables scroll in place. */
+:root{
+  --bg:#f3f5f7; --surface:#ffffff; --ink:#15202b; --muted:#56657a; --line:#d8dee6;
+  --accent:#c4501b; --accent-soft:#fbe9df; --steel:#1f5f8b; --steel-soft:#e3eef6;
+  --code-bg:#0f1b26; --code-fg:#dbe7f2; --code-cmt:#7f97ad;
+  --good:#2e7d4f; --bad:#b3261e;
+  --f-display:"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --f-body:"Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e151c; --surface:#16202a; --ink:#e6edf3; --muted:#9aabbd; --line:#2a3845;
+  --accent:#f0874f; --accent-soft:#3a2418; --steel:#7ab8e3; --steel-soft:#16303f;
+  --code-bg:#0a1016; --code-fg:#dbe7f2; --code-cmt:#6f879c;
+  --good:#6cc493; --bad:#f08a80; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0e151c; --surface:#16202a; --ink:#e6edf3; --muted:#9aabbd; --line:#2a3845;
+  --accent:#f0874f; --accent-soft:#3a2418; --steel:#7ab8e3; --steel-soft:#16303f;
+  --code-bg:#0a1016; --code-fg:#dbe7f2; --code-cmt:#6f879c;
+  --good:#6cc493; --bad:#f08a80; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:17px/1.6 var(--f-body);padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:28px 64px}
+.wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.15;margin:0}
+h1{font-size:clamp(30px,6vw,44px);font-weight:800;letter-spacing:-.01em}
+h2{font-size:24px;font-weight:800}
+h3{font-size:18px;font-weight:600;margin-top:6px}
+p{margin:0}
+a{color:var(--steel)}
+code{font-family:var(--f-mono);font-size:.86em;background:var(--steel-soft);color:var(--ink);padding:1px 5px;border-radius:4px}
+strong{font-weight:700}
+.eyebrow{font:600 12px/1 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+header{display:flex;flex-direction:column;gap:12px;border-bottom:3px solid var(--ink);padding-bottom:20px}
+.meta{display:flex;flex-wrap:wrap;gap:8px 16px;color:var(--muted);font-size:15px}
+.lede{font-size:19px;max-width:65ch}
+nav{display:flex;flex-wrap:wrap;gap:8px}
+nav a{font:600 13px/1 var(--f-mono);text-decoration:none;color:var(--ink);border:1px solid var(--line);background:var(--surface);padding:8px 10px;border-radius:6px}
+nav a:hover,nav a:focus-visible{border-color:var(--accent);color:var(--accent);outline:none}
+section{display:flex;flex-direction:column;gap:14px;scroll-margin-top:16px;min-width:0}
+section > .label{display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--line);padding-bottom:8px}
+section > .label .tag{font:600 11px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--surface);background:var(--ink);padding:5px 7px;border-radius:3px;white-space:nowrap}
+ul,ol{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px}
+.table{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:15.5px;min-width:480px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:600 12px/1.3 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--bg)}
+tr:last-child td{border-bottom:0}
+td.yes{color:var(--good);font-weight:700}
+td.no{color:var(--bad);font-weight:700}
+blockquote{margin:0;border-left:4px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 8px 8px 0;font-weight:600}
+pre{margin:0;background:var(--code-bg);color:var(--code-fg);font:14px/1.6 var(--f-mono);padding:14px 16px;border-radius:8px;overflow-x:auto}
+pre .c{color:var(--code-cmt)}
+.codebox{position:relative;min-width:0}
+.copy{position:absolute;top:8px;right:8px;font:600 11px/1 var(--f-mono);background:transparent;color:var(--code-cmt);border:1px solid var(--code-cmt);border-radius:4px;padding:5px 7px;cursor:pointer}
+.copy:hover,.copy:focus-visible{color:var(--code-fg);border-color:var(--code-fg);outline:none}
+.flow{font:600 14px/1.5 var(--f-mono);background:var(--steel-soft);color:var(--ink);padding:14px 16px;border-radius:8px;overflow-x:auto;white-space:pre}
+.step{display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:start}
+.step > .n{font:800 18px/34px var(--f-display);text-align:center;background:var(--ink);color:var(--bg);border-radius:50%;width:34px;height:34px}
+.step > div{min-width:0;display:flex;flex-direction:column;gap:8px}
+.see{font-size:15px;color:var(--good)}
+.see::before{content:"You should see: ";font-weight:700}
+.warn{border:1px solid var(--bad);border-radius:8px;padding:12px 16px;display:flex;flex-direction:column;gap:10px;background:var(--surface)}
+.warn .eyebrow{color:var(--bad)}
+.note{font-size:15px;color:var(--muted)}
+details{border:1px solid var(--line);background:var(--surface);border-radius:8px}
+details summary{cursor:pointer;padding:12px 16px;font-weight:600;list-style-position:inside}
+details summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:8px}
+details > div{padding:0 16px 14px;display:flex;flex-direction:column;gap:8px}
+.q{display:flex;flex-direction:column;gap:10px}
+.q p.ask{font-weight:600}
+.reread{font-style:italic;color:var(--muted);font-size:15px}
+footer{color:var(--muted);font-size:15px;border-top:1px solid var(--line);padding-top:16px}
+@media (prefers-reduced-motion: reduce){*{scroll-behavior:auto!important}}
+html{scroll-behavior:smooth}
+</style>
+
+<div class="wrap">
+<header>
+  <span class="eyebrow">312 School · Cohort 26a · Containers &amp; Orchestration · Unit 4, night 2</span>
+  <h1>Session 10: Who may read the password</h1>
+  <div class="meta"><span>Mon, Oct 19, 2026</span><span>Maher ("Mo"), plus after-class Q&amp;A</span><span>Unit 4 · Parts 2–3 (Part 4 moved to next class)</span></div>
+  <p class="lede">Last class put the database password in a <strong>Secret</strong>, and base64 hides nothing. So the only real protection is <strong>who is allowed to read it</strong>. Tonight was how the cluster decides that: every <code>kubectl</code> command passes an <strong>AWS check</strong> (who are you?) and then a <strong>Kubernetes check</strong> called <strong>RBAC</strong> (what may you do?). Then <strong>ServiceAccounts</strong>, which are users for programs, and a <strong>read-only sign-in for Claude Code</strong> so it can look and never touch. Part 4 (External Secrets Operator) was pushed to next class.</p>
+  <nav aria-label="Sections">
+    <a href="#did">What we did</a><a href="#ideas">Main ideas</a><a href="#corrections">Corrections</a><a href="#demo">Redo the demo</a><a href="#commands">Commands</a><a href="#stressed">Stressed</a><a href="#homework">Homework</a><a href="#check">Check yourself</a>
+  </nav>
+</header>
+
+<section id="did">
+  <div class="label"><span class="tag">Run of show</span><h2>What we actually did</h2></div>
+  <ol>
+    <li><strong>Re-applied night 1's objects</strong> (ConfigMap, Secret, Postgres, app) in the <code>instructor</code> namespace.</li>
+    <li><strong>Read the password in one command</strong> with <code>jsonpath</code> + <code>base64 -d</code> → <code>change-me-class-password</code>. Point: anyone allowed to read Secrets has the password.</li>
+    <li><strong>"Every command is checked twice"</strong>: AWS check, then Kubernetes check. Shown with Aigerim's laptop as the example, then on the 3D cluster map.</li>
+    <li><strong><code>kubectl auth whoami</code></strong> on Mo's account, then a detour into the AWS console (IAM roles, the SSO inline policy). Lots of confusion here; he redrew it on a whiteboard.</li>
+    <li><strong>Whiteboard:</strong> laptop → AWS sign-in → IAM role "hat" gets you into EKS → inside, a Kubernetes Role + RoleBinding decide what you can do. <strong>30-minute break.</strong></li>
+    <li><strong>ClusterRole vs Role, RoleBinding vs ClusterRoleBinding</strong>, and why your own access is a RoleBinding to the built-in ClusterRole <code>edit</code>.</li>
+    <li><strong>ServiceAccounts</strong>: <code>kubectl describe pod</code> showed the app runs as <code>default</code>.</li>
+    <li><strong>report-bot demo</strong>: ServiceAccount + Role applied → <code>can-i</code> says <strong>no</strong>; RoleBinding applied → <strong>yes</strong>; secrets and delete still <strong>no</strong>.</li>
+    <li><strong>Reading a Forbidden message</strong>: who, what, where.</li>
+    <li><strong>Claude Code with a read-only kubeconfig</strong>: "create a pod" → Forbidden; "list pods" → works; "which Role does this ServiceAccount use?" → it can't list Roles and says so.</li>
+    <li><strong>Q&amp;A</strong> on whether companies let AI into clusters (Copilot, company-closed models).</li>
+    <li><strong>After class:</strong> Q&amp;A on Role vs ClusterRole and the 3 binding combinations, plus "what is a profile?". A Roles lab was promised.</li>
+  </ol>
+</section>
+
+<section id="ideas">
+  <div class="label"><span class="tag">Concepts</span><h2>The main ideas, from zero</h2></div>
+
+  <h3>Why this matters: base64 is not a lock</h3>
+  <div class="codebox"><pre>kubectl get secret investment-app-secret -o jsonpath='{.data.DB_PASSWORD}' | base64 -d
+<span class="c"># change-me-class-password</span></pre></div>
+  <ul>
+    <li>A Secret's value is only <strong>encoded</strong>, not encrypted. Anyone who can read it can decode it.</li>
+    <li>So the question becomes: <strong>who is allowed to read Secrets?</strong></li>
+    <li>Tonight answers two of three questions: what may <em>you</em> do (and how to check), and what may <em>Claude Code</em> do. The third, where the password should live instead of Git, is Part 4.</li>
+  </ul>
+  <blockquote>The password is safe only if the cluster lets the right users read Secrets and nobody else.</blockquote>
+
+  <h3>The two checks: AWS says who you are, Kubernetes says what you may do</h3>
+  <ul>
+    <li><strong>Kubernetes has no user accounts of its own.</strong> Each platform brings its sign-in. On EKS, that is your AWS sign-in (profile <code>312-cluster</code>).</li>
+    <li>Think of AWS as the house and the cluster as a locked room inside it. Being in the house doesn't open the room.</li>
+  </ul>
+  <div class="flow">kubectl get secrets  (on your laptop)
+        ↓  kubectl signs a token with your AWS credentials
+CHECK 1 · AWS: which IAM role signed this?
+        ↓  looked up in the cluster's ACCESS ENTRIES table
+        ↓  role Containers26a  →  user  student:my-namespace
+        ✗  no access entry  →  "Unauthorized"
+CHECK 2 · Kubernetes (RBAC): may this user LIST SECRETS in THIS namespace?
+        ✗  no rule allows it  →  "Forbidden"
+        ✓  a RoleBinding allows it  →  command runs</div>
+  <ul>
+    <li><strong>Access entry:</strong> a table in the cluster that maps an IAM role to a Kubernetes user.</li>
+    <li>The <strong>whole class shares one IAM role</strong>, <code>Containers26a</code>. Your sign-in name fills in the rest: <code>student:&lt;your sign-in name&gt;</code>, which is also your namespace.</li>
+    <li>Your sign-in name is at the end of the Arn that <code>aws sts get-caller-identity</code> prints.</li>
+    <li><strong>No access entry = Unauthorized, even for an AWS administrator.</strong></li>
+    <li>In the IAM console the role shows up as <code>AWSReservedSSO_Containers26a_…</code> because IAM Identity Center created it.</li>
+  </ul>
+  <div class="table"><table>
+    <thead><tr><th>Error</th><th>Which check failed</th><th>What it means</th></tr></thead>
+    <tbody>
+      <tr><td><code>You must be logged in to the server (Unauthorized)</code></td><td><strong>AWS</strong></td><td>The cluster doesn't know who you are</td></tr>
+      <tr><td><code>Error from server (Forbidden): … cannot list …</code></td><td><strong>Kubernetes</strong></td><td>The cluster knows you; no rule allows this</td></tr>
+    </tbody>
+  </table></div>
+  <blockquote>Unauthorized = "who are you?" failed. Forbidden = "you may not" failed.</blockquote>
+
+  <h3>whoami: the user the cluster made from your sign-in</h3>
+  <div class="codebox"><pre>kubectl auth whoami
+<span class="c"># Username  student:my-namespace</span>
+<span class="c"># Groups    [students system:authenticated]</span></pre></div>
+  <ul>
+    <li><code>students</code> is a group the whole class shares.</li>
+    <li><code>system:authenticated</code> only means "you signed in."</li>
+  </ul>
+
+  <h3>RBAC: a Role says what, a RoleBinding says who</h3>
+  <ul>
+    <li><strong>RBAC</strong> = role-based access control, the cluster's own permission rules.</li>
+    <li><strong>Role:</strong> a list of what's allowed: which <strong>verbs</strong> (actions) on which <strong>resources</strong> (kinds of object).</li>
+    <li><strong>RoleBinding:</strong> gives a Role to a user, in one namespace.</li>
+    <li><strong>A Role on its own gives nothing to anyone.</strong> There is no deny: if no RoleBinding allows it, it's refused.</li>
+  </ul>
+  <div class="codebox"><pre>apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: pod-reader
+  namespace: my-namespace
+rules:
+- apiGroups: [""]               <span class="c"># "" = the core group: pods, ConfigMaps, Secrets, Services</span>
+  resources: ["pods"]           <span class="c"># ["*"] would mean every kind in the group</span>
+  verbs: ["get", "list", "watch"]</pre></div>
+  <div class="table"><table>
+    <thead><tr><th>Verb</th><th>Means</th><th>Needed for</th></tr></thead>
+    <tbody>
+      <tr><td><code>get</code></td><td>Read <strong>one</strong> object by name</td><td><code>kubectl get pod web-1</code></td></tr>
+      <tr><td><code>list</code></td><td>Read <strong>all</strong> of them</td><td><code>kubectl get pods</code></td></tr>
+      <tr><td><code>watch</code></td><td>Wait for changes</td><td><code>kubectl get pods --watch</code></td></tr>
+    </tbody>
+  </table></div>
+  <p><strong>Trap:</strong> a Role with only <code>get</code> lets you read <code>pod/web-1</code> by name and <strong>refuses <code>kubectl get pods</code></strong>.</p>
+
+  <h3>The one word that means different things in AWS and Kubernetes</h3>
+  <div class="table"><table>
+    <thead><tr><th>AWS IAM</th><th>Kubernetes RBAC</th></tr></thead>
+    <tbody>
+      <tr><td>A <strong>policy</strong> lists what's allowed</td><td>A <strong>Role</strong> lists what's allowed</td></tr>
+      <tr><td>You attach the policy to an IAM role</td><td>A <strong>RoleBinding</strong> gives the Role to a user</td></tr>
+      <tr><td>Policy can say <strong>Allow or Deny</strong></td><td>Role can <strong>only allow</strong></td></tr>
+    </tbody>
+  </table></div>
+  <blockquote>A Kubernetes Role is like an IAM policy, not like an IAM role.</blockquote>
+  <p>And the IAM role <code>Containers26a</code> and the ClusterRole <code>edit</code> are two different things: the first gets you <strong>into</strong> the cluster (AWS check); the second lists what you may <strong>do</strong> there (Kubernetes check).</p>
+
+  <h3>The four objects: Role, ClusterRole, RoleBinding, ClusterRoleBinding</h3>
+  <ul>
+    <li><strong>ClusterRole:</strong> a list of rules written once for the whole cluster. <strong>The binding that uses it decides where it applies.</strong></li>
+  </ul>
+  <div class="table"><table>
+    <thead><tr><th>Binding</th><th>Points to</th><th>Applies in</th></tr></thead>
+    <tbody>
+      <tr><td>RoleBinding</td><td>Role</td><td>One namespace</td></tr>
+      <tr><td>RoleBinding</td><td>ClusterRole</td><td><strong>Only the RoleBinding's namespace</strong> (this is you)</td></tr>
+      <tr><td>ClusterRoleBinding</td><td>ClusterRole</td><td><strong>Every</strong> namespace</td></tr>
+      <tr><td>ClusterRoleBinding</td><td>Role</td><td><strong>Not allowed</strong></td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li>In one namespace, a Role and a ClusterRole with the same rules give <strong>the same rights</strong>.</li>
+    <li>A ClusterRole exists so one rule list can be written once and reused in many namespaces, or all of them.</li>
+    <li>Built-in ClusterRoles in every cluster: <code>view</code>, <code>edit</code>, <code>admin</code>.</li>
+    <li><strong>Your access:</strong> a RoleBinding <code>student-edit</code> in your namespace → ClusterRole <code>edit</code>. One <code>edit</code> serves all ~95 students, each only in their own namespace.</li>
+    <li><code>edit</code> does <strong>not</strong> include reading Roles or RoleBindings, so you can't print your own binding.</li>
+    <li>Create the Role first. A RoleBinding naming a Role that doesn't exist gives nothing until the Role is created.</li>
+  </ul>
+  <div class="codebox"><pre>kind: RoleBinding
+metadata:
+  name: student-edit
+  namespace: my-namespace   <span class="c"># applies only here</span>
+roleRef:                            <span class="c"># WHAT</span>
+  kind: ClusterRole
+  name: edit
+subjects:                           <span class="c"># WHO</span>
+- kind: User
+  name: student:my-namespace</pre></div>
+  <blockquote>Role + RoleBinding = per namespace. ClusterRole + ClusterRoleBinding = whole cluster. ClusterRole + RoleBinding = the ClusterRole's rules, in one namespace only.</blockquote>
+
+  <h3>ServiceAccount: a user for a program</h3>
+  <ul>
+    <li>A program in a pod has <strong>no AWS sign-in</strong>. Kubernetes knows it by its <strong>ServiceAccount</strong>.</li>
+    <li>The pod YAML names it with <code>serviceAccountName:</code>. Kubernetes gives the pod a token, and its requests arrive as <code>system:serviceaccount:&lt;namespace&gt;:&lt;name&gt;</code>.</li>
+    <li><strong>A pod that names none runs as <code>default</code></strong>, which is what your investment-app does.</li>
+    <li>The <code>default</code> ServiceAccount has <strong>no rights of its own</strong>. Don't bind a Role to it: that would reach <strong>every pod in the namespace that names no ServiceAccount</strong>.</li>
+    <li>So each program that needs rights gets <strong>its own ServiceAccount and its own small Role</strong>.</li>
+  </ul>
+  <div class="flow">person   →  arrives through AWS          →  student:&lt;namespace&gt;
+program  →  arrives as its ServiceAccount →  system:serviceaccount:&lt;ns&gt;:&lt;name&gt;
+both     →  get rights the same way: a RoleBinding</div>
+
+  <h3>Least privilege: report-bot and Claude Code</h3>
+  <ul>
+    <li><strong>Least privilege:</strong> a user or program gets only the permissions its job needs.</li>
+    <li><strong>report-bot</strong> only reads settings → it gets read access to ConfigMaps and nothing else.</li>
+    <li><strong>Claude Code</strong> runs <code>kubectl</code> for you. With <em>your</em> sign-in it could read every Secret or delete anything, including by mistake. To debug it only needs to read.</li>
+    <li>So it gets its own sign-in: profile <code>312-cluster-readonly</code> → IAM role <code>Containers26aReadOnly</code> → user <code>readonly:&lt;namespace&gt;</code> → built-in <code>view</code> in your namespace.</li>
+  </ul>
+  <div class="table"><table>
+    <thead><tr><th>In your namespace</th><th>You (edit)</th><th>Claude Code (view)</th></tr></thead>
+    <tbody>
+      <tr><td>Read pods, logs, events, ConfigMaps</td><td class="yes">yes</td><td class="yes">yes</td></tr>
+      <tr><td>Read Secrets</td><td class="yes">yes</td><td class="no">no</td></tr>
+      <tr><td>Run commands in a pod (exec)</td><td class="yes">yes</td><td class="no">no</td></tr>
+      <tr><td>Read Roles and RoleBindings</td><td class="no">no</td><td class="no">no</td></tr>
+      <tr><td>Create, change, delete</td><td class="yes">yes</td><td class="no">no</td></tr>
+    </tbody>
+  </table></div>
+  <blockquote>Claude Code finds the problem. You apply the fix yourself, in your own terminal, with your own profile.</blockquote>
+</section>
+
+<section id="corrections">
+  <div class="warn">
+    <span class="eyebrow">Where the notes correct what was said live</span>
+    <div class="table"><table>
+      <thead><tr><th>Said in class</th><th>Correct version (site notes)</th></tr></thead>
+      <tbody>
+        <tr><td>"Without the <code>eks:DescribeCluster</code> / <code>ListClusters</code> policy you get Unauthorized; that policy is what lets you into the cluster"</td><td>Those IAM permissions only let <code>aws eks update-kubeconfig</code> read the cluster's address and write your kubeconfig. <strong>The access entry</strong> is what lets the role into the cluster.</td></tr>
+        <tr><td>"Each one of you has their own IAM role"</td><td>The <strong>whole class shares one role</strong>, <code>Containers26a</code>; your sign-in name makes the user unique.</td></tr>
+        <tr><td>"The default ServiceAccount has broad permissions, it can do anything" (also in Granola)</td><td><code>default</code> has <strong>no rights of its own</strong>. The reason to avoid it: a Role bound to it reaches every pod that names no ServiceAccount.</td></tr>
+        <tr><td><code>apiGroups: [""]</code> means "everything"</td><td><code>""</code> is the <strong>core group</strong> (pods, ConfigMaps, Secrets, Services). <code>["*"]</code> under <code>resources</code> means every kind in that group.</td></tr>
+        <tr><td>After class: "ClusterRoles are mostly for users, Roles for bots"</td><td>What matters is the <strong>binding</strong>. In one namespace, a Role and a ClusterRole with the same rules give the same rights.</td></tr>
+        <tr><td>After class: "one role, Containers26a, and many role bindings"</td><td>That mixes two things. <code>Containers26a</code> is the <strong>IAM role</strong> (AWS check). The shared Kubernetes object is the <strong>ClusterRole <code>edit</code></strong>, with one <code>student-edit</code> RoleBinding per namespace.</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<section id="demo">
+  <div class="label"><span class="tag">Hands-on</span><h2>Redo the demo yourself</h2></div>
+  <p><strong>Before you start:</strong></p>
+  <ul>
+    <li>Signed in: <code>aws sso login --profile 312-cluster</code>, and <code>kubectl</code> pointed at your namespace <code>my-namespace</code>.</li>
+    <li>Night 1's objects in your namespace. In <code>04-config-secrets-identity/</code>:</li>
+  </ul>
+  <div class="codebox"><pre>kubectl apply -f configmap-investment-app.yaml -f secret-investment-app.yaml \
+  -f postgres.yaml -f deployment-investment-app.yaml</pre></div>
+  <ul>
+    <li>Claude Code installed (for step 7). Nothing here creates AWS resources, so it costs nothing.</li>
+    <li><strong>You can't redo report-bot</strong>: students can't create Roles or use <code>--as</code>. Read that part in the Commands section.</li>
+  </ul>
+
+  <div class="step"><span class="n">1</span><div>
+    <p><strong>See the user the cluster made from your sign-in.</strong> This is the result of the AWS check.</p>
+    <div class="codebox"><pre>aws sts get-caller-identity --profile 312-cluster   <span class="c"># your sign-in name is at the end of the Arn</span>
+kubectl auth whoami</pre></div>
+    <p class="see"><code>Username student:my-namespace</code> and <code>Groups [students system:authenticated]</code>.</p>
+  </div></div>
+
+  <div class="step"><span class="n">2</span><div>
+    <p><strong>Ask the Kubernetes check what you may do.</strong> <code>can-i</code> changes nothing; it only answers yes or no.</p>
+    <div class="codebox"><pre>kubectl auth can-i get secrets            <span class="c"># in your namespace</span>
+kubectl auth can-i delete pods
+kubectl auth can-i list roles             <span class="c"># edit doesn't include Roles</span>
+kubectl auth can-i get secrets -n &lt;classmate-namespace&gt;</pre></div>
+    <p class="see"><code>yes</code>, <code>yes</code>, <code>no</code>, <code>no</code>.</p>
+  </div></div>
+
+  <div class="step"><span class="n">3</span><div>
+    <p><strong>Get a real Forbidden and read it.</strong></p>
+    <div class="codebox"><pre>kubectl get secrets -n &lt;classmate-namespace&gt;</pre></div>
+    <p class="see"><code>Error from server (Forbidden): secrets is forbidden: User "student:my-namespace" cannot list resource "secrets" in API group "" in the namespace "&lt;classmate&gt;"</code>. Who = your user. What = list secrets (<code>""</code> = core group). Where = their namespace.</p>
+  </div></div>
+
+  <div class="step"><span class="n">4</span><div>
+    <p><strong>Check which ServiceAccount your app runs as.</strong></p>
+    <div class="codebox"><pre>kubectl describe pod -l app=investment-app | grep 'Service Account'
+kubectl get serviceaccounts               <span class="c"># at least "default"</span></pre></div>
+    <p class="see"><code>Service Account: default</code>, because the deployment YAML names none.</p>
+  </div></div>
+
+  <div class="step"><span class="n">5</span><div>
+    <p><strong>Add the read-only profile for Claude Code.</strong> Open <code>~/.aws/config</code> and add a block at the bottom. <strong>Don't remove anything already there.</strong> The setup page has the exact block; it looks roughly like this:</p>
+    <div class="codebox"><pre>[profile 312-cluster-readonly]
+sso_session = 312                 <span class="c"># same SSO session your 312-cluster profile uses</span>
+sso_account_id = &lt;same account id as 312-cluster&gt;
+sso_role_name = Containers26aReadOnly
+region = us-east-1                <span class="c"># where the cluster runs (Identity Center itself is in us-east-2)</span></pre></div>
+    <div class="codebox"><pre>aws sso login --profile 312-cluster-readonly    <span class="c"># browser opens; confirm the code</span></pre></div>
+    <p class="see">a "successfully logged in" message in the terminal.</p>
+  </div></div>
+
+  <div class="step"><span class="n">6</span><div>
+    <p><strong>Write a separate kubeconfig</strong> so your own <code>~/.kube/config</code> stays unchanged.</p>
+    <div class="codebox"><pre>aws eks update-kubeconfig --name containers-26a --region us-east-1 \
+  --profile 312-cluster-readonly --kubeconfig ~/.kube/readonly
+KUBECONFIG=~/.kube/readonly kubectl config set-context --current --namespace=my-namespace
+KUBECONFIG=~/.kube/readonly kubectl auth whoami
+KUBECONFIG=~/.kube/readonly kubectl auth can-i get secrets
+KUBECONFIG=~/.kube/readonly kubectl get pods</pre></div>
+    <p class="see">a new file <code>~/.kube/readonly</code>; whoami prints <code>readonly:my-namespace</code>; can-i prints <code>no</code>; <code>get pods</code> lists your pods.</p>
+  </div></div>
+
+  <div class="step"><span class="n">7</span><div>
+    <p><strong>Start Claude Code with the read-only sign-in</strong> and test it.</p>
+    <div class="codebox"><pre>KUBECONFIG=~/.kube/readonly AWS_PROFILE=312-cluster-readonly claude</pre></div>
+    <p>Then ask it, one at a time:</p>
+    <ul>
+      <li>"Create a pod called test in my namespace" → should fail.</li>
+      <li>"List all pods in my namespace" → works.</li>
+      <li>"What's running in my namespace, and is any pod not ready? Why?" (the homework question)</li>
+      <li>"Which Role does the default ServiceAccount use?" → it can list ServiceAccounts but not Roles, and should say so.</li>
+    </ul>
+    <p class="see"><code>pods is forbidden: User "readonly:my-namespace" cannot create resource "pods"</code> for the first ask, and a normal pod list for the second.</p>
+  </div></div>
+
+  <h3>If it goes wrong</h3>
+  <div class="table"><table>
+    <thead><tr><th>Error</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td><code>Unauthorized</code></td><td>AWS check failed. SSO session expired, or the wrong profile. Run <code>aws sso login --profile …</code> again.</td></tr>
+      <tr><td><code>Forbidden … User "student:…"</code></td><td>Kubernetes check failed. You're asking about another namespace, or something <code>edit</code> doesn't cover (Roles, RoleBindings).</td></tr>
+      <tr><td><code>Forbidden … User "readonly:…"</code> on a write</td><td><strong>Working as intended.</strong> Run the fix yourself with your normal profile.</td></tr>
+      <tr><td>Read-only commands show the wrong namespace</td><td>The new kubeconfig has no default namespace. Run the <code>set-context --namespace</code> line, or add <code>-n my-namespace</code>.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Clean up</h3>
+  <ul>
+    <li>No cloud resources were created, so nothing costs money. Keep the read-only profile and <code>~/.kube/readonly</code>; you'll reuse them.</li>
+  </ul>
+</section>
+
+<section id="commands">
+  <div class="label"><span class="tag">Reference</span><h2>Commands &amp; config that came up</h2></div>
+  <div class="table"><table>
+    <thead><tr><th>Command</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td><code>kubectl get secret &lt;name&gt; -o jsonpath='{.data.DB_PASSWORD}' | base64 -d</code></td><td>Read one Secret value in plain text</td></tr>
+      <tr><td><code>aws sts get-caller-identity</code></td><td>Who AWS thinks you are; sign-in name at the end of the Arn</td></tr>
+      <tr><td><code>kubectl auth whoami</code></td><td>The Kubernetes user the cluster made from your sign-in</td></tr>
+      <tr><td><code>kubectl auth can-i &lt;verb&gt; &lt;resource&gt; [-n ns]</code></td><td>Yes/no: may I do this? Changes nothing</td></tr>
+      <tr><td><code>kubectl auth can-i … --as &lt;user&gt;</code></td><td>Ask for another user (instructor only)</td></tr>
+      <tr><td><code>kubectl describe pod -l app=investment-app | grep 'Service Account'</code></td><td>Which ServiceAccount a pod runs as</td></tr>
+      <tr><td><code>aws sso login --profile 312-cluster-readonly</code></td><td>Sign in with the read-only role</td></tr>
+      <tr><td><code>aws eks update-kubeconfig … --kubeconfig ~/.kube/readonly</code></td><td>Write the read-only context to its own file</td></tr>
+      <tr><td><code>KUBECONFIG=~/.kube/readonly kubectl …</code></td><td>Run one command with the read-only kubeconfig</td></tr>
+      <tr><td><code>KUBECONFIG=~/.kube/readonly AWS_PROFILE=312-cluster-readonly claude</code></td><td>Start Claude Code with read-only access</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>report-bot: the instructor's demo (read along)</h3>
+  <div class="codebox"><pre>apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: report-bot
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: configmap-reader
+rules:
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: report-bot-reads-configmaps
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: configmap-reader
+subjects:
+- kind: ServiceAccount
+  name: report-bot</pre></div>
+  <div class="codebox"><pre>BOT=system:serviceaccount:instructor:report-bot
+kubectl apply -f serviceaccount-report-bot.yaml -f role-configmap-reader.yaml
+kubectl auth can-i get configmaps --as $BOT      <span class="c"># no: a Role alone gives nothing</span>
+kubectl apply -f rolebinding-report-bot.yaml
+kubectl auth can-i get configmaps --as $BOT      <span class="c"># yes</span>
+kubectl auth can-i get secrets --as $BOT         <span class="c"># no</span>
+kubectl auth can-i delete configmaps --as $BOT   <span class="c"># no</span></pre></div>
+  <p class="note">Mo first applied the RoleBinding without <code>-n instructor</code> and had to re-run it: a RoleBinding is namespaced, so it lands wherever you apply it.</p>
+  <p class="note">You don't need to memorize the YAML. The Kubernetes docs page "Using RBAC Authorization" has an example of each object.</p>
+</section>
+
+<section id="stressed">
+  <div class="label"><span class="tag">Emphasis</span><h2>What the instructor stressed</h2></div>
+  <ul>
+    <li><strong>Remember the two checks.</strong> "Focus on this, this is important": the cluster lives inside AWS, so you pass AWS first, then Kubernetes.</li>
+    <li><strong>Being in the AWS account doesn't mean you can reach the cluster.</strong> Different teams get different clusters.</li>
+    <li><strong>An IAM role and a Kubernetes Role are different things.</strong> He spent the most time here.</li>
+    <li><strong>Least privilege, always.</strong> Don't give Claude your own rights: AI can misread "delete this pod" as "delete the deployment", and in production that costs real money.</li>
+    <li><strong>Don't use defaults</strong> (the <code>default</code> namespace, the <code>default</code> ServiceAccount) for your apps.</li>
+    <li><strong>Re-watch if it's still confusing.</strong> "Not hard, but the first time it's a lot."</li>
+    <li>His own view on interviews: say you use Copilot lightly, not that AI does your job. Wait for the school's official advice at the end of the program.</li>
+  </ul>
+</section>
+
+<section id="homework">
+  <div class="label"><span class="tag">Before next class</span><h2>Homework</h2></div>
+  <ul>
+    <li>Run <code>kubectl auth whoami</code> and the <code>can-i</code> checks with your own profile.</li>
+    <li>Set up the read-only profile and run the same checks with it.</li>
+    <li>Start Claude Code with the read-only kubeconfig and ask what's running in your namespace and why a pod isn't ready.</li>
+    <li>Watch for the Roles / ClusterRoles practice lab promised after class.</li>
+  </ul>
+  <p class="note">Next class: a quick recap and Q&amp;A, then Part 4. The External Secrets Operator copies the password from AWS Secrets Manager into a normal Secret, so no file in Git holds it.</p>
+
+  <h3>Worth replaying</h3>
+  <ul>
+    <li><strong>The whiteboard drawing</strong> (just before the break): laptop → IAM role hat → EKS → Kubernetes Role + RoleBinding. This is where the class "got it."</li>
+    <li><strong>The ClusterRole vs RoleBinding drawing</strong> right after the break, with namespaces A and B.</li>
+    <li><strong>The Claude Code read-only demo</strong> near the end: the Forbidden on create, the working list, and Claude saying it can't list Roles.</li>
+  </ul>
+
+  <h3>Left unclear</h3>
+  <ul>
+    <li>The exact <code>~/.aws/config</code> block and <code>update-kubeconfig</code> command weren't shown in full. Step 5–6 above follow the class and the notes; <strong>check the setup page for the exact lines</strong>.</li>
+    <li>Granola spells the profile <code>312-cluster-read-only</code>; the site notes say <code>312-cluster-readonly</code>. The notes spelling is used here.</li>
+    <li>The deck's slides weren't read for this recap; the site notes cover the same eleven sections.</li>
+    <li>Part 4 (External Secrets Operator) wasn't covered.</li>
+  </ul>
+</section>
+
+<section id="check">
+  <div class="label"><span class="tag">Self-test</span><h2>Check yourself</h2></div>
+  <div class="q">
+    <p class="ask">1. A new teammate is an AWS administrator in the account, but every <code>kubectl</code> command prints <code>Unauthorized</code>. Giving them the ClusterRole <code>admin</code> doesn't help. Why not, and what's missing?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>They're failing the AWS check, before RBAC ever runs.</strong> Their IAM role has no access entry in the cluster, so the cluster doesn't know who they are. RBAC rules only matter once you get past check 1.</p>
+      <p class="reread">If this one was shaky, reread "The two checks."</p>
+    </div></details>
+  </div>
+  <div class="q">
+    <p class="ask">2. You create a RoleBinding in namespace <code>team-a</code> that points to a ClusterRole allowing <code>list secrets</code>. Can that user list Secrets in <code>team-b</code>?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>No.</strong> A RoleBinding limits a ClusterRole's rules to the RoleBinding's own namespace. Cluster-wide would need a ClusterRoleBinding. This is exactly why you can't see classmates' Secrets.</p>
+      <p class="reread">If this one was shaky, reread "The four objects."</p>
+    </div></details>
+  </div>
+  <div class="q">
+    <p class="ask">3. A teammate wants a new log-shipping pod to read ConfigMaps, so they bind a ConfigMap-reader Role to the <code>default</code> ServiceAccount. What's wrong with that?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>Every pod in the namespace that names no ServiceAccount now gets that right too.</strong> Create a dedicated ServiceAccount, bind the small Role to it, and set <code>serviceAccountName:</code> in the pod. That's least privilege.</p>
+      <p class="reread">If this one was shaky, reread "ServiceAccount: a user for a program."</p>
+    </div></details>
+  </div>
+</section>
+
+<footer>The full study page and 10-question quiz are in Notion under DevOps / 312 - Notes / Containers &amp; Orchestration.</footer>
+</div>
+
+<script>
+document.querySelectorAll('.codebox').forEach(function(box){
+  var pre = box.querySelector('pre'); var b = document.createElement('button');
+  b.className = 'copy'; b.type = 'button'; b.textContent = 'Copy';
+  b.addEventListener('click', function(){
+    var text = pre.innerText.split('\n').map(function(l){ return l.replace(/\s+#.*$/, ''); }).join('\n').trim();
+    var done = function(){ b.textContent = 'Copied'; setTimeout(function(){ b.textContent = 'Copy'; }, 1500); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(function(){ selectPre(); });
+    } else { selectPre(); }
+    function selectPre(){ var r = document.createRange(); r.selectNodeContents(pre); var s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = 'Selected'; }
+  });
+  box.appendChild(b);
+});
+</script>
+
+</body></html>

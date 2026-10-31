@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Session 08: Probes and the Ingress</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EEF2F7; --surface:#FFFFFF; --ink:#1B2A41; --muted:#56657C; --line:#C9D3E1;
+  --blue:#2459C8; --blue-soft:#DCE6FA;
+  --ok:#1F8A5B; --ok-soft:#D8F0E4;
+  --warn:#A86A00; --warn-soft:#FBEBC9;
+  --bad:#B83A30; --bad-soft:#F7DCD8;
+  --code-bg:#1B2A41; --code-ink:#E6ECF5;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1724; --surface:#172234; --ink:#E4EAF3; --muted:#9AA8BD; --line:#2C3B53;
+    --blue:#7FA6F5; --blue-soft:#1E3157;
+    --ok:#5CCB94; --ok-soft:#163A2B;
+    --warn:#E8B04D; --warn-soft:#3A2D12;
+    --bad:#F08A80; --bad-soft:#3E1C1A;
+    --code-bg:#0B111B; --code-ink:#DCE4F0;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1724; --surface:#172234; --ink:#E4EAF3; --muted:#9AA8BD; --line:#2C3B53;
+  --blue:#7FA6F5; --blue-soft:#1E3157;
+  --ok:#5CCB94; --ok-soft:#163A2B;
+  --warn:#E8B04D; --warn-soft:#3A2D12;
+  --bad:#F08A80; --bad-soft:#3E1C1A;
+  --code-bg:#0B111B; --code-ink:#DCE4F0;
+  color-scheme:dark;
+}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 72px)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:21;background:var(--bg)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size:17px;line-height:1.6}
+code,pre,.mono{font-family:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace}
+code{font-size:.88em;background:var(--blue-soft);padding:.1em .35em;border-radius:4px}
+.wrap{max-width:980px;margin:0 auto;padding:40px 20px 80px}
+header{margin-bottom:36px}
+h1{font-size:clamp(2rem,5vw,3rem);line-height:1.1;margin:.2em 0 .4em;letter-spacing:-.01em}
+.sub{color:var(--muted);margin:0;max-width:62ch}
+.rule-line{margin-top:24px;display:flex;flex-wrap:wrap;gap:12px}
+.rule-line div{flex:1 1 260px;padding:14px 16px;border-left:5px solid;background:var(--surface);border-radius:0 8px 8px 0}
+.rule-line .r{border-color:var(--ok)} .rule-line .l{border-color:var(--bad)}
+.rule-line strong{display:block;font-size:1.1rem}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;display:flex;flex-wrap:nowrap;gap:8px;overflow-x:auto;
+  margin:0 -20px;padding:10px 20px;background:var(--bg);border-bottom:1px solid var(--line);scrollbar-width:thin}
+@media(min-width:900px){nav{flex-wrap:wrap}}
+nav a{white-space:nowrap}
+nav a.active{background:var(--blue);color:var(--surface);border-color:var(--blue)}
+nav a{color:var(--blue);text-decoration:none;border:1px solid var(--line);padding:4px 12px;border-radius:999px;font-size:.92rem;background:var(--surface)}
+nav a:hover{border-color:var(--blue)}
+section{margin-top:56px}
+h2{font-size:1.6rem;margin:0 0 .3em;line-height:1.2}
+h3{font-size:1.15rem;margin:1.4em 0 .3em}
+p{max-width:70ch}
+.lede{color:var(--muted);margin-top:0}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px}
+button{font:inherit;font-size:.95rem;cursor:pointer;border-radius:8px;border:1px solid var(--line);
+  background:var(--surface);color:var(--ink);padding:8px 14px}
+button:hover{border-color:var(--blue)}
+button.primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+:root[data-theme="dark"] button.primary{color:#0F1724}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) button.primary{color:#0F1724}}
+button.danger{border-color:var(--bad);color:var(--bad)}
+button:focus-visible,a:focus-visible,summary:focus-visible,select:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+button:disabled{opacity:.45;cursor:not-allowed}
+.opts button:disabled{opacity:.7}
+.opts button.right:disabled,.opts button.nope:disabled{opacity:1}
+.controls{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;align-items:center}
+
+/* simulator */
+.sim{display:grid;grid-template-columns:1fr;gap:16px}
+@media(min-width:760px){.sim{grid-template-columns:1.25fr 1fr}}
+.rs{border:1px dashed var(--line);border-radius:10px;padding:12px;margin-bottom:12px;transition:opacity .4s}
+.rs.zero{opacity:.55}
+.rs-head{display:flex;justify-content:space-between;gap:8px;font-size:.9rem;color:var(--muted);margin-bottom:8px;flex-wrap:wrap}
+.rs-head b{color:var(--ink)}
+.pods{display:flex;flex-wrap:wrap;gap:10px;min-height:76px}
+.pod{width:150px;border-radius:10px;padding:10px;border:2px solid;font-size:.85rem;line-height:1.35;transition:opacity .5s, transform .3s}
+.pod .n{font-family:"JetBrains Mono",monospace;font-size:.78rem;word-break:break-all}
+.pod .st{font-weight:700;font-size:1rem}
+.pod.ready{border-color:var(--ok);background:var(--ok-soft)}
+.pod.notready{border-color:var(--warn);background:var(--warn-soft)}
+.pod.starting{border-color:var(--line);background:var(--bg)}
+.pod.term{border-color:var(--bad);background:var(--bad-soft);opacity:.6}
+.pod.flash{transform:scale(1.06)}
+.empty{color:var(--muted);font-size:.9rem;align-self:center}
+.log{background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:12px 14px;font-size:.8rem;
+  height:330px;overflow-y:auto;line-height:1.5}
+.log div{white-space:pre-wrap;word-break:break-word}
+.log .w{color:#F4BE5B} .log .e{color:#F49088} .log .g{color:#7FDCA8} .log .c{color:#8FB2F7}
+.users{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:.92rem;color:var(--muted);flex-wrap:wrap}
+.status-pill{display:inline-block;padding:2px 10px;border-radius:999px;font-weight:700;font-size:.85rem}
+.pill-ok{background:var(--ok-soft);color:var(--ok)} .pill-warn{background:var(--warn-soft);color:var(--warn)} .pill-bad{background:var(--bad-soft);color:var(--bad)}
+
+/* liveness */
+.live-grid{display:grid;grid-template-columns:1fr;gap:16px}
+@media(min-width:760px){.live-grid{grid-template-columns:280px 1fr}}
+.bigpod{border:2px solid var(--line);border-radius:14px;padding:18px;text-align:left}
+.bigpod .row{display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding:6px 0;font-size:.95rem}
+.bigpod .row:last-child{border:none}
+.bigpod .val{font-family:"JetBrains Mono",monospace;font-weight:600}
+select{font:inherit;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.backoff{display:flex;gap:4px;align-items:flex-end;height:90px;margin-top:14px}
+.backoff span{flex:1;background:var(--blue-soft);border-radius:4px 4px 0 0;position:relative;transition:background .3s}
+.backoff span.on{background:var(--bad)}
+.backoff-labels{display:flex;gap:4px;font-size:.72rem;color:var(--muted)}
+.backoff-labels span{flex:1;text-align:center}
+
+/* tables */
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:.95rem}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--bg);font-weight:700}
+tr:last-child td{border-bottom:none}
+
+/* request path */
+.path{display:flex;flex-direction:column;gap:0;margin-top:12px}
+.hop{display:grid;grid-template-columns:44px 1fr;gap:14px;position:relative;padding-bottom:18px}
+.hop .dot{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-weight:700;
+  background:var(--surface);border:2px solid var(--blue);color:var(--blue);z-index:1}
+.hop::before{content:"";position:absolute;left:21px;top:44px;bottom:0;width:2px;background:var(--line)}
+.hop:last-child::before{display:none}
+.hop h4{margin:8px 0 2px;font-size:1.05rem}
+.hop p{margin:0;color:var(--muted)}
+.hop.https .dot{border-color:var(--ok);color:var(--ok)}
+.tag{display:inline-block;font-size:.78rem;padding:1px 8px;border-radius:999px;margin-left:6px;vertical-align:2px}
+.tag.enc{background:var(--ok-soft);color:var(--ok)} .tag.plain{background:var(--warn-soft);color:var(--warn)}
+.note{border-left:4px solid var(--blue);background:var(--blue-soft);padding:12px 16px;border-radius:0 8px 8px 0;margin:16px 0;max-width:70ch}
+
+pre{background:var(--code-bg);color:var(--code-ink);padding:14px 16px;border-radius:10px;overflow-x:auto;font-size:.82rem;line-height:1.55;margin:10px 0}
+pre .cm{color:#8A9AB5}
+
+details{background:var(--surface);border:1px solid var(--line);border-radius:10px;margin-bottom:8px}
+summary{cursor:pointer;padding:12px 16px;font-weight:700}
+details > div{padding:0 16px 14px}
+.wrong{color:var(--bad);text-decoration:line-through;text-decoration-thickness:1px}
+
+/* quiz */
+.q{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:14px}
+.q p.prompt{font-weight:700;margin-top:0}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opts button{text-align:left;padding:10px 14px}
+.opts button.right{border-color:var(--ok);background:var(--ok-soft)}
+.opts button.nope{border-color:var(--bad);background:var(--bad-soft)}
+.explain{margin-top:10px;color:var(--muted);display:none}
+.explain.show{display:block}
+.score{font-weight:700}
+footer{margin-top:64px;color:var(--muted);font-size:.9rem}
+
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.tabs button[aria-selected="true"]{background:var(--blue);color:var(--surface);border-color:var(--blue)}
+.tabpane{display:none}.tabpane.show{display:block}
+.timeline{list-style:none;padding:0;margin:0;counter-reset:t}
+.timeline li{counter-increment:t;position:relative;padding:14px 18px 14px 64px;margin-bottom:10px;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.timeline li h4{margin:0 0 4px;font-size:1.08rem}
+.timeline li p{margin:0;color:var(--ink);max-width:68ch}
+.timeline li::before{content:counter(t);position:absolute;left:16px;top:14px;width:32px;height:32px;border-radius:50%;
+  background:var(--blue-soft);color:var(--blue);font-weight:700;display:grid;place-items:center;font-size:.9rem}
+.timeline details{margin:0}
+.yaml-toggle .ln{display:block;transition:background .2s,opacity .2s}
+.yaml-toggle.focus .ln{opacity:.35}
+.yaml-toggle.focus .ln.hl{opacity:1;background:rgba(127,166,245,.18)}
+.flow{display:flex;flex-direction:column;gap:6px;margin:14px 0;max-width:620px}
+.flow div{padding:10px 14px;border-radius:8px;border:1px solid var(--line);background:var(--surface)}
+.flow .arrow{border:none;background:none;padding:0 0 0 18px;color:var(--muted)}
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px}
+.compare > div{border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--bg)}
+.lbs{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.lbs span{display:inline-block;padding:3px 8px;border-radius:6px;font-size:.8rem;font-family:"JetBrains Mono",monospace}
+.lb-many span{background:var(--bad-soft);color:var(--bad)}
+.lb-one span{background:var(--ok-soft);color:var(--ok)}
+.form-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:14px}
+@media(min-width:640px){.form-grid{grid-template-columns:1fr 1fr}}
+.form-grid label{display:flex;flex-direction:column;font-size:.9rem;color:var(--muted);gap:4px}
+.form-grid input{font:inherit;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.verdict{padding:12px 16px;border-radius:8px;font-size:.9rem}
+.verdict.ok{background:var(--ok-soft);color:var(--ok)} .verdict.no{background:var(--bad-soft);color:var(--bad)} .verdict.warn{background:var(--warn-soft);color:var(--warn)}
+.step{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:12px}
+.step.done{border-color:var(--ok)}
+.step-head{display:flex;gap:12px;align-items:flex-start}
+.step-head input{width:22px;height:22px;margin-top:3px;accent-color:var(--ok);flex:none}
+.step-head h4{margin:0;font-size:1.05rem}
+.step-head p{margin:2px 0 0;color:var(--muted)}
+.step pre{margin:10px 0 6px}
+.step details{border:none;background:var(--bg)}
+.step summary{font-weight:400;color:var(--blue);padding:8px 12px}
+.progress{height:8px;background:var(--line);border-radius:999px;overflow:hidden;margin:10px 0 18px}
+.progress div{height:100%;background:var(--ok);width:0;transition:width .3s}
+.cards2{display:grid;grid-template-columns:1fr;gap:14px}
+@media(min-width:720px){.cards2{grid-template-columns:1fr 1fr}}
+.cards2 > div{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.cards2 h3{margin-top:0}
+.cards2 ul{margin:0;padding-left:20px}
+.cards2 li{margin-bottom:6px}
+.fixbox{border:1.5px solid var(--warn);border-radius:14px;padding:12px;background:var(--warn-soft)}
+.fixbox td:first-child{width:44%;color:var(--muted)}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <p class="sub">Containers &amp; Orchestration, unit 3, last class</p>
+  <h1>Session 08: Probes and the Ingress</h1>
+  <p class="sub">Two questions: which pods should get requests, and how does the internet reach them? Click around below; every button acts out something from the class demo.</p>
+  <div class="rule-line">
+    <div class="r"><strong>Readiness controls traffic.</strong>Fails → no requests. The container keeps running.</div>
+    <div class="l"><strong>Liveness controls restarts.</strong>Fails → the kubelet restarts the container.</div>
+  </div>
+</header>
+  <nav aria-label="Sections">
+    <a href="#timeline">What we did</a><a href="#services">Services recap</a><a href="#rollout">Readiness lab</a><a href="#liveness">Liveness lab</a><a href="#probes">Three probes</a>
+    <a href="#ingress">Ingress</a><a href="#admission">Hostname rule</a><a href="#fixes">Corrections</a><a href="#demo">Redo the demo</a><a href="#commands">Commands</a><a href="#wrapup">Stressed &amp; homework</a><a href="#quiz">Check yourself</a>
+  </nav>
+
+<!-- TIMELINE -->
+<section id="timeline">
+  <h2>What we actually did, in order</h2>
+  <p class="lede">Wed, Oct 14, 2026, with Eldiiar, plus after-class with Bakhtiyar. Deck slides 11–22 (Parts 4–5).</p>
+  <ol class="timeline">
+    <li><h4>Services recap</h4><p>ClusterIP (inside the cluster), NodePort (node IP + port, rarely used), LoadBalancer (AWS creates an NLB per Service). Then last class's question 2: who rewrites <code>172.20.x.x</code> to a pod's address. Answer: kube-proxy (see the Services recap below).</p></li>
+    <li><h4>What a probe is</h4><p>Like a blood sample at the doctor: a quick check that tells you if something is wrong inside. The AWS version: a target group health check stops traffic, an Auto Scaling health check replaces the instance. Kubernetes has both actions and calls them probes.</p></li>
+    <li><h4>Readiness, live (with a typo)</h4><p>Applied <code>deployment-drill-readiness.yaml</code>. First hit <code>InvalidImageName</code> because one digit was missing in the image URI (the leading 8). The rollout stopped at the first new pod. Fixed the URI, rollout finished. Even this mistake showed the safety gate working.</p></li>
+    <li><h4>Broke readiness on purpose</h4><p>Applied the file that checks <code>/health</code> (a 404). New pod: Running but 0/1. Old pods kept serving. <code>get endpointslices</code> still listed it; <code>describe</code> showed <code>Ready: false</code>. You can replay this in the readiness lab below.</p></li>
+    <li><h4>Probe settings and check types</h4><p>initialDelay, period, timeout, thresholds; httpGet, tcpSocket, exec, grpc. Then a 20-minute break.</p></li>
+    <li><h4>Liveness, live</h4><p>A standalone pod <code>drill-liveness</code> checking <code>/health</code>: RESTARTS climbed and status flipped to CrashLoopBackOff. Changing its probe gave <code>Forbidden</code>, so he had to delete and recreate it.</p></li>
+    <li><h4>Startup probe, in words only + the SOC 2 story</h4><p>No demo. He told a story about a SOC 2 audit to make the point: <b>best practice vs common sense</b>. Don't add every probe just because a checklist says so; add what your app needs.</p></li>
+    <li><h4>Ingress</h4><p>5 LoadBalancer Services = 5 bills, vs 1 ALB with host rules. He applied an Ingress for his host and a student's, watched rules appear on the shared ALB's 443 listener in the AWS console, and opened both URLs over HTTPS.</p></li>
+    <li><h4>HTTPS, the real request path, limits</h4><p>HTTPS termination at the ALB, the real path of a request, NodePort vs Ingress, and your namespace limits: <b>8 pods, 5 Services, 1 Ingress</b>.</p></li>
+    <li><h4>After class with Bakhtiyar</h4><p>Re-ran the wrong-path rollout slowly, showed the two ReplicaSets, and explained why the app's <b>code</b> has <code>/health</code> (in <code>app.py</code>, it checks the DB connection) but the <b>image</b> was built without it. That's why <code>/health</code> answers 404.</p></li>
+  </ol>
+</section>
+
+<!-- SERVICES -->
+<section id="services">
+  <h2>Services recap: the three types</h2>
+  <p class="lede">Pick a type to see how traffic reaches the pods.</p>
+  <div class="panel">
+    <div class="tabs" role="tablist" id="svcTabs">
+      <button role="tab" aria-selected="true" data-t="cip">ClusterIP</button>
+      <button role="tab" aria-selected="false" data-t="np">NodePort</button>
+      <button role="tab" aria-selected="false" data-t="lb">LoadBalancer</button>
+      <button role="tab" aria-selected="false" data-t="kp">Who rewrites the IP?</button>
+    </div>
+    <div class="tabpane show" data-p="cip">
+      <p><b>Inside the cluster only.</b> The Service gets a stable address like <code>172.20.x.x</code> and the name <code>drill</code>. Other pods (like <code>client</code>) call <code>http://drill</code>.</p>
+      <div class="flow"><div>client pod: <code>curl http://drill</code></div><div class="arrow">↓ CoreDNS: "drill" = 172.20.x.x</div><div>ClusterIP <code>172.20.x.x:80</code></div><div class="arrow">↓ kube-proxy rule on the node</div><div>a ready pod <code>10.20.x.x:8080</code></div></div>
+    </div>
+    <div class="tabpane" data-p="np">
+      <p><b>Node IP + a port above 30000.</b> Rarely used. Breaks when nodes are replaced, and unusable on this cluster because EKS Auto Mode gives you no node IPs. Fine for quick dev access or bare-metal clusters.</p>
+    </div>
+    <div class="tabpane" data-p="lb">
+      <p><b>AWS creates a load balancer (an NLB) for each Service.</b> Easy, but every one is billed by the hour. 5 apps = 5 load balancers. This is exactly the problem the Ingress solves.</p>
+    </div>
+    <div class="tabpane" data-p="kp">
+      <p>Last class's question 2. <b>kube-proxy</b> writes a rule on each node that changes <code>172.20.x.x:80</code> into a ready pod's <code>10.20.x.x:8080</code>.</p>
+      <p><b>CoreDNS</b> does something smaller: it only answers "what is the address of the name <code>drill</code>?" with the ClusterIP. In class it was said "CoreDNS does that mapping"; that's the part to correct.</p>
+      <p style="color:var(--muted)">The instructor's advice: don't over-study NodePort or cluster DNS internals. On EKS Auto Mode you rarely touch them.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ROLLOUT SIM -->
+<section id="rollout">
+  <h2>Readiness lab: the stuck rollout</h2>
+  <p class="lede">You start where the demo did: <code>deployment-drill-readiness.yaml</code> applied, 2 pods, probe checks <code>/</code>. Now apply the wrong-path file (probe checks <code>/health</code>, which this image doesn't have) and watch the rollout gate hold.</p>
+  <div class="panel">
+    <div class="controls">
+      <button class="primary" id="btnWrong">kubectl apply wrong-path file</button>
+      <button id="btnRight">kubectl apply right file</button>
+      <button id="btnCurl">curl http://drill</button>
+      <button id="btnReset">Reset</button>
+    </div>
+    <div class="sim">
+      <div>
+        <div id="rsArea"></div>
+        <div class="users">Rollout: <span id="rolloutState" class="status-pill pill-ok">complete</span></div>
+      </div>
+      <div class="log mono" id="log" aria-live="polite"></div>
+    </div>
+  </div>
+  <div class="note">What to notice: the new pod is <b>Running</b> but <b>0/1</b>. Running means the container started; 0/1 means readiness is failing, so it gets no traffic. Kubernetes won't remove an old pod until a new one is ready, so users never see the broken version. It also won't roll back for you. You fix it by applying the right file.</div>
+  <h3>Why it happens, step by step</h3>
+  <div class="flow">
+    <div>apply wrong-path file → pod template changed → <b>new ReplicaSet</b></div>
+    <div class="arrow">↓</div>
+    <div>1 new pod, 0/1, probe gets 404</div>
+    <div class="arrow">↓</div>
+    <div>old ReplicaSet keeps its 2 pods (1/1) → users still served</div>
+    <div class="arrow">↓</div>
+    <div>apply right file → wrong ReplicaSet scaled to 0 → its pod is removed</div>
+  </div>
+  <div class="tbl-wrap"><table>
+    <tr><th>Fact</th><th>Why it matters</th></tr>
+    <tr><td>Status 200–399 passes; 404, 503 or no answer fails</td><td>A missing route (404) fails the probe</td></tr>
+    <tr><td>Not ready = no traffic, but <b>no restart</b>; the kubelet keeps checking</td><td>When it passes again, traffic comes back by itself</td></tr>
+    <tr><td>The Deployment does nothing about a not-ready pod</td><td>It only counts pods, and the count is still right</td></tr>
+    <tr><td>With 2 replicas and default settings, an old pod is removed only after a new pod is ready</td><td>This is the rollout gate that saved users</td></tr>
+    <tr><td>No automatic rollback; after 10 minutes <code>rollout status</code> says it exceeded its progress deadline</td><td>You fix it by applying the right file</td></tr>
+    <tr><td>Each change to the pod template makes a new ReplicaSet</td><td>That's why you saw two ReplicaSets</td></tr>
+    <tr><td>A not-ready pod <b>stays</b> on the EndpointSlice with <code>Ready: false</code></td><td><code>get</code> lists every address; only <code>describe</code> shows who gets traffic</td></tr>
+  </table></div>
+</section>
+
+<!-- LIVENESS SIM -->
+<section id="liveness">
+  <h2>Liveness lab: the restart loop</h2>
+  <p class="lede">A standalone pod <code>drill-liveness</code>. Its liveness probe runs every 5 s and gives up after 2 fails in a row. Time here runs 10× faster than real life.</p>
+  <div class="panel">
+    <div class="controls">
+      <label for="livePath">Probe path</label>
+      <select id="livePath"><option value="/health">/health (app doesn't have it)</option><option value="/">/ (app answers 200)</option></select>
+      <button class="primary" id="liveStart">kubectl apply</button>
+      <button class="danger" id="liveDel">kubectl delete</button>
+    </div>
+    <div class="live-grid">
+      <div class="bigpod" id="bigpod">
+        <div class="row"><span>NAME</span><span class="val">drill-liveness</span></div>
+        <div class="row"><span>READY</span><span class="val" id="lvReady">-</span></div>
+        <div class="row"><span>STATUS</span><span class="val" id="lvStatus">not created</span></div>
+        <div class="row"><span>RESTARTS</span><span class="val" id="lvRestarts">0</span></div>
+        <div class="row"><span>IP</span><span class="val" id="lvIp">-</span></div>
+      </div>
+      <div>
+        <div class="log mono" id="liveLog" style="height:200px"></div>
+        <div class="backoff" id="backoff" aria-hidden="true"></div>
+        <div class="backoff-labels"><span>10s</span><span>20s</span><span>40s</span><span>80s</span><span>160s</span><span>5m</span></div>
+        <p style="font-size:.9rem;color:var(--muted);margin:.5em 0 0">The wait between restarts doubles each time, up to 5 minutes. While it waits, STATUS shows CrashLoopBackOff.</p>
+      </div>
+    </div>
+  </div>
+  <div class="note">Same name, same IP, RESTARTS goes up: liveness restarts the <b>container</b>, not the pod. And try changing the path while it runs: in class this gave <code>Forbidden</code>, because you can't change probes on a running bare pod. You have to delete and apply again. A Deployment would swap pods for you.</div>
+  <div class="tbl-wrap"><table>
+    <tr><th>Liveness fact</th><th>In plain words</th></tr>
+    <tr><td>Same check as readiness, different action</td><td>After <code>failureThreshold</code> fails in a row, restart the container</td></tr>
+    <tr><td>Checks one container</td><td>Not "the whole pod's health"</td></tr>
+    <tr><td>Best fit</td><td>An app still running but stopped answering (hung)</td></tr>
+    <tr><td>Not for memory leaks</td><td>A container eating memory is stopped by a memory limit (unit 5)</td></tr>
+    <tr><td>Check the app itself, never its database</td><td>A slow database would restart every pod at once</td></tr>
+  </table></div>
+</section>
+
+<!-- THREE PROBES -->
+<section id="probes">
+  <h2>The three probes side by side</h2>
+  <p class="lede">The kubelet (the agent on every node) runs them against one container, every few seconds, for as long as the container runs.</p>
+  <div class="tbl-wrap"><table>
+    <tr><th>Probe</th><th>Question it asks</th><th>When it fails</th><th>Your Scale twin</th></tr>
+    <tr><td><b>Readiness</b></td><td>Ready for requests right now?</td><td>No traffic. Container keeps running and is checked again.</td><td>Target group health check</td></tr>
+    <tr><td><b>Liveness</b></td><td>Still working, or stuck?</td><td>Container restarted in the same pod.</td><td>ASG replacing an instance</td></tr>
+    <tr><td><b>Startup</b></td><td>Finished booting?</td><td>Others wait for it. Never passes → restart.</td><td>Waiting for an instance to warm up</td></tr>
+  </table></div>
+
+  <h3>Settings and their defaults</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Setting</th><th>Meaning</th><th>Default</th></tr>
+    <tr><td><code>initialDelaySeconds</code></td><td>Wait after start before the first check</td><td>0</td></tr>
+    <tr><td><code>periodSeconds</code></td><td>Time between checks</td><td>10</td></tr>
+    <tr><td><code>timeoutSeconds</code></td><td>How long one check waits for an answer</td><td>1</td></tr>
+    <tr><td><code>failureThreshold</code></td><td>Fails in a row before it counts as failed</td><td>3</td></tr>
+    <tr><td><code>successThreshold</code></td><td>Passes in a row to become ready again</td><td>1</td></tr>
+  </table></div>
+  <p><code>httpGet</code> passes on status <b>200–399</b>. Other check types: <code>tcpSocket</code> (port accepts a connection), <code>exec</code> (command exits 0), <code>grpc</code>.</p>
+<pre><span class="cm"># under the container, in spec.template.spec.containers[]</span>
+readinessProbe:
+  httpGet:
+    path: /              <span class="cm"># a URL the app answers, like in a browser (not a folder!)</span>
+    port: 8080           <span class="cm"># the container's port</span>
+  periodSeconds: 5
+  failureThreshold: 3</pre>
+  <h3>Startup probe: waiting for a slow boot</h3>
+  <p>For an app that takes a long time to start, for example one that loads data or runs database migrations for about 2 minutes. While the startup probe hasn't passed, liveness and readiness don't run at all. If it never passes, the kubelet restarts the container.</p>
+  <p>Eldiiar has never used one. Most apps start in seconds, and a start that takes minutes usually means a problem in the image. He called startup probes often over-engineering.</p>
+
+  <h3>All three on one container</h3>
+  <p class="lede">Click a probe to highlight its block. Structure only: pick what your app actually needs.</p>
+  <div class="tabs" id="yamlTabs">
+    <button data-k="all" aria-pressed="true">Show all</button>
+    <button data-k="st" aria-pressed="false">startupProbe</button>
+    <button data-k="rd" aria-pressed="false">readinessProbe</button>
+    <button data-k="lv" aria-pressed="false">livenessProbe</button>
+  </div>
+<pre class="yaml-toggle" id="yamlBox"><span class="ln">containers:</span><span class="ln">- name: drill</span><span class="ln">  image: SCHOOL_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/drill:v1</span><span class="ln">  ports:</span><span class="ln">    - containerPort: 8080</span><span class="ln st">  startupProbe:              <span class="cm"># runs first; the others wait</span></span><span class="ln st">    httpGet: { path: /, port: 8080 }</span><span class="ln rd">  readinessProbe:            <span class="cm"># traffic on/off</span></span><span class="ln rd">    httpGet: { path: /, port: 8080 }</span><span class="ln rd">    periodSeconds: 5</span><span class="ln rd">    failureThreshold: 3</span><span class="ln lv">  livenessProbe:             <span class="cm"># restart if stuck</span></span><span class="ln lv">    httpGet: { path: /, port: 8080 }</span><span class="ln lv">    periodSeconds: 5</span><span class="ln lv">    failureThreshold: 2</span></pre>
+  <p id="yamlNote" style="color:var(--muted)">Startup runs first. Once it passes, readiness and liveness start their checks every 5 seconds.</p>
+
+  <p>Two habits from class: keep liveness checking the app itself, never its database (a slow database would restart every pod at once). And don't add all three probes just because the docs say so. Use the ones your app actually needs.</p>
+</section>
+
+<!-- INGRESS -->
+<section id="ingress">
+  <h2>The Ingress: one load balancer, many apps</h2>
+  <p class="lede">Five LoadBalancer Services means five AWS load balancers on the bill. An Ingress is just a rule, "this hostname → this Service", added to one shared ALB. Same idea as the listener rules in your Scale <code>alb.tf</code>.</p>
+
+  <div class="panel">
+    <label for="appCount"><b>How many apps?</b> <span id="appCountVal">5</span></label>
+    <input type="range" id="appCount" min="1" max="12" value="5" style="width:100%;accent-color:var(--blue)">
+    <div class="compare">
+      <div><b>LoadBalancer Service each</b><div class="lbs lb-many" id="lbMany"></div><p style="margin:.5em 0 0;font-size:.9rem" id="lbManyTxt"></p></div>
+      <div><b>One ALB + Ingress rules</b><div class="lbs lb-one" id="lbOne"></div><p style="margin:.5em 0 0;font-size:.9rem" id="lbOneTxt"></p></div>
+    </div>
+  </div>
+
+  <h3>The real path of a request</h3>
+  <div class="path">
+    <div class="hop"><div class="dot">1</div><div><h4>Browser asks DNS</h4><p>A wildcard record already points every <code>*.k8s.312school.com</code> name at the shared ALB. You create no DNS record.</p></div></div>
+    <div class="hop https"><div class="dot">2</div><div><h4>HTTPS to the ALB's 443 listener <span class="tag enc">encrypted</span></h4><p>The certificate lives here (ACM, made with Terraform). HTTPS ends at the ALB. Port 80 just redirects to 443.</p></div></div>
+    <div class="hop"><div class="dot">3</div><div><h4>Listener rules checked in order</h4><p>Your host's rule matches. No match at all → the ALB answers its own 404.</p></div></div>
+    <div class="hop"><div class="dot">4</div><div><h4>Rule → target group</h4><p>Holds the IPs of your <b>ready</b> drill pods. The controller copied them from the Service's EndpointSlice ahead of time.</p></div></div>
+    <div class="hop"><div class="dot">5</div><div><h4>ALB → pod directly <span class="tag plain">plain HTTP, inside the VPC</span></h4><p>The Service's ClusterIP is <b>not</b> on the path, and no controller pod is either.</p></div></div>
+  </div>
+  <div class="note">Bonus link to part one: a not-ready pod isn't in the target group, so readiness protects internet traffic too.</div>
+
+  <h3>Three pieces, who does what</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Piece</th><th>What it is</th><th>On this cluster</th></tr>
+    <tr><td>Ingress</td><td>The rule: hostname + path → Service. Requests don't pass through it.</td><td>You write it (1 per namespace)</td></tr>
+    <tr><td>IngressClass</td><td>Which program reads your Ingress, plus shared settings (certificate, group)</td><td><code>alb</code>, already created</td></tr>
+    <tr><td>Controller</td><td>Reads your Ingress, adds its rule to the AWS ALB</td><td>Run by EKS Auto Mode, no pod to see</td></tr>
+  </table></div>
+
+  <h3>More about the controller, and old tutorials</h3><div>
+    <p>Without Auto Mode, a team installs a controller first, for example the AWS Load Balancer Controller.</p>
+    <p>Old tutorials use <b>ingress-nginx</b>. Its maintenance ended in March 2026, and this cluster doesn't use it. The Ingress object itself is still current. The <b>Gateway API</b> is a newer API for the same job.</p>
+  </div>
+  <h3>The shared ALB and the certificate</h3><div>
+    <p>The whole class shares one ALB (group <code>containers-26a</code>). Each student's Ingress adds one rule to its HTTPS listener. An ALB allows 100 rules by default, a soft limit AWS can raise.</p>
+    <p>The certificate <code>*.k8s.312school.com</code> is in ACM, made with Terraform (<code>aws_acm_certificate</code>, same as Scale's <code>dns.tf</code>). It's free and auto-renews. It's attached through the IngressClass settings, so your Ingress never mentions a certificate.</p>
+    <p>Everything after the ALB is inside the VPC, so plain HTTP there is safe and faster. Port 80 redirects to 443 with <code>301 Moved Permanently</code>.</p>
+    <p>Deleting your Ingress removes only your rule. The shared ALB stays, because the instructor keeps one Ingress there so it never gets deleted.</p>
+  </div>
+
+  <h3>Your Ingress (only 3 lines really matter)</h3>
+<pre>apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: drill
+spec:
+  ingressClassName: alb                              <span class="cm"># 1. the shared ALB</span>
+  rules:
+    - host: my-namespace.k8s.312school.com   <span class="cm"># 2. only your own host is accepted</span>
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: drill                          <span class="cm"># 3. your Service...</span>
+                port:
+                  number: 80                         <span class="cm"># ...and its port. Never change it.</span></pre>
+  <div class="note">Keep <code>number: 80</code> (the Service's port, not the pod's 8080). A wrong port makes the controller stop updating the shared ALB for <b>every</b> student, and nothing in the cluster catches it.</div>
+
+  <h3>Reading a 404</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>You see</th><th>It means</th></tr>
+    <tr><td><code>server: awselb/2.0</code>, empty body</td><td>No rule matched. The request stopped at the ALB (typo in host, or no Ingress).</td></tr>
+    <tr><td>Your app's own 404 page</td><td>The rule worked and reached your pod. The app just has no such page.</td></tr>
+  </table></div>
+
+  <h3>NodePort vs Ingress</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th></th><th>NodePort</th><th>Ingress</th></tr>
+    <tr><td>User needs</td><td>A node IP + a port above 30000</td><td>One hostname</td></tr>
+    <tr><td>Nodes replaced</td><td>Address breaks</td><td>Keeps working</td></tr>
+    <tr><td>Used for</td><td>Quick dev access, bare metal</td><td>Production traffic</td></tr>
+  </table></div>
+</section>
+
+<!-- ADMISSION -->
+<section id="admission">
+  <h2>The hostname rule (admission policy)</h2>
+  <p class="lede">The cluster checks every Ingress you apply and refuses anything that breaks these rules. Kubernetes has no such rule by default; it's this cluster's own policy, <code>student-ingress-rules</code>.</p>
+  <div class="tbl-wrap"><table>
+    <tr><th>Rule</th><th>Why</th></tr>
+    <tr><td><code>host = &lt;your namespace&gt;.k8s.312school.com</code></td><td>Nobody can take a classmate's name on the shared ALB</td></tr>
+    <tr><td><code>class = alb</code></td><td>There's only the one shared ALB</td></tr>
+    <tr><td>One rule, one path, one Service</td><td>Keeps the ALB under its rule limit</td></tr>
+  </table></div>
+  <p>The instructor namespace is exempt, which is how he showed two hosts in class.</p>
+  <h3>Try it: would the cluster accept your Ingress?</h3>
+  <div class="panel">
+    <div class="form-grid">
+      <label>host<input id="adHost" value="my-namespace.k8s.312school.com"></label>
+      <label>ingressClassName<select id="adClass"><option>alb</option><option>nginx</option></select></label>
+      <label>number of paths<select id="adPaths"><option>1</option><option>2</option></select></label>
+      <label>Service port<select id="adPort"><option>80</option><option>8080</option></select></label>
+    </div>
+    <div class="verdict" id="adVerdict" aria-live="polite"></div>
+  </div>
+  <h3>On a cluster without this policy</h3>
+  <p>One Ingress can route several paths (or hosts) to different Services. In class it was said "just add more hosts and paths"; that's true in general, but refused here.</p>
+<pre>rules:
+- host: shop.example.com
+  http:
+    paths:
+      - path: /api                 <span class="cm"># shop.example.com/api... → api Service</span>
+        pathType: Prefix
+        backend: { service: { name: api, port: { number: 80 } } }
+      - path: /                    <span class="cm"># everything else → web Service</span>
+        pathType: Prefix
+        backend: { service: { name: web, port: { number: 80 } } }</pre>
+</section>
+
+<!-- CORRECTIONS -->
+<section id="fixes">
+  <h2>Where the notes correct what was said live</h2>
+  <p class="lede">Left: what was said in class. Right: the correct version from the site notes and deck.</p>
+  <div class="fixbox"><div class="tbl-wrap"><table>
+    <tr><th>Said in class</th><th>Correct version (site notes and deck)</th></tr>
+    <tr><td>"<code>path</code> checks if that folder exists in the container"</td><td><code>path</code> is a <b>URL the app answers</b>, like in a browser. Not a folder. <code>/health</code> fails because the drill app has no such route.</td></tr>
+    <tr><td>"Status 200 to 299 passes" (in the recap)</td><td><b>200 to 399</b> passes</td></tr>
+    <tr><td>"A not-ready pod is removed from the EndpointSlice" (he caught this live)</td><td>It <b>stays</b> on the list with <code>Ready: false</code> and gets no traffic</td></tr>
+    <tr><td>"successThreshold and failureThreshold together conflict"</td><td>Each controls <b>one direction</b> (fails → not ready; passes → ready again), so they <b>don't conflict</b></td></tr>
+    <tr><td>"Liveness checks the overall health of the pod"</td><td>It checks <b>one container</b>, and restarts that container</td></tr>
+    <tr><td>"Liveness is the fix for a memory leak"</td><td>A container eating memory is stopped by a <b>memory limit</b> (unit 5). Liveness is for a container that is running but <b>stopped answering</b>.</td></tr>
+    <tr><td>Q2 answer: "CoreDNS does that mapping"</td><td><b>kube-proxy</b> wrote the rule on the node that changes <code>172.20.x.x:80</code> to a pod's <code>10.20.x.x:8080</code>. CoreDNS only answers the name <code>drill</code> with the ClusterIP.</td></tr>
+    <tr><td>"The Ingress asks the Service for pod IPs at request time"</td><td>The <b>controller copies</b> ready pod IPs into the target group <b>ahead of time</b>. Neither the Service nor the controller is on the request path.</td></tr>
+    <tr><td>"Just add more hosts and paths to your Ingress"</td><td>True in general, but <b>refused here</b>: one rule, one path, one Service per namespace</td></tr>
+    <tr><td>After class: "the certificate gets created automatically by a cert issuer"</td><td>It was made with <b>Terraform in ACM</b> (<code>cluster/permanent/certificate.tf</code>). No cert-manager on this cluster.</td></tr>
+    <tr><td>Granola notes: host <code>…kubernetes.trivantischool.com</code>, "ALB → ingress controller → pod"</td><td>Host is <code>&lt;namespace&gt;.k8s.312school.com</code>. No controller pod is on the path: <b>ALB → pod</b>.</td></tr>
+  </table></div></div>
+</section>
+
+<!-- DEMO -->
+<section id="demo">
+  <h2>Redo the demo yourself</h2>
+  <p class="lede">README scenarios 5 and 9 in <code>03-reaching-the-application/</code>, in your namespace <code>my-namespace</code>. Tick each step as you finish it; your ticks stay in this browser.</p>
+  <h3>Before you start</h3><div class="note" style="max-width:none">
+    <p>kubectl context is <code>containers-26a</code>, namespace <code>my-namespace</code> (already set).</p>
+    <p>Pull the latest repo. Unit 2 leftovers were removed, so you stay under 8 pods.</p>
+    <p>Replace <code>IMAGE_URI</code> with <code>SCHOOL_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/drill:v1</code> in every file you apply. <code>deployment-drill-readiness-wrong-path.yaml</code> and <code>pod-drill-liveness.yaml</code> still say IMAGE_URI.</p>
+    <p>In <code>ingress-drill.yaml</code>, replace <code>&lt;namespace&gt;</code> with <code>my-namespace</code>.</p>
+  </div>
+  <p style="margin-bottom:0"><b id="demoCount">0 of 11 steps done</b></p>
+  <div class="progress"><div id="demoBar"></div></div>
+  <div class="step" data-i="0"><div class="step-head"><input type="checkbox" aria-label="Mark step 1 done"><div><h4>1. Set up the starting state</h4><p>The drill app, its Service, and a client pod to curl from.</p></div></div>
+<pre>cd 03-reaching-the-application
+kubectl apply -f deployment-drill.yaml -f service-drill.yaml -f pod-client.yaml
+kubectl wait --for=condition=Ready pod/client --timeout=120s
+kubectl get pods,svc</pre>
+  <details><summary>What you should see</summary><div><p>Two drill-… pods and client, all 1/1 Running, and service/drill of type ClusterIP.</p></div></details></div>
+  <div class="step" data-i="1"><div class="step-head"><input type="checkbox" aria-label="Mark step 2 done"><div><h4>2. Add a readiness probe that works</h4><p>Same Deployment plus the probe block, so it rolls out new pods.</p></div></div>
+<pre>kubectl apply -f deployment-drill-readiness.yaml
+kubectl rollout status deploy/drill
+kubectl describe pod -l app=drill | grep Readiness</pre>
+  <details><summary>What you should see</summary><div><p>Readiness: http-get http://:8080/ delay=0s timeout=1s period=5s #success=1 #failure=3, and both pods 1/1.</p></div></details></div>
+  <div class="step" data-i="2"><div class="step-head"><input type="checkbox" aria-label="Mark step 3 done"><div><h4>3. Break it: check a page the app doesn&#x27;t have</h4><p>Split your terminal and watch on one side.</p></div></div>
+<pre>kubectl get pods -l app=drill -w                              # terminal A
+kubectl apply -f deployment-drill-readiness-wrong-path.yaml   # terminal B
+kubectl rollout status deploy/drill                           # Ctrl-C after a minute</pre>
+  <details><summary>What you should see</summary><div><p>&quot;1 out of 2 new replicas have been updated...&quot; that never finishes. Three pods: two old 1/1, one new 0/1 Running.</p></div></details></div>
+  <div class="step" data-i="3"><div class="step-head"><input type="checkbox" aria-label="Mark step 4 done"><div><h4>4. Read why it&#x27;s not ready</h4><p>Events are at the bottom of describe.</p></div></div>
+<pre>kubectl describe pod &lt;the pod showing 0/1&gt;
+kubectl get rs -l app=drill</pre>
+  <details><summary>What you should see</summary><div><p>Warning Unhealthy … Readiness probe failed: HTTP probe failed with statuscode: 404. One ReplicaSet with 2 ready, a newer one with 0 ready.</p></div></details></div>
+  <div class="step" data-i="4"><div class="step-head"><input type="checkbox" aria-label="Mark step 5 done"><div><h4>5. See that the broken pod gets no traffic</h4><p>get shows all addresses; describe shows which are ready.</p></div></div>
+<pre>kubectl get endpointslices -l kubernetes.io/service-name=drill
+kubectl describe endpointslices -l kubernetes.io/service-name=drill | grep -E &#x27;Addresses|Ready&#x27;
+kubectl exec client -- curl -s http://drill</pre>
+  <details><summary>What you should see</summary><div><p>Two addresses Ready: true, one Ready: false (the new pod), and &quot;hello from the drill app&quot;.</p></div></details></div>
+  <div class="step" data-i="5"><div class="step-head"><input type="checkbox" aria-label="Mark step 6 done"><div><h4>6. Fix the rollout</h4><p>Apply the right file again.</p></div></div>
+<pre>kubectl apply -f deployment-drill-readiness.yaml
+kubectl get pods -l app=drill
+kubectl get rs -l app=drill</pre>
+  <details><summary>What you should see</summary><div><p>Two drill pods, both 1/1; the wrong-path ReplicaSet shows 0 0 0.</p></div></details></div>
+  <div class="step" data-i="6"><div class="step-head"><input type="checkbox" aria-label="Mark step 7 done"><div><h4>7. Liveness: a pod that keeps getting restarted</h4><p>Probe checks /health, fails twice, 5 s apart. It has its own label, so the drill Service ignores it.</p></div></div>
+<pre>kubectl apply -f pod-drill-liveness.yaml
+kubectl get pod drill-liveness -w        # leave it 2 minutes, then Ctrl-C
+kubectl describe pod drill-liveness</pre>
+  <details><summary>What you should see</summary><div><p>RESTARTS climbing with longer gaps, STATUS flipping to CrashLoopBackOff. Events: Liveness probe failed … statuscode: 404 and Container drill failed liveness probe, will be restarted.</p></div></details></div>
+  <div class="step" data-i="7"><div class="step-head"><input type="checkbox" aria-label="Mark step 8 done"><div><h4>8. Reset after the probes</h4><p>Frees a pod for the Ingress part (you&#x27;re limited to 8).</p></div></div>
+<pre>kubectl delete -f pod-drill-liveness.yaml
+kubectl apply -f deployment-drill-readiness.yaml</pre>
+  <details><summary>What you should see</summary><div><p>pod &quot;drill-liveness&quot; deleted, and the Deployment unchanged or configured.</p></div></details></div>
+  <div class="step" data-i="8"><div class="step-head"><input type="checkbox" aria-label="Mark step 9 done"><div><h4>9. Put the drill app on your own hostname</h4><p>Confirm your namespace, then apply the Ingress.</p></div></div>
+<pre>kubectl config view --minify -o jsonpath=&#x27;{..namespace}&#x27;; echo
+kubectl apply -f ingress-drill.yaml
+kubectl get ingress drill        # wait 1–2 minutes for ADDRESS</pre>
+  <details><summary>What you should see</summary><div><p>my-namespace, then ingress.networking.k8s.io/drill created; class alb, your host, and ADDRESS k8s-containers26a-…elb.amazonaws.com.</p></div></details></div>
+  <div class="step" data-i="9"><div class="step-head"><input type="checkbox" aria-label="Mark step 10 done"><div><h4>10. Test it from your laptop</h4><p>Three curls: your app, the redirect, and the ALB&#x27;s own 404.</p></div></div>
+<pre>curl https://my-namespace.k8s.312school.com
+curl -sI http://my-namespace.k8s.312school.com | head -1
+curl -si https://no-such-name.k8s.312school.com | grep -iE &#x27;http|server|length&#x27;</pre>
+  <details><summary>What you should see</summary><div><p>&quot;hello from the drill app&quot;; then HTTP/1.1 301 Moved Permanently; then HTTP/2 404, server: awselb/2.0, content-length: 0.</p></div></details></div>
+  <div class="step" data-i="10"><div class="step-head"><input type="checkbox" aria-label="Mark step 11 done"><div><h4>11. See the policy refuse a host that isn&#x27;t yours</h4><p>Change the host in the file to shop.k8s.312school.com and apply again.</p></div></div>
+<pre>kubectl apply -f ingress-drill.yaml</pre>
+  <details><summary>What you should see</summary><div><p>ValidatingAdmissionPolicy &#x27;student-ingress-rules&#x27; … denied request: Every rule needs host: my-namespace.k8s.312school.com. Then put your host back.</p></div></details></div>
+  <h3>Clean up</h3>
+<pre>kubectl delete -f . --ignore-not-found
+kubectl get pods,svc,ingress      <span class="cm"># No resources found</span></pre>
+  <button id="demoReset">Clear my ticks</button>
+</section>
+
+<!-- COMMANDS -->
+<section id="commands">
+  <h2>Commands you'll use for the homework</h2>
+  <p class="lede">README scenarios 5 and 9 in <code>03-reaching-the-application/</code>. Replace <code>IMAGE_URI</code> in every file first.</p>
+  <div class="tbl-wrap"><table>
+    <tr><th>Command</th><th>What it shows</th></tr>
+    <tr><td><code>kubectl get pods -l app=drill -w</code></td><td>Pods changing live (use a split terminal)</td></tr>
+    <tr><td><code>kubectl rollout status deploy/drill</code></td><td>Waits for a rollout; shows where it's stuck</td></tr>
+    <tr><td><code>kubectl get rs -l app=drill</code></td><td>ReplicaSets, one per template version</td></tr>
+    <tr><td><code>kubectl describe pod &lt;name&gt;</code></td><td>Probe config, and Events at the bottom saying why it failed</td></tr>
+    <tr><td><code>kubectl describe endpointslices -l kubernetes.io/service-name=drill</code></td><td>Which addresses are <code>Ready: true/false</code></td></tr>
+    <tr><td><code>kubectl exec client -- curl -s http://drill</code></td><td>Call the Service from inside the cluster</td></tr>
+    <tr><td><code>kubectl get pods -o wide</code></td><td>Pods with their IPs and nodes</td></tr>
+    <tr><td><code>kubectl get ingressclass</code></td><td>Classes available (<code>alb</code>)</td></tr>
+    <tr><td><code>kubectl get ingressclassparams alb -o yaml</code></td><td>Shared settings: certificate ARN, group <code>containers-26a</code>, internet-facing</td></tr>
+    <tr><td><code>kubectl config view --minify -o jsonpath='{..namespace}'</code></td><td>Print your namespace</td></tr>
+    <tr><td><code>kubectl get ingress drill</code></td><td>Your host and the ALB address (wait 1–2 min)</td></tr>
+    <tr><td><code>curl https://my-namespace.k8s.312school.com</code></td><td>Your app over HTTPS from your laptop</td></tr>
+    <tr><td><code>kubectl delete -f . --ignore-not-found</code></td><td>Clean up everything from the folder</td></tr>
+  </table></div>
+  <h3>If it goes wrong</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Error</th><th>Meaning</th></tr>
+    <tr><td><code>InvalidImageName</code> / <code>ErrImagePull</code></td><td>IMAGE_URI not replaced or a character missing</td></tr>
+    <tr><td><code>exceeded quota</code></td><td>Over 8 pods. Delete leftovers or lower replicas.</td></tr>
+    <tr><td>Ingress <code>denied request</code></td><td>Host isn't yours, or more than one rule/path/Service</td></tr>
+    <tr><td>Ingress ADDRESS stays empty</td><td>Normal for 1–2 minutes. Then check the drill Service exists.</td></tr>
+    <tr><td><code>Forbidden</code> on the liveness pod</td><td>Probes can't change on a running pod. Delete, then apply.</td></tr>
+  </table></div>
+</section>
+
+<!-- WRAPUP -->
+<section id="wrapup">
+  <h2>What the instructor stressed, and what's next</h2>
+  <div class="cards2">
+    <div><h3>Stressed in class</h3><ul>
+      <li>Readiness = traffic, liveness = restart. Repeated in every form.</li>
+      <li><code>get endpointslices</code> is misleading. Use <code>describe</code> to see <code>Ready: false</code>.</li>
+      <li>A failing readiness probe is a safety gate: the rollout stops at the first new pod and the old version keeps serving.</li>
+      <li>Use a Deployment, not a bare pod. A bare pod can't take probe changes without delete-and-recreate downtime.</li>
+      <li>Don't add all three probes just because the docs say so (the SOC 2 story).</li>
+      <li>Memorize the Ingress picture: one ALB, rules per host, straight to the pods. Most companies run production traffic this way, and it saves money.</li>
+      <li>Only three Ingress lines really matter: <code>ingressClassName</code>, <code>host</code>, and the Service name/port.</li>
+      <li>Use AI as a co-teacher: ask it for pitfalls and settings for your own app's probes.</li>
+    </ul></div>
+    <div><h3>Homework</h3><ul>
+      <li>Run scenarios 5 and 9 of the <code>03-reaching-the-application/</code> README (use the checklist above). Clean up when done.</li>
+      <li>Bakhtiyar said he'd post an extra exercise and maybe a note on how the certificate was made. Watch Slack.</li>
+      <li>No deadline was given.</li>
+      <li>Next: unit 4, configuration, secrets and identity (how an app gets settings and passwords without baking them into the image).</li>
+    </ul></div>
+    <div><h3>Worth replaying in the recording</h3><ul>
+      <li>The split-terminal wrong-path rollout, then <code>describe endpointslices</code> showing <code>Ready: false</code>.</li>
+      <li>The liveness pod: RESTARTS ticking up and CrashLoopBackOff appearing.</li>
+      <li>The ALB console after applying the Ingress: rules appearing on the 443 listener, one per student.</li>
+      <li>Bakhtiyar's ReplicaSet walkthrough: why the wrong-path pod vanishes when you apply the right file.</li>
+    </ul></div>
+    <div><h3>Left unclear</h3><ul>
+      <li>How the certificate is made from scratch. Notes say Terraform + ACM, validated by a DNS record in Cloudflare, but nobody demoed it.</li>
+      <li>Why <code>/health</code> 404s: the code in <code>app.py</code> has it (checking the DB), but the image was built without it.</li>
+      <li>The map-view diagram showing LB → Service → pod is partly wrong. Traffic goes LB → pod directly.</li>
+      <li>Monitoring and alerting for crashing pods (Datadog, Slack pages) is a later topic.</li>
+    </ul></div>
+  </div>
+</section>
+
+<!-- QUIZ -->
+<section id="quiz">
+  <h2>Check yourself</h2>
+  <p class="lede">Pick an answer to see why. Score: <span class="score" id="score">0 / 0</span></p>
+  <div id="quizArea"></div>
+</section>
+
+<footer>Built from your Session 08 recap (Wed, Oct 14, 2026). Next up: unit 4, configuration, secrets and identity.</footer>
+</div>
+
+<script>
+/* ---------- READINESS ROLLOUT SIM ---------- */
+(function(){
+  const rsArea=document.getElementById('rsArea'), logEl=document.getElementById('log'),
+        stateEl=document.getElementById('rolloutState');
+  const RS={right:{name:'drill-6f8b4c9d7',label:'right file, probe path /'},
+            wrong:{name:'drill-75c9df48b',label:'wrong-path file, probe path /health'}};
+  let pods, current, run=0, podSeq=0;
+  const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+  const rnd=()=>Math.random().toString(36).slice(2,7);
+  function log(t,cls){const d=document.createElement('div');if(cls)d.className=cls;d.textContent=t;logEl.appendChild(d);logEl.scrollTop=logEl.scrollHeight}
+  function setState(t,c){stateEl.textContent=t;stateEl.className='status-pill '+c}
+  function render(){
+    rsArea.innerHTML='';
+    ['right','wrong'].forEach(k=>{
+      const mine=pods.filter(p=>p.rs===k);
+      if(k==='wrong' && !mine.length && current!=='wrong' && !pods.everWrong) return;
+      const readyN=mine.filter(p=>p.state==='ready').length;
+      const box=document.createElement('div');box.className='rs'+(mine.length?'':' zero');
+      box.innerHTML=`<div class="rs-head"><span>ReplicaSet <b class="mono">${RS[k].name}</b></span><span>${RS[k].label}</span><span>desired ${mine.filter(p=>p.state!=='term').length} · ready ${readyN}</span></div>`;
+      const wrap=document.createElement('div');wrap.className='pods';
+      if(!mine.length){wrap.innerHTML='<span class="empty">scaled to 0, no pods</span>'}
+      mine.forEach(p=>{
+        const el=document.createElement('div');
+        const cls={ready:'ready',notready:'notready',starting:'starting',term:'term'}[p.state];
+        el.className='pod '+cls+(p.flash?' flash':'');
+        const ready=p.state==='ready'?'1/1':'0/1';
+        const st=p.state==='term'?'Terminating':(p.state==='starting'?'ContainerCreating':'Running');
+        const traffic=p.state==='ready'?'gets traffic':'no traffic';
+        el.innerHTML=`<div class="n">${p.name}</div><div class="st">${ready} ${st}</div><div>${traffic}</div>`;
+        wrap.appendChild(el);
+      });
+      box.appendChild(wrap);rsArea.appendChild(box);
+    });
+  }
+  function newPod(rs){return {name:RS[rs].name+'-'+rnd(),rs,state:'starting'}}
+  function reset(){
+    run++;pods=[newPod('right'),newPod('right')];pods.forEach(p=>p.state='ready');pods.everWrong=false;current='right';
+    logEl.innerHTML='';
+    log('$ kubectl get pods -l app=drill','c');
+    pods.forEach(p=>log(p.name+'   1/1   Running   0'));
+    log('Starting state: right file applied, both pods ready.','g');
+    setState('complete','pill-ok');render();
+  }
+  async function applyWrong(){
+    if(current==='wrong'){log('$ kubectl apply -f deployment-drill-readiness-wrong-path.yaml','c');log('deployment.apps/drill unchanged');return}
+    const my=++run;current='wrong';pods.everWrong=true;
+    log('$ kubectl apply -f deployment-drill-readiness-wrong-path.yaml','c');
+    log('deployment.apps/drill configured');
+    log('New pod template → new ReplicaSet '+RS.wrong.name);
+    const p=newPod('wrong');pods.push(p);render();setState('in progress','pill-warn');
+    await sleep(1200);if(my!==run)return;
+    p.state='notready';render();
+    log(p.name+'   0/1   Running   0','w');
+    log('Container is running, but readiness has not passed yet.');
+    for(let i=0;i<3;i++){
+      await sleep(1500);if(my!==run)return;
+      log('Warning  Unhealthy  Readiness probe failed: HTTP probe failed with statuscode: 404','w');
+    }
+    log('Old pods stay: no old pod is removed until a new one is ready.','g');
+    log('$ kubectl rollout status deploy/drill','c');
+    log('Waiting for deployment "drill" rollout to finish: 1 out of 2 new replicas have been updated...');
+    setState('stuck at first new pod','pill-warn');
+    await sleep(4000);if(my!==run)return;
+    log('(after 10 real minutes) error: deployment "drill" exceeded its progress deadline','e');
+    log('Kubernetes does not roll back by itself. Apply the right file.','e');
+    setState('progress deadline exceeded','pill-bad');
+  }
+  async function applyRight(){
+    log('$ kubectl apply -f deployment-drill-readiness.yaml','c');
+    if(current==='right'){log('deployment.apps/drill unchanged');return}
+    const my=++run;current='right';
+    log('deployment.apps/drill configured');
+    log('Template matches the old ReplicaSet again → '+RS.wrong.name+' scaled to 0');
+    pods.filter(p=>p.rs==='wrong').forEach(p=>p.state='term');render();
+    await sleep(1400);if(my!==run)return;
+    pods=Object.assign(pods.filter(p=>p.rs!=='wrong'),{everWrong:true});render();
+    log('$ kubectl get rs -l app=drill','c');
+    log(RS.right.name+'   2   2   2');
+    log(RS.wrong.name+'   0   0   0');
+    log('Rollout complete. Users never saw the broken version.','g');
+    setState('complete','pill-ok');
+  }
+  function curl(){
+    const ready=pods.filter(p=>p.state==='ready');
+    log('$ kubectl exec client -- curl -s http://drill','c');
+    if(!ready.length){log('curl: (7) Failed to connect','e');return}
+    const p=ready[Math.floor(Math.random()*ready.length)];
+    log('hello from the drill app   ← served by '+p.name,'g');
+    p.flash=true;render();setTimeout(()=>{p.flash=false;render()},350);
+  }
+  document.getElementById('btnWrong').onclick=applyWrong;
+  document.getElementById('btnRight').onclick=applyRight;
+  document.getElementById('btnCurl').onclick=curl;
+  document.getElementById('btnReset').onclick=reset;
+  reset();
+})();
+
+/* ---------- LIVENESS SIM ---------- */
+(function(){
+  const $=id=>document.getElementById(id);
+  const logEl=$('liveLog'), bo=$('backoff');
+  const steps=[10,20,40,80,160,300];
+  bo.innerHTML=steps.map(s=>`<span style="height:${Math.max(8,s/300*100)}%"></span>`).join('');
+  let run=0, alive=false, restarts=0, path='/health';
+  const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+  const S=10; // 1 real second = 100ms here (10x faster)
+  function log(t,cls){const d=document.createElement('div');if(cls)d.className=cls;d.textContent=t;logEl.appendChild(d);logEl.scrollTop=logEl.scrollHeight}
+  function set(ready,status){$('lvReady').textContent=ready;$('lvStatus').textContent=status;$('lvRestarts').textContent=restarts;
+    $('bigpod').style.borderColor=status==='Running'?'var(--ok)':(status==='CrashLoopBackOff'?'var(--bad)':'var(--line)')}
+  function markBackoff(i){[...bo.children].forEach((s,j)=>s.classList.toggle('on',j<=i))}
+  async function loop(my){
+    let fails=0, crash=0;
+    while(my===run){
+      await sleep(5000/S);if(my!==run)return;
+      if(path==='/'){log('liveness GET / → 200 OK','g');fails=0;continue}
+      fails++;log('Warning  Unhealthy  Liveness probe failed: HTTP probe failed with statuscode: 404','w');
+      if(fails>=2){
+        log('Normal   Killing  Container drill failed liveness probe, will be restarted','e');
+        restarts++;fails=0;
+        const wait=steps[Math.min(crash,steps.length-1)];
+        if(crash>0){
+          set('0/1','CrashLoopBackOff');markBackoff(Math.min(crash,steps.length-1));
+          log('Back-off '+wait+'s restarting failed container','e');
+          await sleep(wait*1000/S);if(my!==run)return;
+        }else{markBackoff(0)}
+        crash++;
+        set('1/1','Running');log('Started container drill (same pod, same IP)');
+      }
+    }
+  }
+  $('liveStart').onclick=()=>{
+    const chosen=$('livePath').value;
+    if(alive){
+      log('$ kubectl apply -f pod-drill-liveness.yaml','c');
+      if(chosen!==path){log('The Pod "drill-liveness" is invalid: spec: Forbidden: pod updates may not change fields other than ...','e');
+        log('Probes can\'t change on a running pod. Delete it, then apply again.','e');}
+      else log('pod/drill-liveness unchanged');
+      return;
+    }
+    path=chosen;alive=true;restarts=0;const my=++run;logEl.innerHTML='';markBackoff(-1);
+    log('$ kubectl apply -f pod-drill-liveness.yaml','c');log('pod/drill-liveness created (probe path '+path+')');
+    $('lvIp').textContent='10.20.'+(10+Math.floor(Math.random()*200))+'.'+(2+Math.floor(Math.random()*250));
+    set('1/1','Running');loop(my);
+  };
+  $('liveDel').onclick=()=>{
+    if(!alive){return}
+    run++;alive=false;log('$ kubectl delete -f pod-drill-liveness.yaml','c');log('pod "drill-liveness" deleted');
+    restarts=0;set('-','not created');$('lvIp').textContent='-';markBackoff(-1);
+  };
+})();
+
+/* ---------- SERVICES TABS ---------- */
+(function(){
+  const tabs=document.querySelectorAll('#svcTabs button');
+  tabs.forEach(b=>b.onclick=()=>{
+    tabs.forEach(x=>x.setAttribute('aria-selected',x===b));
+    document.querySelectorAll('#services .tabpane').forEach(p=>p.classList.toggle('show',p.dataset.p===b.dataset.t));
+  });
+})();
+
+/* ---------- YAML TOGGLE ---------- */
+(function(){
+  const box=document.getElementById('yamlBox'), note=document.getElementById('yamlNote');
+  const notes={all:'Startup runs first. Once it passes, readiness and liveness start their checks every 5 seconds.',
+    st:'startupProbe: no other probe runs until this passes. Never passes → restart.',
+    rd:'readinessProbe: 3 fails in a row (15 s) → no traffic. The container keeps running.',
+    lv:'livenessProbe: 2 fails in a row (10 s) → the container is restarted in the same pod.'};
+  const btns=document.querySelectorAll('#yamlTabs button');
+  btns.forEach(b=>b.onclick=()=>{
+    btns.forEach(x=>x.setAttribute('aria-pressed',x===b));
+    const k=b.dataset.k;box.classList.toggle('focus',k!=='all');
+    box.querySelectorAll('.ln').forEach(l=>l.classList.toggle('hl',l.classList.contains(k)));
+    note.textContent=notes[k];
+  });
+})();
+
+/* ---------- LB COUNT ---------- */
+(function(){
+  const r=document.getElementById('appCount');
+  function draw(){
+    const n=+r.value;document.getElementById('appCountVal').textContent=n;
+    document.getElementById('lbMany').innerHTML=Array.from({length:n},(_,i)=>`<span>NLB ${i+1}</span>`).join('');
+    document.getElementById('lbOne').innerHTML='<span>1 ALB</span>'+Array.from({length:n},(_,i)=>`<span style="opacity:.75">rule ${i+1}</span>`).join('');
+    document.getElementById('lbManyTxt').textContent=n+' load balancer'+(n>1?'s':'')+', each billed by the hour.';
+    document.getElementById('lbOneTxt').textContent='1 load balancer billed, '+n+' listener rule'+(n>1?'s':'')+' (up to 100 by default).';
+  }
+  r.oninput=draw;draw();
+})();
+
+/* ---------- ADMISSION CHECKER ---------- */
+(function(){
+  const ids=['adHost','adClass','adPaths','adPort'];const v=document.getElementById('adVerdict');
+  const MINE='my-namespace.k8s.312school.com';
+  function check(){
+    const host=document.getElementById('adHost').value.trim(), cls=document.getElementById('adClass').value,
+          paths=+document.getElementById('adPaths').value, port=document.getElementById('adPort').value;
+    const errs=[];
+    if(host!==MINE)errs.push('Every rule needs host: '+MINE);
+    if(cls!=='alb')errs.push('ingressClassName must be alb');
+    if(paths>1)errs.push('one rule, one path, one Service');
+    if(errs.length){v.className='verdict no';v.textContent="Error: ValidatingAdmissionPolicy 'student-ingress-rules' denied request: "+errs.join('; ');return}
+    if(port!=='80'){v.className='verdict warn';v.textContent='Accepted, but dangerous: the Service has no port 8080, so the controller stops updating the shared ALB for every student. No cluster check catches this. Use 80.';return}
+    v.className='verdict ok';v.textContent='ingress.networking.k8s.io/drill created. One rule added to the shared ALB\'s 443 listener.';
+  }
+  ids.forEach(i=>{const el=document.getElementById(i);el.oninput=check;el.onchange=check});check();
+})();
+
+/* ---------- DEMO CHECKLIST ---------- */
+(function(){
+  const KEY='s08-demo-steps';let done={};
+  try{done=JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(e){done={}}
+  const steps=[...document.querySelectorAll('#demo .step')];
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(done))}catch(e){}}
+  function upd(){
+    const n=steps.filter(s=>done[s.dataset.i]).length;
+    document.getElementById('demoCount').textContent=n+' of '+steps.length+' steps done';
+    document.getElementById('demoBar').style.width=(n/steps.length*100)+'%';
+  }
+  steps.forEach(s=>{
+    const cb=s.querySelector('input');cb.checked=!!done[s.dataset.i];s.classList.toggle('done',cb.checked);
+    cb.onchange=()=>{done[s.dataset.i]=cb.checked;s.classList.toggle('done',cb.checked);save();upd()};
+  });
+  document.getElementById('demoReset').onclick=()=>{done={};save();steps.forEach(s=>{s.querySelector('input').checked=false;s.classList.remove('done')});upd()};
+  upd();
+})();
+
+/* ---------- STICKY NAV HIGHLIGHT ---------- */
+(function(){
+  const nav=document.querySelector('nav');const links=[...nav.querySelectorAll('a')];
+  const map=new Map(links.map(l=>[l.getAttribute('href').slice(1),l]));
+  const obs=new IntersectionObserver(es=>{es.forEach(e=>{if(!e.isIntersecting)return;
+    links.forEach(l=>l.classList.remove('active'));const l=map.get(e.target.id);
+    if(l){l.classList.add('active');nav.scrollTo({left:Math.max(0,l.offsetLeft-20),behavior:'smooth'})}})},
+    {rootMargin:'-25% 0px -65% 0px'});
+  map.forEach((l,id)=>{const el=document.getElementById(id);if(el)obs.observe(el)});
+})();
+
+/* ---------- QUIZ ---------- */
+(function(){
+  const Q=[
+    {q:'You deploy v2 with a typo in its readiness path. 2 replicas. What do users see?',
+     o:['Errors, because the new pod is broken','Nothing wrong: old pods keep serving and one new pod sits at 0/1','Kubernetes rolls back to v1 automatically'],a:1,
+     e:'The rollout gate removes an old pod only after a new pod is ready. The new pod never gets ready, so the 2 old pods keep serving. No automatic rollback: you apply the fixed file.'},
+    {q:'RESTARTS keeps climbing and status flips to CrashLoopBackOff, but the pod name and IP stay the same. Which probe is failing?',
+     o:['Readiness','Liveness','Startup'],a:1,
+     e:'Liveness restarts the container inside the same pod. Readiness never restarts anything; it only turns traffic off.'},
+    {q:'Why is checking the database in a liveness probe a bad idea?',
+     o:['Probes can\'t reach databases','One slow database would make every pod fail and restart at once','It costs extra on AWS'],a:1,
+     e:'The apps themselves were fine; only the database was slow. Restarting every pod at once turns a slowdown into an outage.'},
+    {q:'A classmate gets a 404 with server: awselb/2.0 and an empty body. Where did the request stop?',
+     o:['At their pod: the app has no such page','At the ALB: no listener rule matched the host','At the Service ClusterIP'],a:1,
+     e:'An empty awselb 404 is the ALB\'s own answer. Likely a host typo, or their Ingress was refused or deleted. The app\'s own 404 page would mean the rule worked.'},
+    {q:'After the ALB, how does a request reach your pod?',
+     o:['ALB → ingress controller pod → Service → pod','ALB → Service ClusterIP → pod','ALB → pod directly, as plain HTTP inside the VPC'],a:2,
+     e:'The controller copied ready pod IPs into the target group ahead of time. Neither the controller nor the ClusterIP is on the request path.'},
+    {q:'A pod is failing readiness. What does kubectl get endpointslices show?',
+     o:['The pod is removed from the list','All addresses, including the not-ready one; you need describe to see Ready: false','Only ready addresses'],a:1,
+     e:'The not-ready pod stays on the EndpointSlice marked Ready: false. get is misleading here; describe shows the truth.'},
+    {q:'Your app runs database migrations for 2 minutes at boot, and liveness keeps killing it before it finishes. What helps?',
+     o:['A longer readiness probe','A startup probe, so liveness and readiness wait until boot is done','Removing the Deployment'],a:1,
+     e:'While the startup probe hasn\'t passed, the other probes don\'t run. If it never passes, the container is restarted.'},
+    {q:'Who rewrites 172.20.x.x:80 into a pod\'s 10.20.x.x:8080?',
+     o:['CoreDNS','kube-proxy','The Ingress'],a:1,
+     e:'kube-proxy writes the node rule. CoreDNS only answers the name "drill" with the ClusterIP.'},
+    {q:'You apply an Ingress with host shop.k8s.312school.com. What happens?',
+     o:['It works; the ALB adds a rule','The admission policy denies it: every rule needs your own namespace host','The ALB returns 404 later'],a:1,
+     e:'The student-ingress-rules policy refuses any host other than <your namespace>.k8s.312school.com, so nobody takes a classmate\'s name.'},
+    {q:'In ingress-drill.yaml, which port goes under backend.service.port.number?',
+     o:['8080, the container port','80, the Service\'s port','443, because it\'s HTTPS'],a:1,
+     e:'The Ingress points at the Service, so it uses the Service\'s port (80). A wrong port breaks ALB updates for the whole class.'}
+  ];
+  const area=document.getElementById('quizArea'), scoreEl=document.getElementById('score');
+  let answered=0, right=0;
+  Q.forEach((item,i)=>{
+    const box=document.createElement('div');box.className='q';
+    box.innerHTML=`<p class="prompt">${i+1}. ${item.q}</p>`;
+    const opts=document.createElement('div');opts.className='opts';
+    const ex=document.createElement('p');ex.className='explain';ex.textContent=item.e;
+    item.o.forEach((t,j)=>{
+      const b=document.createElement('button');b.textContent=t;
+      b.onclick=()=>{
+        if(box.dataset.done)return;box.dataset.done=1;answered++;
+        if(j===item.a){right++;b.classList.add('right')}else{b.classList.add('nope');opts.children[item.a].classList.add('right')}
+        [...opts.children].forEach(x=>x.disabled=true);
+        ex.classList.add('show');scoreEl.textContent=right+' / '+answered;
+      };
+      opts.appendChild(b);
+    });
+    box.appendChild(opts);box.appendChild(ex);area.appendChild(box);
+  });
+})();
+</script>
+</body>
+</html>

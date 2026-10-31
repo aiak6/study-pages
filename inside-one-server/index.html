@@ -1,0 +1,221 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Inside One Server</title>
+<style>
+  :root {
+    --bg: #eef1f5; --surface: #ffffff; --surface-2: #f5f7fb;
+    --ink: #16202f; --muted: #5c6b80; --line: #d6dde7;
+    --boot: #c0631f; --proxy: #2563b0; --app: #2f8f4e; --sysd: #7c3aed;
+    --bad: #c1445a; --ok: #2e8b57;
+    --font: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg:#0f1620; --surface:#1a2534; --surface-2:#131d2a; --ink:#e6ecf4;
+      --muted:#9aa8bc; --line:#2c3a4d; --boot:#e8894f; --proxy:#6ba3e0;
+      --app:#5fce9b; --sysd:#a78bfa; --bad:#e2788b; --ok:#4cc38a;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg:#0f1620; --surface:#1a2534; --surface-2:#131d2a; --ink:#e6ecf4;
+    --muted:#9aa8bc; --line:#2c3a4d; --boot:#e8894f; --proxy:#6ba3e0;
+    --app:#5fce9b; --sysd:#a78bfa; --bad:#e2788b; --ok:#4cc38a;
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font-family:var(--font); line-height:1.55; }
+  .wrap { max-width: 1060px; margin:0 auto; padding-inline:20px; padding-block:40px 56px; }
+  .eyebrow { font-family:var(--mono); font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--proxy); margin:0 0 8px; }
+  h1 { font-size:clamp(26px,4vw,34px); line-height:1.1; margin:0 0 10px; letter-spacing:-.01em; text-wrap:balance; }
+  .lede { color:var(--muted); max-width:66ch; margin:0 0 28px; font-size:16px; }
+  h2.sec { font-size:19px; margin:34px 0 12px; letter-spacing:-.01em; }
+
+  figure { margin:0 0 8px; background:#eef1f6; border:1px solid #d6dde7; border-radius:14px; padding:12px; overflow-x:auto; }
+  figure svg { display:block; width:100%; height:auto; min-width:880px; }
+  figcaption { font-size:13px; color:var(--muted); margin-top:10px; }
+
+  .card { fill:#ffffff; }
+  .navy { fill:#1c2b3a; }
+  .s-boot{stroke:#c0631f}.s-proxy{stroke:#2563b0}.s-app{stroke:#2f8f4e}.s-sysd{stroke:#7c3aed}.s-shell{stroke:#1c2b3a}
+  .f-boot{fill:#c0631f}.f-proxy{fill:#2563b0}.f-app{fill:#2f8f4e}.f-sysd{fill:#7c3aed}
+  .ink{fill:#16202f}.mut{fill:#5c6b80}.wht{fill:#eef2f7}.wht2{fill:#aebccd}
+  .good{fill:#1e7a4a}.bad{fill:#c1445a}
+  .sg{fill:#fdeaea;stroke:#e03e3e;stroke-width:1.6}
+  .num{fill:#e03e3e}.cnum{font:700 12px var(--font);fill:#fff;text-anchor:middle}
+  .b2{stroke-width:2}.b15{stroke-width:1.6}.b25{stroke-width:2.5}
+  .dash{stroke-dasharray:6 5}
+  .arw{stroke:#6b7a8d;stroke-width:2;fill:none}
+  .tt{font:700 15px var(--font)}.tt13{font:700 13px var(--font)}.tt12{font:700 12px var(--font)}
+  .bd{font:400 12.5px var(--font)}.bd11{font:400 11px var(--font)}
+  .mono{font:500 12px var(--mono)}
+  .mid{text-anchor:middle}.end{text-anchor:end}.it{font-style:italic}
+
+  table { width:100%; border-collapse:collapse; font-size:14px; }
+  .tw { overflow-x:auto; border:1px solid var(--line); border-radius:12px; background:var(--surface); }
+  th,td { text-align:left; padding:11px 14px; border-bottom:1px solid var(--line); vertical-align:top; }
+  tr:last-child td { border-bottom:none; }
+  th { font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); font-weight:600; background:var(--surface-2); }
+  td.step { font-family:var(--mono); font-weight:600; color:var(--proxy); white-space:nowrap; }
+  td code, .pair code { font-family:var(--mono); font-size:.88em; background:color-mix(in srgb, var(--ink) 8%, var(--surface)); padding:1px 5px; border-radius:5px; }
+
+  .pair { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:14px; }
+  .pc { background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:16px 18px; border-top:3px solid var(--tone,var(--proxy)); }
+  .pc.bad { --tone:var(--bad); } .pc.ok { --tone:var(--ok); }
+  .pc h3 { margin:0 0 2px; font-size:14px; font-family:var(--mono); }
+  .pc .gloss { font-size:13px; color:var(--muted); font-style:italic; margin:0 0 8px; }
+  .pc p { margin:0; font-size:14px; color:var(--muted); }
+  .pc strong { color:var(--ink); }
+  .trio { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:14px; }
+  .tc { background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:16px 18px; }
+  .tc h3 { margin:0 0 6px; font-size:13px; font-family:var(--mono); color:var(--proxy); }
+  .tc p { margin:0 0 8px; font-size:14px; color:var(--muted); }
+  .tc p:last-child { margin-bottom:0; }
+  .tc strong { color:var(--ink); }
+  code { font-family:var(--mono); font-size:.88em; background:color-mix(in srgb, var(--ink) 8%, var(--surface)); padding:1px 5px; border-radius:5px; }
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<div class="wrap">
+  <p class="eyebrow">Scale · Session 1 · Stop 3</p>
+  <h1>Inside one server</h1>
+  <p class="lede">The big architecture picture draws each EC2 as an empty box. This is that box cut open — what happens once at boot, what happens on every request, and which layer each failure comes from.</p>
+
+  <figure>
+    <svg viewBox="0 0 1280 680" role="img" aria-label="Cutaway of one EC2 instance. The App security group guards its edge. A BOOT band shows the user-data script running once as root: install packages, fetch the DB password from Secrets Manager using the instance role, write config, then systemctl enable --now; its output goes to /var/log/cloud-init-output.log, and set -euo pipefail stops a failed step from being ignored. A RUN band shows every request: it arrives from the ALB target group, nginx listens on 0.0.0.0 port 80 so the outside can reach it, proxy_passes to the app listening on 127.0.0.1 port 8000 which the outside cannot reach, the app runs as a systemd unit with Restart=always and enabled so it returns after reboot, and the app connects out to RDS on port 5432.">
+      <defs>
+        <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <polygon points="0,0 10,5 0,10" fill="#6b7a8d"/>
+        </marker>
+      </defs>
+
+      <!-- request source -->
+      <rect class="navy" x="16" y="450" width="150" height="60" rx="8"/>
+      <text class="tt13 mid wht" x="91" y="476">from the ALB</text>
+      <text class="bd11 mid wht2" x="91" y="495">target group</text>
+      <line class="arw" x1="168" y1="480" x2="246" y2="480" marker-end="url(#ah)"/>
+
+      <!-- the machine -->
+      <rect class="card s-shell b25" x="200" y="60" width="880" height="580" rx="12"/>
+      <text class="tt ink" x="220" y="96" style="font-size:16px">EC2 instance — aws_instance.app["a"]</text>
+
+      <!-- App SG attached to the machine -->
+      <rect class="sg" x="470" y="45" width="350" height="30" rx="15"/>
+      <circle class="num" cx="491" cy="60" r="11"/><text class="cnum" x="491" y="64">2</text>
+      <text class="tt13" x="509" y="64" style="fill:#d43a3a">App SG — allow 80 ← ALB SG</text>
+
+      <!-- BOOT band -->
+      <rect class="s-boot b2" x="224" y="126" width="832" height="200" rx="10" style="fill:#fff7f0"/>
+      <text class="tt f-boot" x="244" y="154">BOOT</text>
+      <text class="bd mut" x="302" y="154">— runs once, as root, with nobody logged in</text>
+      <text class="mono mut end" x="1036" y="154">user data / boot script</text>
+      <text class="bd ink" x="244" y="182">1   install packages (nginx, python, the app)</text>
+      <text class="bd ink" x="244" y="204">2   fetch the DB password from Secrets Manager — via the instance role, no keys on disk</text>
+      <text class="bd ink" x="244" y="226">3   write the config / env file the app reads</text>
+      <text class="bd ink" x="244" y="248">4   systemctl enable --now app</text>
+      <text class="bd mut" x="470" y="248">← enable = at every boot · --now = also start it right this second</text>
+      <text class="bd mut" x="244" y="276">everything it prints lands in  /var/log/cloud-init-output.log  — first place to look on a broken new server</text>
+      <text class="bd11 bad" x="244" y="304">without  set -euo pipefail  a failed step keeps going, and you get a half-built server that looks fine</text>
+
+      <!-- RUN band -->
+      <rect class="s-proxy b2" x="224" y="350" width="832" height="270" rx="10" style="fill:#f4f8fd"/>
+      <text class="tt f-proxy" x="244" y="378">RUN</text>
+      <text class="bd mut" x="296" y="378">— every request, for the life of the machine</text>
+
+      <!-- nginx -->
+      <rect class="card s-proxy b2" x="252" y="420" width="250" height="120" rx="8"/>
+      <text class="tt mid f-proxy" x="377" y="448">nginx</text>
+      <text class="bd mid mut" x="377" y="466">reverse proxy</text>
+      <text class="mono mid ink" x="377" y="492">listening 0.0.0.0:80</text>
+      <text class="bd11 mid mut" x="377" y="512">0.0.0.0 = every interface</text>
+      <text class="bd11 mid good" x="377" y="528">outside CAN reach it</text>
+
+      <line class="arw" x1="506" y1="480" x2="592" y2="480" marker-end="url(#ah)"/>
+      <text class="mono mid mut" x="549" y="470" style="font-size:11px">proxy_pass</text>
+
+      <!-- systemd boundary -->
+      <rect class="s-sysd b15 dash" x="598" y="392" width="310" height="176" rx="10" fill="none"/>
+      <text class="tt12 f-sysd" x="614" y="412">systemd unit — Restart=always</text>
+      <text class="bd11 mut" x="614" y="428">enabled ⇒ it comes back by itself after a reboot</text>
+
+      <!-- app -->
+      <rect class="card s-app b2" x="622" y="442" width="262" height="104" rx="8"/>
+      <text class="tt mid f-app" x="753" y="470">your app</text>
+      <text class="mono mid ink" x="753" y="494">listening 127.0.0.1:8000</text>
+      <text class="bd11 mid mut" x="753" y="514">127.0.0.1 = loopback only</text>
+      <text class="bd11 mid bad" x="753" y="530">outside CANNOT reach it</text>
+
+      <!-- out to RDS -->
+      <line class="arw" x1="888" y1="494" x2="1106" y2="494" marker-end="url(#ah)"/>
+      <text class="mono mid mut" x="997" y="486" style="font-size:11px">:5432</text>
+      <rect class="navy" x="1110" y="464" width="150" height="60" rx="8"/>
+      <text class="tt13 mid wht" x="1185" y="490">RDS</text>
+      <text class="bd11 mid wht2" x="1185" y="509">private subnet</text>
+
+      <text class="bd11 mid mut it" x="640" y="596">the request only reaches your app because nginx accepts it on every interface and hands it to loopback</text>
+    </svg>
+    <figcaption>The two bands answer different questions. "Did it build right?" is a BOOT question — read the cloud-init log. "Is it serving?" is a RUN question — ask systemd, then check what is listening.</figcaption>
+  </figure>
+
+  <h2 class="sec">Not answering? Check in this order</h2>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Ask</th><th>Where you look</th><th>What it rules in or out</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="step">1</td>
+          <td>Did the boot script finish, and did every step succeed?<br><code>/var/log/cloud-init-output.log</code></td>
+          <td>Install failed, a package was missing, a step was refused (often the IAM policy). If this log ends early, nothing below matters yet.</td>
+        </tr>
+        <tr>
+          <td class="step">2</td>
+          <td>Is the service running?<br><code>systemctl status &lt;app&gt;</code></td>
+          <td>Three different answers: <strong>not found</strong> (the unit was never installed), <strong>failed</strong> (it tried and died — the reason is right there), <strong>active</strong> (move on).</td>
+        </tr>
+        <tr>
+          <td class="step">3</td>
+          <td>Is anything listening, and on which address?<br><code>ss -tlnp</code></td>
+          <td>Whether the app opened its port at all — and crucially whether it bound to <code>127.0.0.1</code> (only this machine) or <code>0.0.0.0</code> (reachable). This is the "works on the box, not from a browser" case.</td>
+        </tr>
+        <tr>
+          <td class="step">4</td>
+          <td>Service is up but answers are wrong.<br><code>journalctl -u &lt;app&gt;</code> or the app's own log</td>
+          <td>A crash on each request, a missing environment variable, or a database it cannot reach. The machine is fine; the code or its config is not.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="sec">Refused or timed out — they mean opposite things</h2>
+  <div class="pair">
+    <div class="pc bad">
+      <h3>Connection refused</h3>
+      <p class="gloss">You got an answer, and the answer was "no".</p>
+      <p>The machine <strong>was reached</strong> — so the network path, security group and routing are fine. Nothing is listening on that port. Look at: the service being dead, the app bound to <code>127.0.0.1</code> only, or the wrong port. Good news, really: it narrows the problem to the machine itself.</p>
+    </div>
+    <div class="pc">
+      <h3>Connection timed out</h3>
+      <p class="gloss">You got silence.</p>
+      <p>Nothing answered at all — packets were <strong>dropped somewhere on the way</strong>, so you never got as far as the machine. Look at: the security group not allowing your port, the route table, a NACL, the wrong subnet, or the instance simply being gone. The problem is the path, not the app.</p>
+    </div>
+  </div>
+
+  <h2 class="sec">Three things that come up every time</h2>
+  <div class="trio">
+    <div class="tc">
+      <h3>start vs enable</h3>
+      <p><code>systemctl start</code> — running <strong>now</strong>, gone after a reboot. <code>systemctl enable</code> — will start <strong>at boot</strong>, not running yet. <code>enable --now</code> does both.</p>
+      <p>To prove it: reboot the machine, log in to nothing, and load the site. <code>systemctl is-enabled &lt;app&gt;</code> should say <code>enabled</code>.</p>
+    </div>
+    <div class="tc">
+      <h3>why a reverse proxy</h3>
+      <p>It lets your app bind to <strong>loopback only</strong>, so the only way in is through nginx. It also serves static files, absorbs slow clients, and can handle TLS, redirects and gzip.</p>
+      <p>The cost: one more thing to configure and debug, and one more place a request can die. A <strong>502</strong> means nginx is healthy but couldn't reach your app.</p>
+    </div>
+    <div class="tc">
+      <h3>the SSH key pair</h3>
+      <p>The <strong>public</strong> key sits in <code>~/.ssh/authorized_keys</code> on the server; the <strong>private</strong> key stays on your laptop. The server sends a challenge, your client signs it, the server verifies with the public key — the private key never travels.</p>
+      <p>Keep it off the server: anyone who got into that box would inherit your identity everywhere that key is trusted.</p>
+    </div>
+  </div>
+</div>
+
+</body></html>

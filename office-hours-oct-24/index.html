@@ -1,0 +1,321 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Office Hours — Oct 24</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one reading column; sections as stacked "shipping manifest" blocks with a stencilled label; code and tables scroll in place. */
+:root{
+  --bg:#f3f5f7; --surface:#ffffff; --ink:#15202b; --muted:#56657a; --line:#d8dee6;
+  --accent:#c4501b; --accent-soft:#fbe9df; --steel:#1f5f8b; --steel-soft:#e3eef6;
+  --code-bg:#0f1b26; --code-fg:#dbe7f2; --code-cmt:#7f97ad;
+  --good:#2e7d4f; --bad:#b3261e;
+  --f-display:"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --f-body:"Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e151c; --surface:#16202a; --ink:#e6edf3; --muted:#9aabbd; --line:#2a3845;
+  --accent:#f0874f; --accent-soft:#3a2418; --steel:#7ab8e3; --steel-soft:#16303f;
+  --code-bg:#0a1016; --code-fg:#dbe7f2; --code-cmt:#6f879c;
+  --good:#6cc493; --bad:#f08a80; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0e151c; --surface:#16202a; --ink:#e6edf3; --muted:#9aabbd; --line:#2a3845;
+  --accent:#f0874f; --accent-soft:#3a2418; --steel:#7ab8e3; --steel-soft:#16303f;
+  --code-bg:#0a1016; --code-fg:#dbe7f2; --code-cmt:#6f879c;
+  --good:#6cc493; --bad:#f08a80; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:17px/1.6 var(--f-body);padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:28px 64px}
+.wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.15;margin:0}
+h1{font-size:clamp(30px,6vw,44px);font-weight:800;letter-spacing:-.01em}
+h2{font-size:24px;font-weight:800}
+h3{font-size:18px;font-weight:600;margin-top:6px}
+p{margin:0}
+a{color:var(--steel)}
+code{font-family:var(--f-mono);font-size:.86em;background:var(--steel-soft);color:var(--ink);padding:1px 5px;border-radius:4px}
+strong{font-weight:700}
+.eyebrow{font:600 12px/1 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+header{display:flex;flex-direction:column;gap:12px;border-bottom:3px solid var(--ink);padding-bottom:20px}
+.meta{display:flex;flex-wrap:wrap;gap:8px 16px;color:var(--muted);font-size:15px}
+.lede{font-size:19px;max-width:65ch}
+nav{display:flex;flex-wrap:wrap;gap:8px}
+nav a{font:600 13px/1 var(--f-mono);text-decoration:none;color:var(--ink);border:1px solid var(--line);background:var(--surface);padding:8px 10px;border-radius:6px}
+nav a:hover,nav a:focus-visible{border-color:var(--accent);color:var(--accent);outline:none}
+section{display:flex;flex-direction:column;gap:14px;scroll-margin-top:16px}
+section > .label{display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--line);padding-bottom:8px}
+section > .label .tag{font:600 11px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--surface);background:var(--ink);padding:5px 7px;border-radius:3px}
+ul,ol{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px}
+.table{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:15.5px;min-width:480px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:600 12px/1.3 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--bg)}
+tr:last-child td{border-bottom:0}
+blockquote{margin:0;border-left:4px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 8px 8px 0;font-weight:600}
+pre{margin:0;background:var(--code-bg);color:var(--code-fg);font:14px/1.6 var(--f-mono);padding:14px 16px;border-radius:8px;overflow-x:auto}
+pre .c{color:var(--code-cmt)}
+.codebox{position:relative;min-width:0}
+.copy{position:absolute;top:8px;right:8px;font:600 11px/1 var(--f-mono);background:transparent;color:var(--code-cmt);border:1px solid var(--code-cmt);border-radius:4px;padding:5px 7px;cursor:pointer}
+.copy:hover,.copy:focus-visible{color:var(--code-fg);border-color:var(--code-fg);outline:none}
+.flow{font:600 14px/1.5 var(--f-mono);background:var(--steel-soft);color:var(--ink);padding:14px 16px;border-radius:8px;overflow-x:auto;white-space:pre}
+.step{display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:start}
+.step > .n{font:800 18px/34px var(--f-display);text-align:center;background:var(--ink);color:var(--bg);border-radius:50%;width:34px;height:34px}
+.step > div{min-width:0;display:flex;flex-direction:column;gap:8px}
+.see{font-size:15px;color:var(--good)}
+.see::before{content:"You should see: ";font-weight:700}
+.warn{border:1px solid var(--bad);border-radius:8px;padding:12px 16px;display:flex;flex-direction:column;gap:10px;background:var(--surface)}
+.warn .eyebrow{color:var(--bad)}
+details{border:1px solid var(--line);background:var(--surface);border-radius:8px}
+details summary{cursor:pointer;padding:12px 16px;font-weight:600;list-style-position:inside}
+details summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:8px}
+details > div{padding:0 16px 14px;display:flex;flex-direction:column;gap:8px}
+.q{display:flex;flex-direction:column;gap:10px}
+.q p.ask{font-weight:600}
+.reread{font-style:italic;color:var(--muted);font-size:15px}
+footer{color:var(--muted);font-size:15px;border-top:1px solid var(--line);padding-top:16px}
+@media (prefers-reduced-motion: reduce){*{scroll-behavior:auto!important}}
+html{scroll-behavior:smooth}
+
+<div class="wrap">
+<header>
+  <span class="eyebrow">312 School · Cohort 26a · Saturday office hours</span>
+  <h1>Office Hours, Oct 24</h1>
+  <div class="meta"><span>Sat, Oct 24, 2026 · 10:30am CST</span><span>Marcel</span><span>After Containers Session 12</span></div>
+  <p class="lede">External Secrets in two pictures, operators and IAM for pods, a recap of requests, limits and quotas, HPA and Karpenter, and how much to rely on Claude in labs.</p>
+  <nav aria-label="Sections">
+    <a href="#five">In 5 lines</a><a href="#t1">What's left</a><a href="#t2">Labs &amp; AI</a><a href="#t3">Simple picture</a><a href="#t4">Detailed picture</a><a href="#t5">Resources recap</a><a href="#t6">HPA &amp; Karpenter</a><a href="#remember">Remember</a>
+  </nav>
+</header>
+
+<section id="five">
+  <div class="label"><span class="tag">Summary</span><h2>The whole session in 5 lines</h2></div>
+  <ol>
+    <li>External Secrets is easier as <strong>two pictures</strong>: a simple one to remember and explain in an interview, and a detailed one you look up.</li>
+    <li>The operator is a <strong>copy program</strong>: AWS Secrets Manager → a Kubernetes Secret. It needs <strong>AWS access, Kubernetes access, and instructions</strong>.</li>
+    <li>A Secret always belongs to <strong>one namespace</strong>. There's no cluster-wide Secret.</li>
+    <li>Resource management = <strong>reservations</strong> (requests), <strong>caps</strong> (limits, LimitRange, ResourceQuota) and <strong>scaling</strong> (HPA for pods, Karpenter for nodes).</li>
+    <li>You don't need to memorise commands, but you <strong>do</strong> need to explain the tools in your own words.</li>
+  </ol>
+</section>
+
+<section id="t1">
+  <div class="label"><span class="tag">1</span><h2>What's left &amp; how it's organised</h2></div>
+  <div class="q"><p class="ask">What's the next class, and when do we finish?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>Monday is unit 6: storage and Jobs</strong>, the last Containers class. On Wednesday Marcel explains what remains in the program and how interview prep fits in.</p>
+      <ul><li>Storage = disk and file storage, separate from the CPU and memory covered in unit 5.</li></ul>
+    </div></details></div>
+  <div class="q"><p class="ask">The instructor said teams use Helm and Argo CD instead of plain YAML. Will we cover them?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>Yes, in the next course</strong>, together with CI/CD. The next course puts a lot of pieces together.</p>
+    </div></details></div>
+</section>
+
+<section id="t2">
+  <div class="label"><span class="tag">2</span><h2>Labs, assignments &amp; Claude</h2></div>
+  <div class="q"><p class="ask">I do most labs with Claude and forget the commands. Do I need to learn every command myself?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>Probably not.</strong> At work you'll use AI for this. A company that refuses AI probably isn't where you're interviewing anyway.</p>
+      <ul>
+        <li>What you <strong>do</strong> need: explain the tools in your own words. "Claude did it for me" isn't an interview answer.</li>
+        <li>The next course combines the material with interview prep, including a <strong>list of tools and questions</strong> you should be able to explain.</li>
+      </ul>
+    </div></details></div>
+</section>
+
+<section id="t3">
+  <div class="label"><span class="tag">3</span><h2>External Secrets: the simple picture</h2></div>
+  <div class="q"><p class="ask">I got External Secrets for a moment, then forgot it. How do I keep the whole picture?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>Keep two pictures, not one.</strong> A short one you remember and could describe in <strong>3–4 minutes</strong> in an interview, and a detailed one with every object that you write down and look up. Marcel said he can't recite the detailed one from memory either.</p>
+    </div></details></div>
+  <div class="q"><p class="ask">What does External Secrets actually do?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>It copies values from AWS Secrets Manager into a normal Kubernetes Secret, and keeps them in sync.</strong> Your pod keeps reading a Kubernetes Secret as in Session 09.</p>
+      <div class="flow">AWS Secrets Manager → External Secrets Operator → Kubernetes Secret → pod</div>
+      <ul><li>You could copy values by hand and <code>kubectl apply</code> a Secret. The operator does it for you.</li></ul>
+    </div></details></div>
+  <div class="q"><p class="ask">What's an "operator"?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>A program that runs in the cluster all the time and does one job.</strong></p>
+      <ul>
+        <li>The External Secrets Operator's job is copying. <strong>One installation per cluster.</strong></li>
+        <li>Many sources (AWS Secrets Manager, HashiCorp Vault, Google Secret Manager, Azure Key Vault), <strong>one destination</strong>: a Kubernetes Secret.</li>
+        <li>Other operators do other jobs, e.g. keeping TLS certificates up to date. There are hundreds. Using one is easy (install, follow the docs); building one takes a whole team.</li>
+      </ul>
+    </div></details></div>
+  <div class="q"><p class="ask">What does the operator need to copy one secret?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>Three things:</strong></p>
+      <div class="table"><table>
+        <thead><tr><th>Need</th><th>Given by</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Access to AWS</strong></td><td>An <strong>IAM role</strong> that may read the secret</td></tr>
+          <tr><td><strong>Access to Kubernetes</strong></td><td><strong>RBAC</strong> rules that let it create and update Secrets</td></tr>
+          <tr><td><strong>Instructions</strong></td><td>An <strong>ExternalSecret</strong>: which AWS secret to read, which Secret to write, in which namespace, which keys</td></tr>
+        </tbody>
+      </table></div>
+      <ul><li>The Secret is written in the namespace where you apply the ExternalSecret.</li></ul>
+      <blockquote>This is the picture to explain in an interview.</blockquote>
+    </div></details></div>
+  <div class="q"><p class="ask">In the lab I saw secrets per namespace. Is there also a cluster-wide Secret?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>No. A Secret always belongs to one namespace.</strong> The same value in two namespaces is two Secrets.</p>
+      <ul><li>The <strong>operator</strong> is one per cluster. <strong>Secrets</strong> can be anywhere from zero to thousands, spread across namespaces.</li></ul>
+    </div></details></div>
+</section>
+
+<section id="t4">
+  <div class="label"><span class="tag">4</span><h2>External Secrets: the detailed picture</h2></div>
+  <div class="q"><p class="ask">Which objects make it work on the class cluster?</p>
+    <details><summary>Show answer</summary><div>
+      <div class="table"><table>
+        <thead><tr><th>Object</th><th>Where</th><th>Job</th></tr></thead>
+        <tbody>
+          <tr><td>IAM role <code>containers-26a-secrets-&lt;namespace&gt;</code></td><td>AWS</td><td>Policy allows <code>GetSecretValue</code> on <code>/26a/&lt;namespace&gt;/</code> only</td></tr>
+          <tr><td>IAM OIDC provider + AWS STS</td><td>AWS</td><td>How a pod signs in as an IAM role</td></tr>
+          <tr><td>ServiceAccount <code>secrets-reader</code></td><td>Your namespace</td><td>Its annotation names the IAM role</td></tr>
+          <tr><td>SecretStore <code>aws-secrets-manager</code></td><td>Your namespace</td><td>The AWS region and the ServiceAccount to sign in as</td></tr>
+          <tr><td>Operator's ServiceAccount, ClusterRole, ClusterRoleBinding</td><td><code>external-secrets</code> namespace</td><td>Let it create and update Secrets</td></tr>
+          <tr><td><strong>ExternalSecret</strong></td><td>Your namespace</td><td><strong>The one file you write.</strong> Everything above was made before class</td></tr>
+        </tbody>
+      </table></div>
+      <ul>
+        <li>Marcel corrected the first diagram: it's the <strong><code>secrets-reader</code></strong> ServiceAccount that's linked to the IAM role, not the operator's own ServiceAccount.</li>
+        <li>If the source isn't AWS (Vault, Azure…), the store layer changes; the rest stays the same.</li>
+        <li>The two diagrams are in the class Slack channel.</li>
+      </ul>
+    </div></details></div>
+  <div class="q"><p class="ask">How does a pod "become" an IAM role?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>Through OIDC and STS.</strong> The operator sends the ServiceAccount's token to <strong>AWS STS</strong> and gets <strong>temporary credentials</strong> for the role. A pod isn't an EC2 instance, so it can't use an instance profile (Scale Session 04); OIDC is how pods log in to AWS.</p>
+    </div></details></div>
+  <div class="q"><p class="ask">Is that IAM policy the same kind of JSON we wrote for ECR?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>Yes, same shape, different permission.</strong> The ECR one allowed pulling images; this one allows reading secrets.</p>
+      <ul><li>💡 Once you get the AWS + Kubernetes sign-in pattern, it's the same everywhere: another operator or your own pod, the structure is the same. Only <strong>what</strong> you grant changes (secrets, a bucket, …).</li></ul>
+    </div></details></div>
+  <div class="q"><p class="ask">SecretStore or ClusterSecretStore?</p>
+    <details><summary>Show answer</summary><div>
+      <div class="table"><table>
+        <thead><tr><th></th><th>SecretStore</th><th>ClusterSecretStore</th></tr></thead>
+        <tbody>
+          <tr><td>Belongs to</td><td>One namespace</td><td>The whole cluster</td></tr>
+          <tr><td>Used by</td><td>ExternalSecrets in <strong>that</strong> namespace</td><td>ExternalSecrets in <strong>any</strong> namespace, or only the ones it lists</td></tr>
+        </tbody>
+      </table></div>
+      <ul><li>Whoever sets up the cluster chooses. On the class cluster each namespace has its own SecretStore and IAM role, so you can read only your own secrets.</li></ul>
+    </div></details></div>
+  <div class="q"><p class="ask">How is Lab 114 different from class?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>It has no AWS.</strong></p>
+      <ul>
+        <li>The namespace <code>vault</code> plays AWS Secrets Manager; each Secret in it is one secret in the store.</li>
+        <li>A <strong>Role and RoleBinding</strong> in <code>vault</code> replace the IAM policy.</li>
+        <li>No OIDC or STS: the store signs in to Kubernetes with a ServiceAccount token.</li>
+        <li>ExternalSecret, SecretStore and the written Secret work as in class.</li>
+        <li><strong>Task 5</strong> asks you to write a <strong>ClusterSecretStore</strong>.</li>
+      </ul>
+    </div></details></div>
+</section>
+
+<section id="t5">
+  <div class="label"><span class="tag">5</span><h2>Resource management recap (Session 12)</h2></div>
+  <div class="q"><p class="ask">What's the big picture of requests, limits and quotas?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>Every CPU and gigabyte costs money, and a pod without enough slows down or fails.</strong> Three groups:</p>
+      <div class="table"><table>
+        <thead><tr><th>Group</th><th>Goal</th><th>Kubernetes feature</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Reservations</strong></td><td>Enough for every pod</td><td>Resource <strong>requests</strong> (+ LimitRange defaults)</td></tr>
+          <tr><td><strong>Caps</strong></td><td>No pod takes from others; no surprise bill</td><td>Resource <strong>limits</strong>, <strong>LimitRange</strong> max, <strong>ResourceQuota</strong></td></tr>
+          <tr><td><strong>Scaling</strong></td><td>Meet demand</td><td><strong>HPA</strong> (pods), <strong>Karpenter</strong> (nodes)</td></tr>
+        </tbody>
+      </table></div>
+    </div></details></div>
+  <div class="q"><p class="ask">What happens when a container goes over its limit?</p>
+    <details><summary>Show answer</summary><div>
+      <div class="table"><table>
+        <thead><tr><th>Resource</th><th>Over the limit</th></tr></thead>
+        <tbody>
+          <tr><td><strong>CPU</strong></td><td><strong>Throttled.</strong> The extra work waits; the app answers slower</td></tr>
+          <tr><td><strong>Memory</strong></td><td><strong>OOMKilled</strong>, restarted in the same pod. RESTARTS goes up</td></tr>
+        </tbody>
+      </table></div>
+    </div></details></div>
+  <div class="q"><p class="ask">Why do we need caps if requests already reserve resources?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>So a few pods can't starve the rest or run up the bill.</strong> Example: 100 pods on 20 nodes; if 10 use more than their share, the other 90 slow down.</p>
+      <ul><li>Extreme usage can come from <strong>real traffic</strong>, a <strong>bug</strong> (an endless loop asking for more), or an <strong>attack</strong>.</li></ul>
+    </div></details></div>
+  <div class="q"><p class="ask">Is LimitRange per pod and ResourceQuota per namespace?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>Close.</strong> Both are namespace policies, but they check different things:</p>
+      <ul>
+        <li><strong>LimitRange</strong> checks <strong>each container</strong>: fills in default requests/limits when none are written, and rejects a container above its maximum. So it's both reservation and cap.</li>
+        <li><strong>ResourceQuota</strong> caps the <strong>namespace total</strong>: requests, limits and number of pods.</li>
+        <li>Requests and limits are set <strong>per container</strong>. Most pods run one container, so in practice that's per pod.</li>
+      </ul>
+    </div></details></div>
+  <div class="q"><p class="ask">Does ResourceQuota measure what pods actually use?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>No. It adds up what pods declare in their YAML.</strong></p>
+      <div class="table"><table>
+        <thead><tr><th>Pod</th><th>Request</th><th>Limit</th></tr></thead>
+        <tbody>
+          <tr><td>A</td><td>1Gi</td><td>4Gi</td></tr>
+          <tr><td>B</td><td>2Gi</td><td>4Gi</td></tr>
+          <tr><td>C</td><td>2Gi</td><td>2Gi</td></tr>
+          <tr><td><strong>Namespace total</strong></td><td><strong>5Gi</strong></td><td><strong>10Gi</strong></td></tr>
+        </tbody>
+      </table></div>
+      <ul><li>A pod that would push the total over the quota is <strong>not created</strong>. Actual usage doesn't matter.</li></ul>
+    </div></details></div>
+  <div class="q"><p class="ask">Is a request a guarantee?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>Only if it fits.</strong> The scheduler places a pod only on a node where its requests still fit. If no node has room, the pod stays <strong>Pending</strong>, waiting for capacity.</p>
+    </div></details></div>
+</section>
+
+<section id="t6">
+  <div class="label"><span class="tag">6</span><h2>Scaling: HPA &amp; Karpenter</h2></div>
+  <div class="q"><p class="ask">What's the Kubernetes version of the AWS Auto Scaling group?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>The Horizontal Pod Autoscaler (HPA).</strong> It adds pods when demand rises and removes them when it falls, toward a target you set, e.g. <strong>60% CPU</strong>.</p>
+    </div></details></div>
+  <div class="q"><p class="ask">The HPA added a pod but it's Pending. What now?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>You need more nodes, and that's Karpenter's job.</strong> Karpenter adds EC2 nodes when pods are Pending because no node has room, and removes nodes that are no longer needed.</p>
+      <div class="flow">traffic ↑ → CPU &gt; 60% → HPA adds pods → one doesn't fit → Pending
+→ Karpenter launches a node → pod scheduled</div>
+      <blockquote>The HPA scales pods. Karpenter scales nodes.</blockquote>
+    </div></details></div>
+</section>
+
+<section id="remember">
+  <blockquote>🔑 Remember: two pictures for External Secrets · operator needs AWS access + Kubernetes access + instructions · a Secret lives in one namespace · requests reserve, limits/quotas cap, HPA + Karpenter scale · quota counts what's declared, not what's used</blockquote>
+</section>
+
+<footer>The same notes are in Notion under DevOps / 312 - Notes / 💬 Office Hours.</footer>
+</div>
+
+<script>
+document.querySelectorAll('.codebox').forEach(function(box){
+  var pre = box.querySelector('pre'); var b = document.createElement('button');
+  b.className = 'copy'; b.type = 'button'; b.textContent = 'Copy';
+  b.addEventListener('click', function(){
+    var text = pre.innerText.split('\n').map(function(l){ return l.replace(/\s+#.*$/, ''); }).join('\n').trim();
+    var done = function(){ b.textContent = 'Copied'; setTimeout(function(){ b.textContent = 'Copy'; }, 1500); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(function(){ selectPre(); });
+    } else { selectPre(); }
+    function selectPre(){ var r = document.createRange(); r.selectNodeContents(pre); var s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = 'Selected'; }
+  });
+  box.appendChild(b);
+});
+</script>
+
+</body></html>

@@ -1,0 +1,390 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Session 07: The Service, its endpoints, the ClusterIP, DNS and the three types</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EEF2F7; --surface:#FFFFFF; --ink:#1B2A41; --muted:#56657C; --line:#C9D3E1;
+  --blue:#2459C8; --blue-soft:#DCE6FA;
+  --ok:#1F8A5B; --ok-soft:#D8F0E4;
+  --warn:#A86A00; --warn-soft:#FBEBC9;
+  --bad:#B83A30; --bad-soft:#F7DCD8;
+  --code-bg:#1B2A41; --code-ink:#E6ECF5;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1724; --surface:#172234; --ink:#E4EAF3; --muted:#9AA8BD; --line:#2C3B53;
+    --blue:#7FA6F5; --blue-soft:#1E3157;
+    --ok:#5CCB94; --ok-soft:#163A2B;
+    --warn:#E8B04D; --warn-soft:#3A2D12;
+    --bad:#F08A80; --bad-soft:#3E1C1A;
+    --code-bg:#0B111B; --code-ink:#DCE4F0;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1724; --surface:#172234; --ink:#E4EAF3; --muted:#9AA8BD; --line:#2C3B53;
+  --blue:#7FA6F5; --blue-soft:#1E3157;
+  --ok:#5CCB94; --ok-soft:#163A2B;
+  --warn:#E8B04D; --warn-soft:#3A2D12;
+  --bad:#F08A80; --bad-soft:#3E1C1A;
+  --code-bg:#0B111B; --code-ink:#DCE4F0;
+  color-scheme:dark;
+}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 72px)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:21;background:var(--bg)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size:17px;line-height:1.6}
+code,pre,.mono{font-family:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace}
+code{font-size:.88em;background:var(--blue-soft);padding:.1em .35em;border-radius:4px}
+.wrap{max-width:980px;margin:0 auto;padding:40px 20px 80px}
+header{margin-bottom:36px}
+h1{font-size:clamp(2rem,5vw,3rem);line-height:1.1;margin:.2em 0 .4em;letter-spacing:-.01em}
+.sub{color:var(--muted);margin:0;max-width:62ch}
+.rule-line{margin-top:24px;display:flex;flex-wrap:wrap;gap:12px}
+.rule-line div{flex:1 1 260px;padding:14px 16px;border-left:5px solid;background:var(--surface);border-radius:0 8px 8px 0}
+.rule-line .r{border-color:var(--ok)} .rule-line .l{border-color:var(--bad)}
+.rule-line strong{display:block;font-size:1.1rem}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;display:flex;flex-wrap:nowrap;gap:8px;overflow-x:auto;
+  margin:0 -20px;padding:10px 20px;background:var(--bg);border-bottom:1px solid var(--line);scrollbar-width:thin}
+@media(min-width:900px){nav{flex-wrap:wrap}}
+nav a{white-space:nowrap}
+nav a.active{background:var(--blue);color:var(--surface);border-color:var(--blue)}
+nav a{color:var(--blue);text-decoration:none;border:1px solid var(--line);padding:4px 12px;border-radius:999px;font-size:.92rem;background:var(--surface)}
+nav a:hover{border-color:var(--blue)}
+section{margin-top:56px}
+h2{font-size:1.6rem;margin:0 0 .3em;line-height:1.2}
+h3{font-size:1.15rem;margin:1.4em 0 .3em}
+p{max-width:70ch}
+.lede{color:var(--muted);margin-top:0}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px}
+button{font:inherit;font-size:.95rem;cursor:pointer;border-radius:8px;border:1px solid var(--line);
+  background:var(--surface);color:var(--ink);padding:8px 14px}
+button:hover{border-color:var(--blue)}
+button.primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+:root[data-theme="dark"] button.primary{color:#0F1724}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) button.primary{color:#0F1724}}
+button.danger{border-color:var(--bad);color:var(--bad)}
+button:focus-visible,a:focus-visible,summary:focus-visible,select:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+button:disabled{opacity:.45;cursor:not-allowed}
+.opts button:disabled{opacity:.7}
+.opts button.right:disabled,.opts button.nope:disabled{opacity:1}
+.controls{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;align-items:center}
+
+/* simulator */
+.sim{display:grid;grid-template-columns:1fr;gap:16px}
+@media(min-width:760px){.sim{grid-template-columns:1.25fr 1fr}}
+.rs{border:1px dashed var(--line);border-radius:10px;padding:12px;margin-bottom:12px;transition:opacity .4s}
+.rs.zero{opacity:.55}
+.rs-head{display:flex;justify-content:space-between;gap:8px;font-size:.9rem;color:var(--muted);margin-bottom:8px;flex-wrap:wrap}
+.rs-head b{color:var(--ink)}
+.pods{display:flex;flex-wrap:wrap;gap:10px;min-height:76px}
+.pod{width:150px;border-radius:10px;padding:10px;border:2px solid;font-size:.85rem;line-height:1.35;transition:opacity .5s, transform .3s}
+.pod .n{font-family:"JetBrains Mono",monospace;font-size:.78rem;word-break:break-all}
+.pod .st{font-weight:700;font-size:1rem}
+.pod.ready{border-color:var(--ok);background:var(--ok-soft)}
+.pod.notready{border-color:var(--warn);background:var(--warn-soft)}
+.pod.starting{border-color:var(--line);background:var(--bg)}
+.pod.term{border-color:var(--bad);background:var(--bad-soft);opacity:.6}
+.pod.flash{transform:scale(1.06)}
+.empty{color:var(--muted);font-size:.9rem;align-self:center}
+.log{background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:12px 14px;font-size:.8rem;
+  height:330px;overflow-y:auto;line-height:1.5}
+.log div{white-space:pre-wrap;word-break:break-word}
+.log .w{color:#F4BE5B} .log .e{color:#F49088} .log .g{color:#7FDCA8} .log .c{color:#8FB2F7}
+.users{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:.92rem;color:var(--muted);flex-wrap:wrap}
+.status-pill{display:inline-block;padding:2px 10px;border-radius:999px;font-weight:700;font-size:.85rem}
+.pill-ok{background:var(--ok-soft);color:var(--ok)} .pill-warn{background:var(--warn-soft);color:var(--warn)} .pill-bad{background:var(--bad-soft);color:var(--bad)}
+
+/* liveness */
+.live-grid{display:grid;grid-template-columns:1fr;gap:16px}
+@media(min-width:760px){.live-grid{grid-template-columns:280px 1fr}}
+.bigpod{border:2px solid var(--line);border-radius:14px;padding:18px;text-align:left}
+.bigpod .row{display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding:6px 0;font-size:.95rem}
+.bigpod .row:last-child{border:none}
+.bigpod .val{font-family:"JetBrains Mono",monospace;font-weight:600}
+select{font:inherit;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.backoff{display:flex;gap:4px;align-items:flex-end;height:90px;margin-top:14px}
+.backoff span{flex:1;background:var(--blue-soft);border-radius:4px 4px 0 0;position:relative;transition:background .3s}
+.backoff span.on{background:var(--bad)}
+.backoff-labels{display:flex;gap:4px;font-size:.72rem;color:var(--muted)}
+.backoff-labels span{flex:1;text-align:center}
+
+/* tables */
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:.95rem}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--bg);font-weight:700}
+tr:last-child td{border-bottom:none}
+
+/* request path */
+.path{display:flex;flex-direction:column;gap:0;margin-top:12px}
+.hop{display:grid;grid-template-columns:44px 1fr;gap:14px;position:relative;padding-bottom:18px}
+.hop .dot{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-weight:700;
+  background:var(--surface);border:2px solid var(--blue);color:var(--blue);z-index:1}
+.hop::before{content:"";position:absolute;left:21px;top:44px;bottom:0;width:2px;background:var(--line)}
+.hop:last-child::before{display:none}
+.hop h4{margin:8px 0 2px;font-size:1.05rem}
+.hop p{margin:0;color:var(--muted)}
+.hop.https .dot{border-color:var(--ok);color:var(--ok)}
+.tag{display:inline-block;font-size:.78rem;padding:1px 8px;border-radius:999px;margin-left:6px;vertical-align:2px}
+.tag.enc{background:var(--ok-soft);color:var(--ok)} .tag.plain{background:var(--warn-soft);color:var(--warn)}
+.note{border-left:4px solid var(--blue);background:var(--blue-soft);padding:12px 16px;border-radius:0 8px 8px 0;margin:16px 0;max-width:70ch}
+
+pre{background:var(--code-bg);color:var(--code-ink);padding:14px 16px;border-radius:10px;overflow-x:auto;font-size:.82rem;line-height:1.55;margin:10px 0}
+pre .cm{color:#8A9AB5}
+
+details{background:var(--surface);border:1px solid var(--line);border-radius:10px;margin-bottom:8px}
+summary{cursor:pointer;padding:12px 16px;font-weight:700}
+details > div{padding:0 16px 14px}
+.wrong{color:var(--bad);text-decoration:line-through;text-decoration-thickness:1px}
+
+/* quiz */
+.q{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:14px}
+.q p.prompt{font-weight:700;margin-top:0}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opts button{text-align:left;padding:10px 14px}
+.opts button.right{border-color:var(--ok);background:var(--ok-soft)}
+.opts button.nope{border-color:var(--bad);background:var(--bad-soft)}
+.explain{margin-top:10px;color:var(--muted);display:none}
+.explain.show{display:block}
+.score{font-weight:700}
+footer{margin-top:64px;color:var(--muted);font-size:.9rem}
+
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.tabs button[aria-selected="true"]{background:var(--blue);color:var(--surface);border-color:var(--blue)}
+.tabpane{display:none}.tabpane.show{display:block}
+.timeline{list-style:none;padding:0;margin:0;counter-reset:t}
+.timeline li{counter-increment:t;position:relative;padding:14px 18px 14px 64px;margin-bottom:10px;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.timeline li h4{margin:0 0 4px;font-size:1.08rem}
+.timeline li p{margin:0;color:var(--ink);max-width:68ch}
+.timeline li::before{content:counter(t);position:absolute;left:16px;top:14px;width:32px;height:32px;border-radius:50%;
+  background:var(--blue-soft);color:var(--blue);font-weight:700;display:grid;place-items:center;font-size:.9rem}
+.timeline details{margin:0}
+.yaml-toggle .ln{display:block;transition:background .2s,opacity .2s}
+.yaml-toggle.focus .ln{opacity:.35}
+.yaml-toggle.focus .ln.hl{opacity:1;background:rgba(127,166,245,.18)}
+.flow{display:flex;flex-direction:column;gap:6px;margin:14px 0;max-width:620px}
+.flow div{padding:10px 14px;border-radius:8px;border:1px solid var(--line);background:var(--surface)}
+.flow .arrow{border:none;background:none;padding:0 0 0 18px;color:var(--muted)}
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px}
+.compare > div{border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--bg)}
+.lbs{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.lbs span{display:inline-block;padding:3px 8px;border-radius:6px;font-size:.8rem;font-family:"JetBrains Mono",monospace}
+.lb-many span{background:var(--bad-soft);color:var(--bad)}
+.lb-one span{background:var(--ok-soft);color:var(--ok)}
+.form-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:14px}
+@media(min-width:640px){.form-grid{grid-template-columns:1fr 1fr}}
+.form-grid label{display:flex;flex-direction:column;font-size:.9rem;color:var(--muted);gap:4px}
+.form-grid input{font:inherit;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.verdict{padding:12px 16px;border-radius:8px;font-size:.9rem}
+.verdict.ok{background:var(--ok-soft);color:var(--ok)} .verdict.no{background:var(--bad-soft);color:var(--bad)} .verdict.warn{background:var(--warn-soft);color:var(--warn)}
+.step{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:12px}
+.step.done{border-color:var(--ok)}
+.step-head{display:flex;gap:12px;align-items:flex-start}
+.step-head input{width:22px;height:22px;margin-top:3px;accent-color:var(--ok);flex:none}
+.step-head h4{margin:0;font-size:1.05rem}
+.step-head p{margin:2px 0 0;color:var(--muted)}
+.step pre{margin:10px 0 6px}
+.step details{border:none;background:var(--bg)}
+.step summary{font-weight:400;color:var(--blue);padding:8px 12px}
+.progress{height:8px;background:var(--line);border-radius:999px;overflow:hidden;margin:10px 0 18px}
+.progress div{height:100%;background:var(--ok);width:0;transition:width .3s}
+.cards2{display:grid;grid-template-columns:1fr;gap:14px}
+@media(min-width:720px){.cards2{grid-template-columns:1fr 1fr}}
+.cards2 > div{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.cards2 h3{margin-top:0}
+.cards2 ul{margin:0;padding-left:20px}
+.cards2 li{margin-bottom:6px}
+.fixbox{border:1.5px solid var(--warn);border-radius:14px;padding:12px;background:var(--warn-soft)}
+.fixbox td:first-child{width:44%;color:var(--muted)}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+
+.term{background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:12px 14px;font-family:"JetBrains Mono",monospace;font-size:.8rem;line-height:1.5;overflow-x:auto;white-space:pre}
+.chip{display:inline-block;padding:3px 10px;border-radius:999px;font-size:.85rem;font-weight:700}
+.chip.ok{background:var(--ok-soft);color:var(--ok)}.chip.warn{background:var(--warn-soft);color:var(--warn)}.chip.bad{background:var(--bad-soft);color:var(--bad)}.chip.idle{background:var(--bg);color:var(--muted);border:1px solid var(--line)}
+.lab-row{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:12px}
+.lab-row label{display:flex;gap:6px;align-items:center;font-size:.95rem}
+.lab-row input[type=checkbox]{width:18px;height:18px;accent-color:var(--blue)}
+.layers{display:flex;flex-direction:column;gap:6px}
+.layer{display:flex;justify-content:space-between;gap:10px;padding:8px 12px;border-radius:8px;border:1px solid var(--line);font-family:"JetBrains Mono",monospace;font-size:.82rem;flex-wrap:wrap}
+.layer.cached{background:var(--ok-soft);border-color:var(--ok)}.layer.rebuilt{background:var(--warn-soft);border-color:var(--warn)}.layer.none{background:var(--bg);color:var(--muted)}
+.journey{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.journey .hopbox{padding:10px 14px;border-radius:10px;border:2px solid var(--line);background:var(--surface);font-weight:700;transition:all .3s}
+.journey .hopbox.on{border-color:var(--blue);background:var(--blue-soft);color:var(--blue)}
+.journey .ar{color:var(--muted)}
+</style></head><body><div class="wrap">
+<header><p class="sub">Containers &amp; Orchestration, unit 3</p><h1>Session 07: The Service, its endpoints, the ClusterIP, DNS and the three types</h1><p class="sub">Your drill pods run, but every replaced pod gets a new IP, so anything that remembered the old one breaks. Today's answer is the Service: one fixed name and address in front of a changing set of pods, found by label. It's the Kubernetes version of the load balancer from Scale. Then the three Service types: ClusterIP, NodePort and LoadBalancer.</p><div class="rule-line"><div class="r"><strong>Never hard-code a pod IP.</strong>Call the Service by name.</div><div class="l"><strong>Labels and ports must match exactly.</strong>Kubernetes accepts a typo with no warning.</div></div></header>
+<nav aria-label="Sections"><a href="#timeline">What we did</a><a href="#why">Why not pod IPs</a><a href="#service">The Service</a><a href="#lab">Service lab</a><a href="#endpoints">Endpoints</a><a href="#clusterip">ClusterIP</a><a href="#ports">Port numbers</a><a href="#dns">DNS</a><a href="#types">Three types</a><a href="#pf">port-forward &amp; tools</a><a href="#fixes">Corrections</a><a href="#demo">Redo the demo</a><a href="#commands">Commands</a><a href="#wrapup">Stressed &amp; homework</a><a href="#quiz">Check yourself</a></nav>
+<section id="timeline"><h2>What we actually did, in order</h2><p class="lede">Mon, Oct 12, 2026, with Eldiiar, plus after-class with Bakhtiyar. Deck: "Reaching the application", blocks 1–12.</p><ol class="timeline"><li><h4>AWS analogies recap</h4><p>Pod ≈ EC2, Deployment ≈ Auto Scaling Group, Service ≈ ELB. A Deployment keeps one fixed count, no min/max. Auto-scaling needs an HPA (later).</p></li><li><h4>Marcel's 3D cluster map ("the world")</h4><p>The VPC, the nodes, pods on nodes, Services drawn off the nodes. Link to be posted in the channel.</p></li><li><h4>The problem, live</h4><p>From a dummy pod, curl to a drill pod's IP worked. He deleted that pod, and the same curl got no answer: the replacement had a new IP.</p></li><li><h4>The Service</h4><p>Applied <code>service-drill.yaml</code>, read <code>get svc</code> and <code>get endpointslices</code>, then <code>curl drill</code> from inside the cluster. He deleted both pods and <code>curl drill</code> still answered.</p></li><li><h4>Declarative vs imperative</h4><p><code>apply -f</code> vs <code>kubectl run</code>.</p></li><li><h4>Break: Freelens</h4><p>A free desktop UI for the cluster.</p></li><li><h4>Ports and endpoints</h4><p>port → targetPort. <code>curl drill</code> from his Mac failed: <code>Could not resolve host</code>.</p></li><li><h4>DNS slide skipped on purpose</h4><p>"A rabbit hole." It's homework-level reading.</p></li><li><h4>NodePort</h4><p>Claude wrote a manifest and he applied it, but couldn't demo it: EKS Auto Mode nodes have no public IP.</p></li><li><h4>LoadBalancer, live in his namespace</h4><p>An NLB appeared in the console, its target group held the pod IPs, both targets went healthy, and the class opened the DNS name. It failed on https:// and worked on http://.</p></li><li><h4>Route 53 CNAME</h4><p><code>drillapp.exchangeweb.net</code> → the NLB name, opened in the browser.</p></li><li><h4>Wrap-up</h4><p>port-forward to the Service, common mistakes (label typos, wrong ports), then a preview of Wednesday.</p></li><li><h4>After class with Bakhtiyar</h4><p>Reconnecting to the cluster, fixing InvalidImageName, applying the Service, and why you need the client pod.</p></li></ol></section>
+<section id="why"><h2>Why a pod's IP is not enough</h2><p>Every pod gets its own IP when it's created. Pods are ephemeral: deleted, replaced, rescheduled at any time. The Deployment brings the count back, but the new pod has a new IP, so a caller holding the old IP gets no answer. With 2+ replicas, the caller would also have to pick which pod to call. Same problem as Foundation: every new EC2 instance meant a new IP.</p><pre>Scale:        user → ALB (one DNS name)   → target group → EC2s  (ASG swaps them)
+Kubernetes:   pod  → Service (one name)   → endpoints    → pods  (Deployment swaps them)</pre><div class="note">Never hard-code a pod IP. Call the Service by name.</div></section>
+<section id="service"><h2>The Service: a fixed name and address in front of changing pods</h2><p><b>What it is:</b> an object with a fixed name (<code>drill</code>) and a fixed address (<code>172.20.x.x</code>). A request to it reaches one of the pods its selector picks.</p><p><b>What it is not:</b> a program or a pod. It isn't placed on a node, so <code>kubectl get pods</code> doesn't list it. It's stored in your namespace, like a Deployment.</p><p><b>Selector = a label.</b> The Deployment stamps <code>app: drill</code> on every pod. The Service's <code>selector: app: drill</code> picks them all, including a pod started a second ago. The client pod has <code>app: client</code>, so this Service never picks it.</p><div class="tbl-wrap"><table><tr><th>You wrote</th><th>What happens</th></tr><tr><td><code>selector: app: drill</code></td><td>Both drill pods picked</td></tr><tr><td><code>selector: app: dril</code> (one letter missing)</td><td>Selects nothing. No error, no warning. The Service just never answers.</td></tr></table></div><pre>apiVersion: v1            # Deployments use apps/v1; Services use v1
+kind: Service
+metadata:
+  name: drill             # the name callers use
+spec:
+  type: ClusterIP         # the default; can be left out
+  selector:
+    app: drill            # must equal the pods&#x27; label exactly
+  ports:
+    - port: 80            # what callers dial
+      targetPort: 8080    # where gunicorn listens</pre></section>
+<section id="lab"><h2>Lab: break and fix a Service</h2><p class="lede">Start by curling a pod by IP, delete that pod, and curl again. Then apply the Service, try a wrong selector or targetPort, and see exactly which error each mistake gives.</p><div class="panel"><div class="lab-row"><label>selector <select id="c7sel"><option value="drill">app: drill</option><option value="dril">app: dril (typo)</option></select></label><label>targetPort <select id="c7tp"><option>8080</option><option>9090</option></select></label></div><div class="controls"><button id="c7ip">client: curl the remembered pod IP</button><button id="c7delp">delete a drill pod</button><button class="primary" id="c7apply">kubectl apply -f service-drill.yaml</button><button id="c7curl">client: curl http://drill</button><button id="c7mac">Mac: curl http://drill</button><button id="c7eps">get endpointslices</button><button id="c7lb">apply LoadBalancer</button></div><div class="sim"><div><div class="pods" id="c7pods"></div><p id="c7svc" style="margin:10px 0 0;color:var(--muted)"></p></div><div class="log mono" id="c7log" style="height:300px"></div></div></div></section>
+<section id="endpoints"><h2>Endpoints: the list of pod addresses, kept for you</h2><p><b>Endpoints</b> = the IPs of the pods the selector found, plus the port to send to. Stored as an <b>EndpointSlice</b> (the older Endpoints object still works with a warning). A controller in the control plane updates it on its own every time a matching pod starts or stops. Delete a pod: one IP in the list changes. The Service's name and ClusterIP stay the same.</p><div class="note">Service answers nothing? Read the EndpointSlice first. Empty means no pod matches the selector.</div></section>
+<section id="clusterip"><h2>ClusterIP: a rule on every node, not a machine</h2><p>One word, two meanings: the default Service <b>type</b>, and the <b>address</b> every Service gets (the CLUSTER-IP column). No machine has that address, and it isn't an AWS object. <b>kube-proxy</b>, a program on every node, writes a rule there that rewrites <code>172.20.x.x:80</code> to one pod, like <code>10.20.2.7:8080</code>, picked at random. Requests spread across the pods. A pod that isn't ready is marked in the EndpointSlice and gets no requests.</p><p>Works only inside the cluster. From your Mac, <code>curl http://drill</code> → <code>Could not resolve host</code>. Like SSHing to an EC2 private IP from outside the VPC.</p><pre>client pod ── curl drill:80 ──▶ rule on client's node rewrites to ──▶ drill pod 10.20.x.x:8080</pre></section>
+<section id="ports"><h2>The port numbers, and the one that must match</h2><div class="tbl-wrap"><table><tr><th>Where it's written</th><th>Number</th><th>What it does</th></tr><tr><td><code>port</code> in the Service</td><td>80</td><td>What callers dial. <code>http://drill</code> = <code>http://drill:80</code></td></tr><tr><td><code>targetPort</code> in the Service</td><td>8080</td><td>Where the rule sends. Must equal where the app listens</td></tr><tr><td><code>--bind 0.0.0.0:8080</code> in the Dockerfile CMD</td><td>8080</td><td>Where gunicorn actually listens</td></tr><tr><td><code>containerPort</code> in the Deployment</td><td>8080</td><td>Documentation only. Changing it changes nothing</td></tr><tr><td><code>EXPOSE 8080</code> in the Dockerfile</td><td>8080</td><td>Documentation only</td></tr></table></div><p>Eldiiar's picture: doors between rooms. App code opens 8080 → Dockerfile → container → pod → Service. Wrong targetPort: accepted with no error, endpoints still listed, and every call fails with <code>Connection refused</code>, because nothing listens on that port.</p><div class="note">targetPort = the port the process listens on. Everything else is either the caller's port or a note.</div></section>
+<section id="dns"><h2>The name: cluster DNS turns drill into the ClusterIP</h2><p>Every Service gets <code>&lt;service&gt;.&lt;namespace&gt;.svc.cluster.local</code>. Same namespace: <code>drill</code> is enough. Another namespace: <code>drill.&lt;namespace&gt;</code>. A Service deleted and created again gets a new ClusterIP; the name stays, which is why callers use the name.</p><p>Inside a pod, <code>/etc/resolv.conf</code> has a <b>search</b> line (adds your namespace to short names) and <code>nameserver 172.20.0.10</code>. That nameserver is <b>CoreDNS</b>, the cluster's DNS. It answers cluster names only; public names are Route 53. <code>;; Got recursion not available</code> in nslookup output is a notice. Ignore it.</p></section>
+<section id="types"><h2>The three Service types, each built on the one before</h2><div class="tbl-wrap"><table><tr><th>Type</th><th>Adds</th><th>Reached from</th><th>Used for</th></tr><tr><td>ClusterIP (default)</td><td>A name and an address inside the cluster</td><td>Pods in the cluster</td><td>App-to-app traffic</td></tr><tr><td>NodePort</td><td>One port, 30000–32767, opened on every node</td><td>Anything that can reach the nodes: <code>&lt;node-ip&gt;:&lt;port&gt;</code></td><td>Tests and demos</td></tr><tr><td>LoadBalancer</td><td>AWS builds a Network Load Balancer</td><td>The internet</td><td>How users reach apps on EKS</td></tr></table></div><p>Each type keeps what the one before has: a LoadBalancer Service also has a node port and a ClusterIP. NodePort: Kubernetes picks the port unless you set <code>nodePort:</code> in the range. Not usable here: nodes are in private subnets and your namespace allows 0 node ports.</p><h3>NodePort (shown, not usable here): same file with these changes</h3><pre>  type: NodePort
+  ports:
+    - port: 80
+      targetPort: 8080
+      nodePort: 30080     # optional; must be 30000–32767</pre><h3>LoadBalancer: AWS builds the NLB for you</h3><div class="tbl-wrap"><table><tr><th>Step</th><th>What happens</th></tr><tr><td>Apply the manifest</td><td>AWS creates an NLB with a listener on port 80 and a target group</td></tr><tr><td>Target group</td><td>Holds the pod IPs, kept equal to the endpoints. The NLB sends each connection straight to a pod.</td></tr><tr><td>Health check</td><td>A pod gets traffic once it passes. The NLB takes a few minutes to become active.</td></tr><tr><td><code>kubectl get svc drill-public</code></td><td>Shows the NLB's DNS name under EXTERNAL-IP</td></tr><tr><td>Annotation</td><td>A setting in metadata that changes how an object is handled. <code>aws-load-balancer-scheme: internet-facing</code> makes it public; without it the NLB is internal only.</td></tr><tr><td>http:// only</td><td>HTTPS needs a certificate, which comes with the Ingress</td></tr><tr><td>A nice name</td><td>A Route 53 CNAME → the NLB's DNS name (same as Scale)</td></tr><tr><td>Students</td><td>Billed by the hour, so students can't create one: exceeded quota</td></tr></table></div><pre>apiVersion: v1
+kind: Service
+metadata:
+  name: drill-public
+  annotations:            # without it: internal only
+    service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+spec:
+  type: LoadBalancer
+  selector:
+    app: drill
+  ports:
+    - port: 80
+      targetPort: 8080</pre><pre>user → drillapp.exchangeweb.net (CNAME) → NLB :80 → target group → drill pod :8080</pre><div class="note">LoadBalancer is the production way in. port-forward is the engineer's way in.</div></section>
+<section id="pf"><h2>port-forward to the Service, two ways to create objects, and seeing the cluster</h2><p><code>kubectl port-forward svc/drill 8000:80</code>: laptop port first, then the Service port. kubectl reads the Service's targetPort, picks one pod, and tunnels to it through the API server; the ClusterIP rule isn't used. Only your laptop can use it (127.0.0.1). When that pod is replaced, port-forward prints <code>lost connection to pod</code> and stops, while <code>curl drill</code> from the client pod keeps working.</p><div class="tbl-wrap"><table><tr><th></th><th>Declarative</th><th>Imperative</th></tr><tr><td>How</td><td>Write a manifest, <code>kubectl apply -f</code></td><td>One command: <code>kubectl run test --image=nicolaka/netshoot:v0.16 -- sleep 3600</code></td></tr><tr><td>Good for</td><td>Teams. The file stays in the repo, like Terraform</td><td>Quick tests and the CKA/CKAD exams</td></tr><tr><td>Cost</td><td>Slower to write</td><td>Nothing left for anyone to read</td></tr></table></div><p><b>The world</b> (Marcel's 3D map): Services drawn beside the nodes, with arrows to the pods each one selects. <b>Freelens:</b> free desktop app showing your Deployments, pods, Services, EndpointSlices, logs and YAML. Link in the class channel.</p><div class="note">Use the UI to look. Keep typing kubectl: every job and every exam has it.</div></section>
+<section id="fixes"><h2>Where the notes correct what was said live</h2>
+<p class="lede">Left: what was said in class. Right: the correct version from the site notes and deck.</p>
+<div class="fixbox"><div class="tbl-wrap"><table><tr><th>Said in class</th><th>Correct version (site notes and deck)</th></tr><tr><td>"A Service is a cluster-wide object"</td><td>It's <b>stored in your namespace</b>. It isn't placed on a node, which is the part he meant.</td></tr><tr><td>"ClusterIP is just a type, it doesn't have an IP"</td><td>ClusterIP names <b>both the type and the Service's address</b> (the CLUSTER-IP column).</td></tr><tr><td>"By default the Service uses round robin"</td><td>The kube-proxy rule picks an endpoint <b>at random</b>.</td></tr><tr><td>"CoreDNS runs as pods in kube-system"</td><td>On most clusters, yes. <b>On this cluster AWS runs CoreDNS on every node</b>, so there's no CoreDNS pod to list. That's why his <code>get pods -n kube-system</code> showed nothing.</td></tr><tr><td>"NodePort is dying; they'll remove it"</td><td>NodePort is <b>not deprecated</b>. It's used for tests and demos more than for users.</td></tr><tr><td>"NLB → Service → pod"</td><td>The NLB's target group holds the pod IPs, and it sends each connection <b>straight to a pod</b>.</td></tr><tr><td>After class: "containerPort is the one we're connecting to"</td><td>containerPort is <b>documentation only</b>. <b>targetPort</b> must equal gunicorn's <code>--bind</code> port.</td></tr><tr><td>"Kubernetes API tells you it's a different IP"</td><td><b>Nothing tells you anything.</b> No pod has that IP any more, so the request gets no answer and times out.</td></tr></table></div></div></section><section id="demo"><h2>Redo the demo yourself</h2>
+<p class="lede">Everything runs in your namespace on the school cluster: 8 pods and 5 Services max. Tick each step as you finish it; your ticks stay in this browser.</p>
+<h3>Before you start</h3><div class="note" style="max-width:none">AWS SSO set up from the class doc, kubectl installed, and the containers repo cloned. The exact cluster/profile names are in the Slack message Bakhtiyar shared; the ones in step 1 are placeholders.</div>
+<p style="margin-bottom:0"><b id="demoCount">0 of 10 steps done</b></p><div class="progress"><div id="demoBar"></div></div>
+<div class="step" data-i="0"><div class="step-head"><input type="checkbox" aria-label="Mark step 1 done"><div><h4>1. Connect to the cluster</h4><p>The SSO token expires, so do this every session.</p></div></div>
+<pre>aws sso login --profile &lt;your-profile&gt;
+aws eks update-kubeconfig --name &lt;cluster-name&gt; --region us-east-1 \
+  --profile &lt;your-profile&gt; --alias containers-26a
+kubectl config set-context --current --namespace=&lt;your-namespace&gt;
+kubectl config get-contexts</pre>
+<details><summary>What you should see</summary><div><p><code>modified</code> after set-context (safe to run every time), and your namespace beside the <code>*</code>.</p></div></details></div>
+<div class="step" data-i="1"><div class="step-head"><input type="checkbox" aria-label="Mark step 2 done"><div><h4>2. Get today's folder and fix the image</h4><p>The folder is new, so pull first. Skip the edit and the pods sit in InvalidImageName.</p></div></div>
+<pre>cd containers &amp;&amp; git pull
+cd 03-reaching-the-application
+# in deployment-drill.yaml, replace IMAGE_URI (line ~18) with:
+#   SCHOOL_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/drill:v1</pre>
+<details><summary>What you should see</summary><div><p>The folder exists and the file has the real URI.</p></div></details></div>
+<div class="step" data-i="2"><div class="step-head"><input type="checkbox" aria-label="Mark step 3 done"><div><h4>3. Start clean, then run the drill app and the client pod</h4><p>The drill image has no curl; the client runs nicolaka/netshoot, which does.</p></div></div>
+<pre>kubectl delete -f . --ignore-not-found
+kubectl apply -f deployment-drill.yaml -f pod-client.yaml
+kubectl get pods -o wide</pre>
+<details><summary>What you should see</summary><div><p>Two <code>drill-…</code> pods and <code>client</code>, all Running, each with its own <code>10.20.x.x</code> IP.</p></div></details></div>
+<div class="step" data-i="3"><div class="step-head"><input type="checkbox" aria-label="Mark step 4 done"><div><h4>4. See the problem</h4><p>Call a pod by IP, kill it, call again.</p></div></div>
+<pre>kubectl exec client -- curl -s http://&lt;drill-pod-ip&gt;:8080
+kubectl delete pod &lt;that-drill-pod&gt;
+kubectl exec client -- curl -s --max-time 5 http://&lt;same-ip&gt;:8080
+kubectl get pods -o wide</pre>
+<details><summary>What you should see</summary><div><p><code>hello from the drill app</code> first, then nothing after 5 seconds. The replacement has a new IP.</p></div></details></div>
+<div class="step" data-i="4"><div class="step-head"><input type="checkbox" aria-label="Mark step 5 done"><div><h4>5. Add the Service and call it by name</h4><p></p></div></div>
+<pre>kubectl apply -f service-drill.yaml
+kubectl get svc drill
+kubectl exec client -- curl -s http://drill</pre>
+<details><summary>What you should see</summary><div><p>TYPE ClusterIP, CLUSTER-IP <code>172.20.x.x</code>, <code>80/TCP</code>, and <code>hello from the drill app</code> every time.</p></div></details></div>
+<div class="step" data-i="5"><div class="step-head"><input type="checkbox" aria-label="Mark step 6 done"><div><h4>6. Watch the endpoints update themselves</h4><p></p></div></div>
+<pre>kubectl get endpointslices -l kubernetes.io/service-name=drill
+kubectl delete pod &lt;one-drill-pod&gt;
+kubectl get endpointslices -l kubernetes.io/service-name=drill
+kubectl get svc drill
+kubectl exec client -- curl -s http://drill</pre>
+<details><summary>What you should see</summary><div><p>One IP changed in the slice with no command from you, and the ClusterIP unchanged.</p></div></details></div>
+<div class="step" data-i="6"><div class="step-head"><input type="checkbox" aria-label="Mark step 7 done"><div><h4>7. Prove ClusterIP is inside-only, and look at DNS</h4><p></p></div></div>
+<pre>curl http://drill                               # from your Mac
+kubectl exec client -- cat /etc/resolv.conf
+kubectl exec client -- nslookup drill</pre>
+<details><summary>What you should see</summary><div><p><code>Could not resolve host</code> on the Mac; a search line and <code>nameserver 172.20.0.10</code>; <code>Name: drill.&lt;ns&gt;.svc.cluster.local</code> with the same address as <code>get svc</code>.</p></div></details></div>
+<div class="step" data-i="7"><div class="step-head"><input type="checkbox" aria-label="Mark step 8 done"><div><h4>8. Break it on purpose</h4><p>Wrong targetPort, then wrong selector. The README's scenarios cover these too.</p></div></div>
+<pre># edit service-drill.yaml: targetPort: 9090, then
+kubectl apply -f service-drill.yaml
+kubectl get endpointslices -l kubernetes.io/service-name=drill   # still lists pods (port 9090)
+kubectl exec client -- curl -s http://drill                      # Connection refused
+# put 8080 back; then try selector app: dril and apply again
+kubectl get endpointslices -l kubernetes.io/service-name=drill   # no endpoints
+# put app: drill back and apply</pre>
+<details><summary>What you should see</summary><div><p>No error from apply in either case. The only clues are the refusal and the empty slice.</p></div></details></div>
+<div class="step" data-i="8"><div class="step-head"><input type="checkbox" aria-label="Mark step 9 done"><div><h4>9. Tunnel from your laptop</h4><p></p></div></div>
+<pre>kubectl port-forward svc/drill 8000:80   # terminal 1
+curl localhost:8000                      # terminal 2</pre>
+<details><summary>What you should see</summary><div><p><code>Forwarding from 127.0.0.1:8000 -&gt; 8080</code>, then <code>hello from the drill app</code>.</p></div></details></div>
+<div class="step" data-i="9"><div class="step-head"><input type="checkbox" aria-label="Mark step 10 done"><div><h4>10. Try the LoadBalancer and get refused</h4><p>That's the expected result.</p></div></div>
+<pre>kubectl apply -f service-drill-loadbalancer.yaml</pre>
+<details><summary>What you should see</summary><div><p><code>Forbidden ... exceeded quota: student-quota ... services.loadbalancers=0</code>.</p></div></details></div>
+<h3>If it goes wrong</h3><div class="tbl-wrap"><table><tr><th>Error</th><th>Meaning</th></tr><tr><td><code>Error when retrieving token from sso: Token has expired</code></td><td>Run <code>aws sso login</code> again</td></tr><tr><td><code>InvalidImageName</code></td><td>IMAGE_URI still in deployment-drill.yaml. Paste the README's URI, re-apply</td></tr><tr><td><code>pods "client" not found</code></td><td>You didn't apply <code>pod-client.yaml</code></td></tr><tr><td>No <code>03-reaching-the-application</code> folder</td><td><code>git pull</code></td></tr><tr><td>curl works, then <code>Connection refused</code></td><td>Wrong targetPort</td></tr><tr><td>port-forward: <code>lost connection to pod</code></td><td>Its pod was replaced. Run it again</td></tr></table></div>
+<h3>Clean up</h3><pre>kubectl delete -f . --ignore-not-found
+kubectl get pods,svc      # No resources found</pre><p>This only touches your namespace. Nothing costs money here, since students can't create a LoadBalancer.</p>
+<button id="demoReset">Clear my ticks</button></section><section id="commands"><h2>Commands and config that came up</h2><div class="tbl-wrap"><table><tr><th>Command</th><th>What it does</th></tr><tr><td><code>kubectl apply -f service-drill.yaml</code></td><td>Create/update the Service from the file</td></tr><tr><td><code>kubectl get svc</code> / <code>get svc drill</code></td><td>List Services: type, ClusterIP, external IP, ports</td></tr><tr><td><code>kubectl get endpointslices -l kubernetes.io/service-name=drill</code></td><td>The pod IPs behind the Service</td></tr><tr><td><code>kubectl get endpoints</code></td><td>Older version of the same list (prints a warning)</td></tr><tr><td><code>kubectl exec client -- curl -s http://drill</code></td><td>Run curl inside the cluster, from the client pod</td></tr><tr><td><code>kubectl exec -it &lt;pod&gt; -- /bin/sh</code></td><td>Open a shell inside a pod</td></tr><tr><td><code>kubectl run test --image=nicolaka/netshoot:v0.16 -- sleep 3600</code></td><td>Imperative: a throwaway pod with no file</td></tr><tr><td><code>kubectl get pods -o wide</code></td><td>Pods with their IPs and nodes</td></tr><tr><td><code>kubectl get nodes -o wide</code></td><td>Nodes and their (private) IPs</td></tr><tr><td><code>kubectl port-forward svc/drill 8000:80</code></td><td>Laptop :8000 → one pod behind the Service</td></tr><tr><td><code>kubectl config get-contexts</code></td><td>Which cluster and namespace you're on</td></tr><tr><td><code>k</code></td><td>Eldiiar's alias for kubectl</td></tr></table></div></section><section id="wrapup"><h2>What the instructor stressed, and what's next</h2><div class="cards2"><div><h3>Stressed in class</h3><ul><li>Run the AWS analogy for everything new. Ask "what was this in AWS?" It reviews Scale at the same time.</li><li>Labels are everything. One missing letter and the Service silently serves nothing. Kubernetes won't guess what you meant.</li><li>Ports must line up, from the app code all the way to targetPort.</li><li>LoadBalancer is what's used in real life. Every EKS app is roughly NLB → Service → pods.</li><li>Don't dig into cluster DNS at work. On EKS it just works. If DNS breaks, restart the CoreDNS pods.</li><li>Use Freelens to see, kubectl to work. Exams and jobs both expect the CLI.</li><li>Read the official Kubernetes docs, or point Claude at them, to build vocabulary.</li><li>Always clean up your namespace after practice (Bakhtiyar).</li></ul></div><div><h3>Homework</h3><ul><li>Due Wednesday: run scenarios 1–4, 6 and 8 of the <code>03-reaching-the-application/</code> README in your namespace (Service and EndpointSlices, wrong targetPort, selector that matches nothing, port-forward, the refused LoadBalancer, DNS from the client pod). Scenario 5, probes, is Wednesday's.</li><li>Before Wednesday (Oct 14): read what a readiness probe, a liveness probe and an Ingress are. Docs or Claude.</li><li>Optional: ask Claude to explain how DNS works inside Kubernetes, with a diagram.</li><li>Clean up when done.</li></ul></div><div><h3>Worth replaying in the recording</h3><ul><li>The LoadBalancer demo: the NLB appearing in the console, the target group filling with pod IPs, targets going healthy, the https → http fix, then the Route 53 CNAME. Near the end of the main recording.</li><li>Deleting both pods while <code>curl drill</code> keeps answering: right after he applies the Service, first half.</li><li>After class, Bakhtiyar on "why the client pod": exec (inside the cluster's network) vs port-forward (your laptop). Second half of the after-class video.</li></ul></div><div><h3>Left unclear</h3><ul><li>A student asked if a Service could use port 443. Bakhtiyar hadn't tried it. HTTPS was deferred to the Ingress.</li><li>The DNS block was skipped live. It's covered only in the notes and deck.</li><li>Readiness (which pods count as "ready" for the Service) was mentioned but not explained. That's Wednesday.</li><li>The 3D map link wasn't posted yet during class.</li></ul></div></div></section><section id="quiz"><h2>Check yourself</h2><p class="lede">Pick an answer to see why. Score: <span class="score" id="score">0 / 0</span></p><div id="quizArea"></div></section>
+<footer>Built from your Session 07 recap. </footer></div>
+<script>
+(function(){
+ const $=id=>document.getElementById(id);const rnd=()=>Math.random().toString(36).slice(2,7);const ip=()=>'10.20.'+(1+Math.floor(Math.random()*9))+'.'+(2+Math.floor(Math.random()*250));
+ let pods,svc,remembered,cip;
+ function log(t,c){const d=document.createElement('div');if(c)d.className=c;d.textContent=t;$('c7log').appendChild(d);$('c7log').scrollTop=1e9}
+ function eps(){return svc&&svc.sel==='drill'?pods:[]}
+ function draw(){$('c7pods').innerHTML=pods.map(p=>`<div class="pod ready"><div class="n">${p.n}</div><div class="st">Running</div><div>${p.ip}<br>app: drill</div></div>`).join('')+'<div class="pod starting"><div class="n">client</div><div class="st">Running</div><div>app: client<br>has curl</div></div>';
+  $('c7svc').innerHTML=svc?`Service <b>drill</b> · ClusterIP ${cip} · selector app: ${svc.sel} · port 80 → targetPort ${svc.tp} · endpoints: ${eps().length}`:'No Service yet. Remembered pod IP: '+remembered}
+ function reset(){pods=[{n:'drill-7ff7775db6-'+rnd(),ip:ip()},{n:'drill-7ff7775db6-'+rnd(),ip:ip()}];svc=null;remembered=pods[0].ip;cip='172.20.'+Math.floor(Math.random()*200)+'.'+Math.floor(Math.random()*250);$('c7log').innerHTML='';log('Two drill pods and a client pod. The client remembers '+remembered+'.','g');draw()}
+ $('c7ip').onclick=()=>{log('$ kubectl exec client -- curl -s --max-time 5 http://'+remembered+':8080','c');const p=pods.find(x=>x.ip===remembered);log(p?'hello from the drill app':'(5 seconds of nothing) — no pod has that IP any more. Nothing tells you why.',p?'g':'e')};
+ $('c7delp').onclick=()=>{const old=pods[0];pods[0]={n:'drill-7ff7775db6-'+rnd(),ip:ip()};log('$ kubectl delete pod '+old.n,'c');log('ReplicaSet made a replacement with a NEW IP: '+pods[0].ip);if(svc)log('EndpointSlice updated by itself: '+old.ip+' → '+pods[0].ip+'. ClusterIP '+cip+' unchanged.','g');draw()};
+ $('c7apply').onclick=()=>{const n={sel:$('c7sel').value,tp:$('c7tp').value};log('$ kubectl apply -f service-drill.yaml','c');log(svc?'service/drill configured':'service/drill created  (no warnings, even with a typo)');svc=n;draw()};
+ $('c7curl').onclick=()=>{log('$ kubectl exec client -- curl -s http://drill','c');if(!svc){log('curl: (6) Could not resolve host: drill','e');return}
+  const e=eps();if(!e.length){log('(hangs, then fails) — EndpointSlice is empty: selector app: '+svc.sel+' matches no pod.','e');return}
+  if(svc.tp!=='8080'){log('curl: (7) Failed to connect to drill port 80: Connection refused — the rule reaches a pod, but nothing listens on '+svc.tp+'.','e');return}
+  const p=e[Math.floor(Math.random()*e.length)];log('hello from the drill app   (kube-proxy picked '+p.ip+' at random)','g')};
+ $('c7mac').onclick=()=>{log('$ curl http://drill   (from your Mac)','c');log('curl: (6) Could not resolve host: drill — ClusterIP and its name exist only inside the cluster.','e')};
+ $('c7eps').onclick=()=>{log('$ kubectl get endpointslices -l kubernetes.io/service-name=drill','c');if(!svc){log('No resources found');return}const e=eps();log('NAME          ADDRESSTYPE   PORTS   ENDPOINTS\ndrill-x7k2p   IPv4          '+(e.length?svc.tp:'<unset>')+'    '+(e.map(p=>p.ip).join(',')||'<unset>'))};
+ $('c7lb').onclick=()=>{log('$ kubectl apply -f service-drill-loadbalancer.yaml','c');log('Error from server (Forbidden): exceeded quota: student-quota, requested: services.loadbalancers=1, limited: services.loadbalancers=0','e');log('Expected. NLBs are billed by the hour, so only the instructor can make one.','w')};
+ ['c7sel','c7tp'].forEach(i=>$(i).onchange=()=>log('Changed the file. Apply it to send the change to the cluster.','w'));
+ reset();
+})();
+
+
+(function(){
+  const nav=document.querySelector('nav');const links=[...nav.querySelectorAll('a')];
+  const map=new Map(links.map(l=>[l.getAttribute('href').slice(1),l]));
+  const obs=new IntersectionObserver(es=>{es.forEach(e=>{if(!e.isIntersecting)return;
+    links.forEach(l=>l.classList.remove('active'));const l=map.get(e.target.id);
+    if(l){l.classList.add('active');nav.scrollTo({left:Math.max(0,l.offsetLeft-20),behavior:'smooth'})}})},
+    {rootMargin:'-25% 0px -65% 0px'});
+  map.forEach((l,id)=>{const el=document.getElementById(id);if(el)obs.observe(el)});
+})();
+(function(){
+  const KEY='s07-demo';let done={};
+  try{done=JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(e){done={}}
+  const steps=[...document.querySelectorAll('#demo .step')];
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(done))}catch(e){}}
+  function upd(){const n=steps.filter(s=>done[s.dataset.i]).length;
+    document.getElementById('demoCount').textContent=n+' of '+steps.length+' steps done';
+    document.getElementById('demoBar').style.width=(n/steps.length*100)+'%';}
+  steps.forEach(s=>{const cb=s.querySelector('input');cb.checked=!!done[s.dataset.i];s.classList.toggle('done',cb.checked);
+    cb.onchange=()=>{done[s.dataset.i]=cb.checked;s.classList.toggle('done',cb.checked);save();upd()};});
+  document.getElementById('demoReset').onclick=()=>{done={};save();steps.forEach(s=>{s.querySelector('input').checked=false;s.classList.remove('done')});upd()};
+  upd();
+})();
+(function(){
+  const Q=[{"q": "apply says created, but curl http://web from the client pod hangs. The EndpointSlice shows no addresses. What's wrong?", "o": ["Wrong targetPort", "The selector matches no pod", "CoreDNS is down"], "a": 1, "e": "Empty endpoints = no pod carries that exact label. Compare with kubectl get pods --show-labels, letter by letter."}, {"q": "Endpoints list both pod IPs, but every curl returns Connection refused. Does changing containerPort fix it?", "o": ["Yes", "No, containerPort is documentation only; fix targetPort", "Only after a restart"], "a": 1, "e": "\"Refused\" with endpoints present means nothing listens on targetPort. Set it to gunicorn's --bind port, 8080."}, {"q": "curl http://drill works from the client pod but not from your Mac. Customers need a nice domain. What do you build?", "o": ["A NodePort", "A LoadBalancer Service (internet-facing) plus a Route 53 CNAME", "port-forward for every customer"], "a": 1, "e": "AWS creates an NLB whose targets are the pod IPs; the CNAME points your domain at it. HTTP only until there's a certificate."}, {"q": "Who writes the rule that turns 172.20.x.x:80 into a pod IP?", "o": ["CoreDNS", "kube-proxy on every node", "The NLB"], "a": 1, "e": "CoreDNS only answers the name with the ClusterIP. kube-proxy rewrites the address."}, {"q": "You delete a drill pod. What changes?", "o": ["The Service name and ClusterIP", "One IP in the EndpointSlice; the name and ClusterIP stay", "Nothing at all"], "a": 1, "e": "A controller updates the EndpointSlice on its own."}, {"q": "Is a Service a pod running on a node?", "o": ["Yes", "No, it's an object in your namespace; kube-proxy rules do the work", "Only LoadBalancer Services"], "a": 1, "e": "kubectl get pods never lists it."}, {"q": "From a pod in another namespace, which name reaches your drill Service?", "o": ["drill", "drill.<your-namespace>", "drill.svc"], "a": 1, "e": "Short names get your own namespace added by the search line. Another namespace needs drill.<namespace>."}, {"q": "Why does the NLB demo work on http:// but not https://?", "o": ["The NLB is broken", "HTTPS needs a certificate, which comes with the Ingress", "Port 80 is blocked"], "a": 1, "e": "The listener is on port 80 only."}];
+  const area=document.getElementById('quizArea'),scoreEl=document.getElementById('score');let answered=0,right=0;
+  Q.forEach((item,i)=>{const box=document.createElement('div');box.className='q';
+    const p=document.createElement('p');p.className='prompt';p.textContent=(i+1)+'. '+item.q;box.appendChild(p);
+    const opts=document.createElement('div');opts.className='opts';const ex=document.createElement('p');ex.className='explain';ex.textContent=item.e;
+    item.o.forEach((t,j)=>{const b=document.createElement('button');b.textContent=t;
+      b.onclick=()=>{if(box.dataset.done)return;box.dataset.done=1;answered++;
+        if(j===item.a){right++;b.classList.add('right')}else{b.classList.add('nope');opts.children[item.a].classList.add('right')}
+        [...opts.children].forEach(x=>x.disabled=true);ex.classList.add('show');scoreEl.textContent=right+' / '+answered;};
+      opts.appendChild(b);});
+    box.appendChild(opts);box.appendChild(ex);area.appendChild(box);});
+})();
+</script></body></html>

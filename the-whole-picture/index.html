@@ -1,0 +1,536 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>The Whole Picture</title>
+<style>
+  :root {
+    --bg: #eef1f5;
+    --ink: #16202f;
+    --muted: #5c6b80;
+    --font: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --bg: #0f1620; --ink: #e6ecf4; --muted: #9aa8bc; }
+  }
+  :root[data-theme="dark"] { --bg: #0f1620; --ink: #e6ecf4; --muted: #9aa8bc; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); line-height: 1.5; }
+  .wrap { max-width: 1360px; margin: 0 auto; padding-inline: 16px; padding-block: 32px 48px; }
+  .eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: #2563b0; margin: 0 0 6px; }
+  h1 { font-size: clamp(22px, 3.5vw, 30px); margin: 0 0 8px; letter-spacing: -.01em; text-wrap: balance; }
+  .note { color: var(--muted); max-width: 64ch; margin: 0 0 22px; font-size: 15px; }
+  figure { margin: 0; background: #eef1f6; border: 1px solid #d6dde7; border-radius: 14px; padding: 12px; overflow-x: auto; }
+  figure svg { display: block; width: 100%; height: auto; min-width: 1000px; }
+
+  .dg-title { font: 700 30px var(--font); fill: #16202f; }
+  .dg-sub { font: 400 16px var(--font); fill: #5c6b80; }
+  .lab { font: 700 12px var(--font); fill: #6b7a8d; letter-spacing: .04em; }
+  .card { fill: #ffffff; }
+  .navy { fill: #1c2b3a; }
+  .s-blue{stroke:#2563b0}.s-teal{stroke:#159e8c}.s-orange{stroke:#c0631f}.s-purple{stroke:#7c3aed}.s-green{stroke:#2f8f4e}.s-red{stroke:#e03e3e}
+  .s-cw{stroke:#b23a86}.s-alarm{stroke:#d1495b}.s-sns{stroke:#4f46e5}
+  .f-blue{fill:#2563b0}.f-teal{fill:#159e8c}.f-orange{fill:#c0631f}.f-purple{fill:#7c3aed}.f-green{fill:#2f8f4e}.f-red{fill:#d43a3a}
+  .f-cw{fill:#b23a86}.f-alarm{fill:#d1495b}.f-sns{fill:#4f46e5}
+  .s-slate{stroke:#475569}.f-slate{fill:#475569}
+  .s-edge{stroke:#b45309}.f-edge{fill:#b45309}.s-nat{stroke:#0f766e}.f-nat{fill:#0f766e}
+  .ink{fill:#16202f}.mut{fill:#5c6b80}.wht{fill:#eef2f7}.wht2{fill:#aebccd}
+  .sub-pub{fill:#e8f1fb;stroke:#2563b0;stroke-width:1.4}
+  .sub-priv{fill:#fdeeee;stroke:#e03e3e;stroke-width:1.4}
+  .sg{fill:#fdeaea;stroke:#e03e3e;stroke-width:1.6}
+  .leg{fill:#ffffff;stroke:#e03e3e;stroke-width:2}
+  .leg-b{fill:#ffffff;stroke:#2563b0;stroke-width:2}
+  .vpc{fill:none;stroke:#5c6b80;stroke-width:1.6;stroke-dasharray:8 6}
+  .box2{stroke-width:2}.box15{stroke-width:1.6}
+  .arw{stroke:#6b7a8d;stroke-width:1.8;fill:none}
+  .arw-d{stroke:#6b7a8d;stroke-width:1.6;fill:none;stroke-dasharray:6 5}
+  .tt{font:700 15px var(--font)}.tt14{font:700 14px var(--font)}.tt13{font:700 13px var(--font)}.tt125{font:700 12.5px var(--font)}
+  .bd{font:400 12.5px var(--font)}.bd11{font:400 11px var(--font)}
+  .mono{font:500 12px var(--mono)}.mono11{font:500 11.5px var(--mono)}
+  .mid{text-anchor:middle}.end{text-anchor:end}.it{font-style:italic}
+  .num{fill:#e03e3e}.cnum{font:700 12px var(--font);fill:#fff;text-anchor:middle}
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<div class="wrap">
+  <p class="eyebrow">AWS · full architecture</p>
+  <h1>The whole picture — ALB, auto-scaling &amp; monitoring</h1>
+  <p class="note">CloudFront sits in front, with your ALB as its origin, and Shield + WAF filter in front of the cache. Four reference panels at the bottom: Shield vs WAF, the caching mechanism, what makes a subnet public or private (and why a private box needs a NAT Gateway), and what a status code's first digit tells you on the way back.</p>
+
+  <figure>
+    <svg viewBox="0 0 1900 3420" role="img" aria-label="Full AWS architecture. A browser reaches Route 53 which aliases to an Application Load Balancer inside a VPC. The ALB's listener, rules and target group are shown in detail. Traffic passes through three chained security groups down to EC2 instances in public subnets across two AZs and RDS Postgres in private subnets. On the right: a provisioning column (launch template, expanded Auto Scaling Group, IAM role, Secrets Manager) and a monitoring-and-scaling loop — CloudWatch collects metrics from the ALB and EC2, a CloudWatch alarm fires on a threshold, and the alarm both notifies an SNS topic that emails the on-call and triggers the Auto Scaling Group to scale out or in. A bottom callout distinguishes the target-group health check (should I send traffic here) from the ASG health check (should I keep this instance).">
+      <defs>
+        <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <polygon points="0,0 10,5 0,10" fill="#6b7a8d"/>
+        </marker>
+      </defs>
+
+      <!-- Title -->
+      <text class="dg-title mid" x="700" y="46">The Whole Picture: How Every Service Fits Together</text>
+      <text class="dg-sub mid" x="700" y="74">Three security groups, an ALB, and the auto-scaling &amp; monitoring loop</text>
+
+      <!-- top section labels -->
+      <text class="lab" x="42" y="84">OUTSIDE AWS</text>
+      <text class="lab" x="300" y="84">AWS — NOT INSIDE THE VPC</text>
+
+      <!-- Browser -->
+      <rect class="navy" x="42" y="116" width="185" height="74" rx="8"/>
+      <text class="tt mid wht" x="134" y="150" style="font-size:17px">Browser</text>
+      <text class="bd mid wht2" x="134" y="171">speaks HTTPS</text>
+
+      <!-- Route 53 -->
+      <rect class="card s-teal box15" x="300" y="104" width="228" height="104" rx="8"/>
+      <text class="tt14 mid f-teal" x="414" y="128">Route 53</text>
+      <text class="bd mid mut" x="414" y="148">investmentapp.example.com</text>
+      <text class="bd mid mut" x="414" y="166">alias record → the edge</text>
+      <text class="bd11 mid mut it" x="414" y="186">the apex can't be a CNAME —</text>
+      <text class="bd11 mid mut it" x="414" y="200">an alias answers with A records</text>
+
+      <!-- CloudFront: the edge, in front of everything -->
+      <rect class="card s-edge box15" x="566" y="104" width="340" height="104" rx="8"/>
+      <text class="tt14 mid f-edge" x="736" y="126">CloudFront — the edge</text>
+      <text class="bd mid ink" x="736" y="148">① the browser's TLS ends HERE — cert in us-east-1</text>
+      <text class="bd mid mut" x="736" y="167">HIT = served at the edge; the ALB never sees it</text>
+      <text class="bd mid mut" x="736" y="185">MISS → a NEW TLS connection to the origin</text>
+      <text class="bd mid mut" x="736" y="202">cached for the TTL · invalidate to drop it early</text>
+
+      <!-- Shield + WAF: attached to the distribution, in front of the cache -->
+      <rect class="sg" x="580" y="82" width="312" height="26" rx="13"/>
+      <text class="tt13 mid" x="736" y="100" style="fill:#d43a3a">Shield + WAF — filter before the cache</text>
+
+      <!-- ACM -->
+      <rect class="card s-orange box15" x="940" y="112" width="228" height="96" rx="8"/>
+      <text class="tt14 mid f-orange" x="1054" y="134">ACM Certificate</text>
+      <text class="bd mid mut" x="1054" y="153">free, DNS-validated</text>
+      <text class="bd mid mut" x="1054" y="171">in the ALB's own region</text>
+      <text class="bd11 mid mut it" x="1054" y="192">CloudFront needs a 2nd — us-east-1</text>
+
+      <!-- top arrows -->
+      <line class="arw" x1="227" y1="152" x2="296" y2="152" marker-end="url(#ah)"/>
+      <line class="arw" x1="530" y1="155" x2="562" y2="155" marker-end="url(#ah)"/>
+      <line class="arw" x1="700" y1="210" x2="676" y2="260" marker-end="url(#ah)"/>
+      <text class="bd11 f-edge" x="706" y="240">on MISS → origin</text>
+      <line class="arw-d" x1="1000" y1="208" x2="902" y2="424" marker-end="url(#ah)"/>
+      <text class="bd11 mut" x="962" y="330">ACM cert →</text>
+      <text class="bd11 mut" x="962" y="345">the listener</text>
+
+      <!-- VPC boundary -->
+      <rect class="vpc" x="60" y="212" width="1218" height="1198" rx="16"/>
+      <text class="tt14 ink" x="92" y="250">VPC — 10.5.0.0/16 (everything below this line is INSIDE it)</text>
+
+      <!-- Internet Gateway -->
+      <rect class="card s-purple box15" x="556" y="264" width="230" height="56" rx="8"/>
+      <text class="tt14 mid f-purple" x="671" y="288">Internet Gateway</text>
+      <text class="bd mid mut" x="671" y="307">the VPC's own front door</text>
+
+      <!-- IGW -> ALB (the ALB SG is attached to the ALB, drawn on it below) -->
+      <line class="arw" x1="671" y1="320" x2="671" y2="408" marker-end="url(#ah)"/>
+
+      <!-- ALB container: the Listener + Rules live INSIDE it -->
+      <rect class="card s-blue box2" x="100" y="428" width="830" height="300" rx="10"/>
+      <text class="tt f-blue" x="118" y="456" style="font-size:16px">Application Load Balancer</text>
+      <text class="bd mut" x="118" y="476">lives IN the public subnets · one node per AZ · everything in this box IS the ALB</text>
+
+      <!-- ALB SG: a firewall attached to the ALB's front door -->
+      <rect class="sg" x="325" y="412" width="384" height="30" rx="15"/>
+      <circle class="num" cx="346" cy="427" r="11"/><text class="cnum" x="346" y="431">1</text>
+      <text class="tt13 f-red" x="364" y="431">ALB SG — allow 80, 443 ← 0.0.0.0/0</text>
+
+      <!-- Listener: nested inside the ALB -->
+      <rect class="box15 s-blue" x="126" y="498" width="778" height="214" rx="8" style="fill:#eef4fb"/>
+      <circle cx="150" cy="498" r="14" class="f-blue"/><text class="cnum" x="150" y="503" style="font-size:13px">1</text>
+      <text class="tt f-blue" x="176" y="526">Listener</text>
+      <text class="mono mut" x="288" y="526" style="font-size:12px">HTTPS : 443</text>
+      <text class="bd mut" x="176" y="546">watches the port → <tspan class="ink">② ends the SECOND TLS connection</tspan> (its own cert, its own region) → runs its rules</text>
+
+      <!-- Rules: nested inside the Listener -->
+      <rect class="card s-green box15" x="150" y="560" width="730" height="138" rx="8"/>
+      <circle cx="174" cy="560" r="13" class="f-green"/><text class="cnum" x="174" y="565" style="font-size:12px">2</text>
+      <text class="tt13 f-green" x="196" y="584">Rules — checked in priority order, first match wins</text>
+      <text class="bd ink" x="196" y="608">IF    host · path · header · method · query · source-IP</text>
+      <text class="bd ink" x="196" y="630">THEN    forward → target group · redirect · fixed-response · auth</text>
+      <text class="bd mut" x="196" y="651">+ a default rule catches anything unmatched</text>
+      <text class="bd it f-orange" x="196" y="678">the winning "forward" sends the request OUT to the target group →</text>
+
+      <!-- Target Group: a SEPARATE resource the ALB forwards to -->
+      <rect class="card s-orange box2" x="968" y="512" width="292" height="210" rx="8"/>
+      <circle cx="968" cy="512" r="14" class="f-orange"/><text class="cnum" x="968" y="517" style="font-size:13px">3</text>
+      <text class="tt f-orange" x="990" y="540">Target Group</text>
+      <text class="bd it mut" x="990" y="560">a separate resource —</text>
+      <text class="bd it mut" x="990" y="576">the ALB forwards here</text>
+      <text class="bd ink" x="990" y="600">• pool of EC2 targets · HTTP:80</text>
+      <text class="bd ink" x="990" y="622">• health check GET /health /30s</text>
+      <text class="bd mut" x="1002" y="640">healthy ×3 / unhealthy ×2 · 200</text>
+      <text class="bd ink" x="990" y="664">• only healthy EC2s get traffic</text>
+      <text class="bd ink" x="990" y="688">• ASG registers members here</text>
+
+      <!-- forward: ALB rule -> target group -->
+      <line class="arw" x1="884" y1="617" x2="966" y2="617" marker-end="url(#ah)"/>
+      <text class="bd11 f-orange mid" x="925" y="610">forward</text>
+
+      <!-- Public subnets (the App SG is attached to each instance, drawn below) -->
+
+      <rect class="sub-pub" x="100" y="858" width="566" height="236" rx="10"/>
+      <text class="tt14 mid f-blue" x="383" y="886">PUBLIC SUBNET — AZ a</text>
+      <text class="bd11 mid mut" x="383" y="905">route: 0.0.0.0/0 → Internet Gateway</text>
+      <text class="bd11 mid mut it" x="383" y="922">(this ALB node lives here too)</text>
+      <rect class="card s-green box15" x="140" y="946" width="486" height="122" rx="8"/>
+      <text class="tt14 mid f-green" x="383" y="988">aws_instance.app["a"]</text>
+      <text class="bd mid mut" x="383" y="1012">built by the Auto Scaling group</text>
+      <text class="bd mid mut" x="383" y="1031">from the launch template</text>
+
+      <rect class="sub-pub" x="700" y="858" width="566" height="236" rx="10"/>
+      <text class="tt14 mid f-blue" x="983" y="886">PUBLIC SUBNET — AZ b</text>
+      <text class="bd11 mid mut" x="983" y="905">route: 0.0.0.0/0 → Internet Gateway</text>
+      <text class="bd11 mid mut it" x="983" y="922">(this ALB node lives here too)</text>
+      <rect class="card s-green box15" x="740" y="946" width="486" height="122" rx="8"/>
+      <text class="tt14 mid f-green" x="983" y="988">aws_instance.app["b"]</text>
+      <text class="bd mid mut" x="983" y="1012">built by the Auto Scaling group</text>
+      <text class="bd mid mut" x="983" y="1031">from the launch template</text>
+
+      <!-- Private subnets (the RDS SG is attached to each database, drawn below) -->
+      <text class="bd11 mid mut" x="680" y="1184">app tier connects on 5432 to the RDS endpoint (current primary) · one DB subnet group spans both private subnets</text>
+
+      <rect class="sub-priv" x="100" y="1200" width="566" height="196" rx="10"/>
+      <text class="tt14 mid f-red" x="383" y="1228">PRIVATE SUBNET — AZ a</text>
+      <text class="bd11 mid f-red" x="383" y="1247">no route out — local traffic only</text>
+      <rect class="navy" x="140" y="1276" width="486" height="102" rx="8"/>
+      <text class="tt14 mid wht" x="383" y="1318">RDS (Postgres)</text>
+      <text class="bd mid wht2" x="383" y="1340">primary</text>
+
+      <rect class="sub-priv" x="700" y="1200" width="566" height="196" rx="10"/>
+      <text class="tt14 mid f-red" x="983" y="1228">PRIVATE SUBNET — AZ b</text>
+      <text class="bd11 mid f-red" x="983" y="1247">no route out — local traffic only</text>
+      <rect class="navy" x="740" y="1276" width="486" height="102" rx="8"/>
+      <text class="tt14 mid wht" x="983" y="1318">RDS (Postgres)</text>
+      <text class="bd mid wht2" x="983" y="1340">standby / replica</text>
+
+      <!-- ===== traffic flow + security groups attached to each resource ===== -->
+      <!-- target group -> the EC2 targets (each instance guarded by its App SG) -->
+      <line class="arw" x1="1040" y1="726" x2="404" y2="924" marker-end="url(#ah)"/>
+      <line class="arw" x1="1114" y1="726" x2="986" y2="924" marker-end="url(#ah)"/>
+      <text class="bd11 mut" x="140" y="800">Target group → the healthy EC2 targets; each instance's App SG allows :80 only from the ALB SG.</text>
+
+      <!-- App SG: attached to each EC2 instance -->
+      <rect class="sg" x="258" y="930" width="250" height="30" rx="15"/>
+      <circle class="num" cx="279" cy="945" r="11"/><text class="cnum" x="279" y="949">2</text>
+      <text class="tt13 f-red" x="297" y="949">App SG — allow 80 ← ALB SG</text>
+      <rect class="sg" x="858" y="930" width="250" height="30" rx="15"/>
+      <circle class="num" cx="879" cy="945" r="11"/><text class="cnum" x="879" y="949">2</text>
+      <text class="tt13 f-red" x="897" y="949">App SG — allow 80 ← ALB SG</text>
+
+      <!-- app -> db on 5432 (each database guarded by its RDS SG) -->
+      <line class="arw" x1="383" y1="1070" x2="383" y2="1196" marker-end="url(#ah)"/>
+      <line class="arw" x1="983" y1="1070" x2="983" y2="1196" marker-end="url(#ah)"/>
+      <text class="bd11 mut" x="393" y="1140">:5432</text>
+      <text class="bd11 mut" x="993" y="1140">:5432</text>
+
+      <!-- RDS SG: attached to each database -->
+      <rect class="sg" x="251" y="1260" width="264" height="30" rx="15"/>
+      <circle class="num" cx="272" cy="1275" r="11"/><text class="cnum" x="272" y="1279">3</text>
+      <text class="tt13 f-red" x="290" y="1279">RDS SG — allow 5432 ← App SG</text>
+      <rect class="sg" x="851" y="1260" width="264" height="30" rx="15"/>
+      <circle class="num" cx="872" cy="1275" r="11"/><text class="cnum" x="872" y="1279">3</text>
+      <text class="tt13 f-red" x="890" y="1279">RDS SG — allow 5432 ← App SG</text>
+
+      <!-- ================= RIGHT SIDE ================= -->
+      <!-- metrics into CloudWatch (top rail) -->
+      <polyline class="arw" points="930,455 1690,455 1690,560" marker-end="url(#ah)"/>
+      <text class="bd11 mut" x="1300" y="447">metrics: CPU · requests · latency · healthy-host count</text>
+
+      <!-- PROVISIONING column -->
+      <text class="lab" x="1300" y="548" style="font-size:10.5px">PROVISIONING (account-level)</text>
+      <rect class="card s-blue box15" x="1300" y="560" width="205" height="58" rx="8"/>
+      <text class="tt13 mid f-blue" x="1402" y="584">Launch Template</text>
+      <text class="bd11 mid mut" x="1402" y="603">HOW: AMI, size, key, SG</text>
+
+      <!-- ASG (expanded, split into SCALE vs REPLACE) -->
+      <rect class="card s-green box2" x="1300" y="648" width="205" height="196" rx="8"/>
+      <text class="tt13 f-green" x="1314" y="672">Auto Scaling Group</text>
+      <text class="bd11 ink" x="1314" y="692">min 2 · desired 2 · max 6</text>
+      <text class="bd11 ink" x="1314" y="710">spread across both AZs</text>
+      <text class="f-green" x="1314" y="733" style="font:700 10.5px var(--font)">SCALE ▸ change the count</text>
+      <text class="mut" x="1314" y="749" style="font-size:10.5px">done by a scaling policy,</text>
+      <text class="mut" x="1314" y="763" style="font-size:10.5px">fired by a CloudWatch alarm</text>
+      <text class="f-green" x="1314" y="786" style="font:700 10.5px var(--font)">REPLACE ▸ keep the count</text>
+      <text class="mut" x="1314" y="802" style="font-size:10.5px">the ASG health check kills</text>
+      <text class="mut" x="1314" y="816" style="font-size:10.5px">&amp; relaunches a bad EC2 —</text>
+      <text class="mut" x="1314" y="830" style="font-size:10.5px">self-healing, NOT the policy</text>
+
+      <!-- Scaling Policy (the thing that changes desired count) -->
+      <rect class="card s-slate box15" x="1300" y="866" width="205" height="70" rx="8"/>
+      <text class="tt125 mid f-slate" x="1402" y="890">Scaling Policy</text>
+      <text class="mut mid" x="1402" y="908" style="font-size:10.5px">target-tracking or step</text>
+      <text class="ink mid" x="1402" y="924" style="font-size:10.5px">→ sets the ASG's desired count</text>
+
+      <!-- IAM -->
+      <rect class="card s-purple box15" x="1300" y="960" width="205" height="86" rx="8"/>
+      <text class="tt125 mid f-purple" x="1402" y="984">IAM Role + Instance Profile</text>
+      <text class="bd11 mid mut" x="1402" y="1004">identity for the EC2 —</text>
+      <text class="bd11 mid mut" x="1402" y="1021">no password, no keys stored</text>
+
+      <!-- Secrets Manager -->
+      <rect class="card s-orange box15" x="1300" y="1072" width="205" height="78" rx="8"/>
+      <text class="tt13 mid f-orange" x="1402" y="1096">Secrets Manager</text>
+      <text class="bd11 mid mut" x="1402" y="1116">DB password + API keys</text>
+      <text class="bd11 mid mut" x="1402" y="1133">fetched at boot, via user_data</text>
+
+      <!-- provisioning arrows -->
+      <line class="arw" x1="1402" y1="618" x2="1402" y2="648" marker-end="url(#ah)"/>
+      <line class="arw" x1="1402" y1="866" x2="1402" y2="846" marker-end="url(#ah)"/>
+      <text class="bd11 f-slate mid" x="1402" y="862">sets desired count</text>
+      <line class="arw-d" x1="1300" y1="790" x2="1268" y2="1000" marker-end="url(#ah)"/>
+      <text class="bd11 mut" x="1200" y="892">launch /</text>
+      <text class="bd11 mut" x="1200" y="908">terminate</text>
+      <line class="arw-d" x1="1300" y1="1000" x2="1268" y2="1020" marker-end="url(#ah)"/>
+      <line class="arw" x1="1402" y1="1046" x2="1402" y2="1072" marker-end="url(#ah)"/>
+
+      <!-- MONITORING column -->
+      <text class="lab" x="1585" y="548" style="font-size:10.5px">MONITORING &amp; SCALING LOOP</text>
+
+      <!-- CloudWatch -->
+      <rect class="card s-cw box15" x="1585" y="560" width="210" height="92" rx="8"/>
+      <text class="tt13 mid f-cw" x="1690" y="584">CloudWatch</text>
+      <text class="bd11 mid ink" x="1690" y="606">metrics from EC2 · ALB · RDS</text>
+      <text class="bd11 mid mut" x="1690" y="624">CPU, requests, latency,</text>
+      <text class="bd11 mid mut" x="1690" y="641">healthy-host count, logs</text>
+
+      <!-- CloudWatch Alarm -->
+      <rect class="card s-alarm box2" x="1585" y="680" width="210" height="110" rx="8"/>
+      <text class="tt13 mid f-alarm" x="1690" y="704">CloudWatch Alarm</text>
+      <text class="bd11 mid mut" x="1690" y="724">watches one metric vs a</text>
+      <text class="bd11 mid mut" x="1690" y="741">threshold for N periods</text>
+      <text class="bd11 mid ink" x="1690" y="760">state:  OK  /  ALARM</text>
+      <text class="bd11 mid mut" x="1690" y="779">e.g. CPU &gt; 70% for 3 min</text>
+
+      <!-- SNS -->
+      <rect class="card s-sns box15" x="1585" y="818" width="210" height="92" rx="8"/>
+      <text class="tt13 mid f-sns" x="1690" y="842">SNS Topic</text>
+      <text class="bd11 mid mut" x="1690" y="862">fan-out notifications</text>
+      <text class="bd11 mid mut" x="1690" y="879">subscribers: email, Slack,</text>
+      <text class="bd11 mid mut" x="1690" y="896">Lambda, SQS …</text>
+
+      <!-- Email -->
+      <rect class="navy" x="1585" y="938" width="210" height="56" rx="8"/>
+      <text class="tt13 mid wht" x="1690" y="962">You / on-call</text>
+      <text class="bd11 mid wht2" x="1690" y="980">email + phone alert</text>
+
+      <!-- monitoring arrows -->
+      <line class="arw" x1="1690" y1="652" x2="1690" y2="680" marker-end="url(#ah)"/>
+      <text class="bd11 mut" x="1700" y="670">evaluate</text>
+      <line class="arw" x1="1690" y1="790" x2="1690" y2="818" marker-end="url(#ah)"/>
+      <text class="bd11 mut" x="1700" y="808">= ALARM → notify</text>
+      <line class="arw" x1="1690" y1="910" x2="1690" y2="938" marker-end="url(#ah)"/>
+      <!-- Alarm -> Scaling Policy (the scale path) -->
+      <polyline class="arw" points="1585,740 1543,740 1543,901 1508,901" marker-end="url(#ah)"/>
+      <text class="bd11 f-alarm mid" x="1544" y="734">on ALARM</text>
+
+      <!-- ================= LEGENDS ================= -->
+      <!-- SG legend -->
+      <rect class="leg" x="100" y="1446" width="1695" height="176" rx="10"/>
+      <text class="tt mid f-red" x="947" y="1476" style="font-size:15px">Three security groups total — each one only trusts the group immediately before it</text>
+      <circle class="num" cx="126" cy="1508" r="11"/><text class="cnum" x="126" y="1512">1</text>
+      <text class="tt13 ink" x="146" y="1506">ALB's security group:</text>
+      <text class="mono ink" x="146" y="1526">allow 80, 443 &lt;- 0.0.0.0/0   (the whole internet — the only genuinely public one)</text>
+      <circle class="num" cx="126" cy="1552" r="11"/><text class="cnum" x="126" y="1556">2</text>
+      <text class="tt13 ink" x="146" y="1550">App EC2's security group:</text>
+      <text class="mono ink" x="146" y="1570">allow 80 &lt;- ALB's security group only   (never a raw IP, never "anywhere")</text>
+      <circle class="num" cx="126" cy="1596" r="11"/><text class="cnum" x="126" y="1600">3</text>
+      <text class="tt13 ink" x="146" y="1594">RDS's security group:</text>
+      <text class="mono ink" x="146" y="1614">allow 5432 &lt;- App EC2's security group only   (not even the ALB can reach it)</text>
+
+      <!-- Health-check legend -->
+      <rect class="leg-b" x="100" y="1648" width="1695" height="196" rx="10"/>
+      <text class="tt mid f-blue" x="947" y="1678" style="font-size:15px">The two "health checks" — they answer different questions</text>
+
+      <rect class="f-orange" x="122" y="1702" width="15" height="15" rx="3"/>
+      <text class="tt13 f-orange" x="148" y="1715">Target Group health check</text>
+      <text class="bd ink" x="148" y="1736">"Should I SEND traffic here?"  An unhealthy target is pulled from rotation — the ALB just stops routing to it. It keeps running.</text>
+
+      <rect class="f-green" x="122" y="1760" width="15" height="15" rx="3"/>
+      <text class="tt13 f-green" x="148" y="1773">ASG health check</text>
+      <text class="bd ink" x="148" y="1794">"Should I KEEP this instance?"  An unhealthy instance is terminated and replaced. With health_check_type = ELB it trusts the target-group verdict,</text>
+      <text class="bd ink" x="148" y="1812">so a box that fails the ALB check doesn't just get ignored — it gets rebuilt.</text>
+      <text class="bd it mut" x="148" y="1833">In order: a sick box first stops getting traffic (Target Group), then gets replaced (ASG).</text>
+
+      <!-- ===== Route tables & NAT ===== -->
+      <rect class="card" x="100" y="1870" width="1695" height="250" rx="10" style="stroke:#0f766e;stroke-width:2"/>
+      <text class="tt mid f-nat" x="947" y="1900" style="font-size:15px">What makes a subnet public or private — and how a private box reaches out</text>
+
+      <rect class="card" x="126" y="1922" width="470" height="56" rx="8" style="stroke:#2563b0;stroke-width:1.4"/>
+      <text class="tt12 f-blue" x="142" y="1943">PUBLIC subnet — its route table</text>
+      <text class="mono ink" x="142" y="1965">10.0.0.0/16 → local   ·   0.0.0.0/0 → igw</text>
+
+      <rect class="card" x="126" y="1990" width="470" height="56" rx="8" style="stroke:#e03e3e;stroke-width:1.4"/>
+      <text class="tt12 f-red" x="142" y="2011">PRIVATE subnet — fully isolated</text>
+      <text class="mono ink" x="142" y="2033">10.0.0.0/16 → local   ·   (no 0.0.0.0/0 line at all)</text>
+
+      <rect class="card" x="126" y="2058" width="470" height="56" rx="8" style="stroke:#0f766e;stroke-width:1.4"/>
+      <text class="tt12 f-nat" x="142" y="2079">PRIVATE subnet — needs to fetch updates</text>
+      <text class="mono ink" x="142" y="2101">10.0.0.0/16 → local   ·   0.0.0.0/0 → nat</text>
+
+      <rect class="card s-red box15" x="648" y="1950" width="170" height="54" rx="8"/>
+      <text class="tt12 mid f-red" x="733" y="1972">private EC2</text>
+      <text class="bd11 mid mut" x="733" y="1990">no public IP</text>
+      <line class="arw" x1="822" y1="1977" x2="864" y2="1977" marker-end="url(#ah)"/>
+
+      <rect class="card s-nat box2" x="868" y="1950" width="232" height="54" rx="8"/>
+      <text class="tt12 mid f-nat" x="984" y="1972">NAT Gateway</text>
+      <text class="bd11 mid mut" x="984" y="1990">sits in a PUBLIC subnet</text>
+      <line class="arw" x1="1104" y1="1977" x2="1146" y2="1977" marker-end="url(#ah)"/>
+
+      <rect class="card s-purple box15" x="1150" y="1950" width="200" height="54" rx="8"/>
+      <text class="tt12 mid f-purple" x="1250" y="1980">Internet Gateway</text>
+      <line class="arw" x1="1354" y1="1977" x2="1396" y2="1977" marker-end="url(#ah)"/>
+
+      <rect class="navy" x="1400" y="1950" width="150" height="54" rx="8"/>
+      <text class="tt12 mid wht" x="1475" y="1980">the internet</text>
+
+      <text class="bd11 mid mut it" x="1100" y="2028">outbound only — replies come back, but nothing outside can start a connection inward</text>
+      <text class="bd bad" x="648" y="2064">The trap: a private instance whose route table points 0.0.0.0/0 at the internet gateway still cannot download anything.</text>
+      <text class="bd mut" x="648" y="2088">It has no public IP, so replies have no address to come back to. The IGW does not translate addresses — the NAT Gateway does.</text>
+      <text class="bd11 mut it" x="648" y="2108">(Your RDS is managed, so AWS patches it. This matters the moment you put an app server in a private subnet.)</text>
+
+      <!-- ===== the answer on the way back ===== -->
+      <rect class="leg-b" x="100" y="2146" width="1695" height="250" rx="10"/>
+      <text class="tt mid f-blue" x="947" y="2176" style="font-size:15px">The answer on the way back — the first digit says which side to look at</text>
+
+      <rect class="card" x="126" y="2196" width="790" height="124" rx="8" style="stroke:#c0631f;stroke-width:1.4"/>
+      <text class="tt13 f-orange" x="144" y="2220">4xx — the REQUEST was wrong · look at the caller</text>
+      <text class="mono ink" x="144" y="2248" style="font-size:11.5px">404 wrong path · 401 not signed in · 403 signed in but not allowed · 429 too many</text>
+      <text class="bd mut" x="144" y="2274">Something looked at the request and said no. The server itself is</text>
+      <text class="bd mut" x="144" y="2294">healthy — this is not an outage, and no alarm should fire.</text>
+
+      <rect class="card" x="946" y="2196" width="836" height="124" rx="8" style="stroke:#c1445a;stroke-width:1.6"/>
+      <text class="tt13" x="964" y="2220" style="fill:#c1445a">5xx — the SERVER broke · look at your side</text>
+      <text class="bd ink" x="964" y="2244"><tspan class="mono">500</tspan>  your app threw an exception — it did at least answer</text>
+      <text class="bd ink" x="964" y="2264"><tspan class="mono">502</tspan>  something in front reached your app and got a broken reply (nginx → dead app)</text>
+      <text class="bd ink" x="964" y="2284"><tspan class="mono">503</tspan>  the load balancer has no healthy targets at all — nothing to forward to</text>
+      <text class="bd ink" x="964" y="2304"><tspan class="mono">504</tspan>  the target accepted the request but took too long to answer</text>
+
+      <text class="bd bad" x="126" y="2348">Interview catch: an alarm that counts 5xx returned BY YOUR APP will not fire when every app process is dead — a dead app returns nothing at all.</text>
+      <text class="bd ink" x="126" y="2372">What catches that instead: the load balancer's own 5XX metric, and HealthyHostCount dropping to zero.</text>
+
+      <!-- ===== AT THE EDGE ===== -->
+      <rect class="card" x="100" y="2422" width="1695" height="460" rx="10" style="stroke:#b45309;stroke-width:2"/>
+      <text class="tt mid f-edge" x="947" y="2452" style="font-size:15px">At the edge — what CloudFront does before anything reaches your VPC</text>
+
+      <!-- row 1: MISS -->
+      <text class="mono mut" x="126" y="2499" style="font-size:11px">1st request</text>
+      <rect class="navy" x="240" y="2470" width="140" height="48" rx="7"/>
+      <text class="tt12 mid wht" x="310" y="2499">a viewer</text>
+      <line class="arw" x1="384" y1="2494" x2="414" y2="2494" marker-end="url(#ah)"/>
+      <rect class="card s-edge box2" x="418" y="2470" width="234" height="48" rx="8"/>
+      <text class="tt12 mid f-edge" x="535" y="2489">edge location</text>
+      <text class="bd11 mid mut" x="535" y="2506">MISS — no copy yet</text>
+      <line class="arw" x1="656" y1="2494" x2="686" y2="2494" marker-end="url(#ah)"/>
+      <text class="bd11 mid mut" x="671" y="2483">fetch</text>
+      <rect class="card s-blue box2" x="690" y="2470" width="234" height="48" rx="8"/>
+      <text class="tt12 mid f-blue" x="807" y="2499">origin = your ALB</text>
+      <text class="bd ink" x="944" y="2488">the answer goes back to the viewer, and the edge keeps</text>
+      <text class="bd mut" x="944" y="2506">a copy — for as long as its TTL allows</text>
+
+      <!-- row 2: HIT -->
+      <text class="mono mut" x="126" y="2563" style="font-size:11px">later requests</text>
+      <rect class="navy" x="240" y="2534" width="140" height="48" rx="7"/>
+      <text class="tt12 mid wht" x="310" y="2563">another viewer</text>
+      <line class="arw" x1="384" y1="2558" x2="414" y2="2558" marker-end="url(#ah)"/>
+      <rect class="card box2" x="418" y="2534" width="234" height="48" rx="8" style="stroke:#2e8b57"/>
+      <text class="tt12 mid" x="535" y="2553" style="fill:#1e7a4a">edge location</text>
+      <text class="bd11 mid mut" x="535" y="2570">HIT — served right here</text>
+      <text class="bd ink" x="690" y="2552">your ALB, its target group and your EC2s never see this</text>
+      <text class="bd mut" x="690" y="2570">request at all — it never enters the VPC</text>
+
+      <!-- detail cards -->
+      <rect class="card s-edge box15" x="126" y="2604" width="530" height="152" rx="9"/>
+      <text class="tt13 f-edge" x="142" y="2628">How long may it serve that copy?</text>
+      <text class="bd ink" x="142" y="2652">• Cache-Control / max-age from your origin wins</text>
+      <text class="bd ink" x="142" y="2672">• otherwise the distribution's default TTL</text>
+      <text class="bd ink" x="142" y="2692">• min-TTL and max-TTL clamp whatever it gets</text>
+      <text class="bd mut" x="142" y="2718">Ask: what breaks if this is 60 seconds stale?</text>
+      <text class="bd mut" x="142" y="2736">A logo — a year. Seats left on a flight — seconds, or never.</text>
+
+      <rect class="card s-edge box15" x="680" y="2604" width="530" height="152" rx="9"/>
+      <text class="tt13 f-edge" x="696" y="2628">What counts as "the same" request?</text>
+      <text class="bd ink" x="696" y="2652">• the cache key — by default the path + query string</text>
+      <text class="bd ink" x="696" y="2672">• you choose which headers and cookies join the key</text>
+      <text class="bd ink" x="696" y="2692">• one key = one stored answer for everybody</text>
+      <text class="bd mut" x="696" y="2718">Get the key wrong and two different answers end up</text>
+      <text class="bd mut" x="696" y="2736">sharing one slot. That is how caches leak.</text>
+
+      <rect class="card s-edge box15" x="1234" y="2604" width="548" height="152" rx="9"/>
+      <text class="tt13 f-edge" x="1250" y="2628">Replaced the file, still seeing the old one?</text>
+      <text class="bd mut" x="1250" y="2652">That is the TTL doing its job — the edge trusts its copy</text>
+      <text class="bd mut" x="1250" y="2670">until it expires. It never asked your origin again.</text>
+      <text class="bd ink" x="1250" y="2696">• invalidation — throw the copy away now</text>
+      <text class="bd ink" x="1250" y="2716">• or version the name (app.v2.js) — a brand new key,</text>
+      <text class="bd mut" x="1262" y="2734">so there is no old copy to expire in the first place</text>
+
+      <!-- never cache -->
+      <rect class="sg" x="126" y="2772" width="1656" height="54" rx="8"/>
+      <text class="bd" x="142" y="2792" style="fill:#c1445a;font-weight:600">Never cache anything personal at the edge: pages rendered for a signed-in user, anything behind a session cookie, account or order details.</text>
+      <text class="bd ink" x="142" y="2812">A cache that leaves the session cookie out of its key will happily hand one user's page to the next person who asks for that same URL.</text>
+
+      <text class="bd ink" x="126" y="2850">A CDN does not replace the load balancer: every miss, every POST and everything dynamic still goes to the origin — which still needs healthy targets to spread across.</text>
+      <text class="bd mut" x="126" y="2870">The same trap exists one layer down: two app servers each holding their own in-memory copy will disagree after a write. Share it (Redis), or don't cache mutable data per instance.</text>
+
+      <!-- ===== SHIELD + WAF ===== -->
+      <rect class="card" x="100" y="2902" width="1695" height="478" rx="10" style="stroke:#e03e3e;stroke-width:2"/>
+      <text class="tt mid f-red" x="947" y="2932" style="font-size:15px">Shield and WAF — what filters a request before it is ever served</text>
+
+      <!-- order strip -->
+      <rect class="navy" x="126" y="2958" width="170" height="52" rx="7"/>
+      <text class="tt12 mid wht" x="211" y="2978">a request</text>
+      <text class="bd11 mid wht2" x="211" y="2996">from anywhere</text>
+      <line class="arw" x1="300" y1="2984" x2="326" y2="2984" marker-end="url(#ah)"/>
+
+      <rect class="card s-red box2" x="330" y="2958" width="250" height="52" rx="8"/>
+      <text class="tt12 mid f-red" x="455" y="2978">AWS Shield</text>
+      <text class="bd11 mid mut" x="455" y="2996">L3 / L4 — sheer volume</text>
+      <line class="arw" x1="584" y1="2984" x2="610" y2="2984" marker-end="url(#ah)"/>
+
+      <rect class="card s-red box2" x="614" y="2958" width="280" height="52" rx="8"/>
+      <text class="tt12 mid f-red" x="754" y="2978">AWS WAF — web ACL</text>
+      <text class="bd11 mid mut" x="754" y="2996">L7 — what the request says</text>
+      <line class="arw" x1="898" y1="2984" x2="924" y2="2984" marker-end="url(#ah)"/>
+
+      <rect class="card s-edge box2" x="928" y="2958" width="250" height="52" rx="8"/>
+      <text class="tt12 mid f-edge" x="1053" y="2978">CloudFront cache</text>
+      <text class="bd11 mid mut" x="1053" y="2996">HIT or MISS</text>
+      <line class="arw" x1="1182" y1="2984" x2="1208" y2="2984" marker-end="url(#ah)"/>
+
+      <rect class="card s-blue box2" x="1212" y="2958" width="250" height="52" rx="8"/>
+      <text class="tt12 mid f-blue" x="1337" y="2988">origin — your ALB</text>
+
+      <text class="bd ink" x="1490" y="2976">blocked here, it never reaches your</text>
+      <text class="bd mut" x="1490" y="2994">region, your cache, or your bill</text>
+
+      <!-- Shield card -->
+      <rect class="card s-red box15" x="126" y="3038" width="810" height="152" rx="9"/>
+      <text class="tt13 f-red" x="142" y="3062">AWS Shield — the "too much traffic" problem</text>
+      <text class="bd ink" x="142" y="3086">Standard: free, automatic, already on for every AWS account.</text>
+      <text class="bd mut" x="142" y="3104">Absorbs ordinary L3/L4 floods (SYN, UDP reflection). Nothing to configure, nothing to write.</text>
+      <text class="bd ink" x="142" y="3130">Advanced: paid. Adds L7 DDoS protection, a 24/7 response team, attack diagnostics —</text>
+      <text class="bd mut" x="142" y="3148">and cost protection, which credits back the scaling bill an attack caused.</text>
+      <text class="bd mut" x="142" y="3174">Covers CloudFront, Route 53, ALB / NLB, Global Accelerator and Elastic IPs.</text>
+
+      <!-- WAF card -->
+      <rect class="card s-red box15" x="972" y="3038" width="810" height="152" rx="9"/>
+      <text class="tt13 f-red" x="988" y="3062">AWS WAF — the "bad traffic" problem</text>
+      <text class="bd ink" x="988" y="3086">Reads the actual HTTP request: path, headers, cookies, query string, body.</text>
+      <text class="bd mut" x="988" y="3104">A normal-looking request can still be an attack — that is what WAF is for.</text>
+      <text class="bd ink" x="988" y="3130">Attaches to a CloudFront distribution, an ALB, or API Gateway.</text>
+      <text class="bd mut" x="988" y="3148">On CloudFront it runs at the edge; on the ALB it only runs once traffic reached your region.</text>
+      <text class="bd mut" x="988" y="3174">For CloudFront the web ACL is us-east-1 / CLOUDFRONT scope — the same quirk as the certificate.</text>
+
+      <!-- rules card -->
+      <rect class="card s-red box15" x="126" y="3212" width="1656" height="118" rx="9"/>
+      <text class="tt13 f-red" x="142" y="3236">A web ACL is a list of rules in priority order with a default action — structurally the same idea as an ALB listener's rules</text>
+      <text class="bd ink" x="142" y="3262">Rules: AWS managed groups (common exploits, SQL injection, known bad inputs, bot control) · your own IP sets · geo match · string and regex match · rate-based</text>
+      <text class="bd ink" x="142" y="3284">A rate-based rule blocks an IP that crosses N requests in five minutes — the usual answer to scraping and credential stuffing.</text>
+      <text class="bd mut" x="142" y="3308">Actions: Allow · Block · CAPTCHA / Challenge · <tspan class="ink">Count</tspan>. Ship a new rule in Count first, watch what it <tspan style="font-style:italic">would</tspan> have blocked, then switch it on.</text>
+
+      <text class="bd ink" x="126" y="3358">The split worth memorising: <tspan style="font-weight:600">Shield answers "too much traffic", WAF answers "bad traffic".</tspan> Shield needs no rules from you; WAF is nothing but rules.</text>
+    </svg>
+  </figure>
+</div>
+
+</body></html>

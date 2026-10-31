@@ -1,0 +1,1052 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Containers Command Sheet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a field guide — sticky filter bar, then sections in workflow order (laptop → registry → cluster), each row = command · meaning · class */
+:root{
+  --bg:#f3f5f8; --surface:#ffffff; --ink:#152033; --muted:#5b6679; --line:#dde3ec;
+  --code-bg:#eaf0f7; --accent:#2752c4; --accent-soft:#e3ebfb;
+  --docker:#0f7a8a; --docker-soft:#dff2f4; --ecr:#a35a10; --ecr-soft:#fbeedd; --k8s:#3b4fc4; --k8s-soft:#e5e8fb;
+  --warn:#b4361f;
+  --f-display:"Bricolage Grotesque", "IBM Plex Sans", system-ui, sans-serif;
+  --f-body:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0e1420; --surface:#151d2c; --ink:#e6ebf3; --muted:#9aa6b8; --line:#26324a;
+  --code-bg:#1c2639; --accent:#86a6ff; --accent-soft:#1d2a4a;
+  --docker:#5cc8d6; --docker-soft:#123138; --ecr:#e8a660; --ecr-soft:#352614; --k8s:#9aa8ff; --k8s-soft:#1f2550;
+  --warn:#ff8a73; color-scheme:dark; } }
+:root[data-theme="dark"]{
+  --bg:#0e1420; --surface:#151d2c; --ink:#e6ebf3; --muted:#9aa6b8; --line:#26324a;
+  --code-bg:#1c2639; --accent:#86a6ff; --accent-soft:#1d2a4a;
+  --docker:#5cc8d6; --docker-soft:#123138; --ecr:#e8a660; --ecr-soft:#352614; --k8s:#9aa8ff; --k8s-soft:#1f2550;
+  --warn:#ff8a73; color-scheme:dark; }
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;padding-inline:16px;padding-block:0 48px}
+.wrap{max-width:1040px;margin:0 auto}
+.intro{padding-block:36px 20px;display:grid;gap:10px}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(28px,5vw,42px);line-height:1.08;margin:0;text-wrap:balance;letter-spacing:-.01em}
+.lede{margin:0;color:var(--muted);max-width:62ch}
+.flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-family:var(--f-mono);font-size:12.5px;margin-top:4px}
+.flow span{padding:4px 10px;border-radius:999px}
+.flow .arrow{padding:0;color:var(--muted)}
+.f-docker{background:var(--docker-soft);color:var(--docker)} .f-ecr{background:var(--ecr-soft);color:var(--ecr)} .f-k8s{background:var(--k8s-soft);color:var(--k8s)}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:12px;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.search{flex:1 1 260px;min-width:0;display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:0 12px}
+.search:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.search svg{flex:none;color:var(--muted)}
+#q{border:0;outline:0;background:transparent;color:var(--ink);font:inherit;font-size:15px;padding:10px 0;width:100%;min-width:0}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:500 13px var(--f-body);border:1px solid var(--line);background:var(--surface);color:var(--muted);padding:7px 12px;border-radius:999px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip:focus-visible,.copy:focus-visible,.toc-link:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.count{font-family:var(--f-mono);font-size:12px;color:var(--muted);margin-left:auto}
+.toc{display:flex;flex-wrap:wrap;gap:4px 14px;padding-block:14px 4px;font-size:13px}
+.toc-link{color:var(--muted);text-decoration:none;border-bottom:1px dashed transparent}
+.toc-link:hover{color:var(--accent);border-bottom-color:var(--accent)}
+.block{margin-top:28px;scroll-margin-top:84px}
+.block-head{display:grid;gap:2px;margin-bottom:10px}
+.grp{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;font-weight:500}
+.grp-docker{color:var(--docker)} .grp-ecr{color:var(--ecr)} .grp-k8s{color:var(--k8s)}
+.block-head h2{font-family:var(--f-display);font-weight:600;font-size:22px;margin:0;text-wrap:balance}
+.block-head p{margin:0;color:var(--muted);font-size:14px}
+.rows{list-style:none;margin:0;padding:0;background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.row{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr) 44px;gap:14px;align-items:start;padding:12px 14px;border-top:1px solid var(--line)}
+.row:first-child{border-top:0}
+.cmd{display:flex;gap:8px;align-items:flex-start;min-width:0}
+.cmd code{flex:1;min-width:0;font-family:var(--f-mono);font-size:13px;line-height:1.55;background:var(--code-bg);padding:5px 9px;border-radius:6px;white-space:pre-wrap;overflow-wrap:anywhere}
+.copy{flex:none;font:500 12px var(--f-body);color:var(--accent);background:transparent;border:1px solid var(--line);border-radius:6px;padding:5px 8px;cursor:pointer}
+.copy:hover{background:var(--accent-soft)}
+.copy.done{color:var(--docker);border-color:var(--docker)}
+.desc{margin:0;padding-top:4px;min-width:0}
+.src{font-family:var(--f-mono);font-size:11.5px;color:var(--muted);padding-top:7px;text-align:right}
+.empty{margin-top:32px;color:var(--muted);text-align:center}
+.rule{margin-top:32px;padding:16px 18px;border-radius:12px;background:var(--accent-soft);display:grid;gap:4px}
+.rule strong{font-family:var(--f-display);font-size:17px}
+.rule code{font-family:var(--f-mono);font-size:13px}
+.legend{margin-top:18px;font-size:13px;color:var(--muted)}
+.legend code{font-family:var(--f-mono)}
+@media (max-width:720px){
+  .row{grid-template-columns:minmax(0,1fr) auto;gap:6px 10px}
+  .cmd{grid-column:1 / -1}
+  .desc{padding-top:0}
+  .src{padding-top:0}
+  .count{margin-left:0;width:100%}
+}
+@media (prefers-reduced-motion:no-preference){ html{scroll-behavior:smooth} }
+</style>
+<div class="wrap">
+<header class="intro">
+<span class="eyebrow">312 School · Containers Sessions 01–13 · 214 commands</span>
+<h1>Containers Command Sheet</h1>
+<p class="lede">Every command from the Docker and Kubernetes classes, the Oct 10 office hours and Assignments 01–02, in the order you use them: build on the laptop, push to ECR, run on the school cluster.</p>
+<div class="flow"><span class="f-docker">docker build</span><span class="arrow">→</span><span class="f-ecr">docker push → ECR</span><span class="arrow">→</span><span class="f-k8s">kubectl apply</span></div>
+</header>
+<div class="bar" role="search">
+<label class="search" for="q"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+<input id="q" type="search" placeholder="Filter: logs, namespace, rollout, ECR…" autocomplete="off"></label>
+<div class="chips" role="group" aria-label="Show">
+<button type="button" class="chip" data-f="all" aria-pressed="true">All</button>
+<button type="button" class="chip" data-f="docker" aria-pressed="false">Docker</button>
+<button type="button" class="chip" data-f="ecr" aria-pressed="false">ECR</button>
+<button type="button" class="chip" data-f="k8s" aria-pressed="false">Kubernetes</button>
+</div>
+<span class="count" id="count">214 commands</span>
+</div>
+<nav class="toc" aria-label="Sections"><a href="#docker" class="toc-link" data-g="docker">Check, run &amp; explore</a><a href="#build" class="toc-link" data-g="docker">Build &amp; run your image</a><a href="#network" class="toc-link" data-g="docker">Network, Postgres &amp; Compose</a><a href="#ecr" class="toc-link" data-g="ecr">Repository, login &amp; push</a><a href="#context" class="toc-link" data-g="k8s">Sign in &amp; point kubectl</a><a href="#pods" class="toc-link" data-g="k8s">Pods</a><a href="#deploy" class="toc-link" data-g="k8s">Deployments &amp; ReplicaSets</a><a href="#rollout" class="toc-link" data-g="k8s">Tunnel &amp; rolling update</a><a href="#services" class="toc-link" data-g="k8s">Services, endpoints &amp; DNS</a><a href="#probes" class="toc-link" data-g="k8s">Probes &amp; the stuck rollout</a><a href="#ingress" class="toc-link" data-g="k8s">The Ingress</a><a href="#config" class="toc-link" data-g="k8s">ConfigMaps &amp; Secrets</a><a href="#rbac" class="toc-link" data-g="k8s">Who may do what (RBAC &amp; read-only Claude)</a><a href="#extsecrets" class="toc-link" data-g="k8s">External Secrets (password from AWS)</a><a href="#resources" class="toc-link" data-g="k8s">Requests, limits &amp; quotas</a><a href="#hpa" class="toc-link" data-g="k8s">The HPA (Horizontal Pod Autoscaler)</a><a href="#storage" class="toc-link" data-g="k8s">Storage (PVC, StorageClass, PV)</a><a href="#jobs" class="toc-link" data-g="k8s">Jobs &amp; CronJobs</a><a href="#debug" class="toc-link" data-g="k8s">Debug &amp; clean up</a></nav>
+<section class="block" id="docker" data-g="docker">
+<header class="block-head"><span class="grp grp-docker">Docker · laptop</span><h2>Check, run &amp; explore</h2><p>Is Docker alive, start a container, look inside, clean up.</p></header>
+<ul class="rows"><li class="row" data-text="docker version client and daemon versions session 01">
+<div class="cmd"><code>docker version</code><button type="button" class="copy" data-cmd="docker version" aria-label="Copy command">Copy</button></div>
+<p class="desc">Client and daemon versions</p>
+<span class="src" title="Session 01">S01</span>
+</li><li class="row" data-text="docker ps running containers. any answer, even empty = the daemon is up session 01">
+<div class="cmd"><code>docker ps</code><button type="button" class="copy" data-cmd="docker ps" aria-label="Copy command">Copy</button></div>
+<p class="desc">Running containers. Any answer, even empty = the daemon is up</p>
+<span class="src" title="Session 01">S01</span>
+</li><li class="row" data-text="docker ps -a all containers, stopped (exited) ones too session 01">
+<div class="cmd"><code>docker ps -a</code><button type="button" class="copy" data-cmd="docker ps -a" aria-label="Copy command">Copy</button></div>
+<p class="desc">All containers, stopped (Exited) ones too</p>
+<span class="src" title="Session 01">S01</span>
+</li><li class="row" data-text="docker images local images and their size session 01">
+<div class="cmd"><code>docker images</code><button type="button" class="copy" data-cmd="docker images" aria-label="Copy command">Copy</button></div>
+<p class="desc">Local images and their size</p>
+<span class="src" title="Session 01">S01</span>
+</li><li class="row" data-text="docker pull nginx:1.23 download an image without running it session 01">
+<div class="cmd"><code>docker pull nginx:1.23</code><button type="button" class="copy" data-cmd="docker pull nginx:1.23" aria-label="Copy command">Copy</button></div>
+<p class="desc">Download an image without running it</p>
+<span class="src" title="Session 01">S01</span>
+</li><li class="row" data-text="docker run -it --rm python:3.12-slim bash new container with a shell inside; deleted when you exit session 01">
+<div class="cmd"><code>docker run -it --rm python:3.12-slim bash</code><button type="button" class="copy" data-cmd="docker run -it --rm python:3.12-slim bash" aria-label="Copy command">Copy</button></div>
+<p class="desc">New container with a shell inside; deleted when you exit</p>
+<span class="src" title="Session 01">S01</span>
+</li><li class="row" data-text="docker run --rm python:3.12-slim uname -r run one command, print, delete session 01">
+<div class="cmd"><code>docker run --rm python:3.12-slim uname -r</code><button type="button" class="copy" data-cmd="docker run --rm python:3.12-slim uname -r" aria-label="Copy command">Copy</button></div>
+<p class="desc">Run one command, print, delete</p>
+<span class="src" title="Session 01">S01</span>
+</li><li class="row" data-text="docker run -d python:3.12-slim sleep 300 run in the background (-d); prints the id session 01">
+<div class="cmd"><code>docker run -d python:3.12-slim sleep 300</code><button type="button" class="copy" data-cmd="docker run -d python:3.12-slim sleep 300" aria-label="Copy command">Copy</button></div>
+<p class="desc">Run in the background (-d); prints the id</p>
+<span class="src" title="Session 01">S01</span>
+</li><li class="row" data-text="docker run -d -p 9000:80 --name web-app nginx:1.23 background + your own name; laptop 9000 → container 80 session 01">
+<div class="cmd"><code>docker run -d -p 9000:80 --name web-app nginx:1.23</code><button type="button" class="copy" data-cmd="docker run -d -p 9000:80 --name web-app nginx:1.23" aria-label="Copy command">Copy</button></div>
+<p class="desc">Background + your own name; laptop 9000 → container 80</p>
+<span class="src" title="Session 01">S01</span>
+</li><li class="row" data-text="docker exec -it &lt;container&gt; bash shell inside a running container (not pid 1, exit keeps it running) session 01">
+<div class="cmd"><code>docker exec -it &lt;container&gt; bash</code><button type="button" class="copy" data-cmd="docker exec -it &lt;container&gt; bash" aria-label="Copy command">Copy</button></div>
+<p class="desc">Shell inside a running container (not PID 1, exit keeps it running)</p>
+<span class="src" title="Session 01">S01</span>
+</li><li class="row" data-text="docker top &lt;container&gt; the container&#x27;s processes session 01">
+<div class="cmd"><code>docker top &lt;container&gt;</code><button type="button" class="copy" data-cmd="docker top &lt;container&gt;" aria-label="Copy command">Copy</button></div>
+<p class="desc">The container&#x27;s processes</p>
+<span class="src" title="Session 01">S01</span>
+</li><li class="row" data-text="docker exec &lt;container&gt; cat /proc/1/cmdline who is pid 1 inside the container session 02">
+<div class="cmd"><code>docker exec &lt;container&gt; cat /proc/1/cmdline</code><button type="button" class="copy" data-cmd="docker exec &lt;container&gt; cat /proc/1/cmdline" aria-label="Copy command">Copy</button></div>
+<p class="desc">Who is PID 1 inside the container</p>
+<span class="src" title="Session 02">S02</span>
+</li><li class="row" data-text="docker logs &lt;container&gt; what pid 1 printed (stdout / stderr) session 01">
+<div class="cmd"><code>docker logs &lt;container&gt;</code><button type="button" class="copy" data-cmd="docker logs &lt;container&gt;" aria-label="Copy command">Copy</button></div>
+<p class="desc">What PID 1 printed (stdout / stderr)</p>
+<span class="src" title="Session 01">S01</span>
+</li><li class="row" data-text="docker stop &lt;container&gt; sigterm to pid 1; force-kill after 10 s session 01">
+<div class="cmd"><code>docker stop &lt;container&gt;</code><button type="button" class="copy" data-cmd="docker stop &lt;container&gt;" aria-label="Copy command">Copy</button></div>
+<p class="desc">SIGTERM to PID 1; force-kill after 10 s</p>
+<span class="src" title="Session 01">S01</span>
+</li><li class="row" data-text="docker start &lt;container&gt; start a stopped container again (~1 s) session 01">
+<div class="cmd"><code>docker start &lt;container&gt;</code><button type="button" class="copy" data-cmd="docker start &lt;container&gt;" aria-label="Copy command">Copy</button></div>
+<p class="desc">Start a stopped container again (~1 s)</p>
+<span class="src" title="Session 01">S01</span>
+</li><li class="row" data-text="docker rm &lt;container&gt; delete a stopped container session 01">
+<div class="cmd"><code>docker rm &lt;container&gt;</code><button type="button" class="copy" data-cmd="docker rm &lt;container&gt;" aria-label="Copy command">Copy</button></div>
+<p class="desc">Delete a stopped container</p>
+<span class="src" title="Session 01">S01</span>
+</li><li class="row" data-text="docker rm -f &lt;container&gt; stop and delete in one go session 02">
+<div class="cmd"><code>docker rm -f &lt;container&gt;</code><button type="button" class="copy" data-cmd="docker rm -f &lt;container&gt;" aria-label="Copy command">Copy</button></div>
+<p class="desc">Stop and delete in one go</p>
+<span class="src" title="Session 02">S02</span>
+</li><li class="row" data-text="docker rmi hello:v1 delete an image (no container may still use it) session 02">
+<div class="cmd"><code>docker rmi hello:v1</code><button type="button" class="copy" data-cmd="docker rmi hello:v1" aria-label="Copy command">Copy</button></div>
+<p class="desc">Delete an image (no container may still use it)</p>
+<span class="src" title="Session 02">S02</span>
+</li><li class="row" data-text="for c in $(docker ps -aq); do docker rm -f &quot;$c&quot;; done remove every container on the laptop session 02">
+<div class="cmd"><code>for c in $(docker ps -aq); do docker rm -f &quot;$c&quot;; done</code><button type="button" class="copy" data-cmd="for c in $(docker ps -aq); do docker rm -f &quot;$c&quot;; done" aria-label="Copy command">Copy</button></div>
+<p class="desc">Remove every container on the laptop</p>
+<span class="src" title="Session 02">S02</span>
+</li><li class="row" data-text="docker info is docker desktop running? docker.sock error = start it assignment 02">
+<div class="cmd"><code>docker info</code><button type="button" class="copy" data-cmd="docker info" aria-label="Copy command">Copy</button></div>
+<p class="desc">Is Docker Desktop running? docker.sock error = start it</p>
+<span class="src" title="Assignment 02">A02</span>
+</li><li class="row" data-text="open -a docker start docker desktop on a mac assignment 02">
+<div class="cmd"><code>open -a Docker</code><button type="button" class="copy" data-cmd="open -a Docker" aria-label="Copy command">Copy</button></div>
+<p class="desc">Start Docker Desktop on a Mac</p>
+<span class="src" title="Assignment 02">A02</span>
+</li></ul>
+</section><section class="block" id="build" data-g="docker">
+<header class="block-head"><span class="grp grp-docker">Docker · laptop</span><h2>Build &amp; run your image</h2><p>Dockerfile → image → container, the right way for the cluster.</p></header>
+<ul class="rows"><li class="row" data-text="docker build -t hello:v1 . build an image name:tag; . = the build context (this folder) session 02">
+<div class="cmd"><code>docker build -t hello:v1 .</code><button type="button" class="copy" data-cmd="docker build -t hello:v1 ." aria-label="Copy command">Copy</button></div>
+<p class="desc">Build an image name:tag; . = the build context (this folder)</p>
+<span class="src" title="Session 02">S02</span>
+</li><li class="row" data-text="docker build --platform linux/amd64 -t investment-app:v1 . build for the cluster&#x27;s processor (mac = arm64, nodes = amd64) session 03">
+<div class="cmd"><code>docker build --platform linux/amd64 -t investment-app:v1 .</code><button type="button" class="copy" data-cmd="docker build --platform linux/amd64 -t investment-app:v1 ." aria-label="Copy command">Copy</button></div>
+<p class="desc">Build for the cluster&#x27;s processor (Mac = arm64, nodes = amd64)</p>
+<span class="src" title="Session 03">S03</span>
+</li><li class="row" data-text="docker image inspect &lt;image&gt; --format &#x27;{{.os}}/{{.architecture}}&#x27; must print linux/amd64 before every push session 03">
+<div class="cmd"><code>docker image inspect &lt;image&gt; --format &#x27;{{.Os}}/{{.Architecture}}&#x27;</code><button type="button" class="copy" data-cmd="docker image inspect &lt;image&gt; --format &#x27;{{.Os}}/{{.Architecture}}&#x27;" aria-label="Copy command">Copy</button></div>
+<p class="desc">Must print linux/amd64 before every push</p>
+<span class="src" title="Session 03">S03</span>
+</li><li class="row" data-text="uname -m your processor: arm64 or x86_64 (amd64) session 03">
+<div class="cmd"><code>uname -m</code><button type="button" class="copy" data-cmd="uname -m" aria-label="Copy command">Copy</button></div>
+<p class="desc">Your processor: arm64 or x86_64 (amd64)</p>
+<span class="src" title="Session 03">S03</span>
+</li><li class="row" data-text="docker history &lt;image&gt; the image&#x27;s layers (a deleted secret still shows here) session 02">
+<div class="cmd"><code>docker history &lt;image&gt;</code><button type="button" class="copy" data-cmd="docker history &lt;image&gt;" aria-label="Copy command">Copy</button></div>
+<p class="desc">The image&#x27;s layers (a deleted secret still shows here)</p>
+<span class="src" title="Session 02">S02</span>
+</li><li class="row" data-text="docker run -d -p 127.0.0.1:8000:8080 --name hello hello:v1 laptop 8000 → container 8080, this laptop only session 02">
+<div class="cmd"><code>docker run -d -p 127.0.0.1:8000:8080 --name hello hello:v1</code><button type="button" class="copy" data-cmd="docker run -d -p 127.0.0.1:8000:8080 --name hello hello:v1" aria-label="Copy command">Copy</button></div>
+<p class="desc">Laptop 8000 → container 8080, this laptop only</p>
+<span class="src" title="Session 02">S02</span>
+</li><li class="row" data-text="docker run -d ... --env-file investment-app.env investment-app pass config at run time, not in the image session 02">
+<div class="cmd"><code>docker run -d ... --env-file investment-app.env investment-app</code><button type="button" class="copy" data-cmd="docker run -d ... --env-file investment-app.env investment-app" aria-label="Copy command">Copy</button></div>
+<p class="desc">Pass config at run time, not in the image</p>
+<span class="src" title="Session 02">S02</span>
+</li><li class="row" data-text="curl --retry 5 --retry-all-errors --retry-delay 1 localhost:8000 keep trying until the app answers session 02">
+<div class="cmd"><code>curl --retry 5 --retry-all-errors --retry-delay 1 localhost:8000</code><button type="button" class="copy" data-cmd="curl --retry 5 --retry-all-errors --retry-delay 1 localhost:8000" aria-label="Copy command">Copy</button></div>
+<p class="desc">Keep trying until the app answers</p>
+<span class="src" title="Session 02">S02</span>
+</li><li class="row" data-text="export revised_image=&lt;account&gt;.dkr.ecr.&lt;region&gt;.amazonaws.com/&lt;repo&gt;:&lt;tag&gt; save the full image address in a variable session 13">
+<div class="cmd"><code>export REVISED_IMAGE=&lt;account&gt;.dkr.ecr.&lt;region&gt;.amazonaws.com/&lt;repo&gt;:&lt;tag&gt;</code><button type="button" class="copy" data-cmd="export REVISED_IMAGE=&lt;account&gt;.dkr.ecr.&lt;region&gt;.amazonaws.com/&lt;repo&gt;:&lt;tag&gt;" aria-label="Copy command">Copy</button></div>
+<p class="desc">Save the full image address in a variable</p>
+<span class="src" title="Session 13">S13</span>
+</li><li class="row" data-text="docker build --platform linux/amd64 -t &quot;$revised_image&quot; app/ &amp;&amp; docker push &quot;$revised_image&quot; build + push using the variable. keep the double quotes or nothing gets tagged session 13">
+<div class="cmd"><code>docker build --platform linux/amd64 -t &quot;$REVISED_IMAGE&quot; app/ &amp;&amp; docker push &quot;$REVISED_IMAGE&quot;</code><button type="button" class="copy" data-cmd="docker build --platform linux/amd64 -t &quot;$REVISED_IMAGE&quot; app/ &amp;&amp; docker push &quot;$REVISED_IMAGE&quot;" aria-label="Copy command">Copy</button></div>
+<p class="desc">Build + push using the variable. Keep the double quotes or nothing gets tagged</p>
+<span class="src" title="Session 13">S13</span>
+</li><li class="row" data-text="docker run ubuntu sleep 5 text after the image replaces cmd office hours oct 10">
+<div class="cmd"><code>docker run ubuntu sleep 5</code><button type="button" class="copy" data-cmd="docker run ubuntu sleep 5" aria-label="Copy command">Copy</button></div>
+<p class="desc">Text after the image replaces CMD</p>
+<span class="src" title="Office Hours Oct 10">OH</span>
+</li><li class="row" data-text="docker run --entrypoint echo ubuntu-sleeper 10 --entrypoint (before the image) replaces entrypoint → echo 10 office hours oct 10">
+<div class="cmd"><code>docker run --entrypoint echo ubuntu-sleeper 10</code><button type="button" class="copy" data-cmd="docker run --entrypoint echo ubuntu-sleeper 10" aria-label="Copy command">Copy</button></div>
+<p class="desc">--entrypoint (before the image) replaces ENTRYPOINT → echo 10</p>
+<span class="src" title="Office Hours Oct 10">OH</span>
+</li></ul>
+</section><section class="block" id="network" data-g="docker">
+<header class="block-head"><span class="grp grp-docker">Docker · laptop</span><h2>Network, Postgres &amp; Compose</h2><p>Two containers that talk to each other by name.</p></header>
+<ul class="rows"><li class="row" data-text="docker network create app-net private network; containers on it reach each other by name session 03">
+<div class="cmd"><code>docker network create app-net</code><button type="button" class="copy" data-cmd="docker network create app-net" aria-label="Copy command">Copy</button></div>
+<p class="desc">Private network; containers on it reach each other by name</p>
+<span class="src" title="Session 03">S03</span>
+</li><li class="row" data-text="docker run -d --name db --network app-net -e postgres_user=investment_app -e postgres_password=&lt;pw&gt; -e postgres_db=investment_app postgres:16 postgres container; the -e vars create user, password, db on first start session 03">
+<div class="cmd"><code>docker run -d --name db --network app-net -e POSTGRES_USER=investment_app -e POSTGRES_PASSWORD=&lt;pw&gt; -e POSTGRES_DB=investment_app postgres:16</code><button type="button" class="copy" data-cmd="docker run -d --name db --network app-net -e POSTGRES_USER=investment_app -e POSTGRES_PASSWORD=&lt;pw&gt; -e POSTGRES_DB=investment_app postgres:16" aria-label="Copy command">Copy</button></div>
+<p class="desc">Postgres container; the -e vars create user, password, DB on first start</p>
+<span class="src" title="Session 03">S03</span>
+</li><li class="row" data-text="docker run -d --name app --network app-net -p 127.0.0.1:8001:8080 --env-file investment-app.env investment-app:v1 app on the same network, so db_host=db works session 03">
+<div class="cmd"><code>docker run -d --name app --network app-net -p 127.0.0.1:8001:8080 --env-file investment-app.env investment-app:v1</code><button type="button" class="copy" data-cmd="docker run -d --name app --network app-net -p 127.0.0.1:8001:8080 --env-file investment-app.env investment-app:v1" aria-label="Copy command">Copy</button></div>
+<p class="desc">App on the same network, so DB_HOST=db works</p>
+<span class="src" title="Session 03">S03</span>
+</li><li class="row" data-text="curl localhost:8001/health {&quot;status&quot;:&quot;ok&quot;} = app + db connected session 03">
+<div class="cmd"><code>curl localhost:8001/health</code><button type="button" class="copy" data-cmd="curl localhost:8001/health" aria-label="Copy command">Copy</button></div>
+<p class="desc">{&quot;status&quot;:&quot;ok&quot;} = app + DB connected</p>
+<span class="src" title="Session 03">S03</span>
+</li><li class="row" data-text="docker compose up -d --build build and start every service in compose.yaml assignment 01">
+<div class="cmd"><code>docker compose up -d --build</code><button type="button" class="copy" data-cmd="docker compose up -d --build" aria-label="Copy command">Copy</button></div>
+<p class="desc">Build and start every service in compose.yaml</p>
+<span class="src" title="Assignment 01">A01</span>
+</li><li class="row" data-text="docker compose down remove containers + network; the volume (data) stays assignment 01">
+<div class="cmd"><code>docker compose down</code><button type="button" class="copy" data-cmd="docker compose down" aria-label="Copy command">Copy</button></div>
+<p class="desc">Remove containers + network; the volume (data) stays</p>
+<span class="src" title="Assignment 01">A01</span>
+</li><li class="row" data-text="docker compose down -v ⚠️ also deletes the named volume = data gone assignment 01">
+<div class="cmd"><code>docker compose down -v</code><button type="button" class="copy" data-cmd="docker compose down -v" aria-label="Copy command">Copy</button></div>
+<p class="desc">⚠️ Also deletes the named volume = data gone</p>
+<span class="src" title="Assignment 01">A01</span>
+</li><li class="row" data-text="docker compose logs app logs of one service assignment 01">
+<div class="cmd"><code>docker compose logs app</code><button type="button" class="copy" data-cmd="docker compose logs app" aria-label="Copy command">Copy</button></div>
+<p class="desc">Logs of one service</p>
+<span class="src" title="Assignment 01">A01</span>
+</li><li class="row" data-text="docker compose exec db psql -u investment_app -c &quot;select * from trades;&quot; query the db inside the db service assignment 01">
+<div class="cmd"><code>docker compose exec db psql -U investment_app -c &quot;SELECT * FROM trades;&quot;</code><button type="button" class="copy" data-cmd="docker compose exec db psql -U investment_app -c &quot;SELECT * FROM trades;&quot;" aria-label="Copy command">Copy</button></div>
+<p class="desc">Query the DB inside the db service</p>
+<span class="src" title="Assignment 01">A01</span>
+</li></ul>
+</section><section class="block" id="ecr" data-g="ecr">
+<header class="block-head"><span class="grp grp-ecr">ECR · the bridge</span><h2>Repository, login &amp; push</h2><p>Get the image off the laptop and let the school&#x27;s cluster pull it.</p></header>
+<ul class="rows"><li class="row" data-text="aws sts get-caller-identity which aws account and role your next commands act in session 03">
+<div class="cmd"><code>aws sts get-caller-identity</code><button type="button" class="copy" data-cmd="aws sts get-caller-identity" aria-label="Copy command">Copy</button></div>
+<p class="desc">Which AWS account and role your next commands act in</p>
+<span class="src" title="Session 03">S03</span>
+</li><li class="row" data-text="terraform init &amp;&amp; terraform plan &amp;&amp; terraform apply create the ecr repo from ecr.tf (immutable tags) session 03">
+<div class="cmd"><code>terraform init &amp;&amp; terraform plan &amp;&amp; terraform apply</code><button type="button" class="copy" data-cmd="terraform init &amp;&amp; terraform plan &amp;&amp; terraform apply" aria-label="Copy command">Copy</button></div>
+<p class="desc">Create the ECR repo from ecr.tf (IMMUTABLE tags)</p>
+<span class="src" title="Session 03">S03</span>
+</li><li class="row" data-text="aws ecr get-login-password --region us-east-1 | docker login --username aws --password-stdin &lt;account&gt;.dkr.ecr.us-east-1.amazonaws.com log docker into ecr; lasts 12 hours. always give the full address session 03">
+<div class="cmd"><code>aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin &lt;account&gt;.dkr.ecr.us-east-1.amazonaws.com</code><button type="button" class="copy" data-cmd="aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin &lt;account&gt;.dkr.ecr.us-east-1.amazonaws.com" aria-label="Copy command">Copy</button></div>
+<p class="desc">Log Docker into ECR; lasts 12 hours. Always give the full address</p>
+<span class="src" title="Session 03">S03</span>
+</li><li class="row" data-text="docker tag investment-app:v1 $registry/investment-app:v1 same image, full ecr address as its name session 03">
+<div class="cmd"><code>docker tag investment-app:v1 $REGISTRY/investment-app:v1</code><button type="button" class="copy" data-cmd="docker tag investment-app:v1 $REGISTRY/investment-app:v1" aria-label="Copy command">Copy</button></div>
+<p class="desc">Same image, full ECR address as its name</p>
+<span class="src" title="Session 03">S03</span>
+</li><li class="row" data-text="docker push $registry/investment-app:v1 upload to ecr. network drop? run it again session 03">
+<div class="cmd"><code>docker push $REGISTRY/investment-app:v1</code><button type="button" class="copy" data-cmd="docker push $REGISTRY/investment-app:v1" aria-label="Copy command">Copy</button></div>
+<p class="desc">Upload to ECR. Network drop? Run it again</p>
+<span class="src" title="Session 03">S03</span>
+</li><li class="row" data-text="aws ecr set-repository-policy --repository-name investment-app --policy-text file://repository-policy.json let the cluster&#x27;s role (containers-26a-node) pull session 03">
+<div class="cmd"><code>aws ecr set-repository-policy --repository-name investment-app --policy-text file://repository-policy.json</code><button type="button" class="copy" data-cmd="aws ecr set-repository-policy --repository-name investment-app --policy-text file://repository-policy.json" aria-label="Copy command">Copy</button></div>
+<p class="desc">Let the cluster&#x27;s role (containers-26a-node) pull</p>
+<span class="src" title="Session 03">S03</span>
+</li></ul>
+</section><section class="block" id="context" data-g="k8s">
+<header class="block-head"><span class="grp grp-k8s">Kubernetes · cluster</span><h2>Sign in &amp; point kubectl</h2><p>Which cluster, as whom, in which namespace.</p></header>
+<ul class="rows"><li class="row" data-text="aws sso login --profile 312-cluster school sign-in; lasts one day session 04">
+<div class="cmd"><code>aws sso login --profile 312-cluster</code><button type="button" class="copy" data-cmd="aws sso login --profile 312-cluster" aria-label="Copy command">Copy</button></div>
+<p class="desc">School sign-in; lasts one day</p>
+<span class="src" title="Session 04">S04</span>
+</li><li class="row" data-text="aws sts get-caller-identity --profile 312-cluster which account and role you&#x27;re signed in as session 04">
+<div class="cmd"><code>aws sts get-caller-identity --profile 312-cluster</code><button type="button" class="copy" data-cmd="aws sts get-caller-identity --profile 312-cluster" aria-label="Copy command">Copy</button></div>
+<p class="desc">Which account and role you&#x27;re signed in as</p>
+<span class="src" title="Session 04">S04</span>
+</li><li class="row" data-text="aws eks update-kubeconfig --name containers-26a --region us-east-1 --profile 312-cluster --alias containers-26a writes the context into ~/.kube/config (once per laptop) session 04">
+<div class="cmd"><code>aws eks update-kubeconfig --name containers-26a --region us-east-1 --profile 312-cluster --alias containers-26a</code><button type="button" class="copy" data-cmd="aws eks update-kubeconfig --name containers-26a --region us-east-1 --profile 312-cluster --alias containers-26a" aria-label="Copy command">Copy</button></div>
+<p class="desc">Writes the context into ~/.kube/config (once per laptop)</p>
+<span class="src" title="Session 04">S04</span>
+</li><li class="row" data-text="kubectl config get-contexts all contexts; * = current, plus its namespace session 04">
+<div class="cmd"><code>kubectl config get-contexts</code><button type="button" class="copy" data-cmd="kubectl config get-contexts" aria-label="Copy command">Copy</button></div>
+<p class="desc">All contexts; * = current, plus its namespace</p>
+<span class="src" title="Session 04">S04</span>
+</li><li class="row" data-text="kubectl config current-context which cluster you&#x27;re pointed at session 04">
+<div class="cmd"><code>kubectl config current-context</code><button type="button" class="copy" data-cmd="kubectl config current-context" aria-label="Copy command">Copy</button></div>
+<p class="desc">Which cluster you&#x27;re pointed at</p>
+<span class="src" title="Session 04">S04</span>
+</li><li class="row" data-text="kubectl config use-context containers-26a switch to the school cluster if you have others session 05">
+<div class="cmd"><code>kubectl config use-context containers-26a</code><button type="button" class="copy" data-cmd="kubectl config use-context containers-26a" aria-label="Copy command">Copy</button></div>
+<p class="desc">Switch to the school cluster if you have others</p>
+<span class="src" title="Session 05">S05</span>
+</li><li class="row" data-text="kubectl config set-context --current --namespace=&lt;ns&gt; save your namespace in the context (edits one line of the file) session 04">
+<div class="cmd"><code>kubectl config set-context --current --namespace=&lt;ns&gt;</code><button type="button" class="copy" data-cmd="kubectl config set-context --current --namespace=&lt;ns&gt;" aria-label="Copy command">Copy</button></div>
+<p class="desc">Save your namespace in the context (edits one line of the file)</p>
+<span class="src" title="Session 04">S04</span>
+</li><li class="row" data-text="kubectl get namespaces every namespace on the cluster session 04">
+<div class="cmd"><code>kubectl get namespaces</code><button type="button" class="copy" data-cmd="kubectl get namespaces" aria-label="Copy command">Copy</button></div>
+<p class="desc">Every namespace on the cluster</p>
+<span class="src" title="Session 04">S04</span>
+</li><li class="row" data-text="kubectl get pods -n &lt;ns&gt; -n = use this namespace for one command session 04">
+<div class="cmd"><code>kubectl get pods -n &lt;ns&gt;</code><button type="button" class="copy" data-cmd="kubectl get pods -n &lt;ns&gt;" aria-label="Copy command">Copy</button></div>
+<p class="desc">-n = use this namespace for one command</p>
+<span class="src" title="Session 04">S04</span>
+</li><li class="row" data-text="kubectl create namespace &lt;name&gt; make a namespace (admins only on the school cluster) session 05">
+<div class="cmd"><code>kubectl create namespace &lt;name&gt;</code><button type="button" class="copy" data-cmd="kubectl create namespace &lt;name&gt;" aria-label="Copy command">Copy</button></div>
+<p class="desc">Make a namespace (admins only on the school cluster)</p>
+<span class="src" title="Session 05">S05</span>
+</li><li class="row" data-text="kubectl get nodes -o wide the nodes (ec2 instances) and their internal ips office hours oct 10">
+<div class="cmd"><code>kubectl get nodes -o wide</code><button type="button" class="copy" data-cmd="kubectl get nodes -o wide" aria-label="Copy command">Copy</button></div>
+<p class="desc">The nodes (EC2 instances) and their internal IPs</p>
+<span class="src" title="Office Hours Oct 10">OH</span>
+</li><li class="row" data-text="alias k=kubectl type k like the instructors; add it to ~/.zshrc to keep it session 04">
+<div class="cmd"><code>alias k=kubectl</code><button type="button" class="copy" data-cmd="alias k=kubectl" aria-label="Copy command">Copy</button></div>
+<p class="desc">Type k like the instructors; add it to ~/.zshrc to keep it</p>
+<span class="src" title="Session 04">S04</span>
+</li></ul>
+</section><section class="block" id="pods" data-g="k8s">
+<header class="block-head"><span class="grp grp-k8s">Kubernetes · cluster</span><h2>Pods</h2><p>Apply, read, get inside, delete.</p></header>
+<ul class="rows"><li class="row" data-text="kubectl apply -f &lt;file&gt;.yaml create or update the object described in the file session 04">
+<div class="cmd"><code>kubectl apply -f &lt;file&gt;.yaml</code><button type="button" class="copy" data-cmd="kubectl apply -f &lt;file&gt;.yaml" aria-label="Copy command">Copy</button></div>
+<p class="desc">Create or update the object described in the file</p>
+<span class="src" title="Session 04">S04</span>
+</li><li class="row" data-text="kubectl get pods status word: pending, containercreating, running, backoff… session 04">
+<div class="cmd"><code>kubectl get pods</code><button type="button" class="copy" data-cmd="kubectl get pods" aria-label="Copy command">Copy</button></div>
+<p class="desc">Status word: Pending, ContainerCreating, Running, BackOff…</p>
+<span class="src" title="Session 04">S04</span>
+</li><li class="row" data-text="kubectl get pods -o wide adds pod ip and node session 05">
+<div class="cmd"><code>kubectl get pods -o wide</code><button type="button" class="copy" data-cmd="kubectl get pods -o wide" aria-label="Copy command">Copy</button></div>
+<p class="desc">Adds pod IP and node</p>
+<span class="src" title="Session 05">S05</span>
+</li><li class="row" data-text="kubectl get pods -w keep watching; print every change session 05">
+<div class="cmd"><code>kubectl get pods -w</code><button type="button" class="copy" data-cmd="kubectl get pods -w" aria-label="Copy command">Copy</button></div>
+<p class="desc">Keep watching; print every change</p>
+<span class="src" title="Session 05">S05</span>
+</li><li class="row" data-text="kubectl describe pod &lt;pod&gt; details plus the events: what the cluster did session 04">
+<div class="cmd"><code>kubectl describe pod &lt;pod&gt;</code><button type="button" class="copy" data-cmd="kubectl describe pod &lt;pod&gt;" aria-label="Copy command">Copy</button></div>
+<p class="desc">Details plus the Events: what the cluster did</p>
+<span class="src" title="Session 04">S04</span>
+</li><li class="row" data-text="kubectl logs &lt;pod&gt; what the container printed session 05">
+<div class="cmd"><code>kubectl logs &lt;pod&gt;</code><button type="button" class="copy" data-cmd="kubectl logs &lt;pod&gt;" aria-label="Copy command">Copy</button></div>
+<p class="desc">What the container printed</p>
+<span class="src" title="Session 05">S05</span>
+</li><li class="row" data-text="kubectl exec -it &lt;pod&gt; -- sh shell inside the pod&#x27;s container session 04">
+<div class="cmd"><code>kubectl exec -it &lt;pod&gt; -- sh</code><button type="button" class="copy" data-cmd="kubectl exec -it &lt;pod&gt; -- sh" aria-label="Copy command">Copy</button></div>
+<p class="desc">Shell inside the pod&#x27;s container</p>
+<span class="src" title="Session 04">S04</span>
+</li><li class="row" data-text="kubectl exec -it &lt;pod&gt; -c &lt;container&gt; -- sh same, naming the container when there&#x27;s more than one session 04">
+<div class="cmd"><code>kubectl exec -it &lt;pod&gt; -c &lt;container&gt; -- sh</code><button type="button" class="copy" data-cmd="kubectl exec -it &lt;pod&gt; -c &lt;container&gt; -- sh" aria-label="Copy command">Copy</button></div>
+<p class="desc">Same, naming the container when there&#x27;s more than one</p>
+<span class="src" title="Session 04">S04</span>
+</li><li class="row" data-text="kubectl get pod &lt;pod&gt; -o yaml the object the cluster stores (e.g. which image it really runs) session 06">
+<div class="cmd"><code>kubectl get pod &lt;pod&gt; -o yaml</code><button type="button" class="copy" data-cmd="kubectl get pod &lt;pod&gt; -o yaml" aria-label="Copy command">Copy</button></div>
+<p class="desc">The object the cluster stores (e.g. which image it really runs)</p>
+<span class="src" title="Session 06">S06</span>
+</li><li class="row" data-text="kubectl delete pod &lt;pod&gt; delete one pod (a bare pod is gone for good) session 04">
+<div class="cmd"><code>kubectl delete pod &lt;pod&gt;</code><button type="button" class="copy" data-cmd="kubectl delete pod &lt;pod&gt;" aria-label="Copy command">Copy</button></div>
+<p class="desc">Delete one pod (a bare pod is gone for good)</p>
+<span class="src" title="Session 04">S04</span>
+</li><li class="row" data-text="kubectl run test --image=nicolaka/netshoot:v0.16 -- sleep 3600 imperative: start a pod with no manifest (quick tests, cka/ckad) session 07">
+<div class="cmd"><code>kubectl run test --image=nicolaka/netshoot:v0.16 -- sleep 3600</code><button type="button" class="copy" data-cmd="kubectl run test --image=nicolaka/netshoot:v0.16 -- sleep 3600" aria-label="Copy command">Copy</button></div>
+<p class="desc">Imperative: start a pod with no manifest (quick tests, CKA/CKAD)</p>
+<span class="src" title="Session 07">S07</span>
+</li><li class="row" data-text="kubectl apply --dry-run=server -f &lt;file&gt;.yaml api server checks the file without creating anything assignment 02">
+<div class="cmd"><code>kubectl apply --dry-run=server -f &lt;file&gt;.yaml</code><button type="button" class="copy" data-cmd="kubectl apply --dry-run=server -f &lt;file&gt;.yaml" aria-label="Copy command">Copy</button></div>
+<p class="desc">API server checks the file without creating anything</p>
+<span class="src" title="Assignment 02">A02</span>
+</li></ul>
+</section><section class="block" id="deploy" data-g="k8s">
+<header class="block-head"><span class="grp grp-k8s">Kubernetes · cluster</span><h2>Deployments &amp; ReplicaSets</h2><p>Keep a count of pods alive.</p></header>
+<ul class="rows"><li class="row" data-text="kubectl get deployments ready, up-to-date, available session 05">
+<div class="cmd"><code>kubectl get deployments</code><button type="button" class="copy" data-cmd="kubectl get deployments" aria-label="Copy command">Copy</button></div>
+<p class="desc">READY, UP-TO-DATE, AVAILABLE</p>
+<span class="src" title="Session 05">S05</span>
+</li><li class="row" data-text="kubectl get rs replicasets: desired, current, ready session 05">
+<div class="cmd"><code>kubectl get rs</code><button type="button" class="copy" data-cmd="kubectl get rs" aria-label="Copy command">Copy</button></div>
+<p class="desc">ReplicaSets: DESIRED, CURRENT, READY</p>
+<span class="src" title="Session 05">S05</span>
+</li><li class="row" data-text="kubectl get deploy,rs,pods -l app=drill all three levels, selected by label session 05">
+<div class="cmd"><code>kubectl get deploy,rs,pods -l app=drill</code><button type="button" class="copy" data-cmd="kubectl get deploy,rs,pods -l app=drill" aria-label="Copy command">Copy</button></div>
+<p class="desc">All three levels, selected by label</p>
+<span class="src" title="Session 05">S05</span>
+</li><li class="row" data-text="kubectl get rs -o yaml the replicaset the deployment made, as yaml session 06">
+<div class="cmd"><code>kubectl get rs -o yaml</code><button type="button" class="copy" data-cmd="kubectl get rs -o yaml" aria-label="Copy command">Copy</button></div>
+<p class="desc">The ReplicaSet the Deployment made, as YAML</p>
+<span class="src" title="Session 06">S06</span>
+</li><li class="row" data-text="kubectl scale deploy/drill --replicas=3 change the stored count (not the file) session 05">
+<div class="cmd"><code>kubectl scale deploy/drill --replicas=3</code><button type="button" class="copy" data-cmd="kubectl scale deploy/drill --replicas=3" aria-label="Copy command">Copy</button></div>
+<p class="desc">Change the stored count (not the file)</p>
+<span class="src" title="Session 05">S05</span>
+</li><li class="row" data-text="kubectl delete -f deployment-drill.yaml delete the deployment in the file, with its replicaset and pods session 05">
+<div class="cmd"><code>kubectl delete -f deployment-drill.yaml</code><button type="button" class="copy" data-cmd="kubectl delete -f deployment-drill.yaml" aria-label="Copy command">Copy</button></div>
+<p class="desc">Delete the Deployment in the file, with its ReplicaSet and pods</p>
+<span class="src" title="Session 05">S05</span>
+</li><li class="row" data-text="kubectl delete deploy drill same, by name, no file needed session 05">
+<div class="cmd"><code>kubectl delete deploy drill</code><button type="button" class="copy" data-cmd="kubectl delete deploy drill" aria-label="Copy command">Copy</button></div>
+<p class="desc">Same, by name, no file needed</p>
+<span class="src" title="Session 05">S05</span>
+</li></ul>
+</section><section class="block" id="rollout" data-g="k8s">
+<header class="block-head"><span class="grp grp-k8s">Kubernetes · cluster</span><h2>Tunnel &amp; rolling update</h2><p>Reach a pod from the laptop, ship v2, go back.</p></header>
+<ul class="rows"><li class="row" data-text="kubectl port-forward deploy/drill 8000:8080 tunnel laptop 8000 → pod 8080 through the api server session 06">
+<div class="cmd"><code>kubectl port-forward deploy/drill 8000:8080</code><button type="button" class="copy" data-cmd="kubectl port-forward deploy/drill 8000:8080" aria-label="Copy command">Copy</button></div>
+<p class="desc">Tunnel laptop 8000 → pod 8080 through the API server</p>
+<span class="src" title="Session 06">S06</span>
+</li><li class="row" data-text="curl localhost:8000 test the app through the tunnel (second terminal) session 06">
+<div class="cmd"><code>curl localhost:8000</code><button type="button" class="copy" data-cmd="curl localhost:8000" aria-label="Copy command">Copy</button></div>
+<p class="desc">Test the app through the tunnel (second terminal)</p>
+<span class="src" title="Session 06">S06</span>
+</li><li class="row" data-text="kubectl set image deployment/drill drill=&lt;registry&gt;/drill:v2 new image → rolling update (drill= is the container name) session 06">
+<div class="cmd"><code>kubectl set image deployment/drill drill=&lt;registry&gt;/drill:v2</code><button type="button" class="copy" data-cmd="kubectl set image deployment/drill drill=&lt;registry&gt;/drill:v2" aria-label="Copy command">Copy</button></div>
+<p class="desc">New image → rolling update (drill= is the container name)</p>
+<span class="src" title="Session 06">S06</span>
+</li><li class="row" data-text="kubectl rollout status deploy/drill wait until the rollout finishes session 06">
+<div class="cmd"><code>kubectl rollout status deploy/drill</code><button type="button" class="copy" data-cmd="kubectl rollout status deploy/drill" aria-label="Copy command">Copy</button></div>
+<p class="desc">Wait until the rollout finishes</p>
+<span class="src" title="Session 06">S06</span>
+</li><li class="row" data-text="kubectl rollout undo deploy/drill scale the old replicaset back up = previous version session 06">
+<div class="cmd"><code>kubectl rollout undo deploy/drill</code><button type="button" class="copy" data-cmd="kubectl rollout undo deploy/drill" aria-label="Copy command">Copy</button></div>
+<p class="desc">Scale the old ReplicaSet back up = previous version</p>
+<span class="src" title="Session 06">S06</span>
+</li><li class="row" data-text="kubectl port-forward svc/drill 8000:80 tunnel laptop 8000 → service port 80 → one pod (its targetport). dies when that pod is replaced session 07">
+<div class="cmd"><code>kubectl port-forward svc/drill 8000:80</code><button type="button" class="copy" data-cmd="kubectl port-forward svc/drill 8000:80" aria-label="Copy command">Copy</button></div>
+<p class="desc">Tunnel laptop 8000 → Service port 80 → one pod (its targetPort). Dies when that pod is replaced</p>
+<span class="src" title="Session 07">S07</span>
+</li></ul>
+</section><section class="block" id="services" data-g="k8s">
+<header class="block-head"><span class="grp grp-k8s">Kubernetes · cluster</span><h2>Services, endpoints &amp; DNS</h2><p>One fixed name in front of changing pods. Call the Service, never a pod IP.</p></header>
+<ul class="rows"><li class="row" data-text="kubectl apply -f service-drill.yaml create the service (clusterip by default) session 07">
+<div class="cmd"><code>kubectl apply -f service-drill.yaml</code><button type="button" class="copy" data-cmd="kubectl apply -f service-drill.yaml" aria-label="Copy command">Copy</button></div>
+<p class="desc">Create the Service (ClusterIP by default)</p>
+<span class="src" title="Session 07">S07</span>
+</li><li class="row" data-text="kubectl get svc drill type, cluster-ip (172.20.x.x), external-ip, port(s) session 07">
+<div class="cmd"><code>kubectl get svc drill</code><button type="button" class="copy" data-cmd="kubectl get svc drill" aria-label="Copy command">Copy</button></div>
+<p class="desc">TYPE, CLUSTER-IP (172.20.x.x), EXTERNAL-IP, PORT(S)</p>
+<span class="src" title="Session 07">S07</span>
+</li><li class="row" data-text="kubectl exec client -- curl -s http://drill call the service by name from inside the cluster (port 80 implied) session 07">
+<div class="cmd"><code>kubectl exec client -- curl -s http://drill</code><button type="button" class="copy" data-cmd="kubectl exec client -- curl -s http://drill" aria-label="Copy command">Copy</button></div>
+<p class="desc">Call the Service by name from inside the cluster (port 80 implied)</p>
+<span class="src" title="Session 07">S07</span>
+</li><li class="row" data-text="kubectl exec client -- curl -s http://drill.&lt;namespace&gt; service in another namespace: add .namespace to the name session 09">
+<div class="cmd"><code>kubectl exec client -- curl -s http://drill.&lt;namespace&gt;</code><button type="button" class="copy" data-cmd="kubectl exec client -- curl -s http://drill.&lt;namespace&gt;" aria-label="Copy command">Copy</button></div>
+<p class="desc">Service in another namespace: add .namespace to the name</p>
+<span class="src" title="Session 09">S09</span>
+</li><li class="row" data-text="kubectl exec client -- curl -s http://&lt;pod-ip&gt;:8080 call one pod directly; stops working once that pod is replaced session 07">
+<div class="cmd"><code>kubectl exec client -- curl -s http://&lt;pod-ip&gt;:8080</code><button type="button" class="copy" data-cmd="kubectl exec client -- curl -s http://&lt;pod-ip&gt;:8080" aria-label="Copy command">Copy</button></div>
+<p class="desc">Call one pod directly; stops working once that pod is replaced</p>
+<span class="src" title="Session 07">S07</span>
+</li><li class="row" data-text="kubectl get endpointslices -l kubernetes.io/service-name=drill pod ips the selector found. empty = no pod matches the selector session 07">
+<div class="cmd"><code>kubectl get endpointslices -l kubernetes.io/service-name=drill</code><button type="button" class="copy" data-cmd="kubectl get endpointslices -l kubernetes.io/service-name=drill" aria-label="Copy command">Copy</button></div>
+<p class="desc">Pod IPs the selector found. Empty = no pod matches the selector</p>
+<span class="src" title="Session 07">S07</span>
+</li><li class="row" data-text="kubectl describe endpointslices -l kubernetes.io/service-name=drill | grep -e &#x27;addresses|ready&#x27; which pod ips are ready: true (get traffic) or ready: false session 08">
+<div class="cmd"><code>kubectl describe endpointslices -l kubernetes.io/service-name=drill | grep -E &#x27;Addresses|Ready&#x27;</code><button type="button" class="copy" data-cmd="kubectl describe endpointslices -l kubernetes.io/service-name=drill | grep -E &#x27;Addresses|Ready&#x27;" aria-label="Copy command">Copy</button></div>
+<p class="desc">Which pod IPs are Ready: true (get traffic) or Ready: false</p>
+<span class="src" title="Session 08">S08</span>
+</li><li class="row" data-text="kubectl get endpoints older object, same info; prints a warning session 07">
+<div class="cmd"><code>kubectl get endpoints</code><button type="button" class="copy" data-cmd="kubectl get endpoints" aria-label="Copy command">Copy</button></div>
+<p class="desc">Older object, same info; prints a warning</p>
+<span class="src" title="Session 07">S07</span>
+</li><li class="row" data-text="kubectl exec client -- cat /etc/resolv.conf search line (adds your namespace) + nameserver 172.20.0.10 (coredns) session 07">
+<div class="cmd"><code>kubectl exec client -- cat /etc/resolv.conf</code><button type="button" class="copy" data-cmd="kubectl exec client -- cat /etc/resolv.conf" aria-label="Copy command">Copy</button></div>
+<p class="desc">search line (adds your namespace) + nameserver 172.20.0.10 (CoreDNS)</p>
+<span class="src" title="Session 07">S07</span>
+</li><li class="row" data-text="kubectl exec client -- nslookup drill resolves to drill.&lt;ns&gt;.svc.cluster.local → the clusterip session 07">
+<div class="cmd"><code>kubectl exec client -- nslookup drill</code><button type="button" class="copy" data-cmd="kubectl exec client -- nslookup drill" aria-label="Copy command">Copy</button></div>
+<p class="desc">Resolves to drill.&lt;ns&gt;.svc.cluster.local → the ClusterIP</p>
+<span class="src" title="Session 07">S07</span>
+</li><li class="row" data-text="kubectl apply -f service-drill-loadbalancer.yaml loadbalancer → aws nlb. students: forbidden, quota services.loadbalancers=0 session 07">
+<div class="cmd"><code>kubectl apply -f service-drill-loadbalancer.yaml</code><button type="button" class="copy" data-cmd="kubectl apply -f service-drill-loadbalancer.yaml" aria-label="Copy command">Copy</button></div>
+<p class="desc">LoadBalancer → AWS NLB. Students: Forbidden, quota services.loadbalancers=0</p>
+<span class="src" title="Session 07">S07</span>
+</li></ul>
+</section><section class="block" id="probes" data-g="k8s">
+<header class="block-head"><span class="grp grp-k8s">Kubernetes · cluster</span><h2>Probes &amp; the stuck rollout</h2><p>Readiness stops traffic, liveness restarts the container.</p></header>
+<ul class="rows"><li class="row" data-text="kubectl apply -f deployment-drill-readiness.yaml deployment with a readiness probe on / (passes) session 08">
+<div class="cmd"><code>kubectl apply -f deployment-drill-readiness.yaml</code><button type="button" class="copy" data-cmd="kubectl apply -f deployment-drill-readiness.yaml" aria-label="Copy command">Copy</button></div>
+<p class="desc">Deployment with a readiness probe on / (passes)</p>
+<span class="src" title="Session 08">S08</span>
+</li><li class="row" data-text="kubectl apply -f deployment-drill-readiness-wrong-path.yaml probe checks /health → 404 → new pod never ready session 08">
+<div class="cmd"><code>kubectl apply -f deployment-drill-readiness-wrong-path.yaml</code><button type="button" class="copy" data-cmd="kubectl apply -f deployment-drill-readiness-wrong-path.yaml" aria-label="Copy command">Copy</button></div>
+<p class="desc">Probe checks /health → 404 → new pod never ready</p>
+<span class="src" title="Session 08">S08</span>
+</li><li class="row" data-text="kubectl get pods -l app=drill -w watch the new pod sit at running, ready 0/1 session 08">
+<div class="cmd"><code>kubectl get pods -l app=drill -w</code><button type="button" class="copy" data-cmd="kubectl get pods -l app=drill -w" aria-label="Copy command">Copy</button></div>
+<p class="desc">Watch the new pod sit at Running, READY 0/1</p>
+<span class="src" title="Session 08">S08</span>
+</li><li class="row" data-text="kubectl rollout status deploy/drill waits on a stuck rollout; after 10 min: exceeded its progress deadline session 08">
+<div class="cmd"><code>kubectl rollout status deploy/drill</code><button type="button" class="copy" data-cmd="kubectl rollout status deploy/drill" aria-label="Copy command">Copy</button></div>
+<p class="desc">Waits on a stuck rollout; after 10 min: exceeded its progress deadline</p>
+<span class="src" title="Session 08">S08</span>
+</li><li class="row" data-text="kubectl get rs -l app=drill two replicasets: old one still serving, new one stuck session 08">
+<div class="cmd"><code>kubectl get rs -l app=drill</code><button type="button" class="copy" data-cmd="kubectl get rs -l app=drill" aria-label="Copy command">Copy</button></div>
+<p class="desc">Two ReplicaSets: old one still serving, new one stuck</p>
+<span class="src" title="Session 08">S08</span>
+</li><li class="row" data-text="kubectl describe pod &lt;new-pod&gt; events: readiness probe failed … statuscode: 404 session 08">
+<div class="cmd"><code>kubectl describe pod &lt;new-pod&gt;</code><button type="button" class="copy" data-cmd="kubectl describe pod &lt;new-pod&gt;" aria-label="Copy command">Copy</button></div>
+<p class="desc">Events: Readiness probe failed … statuscode: 404</p>
+<span class="src" title="Session 08">S08</span>
+</li><li class="row" data-text="kubectl apply -f pod-drill-liveness.yaml bare pod with a liveness probe that always fails session 08">
+<div class="cmd"><code>kubectl apply -f pod-drill-liveness.yaml</code><button type="button" class="copy" data-cmd="kubectl apply -f pod-drill-liveness.yaml" aria-label="Copy command">Copy</button></div>
+<p class="desc">Bare pod with a liveness probe that always fails</p>
+<span class="src" title="Session 08">S08</span>
+</li><li class="row" data-text="kubectl get pod drill-liveness -w restarts climbs, status flips to crashloopbackoff session 08">
+<div class="cmd"><code>kubectl get pod drill-liveness -w</code><button type="button" class="copy" data-cmd="kubectl get pod drill-liveness -w" aria-label="Copy command">Copy</button></div>
+<p class="desc">RESTARTS climbs, status flips to CrashLoopBackOff</p>
+<span class="src" title="Session 08">S08</span>
+</li><li class="row" data-text="kubectl describe pod drill-liveness liveness probe failed … will be restarted session 08">
+<div class="cmd"><code>kubectl describe pod drill-liveness</code><button type="button" class="copy" data-cmd="kubectl describe pod drill-liveness" aria-label="Copy command">Copy</button></div>
+<p class="desc">Liveness probe failed … will be restarted</p>
+<span class="src" title="Session 08">S08</span>
+</li></ul>
+</section><section class="block" id="ingress" data-g="k8s">
+<header class="block-head"><span class="grp grp-k8s">Kubernetes · cluster</span><h2>The Ingress</h2><p>Your hostname → your Service, on the class&#x27;s shared ALB, HTTPS at the load balancer.</p></header>
+<ul class="rows"><li class="row" data-text="kubectl get ingressclass the alb class (already created on this cluster) session 08">
+<div class="cmd"><code>kubectl get ingressclass</code><button type="button" class="copy" data-cmd="kubectl get ingressclass" aria-label="Copy command">Copy</button></div>
+<p class="desc">The alb class (already created on this cluster)</p>
+<span class="src" title="Session 08">S08</span>
+</li><li class="row" data-text="kubectl get ingressclassparams alb -o yaml certificate arn, group containers-26a, internet-facing session 08">
+<div class="cmd"><code>kubectl get ingressclassparams alb -o yaml</code><button type="button" class="copy" data-cmd="kubectl get ingressclassparams alb -o yaml" aria-label="Copy command">Copy</button></div>
+<p class="desc">Certificate ARN, group containers-26a, internet-facing</p>
+<span class="src" title="Session 08">S08</span>
+</li><li class="row" data-text="kubectl apply -f ingress-drill.yaml add your rule: &lt;ns&gt;.k8s.312school.com → drill service port 80 session 08">
+<div class="cmd"><code>kubectl apply -f ingress-drill.yaml</code><button type="button" class="copy" data-cmd="kubectl apply -f ingress-drill.yaml" aria-label="Copy command">Copy</button></div>
+<p class="desc">Add your rule: &lt;ns&gt;.k8s.312school.com → drill Service port 80</p>
+<span class="src" title="Session 08">S08</span>
+</li><li class="row" data-text="kubectl get ingress drill address appears after about a minute session 08">
+<div class="cmd"><code>kubectl get ingress drill</code><button type="button" class="copy" data-cmd="kubectl get ingress drill" aria-label="Copy command">Copy</button></div>
+<p class="desc">ADDRESS appears after about a minute</p>
+<span class="src" title="Session 08">S08</span>
+</li><li class="row" data-text="curl https://&lt;ns&gt;.k8s.312school.com through the shared alb to a ready pod session 08">
+<div class="cmd"><code>curl https://&lt;ns&gt;.k8s.312school.com</code><button type="button" class="copy" data-cmd="curl https://&lt;ns&gt;.k8s.312school.com" aria-label="Copy command">Copy</button></div>
+<p class="desc">Through the shared ALB to a ready pod</p>
+<span class="src" title="Session 08">S08</span>
+</li><li class="row" data-text="curl -si http://&lt;ns&gt;.k8s.312school.com | head -1 301 moved permanently → port 80 redirects to 443 session 08">
+<div class="cmd"><code>curl -sI http://&lt;ns&gt;.k8s.312school.com | head -1</code><button type="button" class="copy" data-cmd="curl -sI http://&lt;ns&gt;.k8s.312school.com | head -1" aria-label="Copy command">Copy</button></div>
+<p class="desc">301 Moved Permanently → port 80 redirects to 443</p>
+<span class="src" title="Session 08">S08</span>
+</li></ul>
+</section><section class="block" id="config" data-g="k8s">
+<header class="block-head"><span class="grp grp-k8s">Kubernetes · cluster</span><h2>ConfigMaps &amp; Secrets</h2><p>Settings outside the image. Copied into the container when it starts.</p></header>
+<ul class="rows"><li class="row" data-text="kubectl apply -f configmap-investment-app.yaml create the configmap (ordinary settings) session 09">
+<div class="cmd"><code>kubectl apply -f configmap-investment-app.yaml</code><button type="button" class="copy" data-cmd="kubectl apply -f configmap-investment-app.yaml" aria-label="Copy command">Copy</button></div>
+<p class="desc">Create the ConfigMap (ordinary settings)</p>
+<span class="src" title="Session 09">S09</span>
+</li><li class="row" data-text="kubectl get cm configmaps; data = number of keys session 09">
+<div class="cmd"><code>kubectl get cm</code><button type="button" class="copy" data-cmd="kubectl get cm" aria-label="Copy command">Copy</button></div>
+<p class="desc">ConfigMaps; DATA = number of keys</p>
+<span class="src" title="Session 09">S09</span>
+</li><li class="row" data-text="kubectl describe cm investment-app-config every key and value, in plain text session 09">
+<div class="cmd"><code>kubectl describe cm investment-app-config</code><button type="button" class="copy" data-cmd="kubectl describe cm investment-app-config" aria-label="Copy command">Copy</button></div>
+<p class="desc">Every key and value, in plain text</p>
+<span class="src" title="Session 09">S09</span>
+</li><li class="row" data-text="kubectl edit cm investment-app-config change the live object (running pods keep the old value) session 09">
+<div class="cmd"><code>kubectl edit cm investment-app-config</code><button type="button" class="copy" data-cmd="kubectl edit cm investment-app-config" aria-label="Copy command">Copy</button></div>
+<p class="desc">Change the live object (running pods keep the old value)</p>
+<span class="src" title="Session 09">S09</span>
+</li><li class="row" data-text="kubectl apply -f secret-investment-app.yaml create the secret (password, api key). never commit it with real values session 09">
+<div class="cmd"><code>kubectl apply -f secret-investment-app.yaml</code><button type="button" class="copy" data-cmd="kubectl apply -f secret-investment-app.yaml" aria-label="Copy command">Copy</button></div>
+<p class="desc">Create the Secret (password, API key). Never commit it with real values</p>
+<span class="src" title="Session 09">S09</span>
+</li><li class="row" data-text="kubectl get secret investment-app-secret type opaque, data 2 session 09">
+<div class="cmd"><code>kubectl get secret investment-app-secret</code><button type="button" class="copy" data-cmd="kubectl get secret investment-app-secret" aria-label="Copy command">Copy</button></div>
+<p class="desc">TYPE Opaque, DATA 2</p>
+<span class="src" title="Session 09">S09</span>
+</li><li class="row" data-text="kubectl describe secret investment-app-secret key sizes only, not the values session 09">
+<div class="cmd"><code>kubectl describe secret investment-app-secret</code><button type="button" class="copy" data-cmd="kubectl describe secret investment-app-secret" aria-label="Copy command">Copy</button></div>
+<p class="desc">Key sizes only, not the values</p>
+<span class="src" title="Session 09">S09</span>
+</li><li class="row" data-text="kubectl get secret investment-app-secret -o yaml values under data:, base64-encoded (not encrypted) session 09">
+<div class="cmd"><code>kubectl get secret investment-app-secret -o yaml</code><button type="button" class="copy" data-cmd="kubectl get secret investment-app-secret -o yaml" aria-label="Copy command">Copy</button></div>
+<p class="desc">Values under data:, base64-encoded (not encrypted)</p>
+<span class="src" title="Session 09">S09</span>
+</li><li class="row" data-text="kubectl get secret investment-app-secret -o jsonpath=&#x27;{.data.db_password}&#x27; | base64 -d decode one value = the plain password session 09">
+<div class="cmd"><code>kubectl get secret investment-app-secret -o jsonpath=&#x27;{.data.DB_PASSWORD}&#x27; | base64 -d</code><button type="button" class="copy" data-cmd="kubectl get secret investment-app-secret -o jsonpath=&#x27;{.data.DB_PASSWORD}&#x27; | base64 -d" aria-label="Copy command">Copy</button></div>
+<p class="desc">Decode one value = the plain password</p>
+<span class="src" title="Session 09">S09</span>
+</li><li class="row" data-text="kubectl describe pod -l app=investment-app where each env var comes from (not the value) session 09">
+<div class="cmd"><code>kubectl describe pod -l app=investment-app</code><button type="button" class="copy" data-cmd="kubectl describe pod -l app=investment-app" aria-label="Copy command">Copy</button></div>
+<p class="desc">Where each env var comes from (not the value)</p>
+<span class="src" title="Session 09">S09</span>
+</li><li class="row" data-text="kubectl exec deploy/investment-app -- env every variable the app sees, real values included session 09">
+<div class="cmd"><code>kubectl exec deploy/investment-app -- env</code><button type="button" class="copy" data-cmd="kubectl exec deploy/investment-app -- env" aria-label="Copy command">Copy</button></div>
+<p class="desc">Every variable the app sees, real values included</p>
+<span class="src" title="Session 09">S09</span>
+</li><li class="row" data-text="kubectl exec deploy/investment-app -- printenv ticker one variable session 09">
+<div class="cmd"><code>kubectl exec deploy/investment-app -- printenv TICKER</code><button type="button" class="copy" data-cmd="kubectl exec deploy/investment-app -- printenv TICKER" aria-label="Copy command">Copy</button></div>
+<p class="desc">One variable</p>
+<span class="src" title="Session 09">S09</span>
+</li><li class="row" data-text="kubectl rollout restart deploy/investment-app replace pods one by one so they copy the new values session 09">
+<div class="cmd"><code>kubectl rollout restart deploy/investment-app</code><button type="button" class="copy" data-cmd="kubectl rollout restart deploy/investment-app" aria-label="Copy command">Copy</button></div>
+<p class="desc">Replace pods one by one so they copy the new values</p>
+<span class="src" title="Session 09">S09</span>
+</li></ul>
+</section><section class="block" id="rbac" data-g="k8s">
+<header class="block-head"><span class="grp grp-k8s">Kubernetes · cluster</span><h2>Who may do what (RBAC &amp; read-only Claude)</h2><p>AWS check (who are you?), then RBAC check (what may you do?). Unauthorized = AWS failed, Forbidden = RBAC failed.</p></header>
+<ul class="rows"><li class="row" data-text="kubectl auth whoami the kubernetes user made from your sign-in: student:&lt;ns&gt;, groups students + system:authenticated session 10">
+<div class="cmd"><code>kubectl auth whoami</code><button type="button" class="copy" data-cmd="kubectl auth whoami" aria-label="Copy command">Copy</button></div>
+<p class="desc">The Kubernetes user made from your sign-in: student:&lt;ns&gt;, groups students + system:authenticated</p>
+<span class="src" title="Session 10">S10</span>
+</li><li class="row" data-text="kubectl auth can-i get secrets yes/no: may i do this here? changes nothing session 10">
+<div class="cmd"><code>kubectl auth can-i get secrets</code><button type="button" class="copy" data-cmd="kubectl auth can-i get secrets" aria-label="Copy command">Copy</button></div>
+<p class="desc">Yes/no: may I do this here? Changes nothing</p>
+<span class="src" title="Session 10">S10</span>
+</li><li class="row" data-text="kubectl auth can-i delete pods yes for students (clusterrole edit in your namespace) session 10">
+<div class="cmd"><code>kubectl auth can-i delete pods</code><button type="button" class="copy" data-cmd="kubectl auth can-i delete pods" aria-label="Copy command">Copy</button></div>
+<p class="desc">yes for students (ClusterRole edit in your namespace)</p>
+<span class="src" title="Session 10">S10</span>
+</li><li class="row" data-text="kubectl auth can-i list roles no: edit doesn&#x27;t include roles or rolebindings session 10">
+<div class="cmd"><code>kubectl auth can-i list roles</code><button type="button" class="copy" data-cmd="kubectl auth can-i list roles" aria-label="Copy command">Copy</button></div>
+<p class="desc">no: edit doesn&#x27;t include Roles or RoleBindings</p>
+<span class="src" title="Session 10">S10</span>
+</li><li class="row" data-text="kubectl auth can-i get secrets -n &lt;classmate&gt; no: no rolebinding in their namespace names you session 10">
+<div class="cmd"><code>kubectl auth can-i get secrets -n &lt;classmate&gt;</code><button type="button" class="copy" data-cmd="kubectl auth can-i get secrets -n &lt;classmate&gt;" aria-label="Copy command">Copy</button></div>
+<p class="desc">no: no RoleBinding in their namespace names you</p>
+<span class="src" title="Session 10">S10</span>
+</li><li class="row" data-text="kubectl get secrets -n &lt;classmate&gt; forbidden message = who (user), what (cannot list secrets), where (namespace) session 10">
+<div class="cmd"><code>kubectl get secrets -n &lt;classmate&gt;</code><button type="button" class="copy" data-cmd="kubectl get secrets -n &lt;classmate&gt;" aria-label="Copy command">Copy</button></div>
+<p class="desc">Forbidden message = who (User), what (cannot list secrets), where (namespace)</p>
+<span class="src" title="Session 10">S10</span>
+</li><li class="row" data-text="kubectl auth can-i get configmaps --as system:serviceaccount:&lt;ns&gt;:report-bot ask as another user/serviceaccount (instructor only; students can&#x27;t use --as) session 10">
+<div class="cmd"><code>kubectl auth can-i get configmaps --as system:serviceaccount:&lt;ns&gt;:report-bot</code><button type="button" class="copy" data-cmd="kubectl auth can-i get configmaps --as system:serviceaccount:&lt;ns&gt;:report-bot" aria-label="Copy command">Copy</button></div>
+<p class="desc">Ask as another user/ServiceAccount (instructor only; students can&#x27;t use --as)</p>
+<span class="src" title="Session 10">S10</span>
+</li><li class="row" data-text="kubectl describe pod -l app=investment-app | grep &#x27;service account&#x27; which serviceaccount the pod runs as (none named → default) session 10">
+<div class="cmd"><code>kubectl describe pod -l app=investment-app | grep &#x27;Service Account&#x27;</code><button type="button" class="copy" data-cmd="kubectl describe pod -l app=investment-app | grep &#x27;Service Account&#x27;" aria-label="Copy command">Copy</button></div>
+<p class="desc">Which ServiceAccount the pod runs as (none named → default)</p>
+<span class="src" title="Session 10">S10</span>
+</li><li class="row" data-text="kubectl get sa serviceaccounts in your namespace (sa = serviceaccount) session 10">
+<div class="cmd"><code>kubectl get sa</code><button type="button" class="copy" data-cmd="kubectl get sa" aria-label="Copy command">Copy</button></div>
+<p class="desc">ServiceAccounts in your namespace (sa = serviceaccount)</p>
+<span class="src" title="Session 10">S10</span>
+</li><li class="row" data-text="kubectl get clusterrole cluster-wide roles (no -n). system: ones belong to kubernetes session 11">
+<div class="cmd"><code>kubectl get clusterrole</code><button type="button" class="copy" data-cmd="kubectl get clusterrole" aria-label="Copy command">Copy</button></div>
+<p class="desc">Cluster-wide roles (no -n). system: ones belong to Kubernetes</p>
+<span class="src" title="Session 11">S11</span>
+</li><li class="row" data-text="kubectl get clusterrole edit -o yaml the rules inside edit (includes external-secrets.io resources) session 11">
+<div class="cmd"><code>kubectl get clusterrole edit -o yaml</code><button type="button" class="copy" data-cmd="kubectl get clusterrole edit -o yaml" aria-label="Copy command">Copy</button></div>
+<p class="desc">The rules inside edit (includes external-secrets.io resources)</p>
+<span class="src" title="Session 11">S11</span>
+</li><li class="row" data-text="kubectl get rolebinding -n &lt;ns&gt; rolebindings in a namespace (two per student: edit/view + namespace-reader) session 11">
+<div class="cmd"><code>kubectl get rolebinding -n &lt;ns&gt;</code><button type="button" class="copy" data-cmd="kubectl get rolebinding -n &lt;ns&gt;" aria-label="Copy command">Copy</button></div>
+<p class="desc">RoleBindings in a namespace (two per student: edit/view + namespace-reader)</p>
+<span class="src" title="Session 11">S11</span>
+</li><li class="row" data-text="kubectl get rolebinding &lt;name&gt; -o yaml roleref (which clusterrole) + subjects (which user) session 11">
+<div class="cmd"><code>kubectl get rolebinding &lt;name&gt; -o yaml</code><button type="button" class="copy" data-cmd="kubectl get rolebinding &lt;name&gt; -o yaml" aria-label="Copy command">Copy</button></div>
+<p class="desc">roleRef (which ClusterRole) + subjects (which user)</p>
+<span class="src" title="Session 11">S11</span>
+</li><li class="row" data-text="aws sso login --profile 312-cluster-readonly sign in with the read-only role containers26areadonly session 10">
+<div class="cmd"><code>aws sso login --profile 312-cluster-readonly</code><button type="button" class="copy" data-cmd="aws sso login --profile 312-cluster-readonly" aria-label="Copy command">Copy</button></div>
+<p class="desc">Sign in with the read-only role Containers26aReadOnly</p>
+<span class="src" title="Session 10">S10</span>
+</li><li class="row" data-text="aws eks update-kubeconfig --name containers-26a --region us-east-1 --profile 312-cluster-readonly --kubeconfig ~/.kube/readonly read-only context in its own file; ~/.kube/config stays unchanged (check the setup page) session 10">
+<div class="cmd"><code>aws eks update-kubeconfig --name containers-26a --region us-east-1 --profile 312-cluster-readonly --kubeconfig ~/.kube/readonly</code><button type="button" class="copy" data-cmd="aws eks update-kubeconfig --name containers-26a --region us-east-1 --profile 312-cluster-readonly --kubeconfig ~/.kube/readonly" aria-label="Copy command">Copy</button></div>
+<p class="desc">Read-only context in its own file; ~/.kube/config stays unchanged (check the setup page)</p>
+<span class="src" title="Session 10">S10</span>
+</li><li class="row" data-text="kubeconfig=~/.kube/readonly kubectl auth whoami readonly:&lt;ns&gt; = the read-only sign-in works session 10">
+<div class="cmd"><code>KUBECONFIG=~/.kube/readonly kubectl auth whoami</code><button type="button" class="copy" data-cmd="KUBECONFIG=~/.kube/readonly kubectl auth whoami" aria-label="Copy command">Copy</button></div>
+<p class="desc">readonly:&lt;ns&gt; = the read-only sign-in works</p>
+<span class="src" title="Session 10">S10</span>
+</li><li class="row" data-text="kubeconfig=~/.kube/readonly kubectl auth can-i get secrets no: view can&#x27;t read secrets session 10">
+<div class="cmd"><code>KUBECONFIG=~/.kube/readonly kubectl auth can-i get secrets</code><button type="button" class="copy" data-cmd="KUBECONFIG=~/.kube/readonly kubectl auth can-i get secrets" aria-label="Copy command">Copy</button></div>
+<p class="desc">no: view can&#x27;t read Secrets</p>
+<span class="src" title="Session 10">S10</span>
+</li><li class="row" data-text="kubeconfig=~/.kube/readonly aws_profile=312-cluster-readonly claude start claude code read-only: reads pods/logs/events, can&#x27;t change anything session 10">
+<div class="cmd"><code>KUBECONFIG=~/.kube/readonly AWS_PROFILE=312-cluster-readonly claude</code><button type="button" class="copy" data-cmd="KUBECONFIG=~/.kube/readonly AWS_PROFILE=312-cluster-readonly claude" aria-label="Copy command">Copy</button></div>
+<p class="desc">Start Claude Code read-only: reads pods/logs/events, can&#x27;t change anything</p>
+<span class="src" title="Session 10">S10</span>
+</li></ul>
+</section><section class="block" id="extsecrets" data-g="k8s">
+<header class="block-head"><span class="grp grp-k8s">Kubernetes · cluster</span><h2>External Secrets (password from AWS)</h2><p>Git holds the path, AWS Secrets Manager holds the value, the operator writes a normal Secret.</p></header>
+<ul class="rows"><li class="row" data-text="kubectl get all -n &lt;ns&gt; pods, services, deployments, replicasets at once. not secrets or serviceaccounts session 11">
+<div class="cmd"><code>kubectl get all -n &lt;ns&gt;</code><button type="button" class="copy" data-cmd="kubectl get all -n &lt;ns&gt;" aria-label="Copy command">Copy</button></div>
+<p class="desc">Pods, Services, Deployments, ReplicaSets at once. Not Secrets or ServiceAccounts</p>
+<span class="src" title="Session 11">S11</span>
+</li><li class="row" data-text="kubectl get secretstore aws-secrets-manager -o yaml region + the serviceaccount (secrets-reader) it signs in to aws as session 11">
+<div class="cmd"><code>kubectl get secretstore aws-secrets-manager -o yaml</code><button type="button" class="copy" data-cmd="kubectl get secretstore aws-secrets-manager -o yaml" aria-label="Copy command">Copy</button></div>
+<p class="desc">Region + the ServiceAccount (secrets-reader) it signs in to AWS as</p>
+<span class="src" title="Session 11">S11</span>
+</li><li class="row" data-text="kubectl delete secret investment-app-secret remove the hand-made secret so the operator writes its own session 11">
+<div class="cmd"><code>kubectl delete secret investment-app-secret</code><button type="button" class="copy" data-cmd="kubectl delete secret investment-app-secret" aria-label="Copy command">Copy</button></div>
+<p class="desc">Remove the hand-made Secret so the operator writes its own</p>
+<span class="src" title="Session 11">S11</span>
+</li><li class="row" data-text="kubectl apply -f externalsecret-investment-app.yaml create the externalsecret (key: /26a/&lt;ns&gt;/investment-app). safe to commit session 11">
+<div class="cmd"><code>kubectl apply -f externalsecret-investment-app.yaml</code><button type="button" class="copy" data-cmd="kubectl apply -f externalsecret-investment-app.yaml" aria-label="Copy command">Copy</button></div>
+<p class="desc">Create the ExternalSecret (key: /26a/&lt;ns&gt;/investment-app). Safe to commit</p>
+<span class="src" title="Session 11">S11</span>
+</li><li class="row" data-text="kubectl get externalsecret secretsynced + ready true = it worked. secretsyncederror = couldn&#x27;t read aws session 11">
+<div class="cmd"><code>kubectl get externalsecret</code><button type="button" class="copy" data-cmd="kubectl get externalsecret" aria-label="Copy command">Copy</button></div>
+<p class="desc">SecretSynced + READY True = it worked. SecretSyncedError = couldn&#x27;t read AWS</p>
+<span class="src" title="Session 11">S11</span>
+</li><li class="row" data-text="kubectl get secret investment-app-secret -o jsonpath=&#x27;{.data.db_password}&#x27; | base64 -d after sync: the random aws value, not change-me-class-password session 11">
+<div class="cmd"><code>kubectl get secret investment-app-secret -o jsonpath=&#x27;{.data.DB_PASSWORD}&#x27; | base64 -d</code><button type="button" class="copy" data-cmd="kubectl get secret investment-app-secret -o jsonpath=&#x27;{.data.DB_PASSWORD}&#x27; | base64 -d" aria-label="Copy command">Copy</button></div>
+<p class="desc">After sync: the random AWS value, not change-me-class-password</p>
+<span class="src" title="Session 11">S11</span>
+</li><li class="row" data-text="kubectl apply -f externalsecret-other-path.yaml ask for a classmate&#x27;s path. kubernetes accepts it session 11">
+<div class="cmd"><code>kubectl apply -f externalsecret-other-path.yaml</code><button type="button" class="copy" data-cmd="kubectl apply -f externalsecret-other-path.yaml" aria-label="Copy command">Copy</button></div>
+<p class="desc">Ask for a classmate&#x27;s path. Kubernetes accepts it</p>
+<span class="src" title="Session 11">S11</span>
+</li><li class="row" data-text="kubectl describe externalsecret other-path events: accessdeniedexception … getsecretvalue on a classmate&#x27;s path session 11">
+<div class="cmd"><code>kubectl describe externalsecret other-path</code><button type="button" class="copy" data-cmd="kubectl describe externalsecret other-path" aria-label="Copy command">Copy</button></div>
+<p class="desc">Events: AccessDeniedException … GetSecretValue on a classmate&#x27;s path</p>
+<span class="src" title="Session 11">S11</span>
+</li><li class="row" data-text="kubectl delete externalsecret other-path clean up the failure demo session 11">
+<div class="cmd"><code>kubectl delete externalsecret other-path</code><button type="button" class="copy" data-cmd="kubectl delete externalsecret other-path" aria-label="Copy command">Copy</button></div>
+<p class="desc">Clean up the failure demo</p>
+<span class="src" title="Session 11">S11</span>
+</li><li class="row" data-text="kubectl get pods -n external-secrets the operator&#x27;s own pods session 11">
+<div class="cmd"><code>kubectl get pods -n external-secrets</code><button type="button" class="copy" data-cmd="kubectl get pods -n external-secrets" aria-label="Copy command">Copy</button></div>
+<p class="desc">The operator&#x27;s own pods</p>
+<span class="src" title="Session 11">S11</span>
+</li><li class="row" data-text="kubectl logs &lt;operator-pod&gt; -n external-secrets operator log: region, credentials, sync errors session 11">
+<div class="cmd"><code>kubectl logs &lt;operator-pod&gt; -n external-secrets</code><button type="button" class="copy" data-cmd="kubectl logs &lt;operator-pod&gt; -n external-secrets" aria-label="Copy command">Copy</button></div>
+<p class="desc">Operator log: region, credentials, sync errors</p>
+<span class="src" title="Session 11">S11</span>
+</li><li class="row" data-text="kubectl rollout restart deploy/postgres deploy/investment-app new pods read the new secret (after sync or rotation) session 11">
+<div class="cmd"><code>kubectl rollout restart deploy/postgres deploy/investment-app</code><button type="button" class="copy" data-cmd="kubectl rollout restart deploy/postgres deploy/investment-app" aria-label="Copy command">Copy</button></div>
+<p class="desc">New pods read the new Secret (after sync or rotation)</p>
+<span class="src" title="Session 11">S11</span>
+</li></ul>
+</section><section class="block" id="resources" data-g="k8s">
+<header class="block-head"><span class="grp grp-k8s">Kubernetes · cluster</span><h2>Requests, limits &amp; quotas</h2><p>Request = where it may land. Limit = how far it may go. CPU over → throttled, memory over → OOMKilled.</p></header>
+<ul class="rows"><li class="row" data-text="kubectl get deploy,pods,svc -o wide which node each pod landed on (a namespace spans nodes) session 11">
+<div class="cmd"><code>kubectl get deploy,pods,svc -o wide</code><button type="button" class="copy" data-cmd="kubectl get deploy,pods,svc -o wide" aria-label="Copy command">Copy</button></div>
+<p class="desc">Which node each pod landed on (a namespace spans nodes)</p>
+<span class="src" title="Session 11">S11</span>
+</li><li class="row" data-text="kubectl top pods -l app=investment-app current cpu (m) and memory (mi) per pod. a snapshot, not a history session 11">
+<div class="cmd"><code>kubectl top pods -l app=investment-app</code><button type="button" class="copy" data-cmd="kubectl top pods -l app=investment-app" aria-label="Copy command">Copy</button></div>
+<p class="desc">Current CPU (m) and memory (Mi) per pod. A snapshot, not a history</p>
+<span class="src" title="Session 11">S11</span>
+</li><li class="row" data-text="kubectl describe pods -l app=investment-app last state: terminated, reason: oomkilled · failedscheduling reason session 11">
+<div class="cmd"><code>kubectl describe pods -l app=investment-app</code><button type="button" class="copy" data-cmd="kubectl describe pods -l app=investment-app" aria-label="Copy command">Copy</button></div>
+<p class="desc">Last State: Terminated, Reason: OOMKilled · FailedScheduling reason</p>
+<span class="src" title="Session 11">S11</span>
+</li><li class="row" data-text="kubectl patch deployment investment-app --type=strategic --patch-file investment-app-resources.patch.yaml add requests/limits to the live deployment. changes the cluster, not your file session 12">
+<div class="cmd"><code>kubectl patch deployment investment-app --type=strategic --patch-file investment-app-resources.patch.yaml</code><button type="button" class="copy" data-cmd="kubectl patch deployment investment-app --type=strategic --patch-file investment-app-resources.patch.yaml" aria-label="Copy command">Copy</button></div>
+<p class="desc">Add requests/limits to the live Deployment. Changes the cluster, not your file</p>
+<span class="src" title="Session 12">S12</span>
+</li><li class="row" data-text="kubectl rollout status deployment/investment-app --timeout=120s watch the patched rollout, up to 120 s session 12">
+<div class="cmd"><code>kubectl rollout status deployment/investment-app --timeout=120s</code><button type="button" class="copy" data-cmd="kubectl rollout status deployment/investment-app --timeout=120s" aria-label="Copy command">Copy</button></div>
+<p class="desc">Watch the patched rollout, up to 120 s</p>
+<span class="src" title="Session 12">S12</span>
+</li><li class="row" data-text="kubectl get deployment investment-app -o yaml resources: {} = nothing declared; after the patch, requests + limits session 12">
+<div class="cmd"><code>kubectl get deployment investment-app -o yaml</code><button type="button" class="copy" data-cmd="kubectl get deployment investment-app -o yaml" aria-label="Copy command">Copy</button></div>
+<p class="desc">resources: {} = nothing declared; after the patch, requests + limits</p>
+<span class="src" title="Session 12">S12</span>
+</li><li class="row" data-text="kubectl edit deploy investment-app change the live object in vi (patch does the same without the editor) session 12">
+<div class="cmd"><code>kubectl edit deploy investment-app</code><button type="button" class="copy" data-cmd="kubectl edit deploy investment-app" aria-label="Copy command">Copy</button></div>
+<p class="desc">Change the live object in vi (patch does the same without the editor)</p>
+<span class="src" title="Session 12">S12</span>
+</li><li class="row" data-text="kubectl get limitrange -o yaml namespace defaults (50m/64mi req, 250m/256mi lim) + max per container (1 cpu / 1gi) session 12">
+<div class="cmd"><code>kubectl get limitrange -o yaml</code><button type="button" class="copy" data-cmd="kubectl get limitrange -o yaml" aria-label="Copy command">Copy</button></div>
+<p class="desc">Namespace defaults (50m/64Mi req, 250m/256Mi lim) + max per container (1 CPU / 1Gi)</p>
+<span class="src" title="Session 12">S12</span>
+</li><li class="row" data-text="kubectl get pods -l app=investment-app -o yaml the requests/limits each pod actually got (yours or limitrange defaults) session 12">
+<div class="cmd"><code>kubectl get pods -l app=investment-app -o yaml</code><button type="button" class="copy" data-cmd="kubectl get pods -l app=investment-app -o yaml" aria-label="Copy command">Copy</button></div>
+<p class="desc">The requests/limits each pod actually got (yours or LimitRange defaults)</p>
+<span class="src" title="Session 12">S12</span>
+</li><li class="row" data-text="kubectl describe resourcequota used vs hard: 500m cpu req, 1gi mem req, 2 cpu / 2gi limits, 8 pods session 12">
+<div class="cmd"><code>kubectl describe resourcequota</code><button type="button" class="copy" data-cmd="kubectl describe resourcequota" aria-label="Copy command">Copy</button></div>
+<p class="desc">Used vs Hard: 500m CPU req, 1Gi mem req, 2 CPU / 2Gi limits, 8 pods</p>
+<span class="src" title="Session 12">S12</span>
+</li><li class="row" data-text="kubectl apply -f deployment-quota-failure.yaml a 600m deployment the quota refuses: no pod is created session 12">
+<div class="cmd"><code>kubectl apply -f deployment-quota-failure.yaml</code><button type="button" class="copy" data-cmd="kubectl apply -f deployment-quota-failure.yaml" aria-label="Copy command">Copy</button></div>
+<p class="desc">A 600m Deployment the quota refuses: no pod is created</p>
+<span class="src" title="Session 12">S12</span>
+</li><li class="row" data-text="kubectl get pods -l app=unit5-quota no resources found: refused before scheduling (not pending) session 12">
+<div class="cmd"><code>kubectl get pods -l app=unit5-quota</code><button type="button" class="copy" data-cmd="kubectl get pods -l app=unit5-quota" aria-label="Copy command">Copy</button></div>
+<p class="desc">No resources found: refused before scheduling (not Pending)</p>
+<span class="src" title="Session 12">S12</span>
+</li><li class="row" data-text="kubectl describe rs -l app=unit5-quota failedcreate … exceeded quota … limited: requests.cpu=500m session 12">
+<div class="cmd"><code>kubectl describe rs -l app=unit5-quota</code><button type="button" class="copy" data-cmd="kubectl describe rs -l app=unit5-quota" aria-label="Copy command">Copy</button></div>
+<p class="desc">FailedCreate … exceeded quota … limited: requests.cpu=500m</p>
+<span class="src" title="Session 12">S12</span>
+</li><li class="row" data-text="kubectl delete -f deployment-quota-failure.yaml clean up the quota demo session 12">
+<div class="cmd"><code>kubectl delete -f deployment-quota-failure.yaml</code><button type="button" class="copy" data-cmd="kubectl delete -f deployment-quota-failure.yaml" aria-label="Copy command">Copy</button></div>
+<p class="desc">Clean up the quota demo</p>
+<span class="src" title="Session 12">S12</span>
+</li></ul>
+</section><section class="block" id="hpa" data-g="k8s">
+<header class="block-head"><span class="grp grp-k8s">Kubernetes · cluster</span><h2>The HPA (Horizontal Pod Autoscaler)</h2><p>More CPU, more pods. Utilization = use ÷ request × 100. No CPU request = no CPU scaling.</p></header>
+<ul class="rows"><li class="row" data-text="kubectl apply -f deployment-cpu-demo.yaml the unit5-cpu deployment + service (pod requests 50m) session 12">
+<div class="cmd"><code>kubectl apply -f deployment-cpu-demo.yaml</code><button type="button" class="copy" data-cmd="kubectl apply -f deployment-cpu-demo.yaml" aria-label="Copy command">Copy</button></div>
+<p class="desc">The unit5-cpu Deployment + Service (pod requests 50m)</p>
+<span class="src" title="Session 12">S12</span>
+</li><li class="row" data-text="kubectl apply -f hpa-cpu-demo.yaml hpa: target 60% of the request, 1–2 replicas session 12">
+<div class="cmd"><code>kubectl apply -f hpa-cpu-demo.yaml</code><button type="button" class="copy" data-cmd="kubectl apply -f hpa-cpu-demo.yaml" aria-label="Copy command">Copy</button></div>
+<p class="desc">HPA: target 60% of the request, 1–2 replicas</p>
+<span class="src" title="Session 12">S12</span>
+</li><li class="row" data-text="kubectl get hpa targets (cpu: 2%/60%), minpods, maxpods, replicas. &lt;unknown&gt; at first is normal session 12">
+<div class="cmd"><code>kubectl get hpa</code><button type="button" class="copy" data-cmd="kubectl get hpa" aria-label="Copy command">Copy</button></div>
+<p class="desc">TARGETS (cpu: 2%/60%), MINPODS, MAXPODS, REPLICAS. &lt;unknown&gt; at first is normal</p>
+<span class="src" title="Session 12">S12</span>
+</li><li class="row" data-text="kubectl apply -f pod-load.yaml a client that sends requests for 3 minutes session 12">
+<div class="cmd"><code>kubectl apply -f pod-load.yaml</code><button type="button" class="copy" data-cmd="kubectl apply -f pod-load.yaml" aria-label="Copy command">Copy</button></div>
+<p class="desc">A client that sends requests for 3 minutes</p>
+<span class="src" title="Session 12">S12</span>
+</li><li class="row" data-text="kubectl get hpa unit5-cpu --watch live: target climbs, replicas 1 → 2. ctrl-c to stop session 12">
+<div class="cmd"><code>kubectl get hpa unit5-cpu --watch</code><button type="button" class="copy" data-cmd="kubectl get hpa unit5-cpu --watch" aria-label="Copy command">Copy</button></div>
+<p class="desc">Live: target climbs, REPLICAS 1 → 2. Ctrl-C to stop</p>
+<span class="src" title="Session 12">S12</span>
+</li><li class="row" data-text="kubectl top pods -l app=unit5-cpu cpu per demo pod under load (~129m) session 12">
+<div class="cmd"><code>kubectl top pods -l app=unit5-cpu</code><button type="button" class="copy" data-cmd="kubectl top pods -l app=unit5-cpu" aria-label="Copy command">Copy</button></div>
+<p class="desc">CPU per demo pod under load (~129m)</p>
+<span class="src" title="Session 12">S12</span>
+</li><li class="row" data-text="kubectl describe hpa unit5-cpu events: successfulrescale … new size: 2 session 12">
+<div class="cmd"><code>kubectl describe hpa unit5-cpu</code><button type="button" class="copy" data-cmd="kubectl describe hpa unit5-cpu" aria-label="Copy command">Copy</button></div>
+<p class="desc">Events: SuccessfulRescale … New size: 2</p>
+<span class="src" title="Session 12">S12</span>
+</li><li class="row" data-text="kubectl logs pod-load how many http requests the load pod completed session 12">
+<div class="cmd"><code>kubectl logs pod-load</code><button type="button" class="copy" data-cmd="kubectl logs pod-load" aria-label="Copy command">Copy</button></div>
+<p class="desc">How many HTTP requests the load pod completed</p>
+<span class="src" title="Session 12">S12</span>
+</li><li class="row" data-text="kubectl delete -f pod-load.yaml -f hpa-cpu-demo.yaml -f deployment-cpu-demo.yaml --ignore-not-found clean up the hpa demo session 12">
+<div class="cmd"><code>kubectl delete -f pod-load.yaml -f hpa-cpu-demo.yaml -f deployment-cpu-demo.yaml --ignore-not-found</code><button type="button" class="copy" data-cmd="kubectl delete -f pod-load.yaml -f hpa-cpu-demo.yaml -f deployment-cpu-demo.yaml --ignore-not-found" aria-label="Copy command">Copy</button></div>
+<p class="desc">Clean up the HPA demo</p>
+<span class="src" title="Session 12">S12</span>
+</li></ul>
+</section><section class="block" id="storage" data-g="k8s">
+<header class="block-head"><span class="grp grp-k8s">Kubernetes · cluster</span><h2>Storage (PVC, StorageClass, PV)</h2><p>The pod is temporary; the claim keeps the data on its own EBS disk.</p></header>
+<ul class="rows"><li class="row" data-text="kubectl apply -f postgres-ephemeral.yaml postgres with no volume: its table is lost when the pod is replaced session 13">
+<div class="cmd"><code>kubectl apply -f postgres-ephemeral.yaml</code><button type="button" class="copy" data-cmd="kubectl apply -f postgres-ephemeral.yaml" aria-label="Copy command">Copy</button></div>
+<p class="desc">Postgres with no volume: its table is lost when the pod is replaced</p>
+<span class="src" title="Session 13">S13</span>
+</li><li class="row" data-text="kubectl exec -i deployment/unit6-postgres -- sh -ec &#x27;psql -u &quot;$postgres_user&quot; -d &quot;$postgres_db&quot; -v on_error_stop=1&#x27; &lt; schema.sql run a sql file from your laptop inside the postgres pod session 13">
+<div class="cmd"><code>kubectl exec -i deployment/unit6-postgres -- sh -ec &#x27;psql -U &quot;$POSTGRES_USER&quot; -d &quot;$POSTGRES_DB&quot; -v ON_ERROR_STOP=1&#x27; &lt; schema.sql</code><button type="button" class="copy" data-cmd="kubectl exec -i deployment/unit6-postgres -- sh -ec &#x27;psql -U &quot;$POSTGRES_USER&quot; -d &quot;$POSTGRES_DB&quot; -v ON_ERROR_STOP=1&#x27; &lt; schema.sql" aria-label="Copy command">Copy</button></div>
+<p class="desc">Run a SQL file from your laptop inside the Postgres pod</p>
+<span class="src" title="Session 13">S13</span>
+</li><li class="row" data-text="kubectl exec deployment/unit6-postgres -- sh -ec &#x27;psql -u &quot;$postgres_user&quot; -d &quot;$postgres_db&quot; -c &quot;select side, price from trades;&quot;&#x27; is the trade still there after the pod was replaced? session 13">
+<div class="cmd"><code>kubectl exec deployment/unit6-postgres -- sh -ec &#x27;psql -U &quot;$POSTGRES_USER&quot; -d &quot;$POSTGRES_DB&quot; -c &quot;SELECT side, price FROM trades;&quot;&#x27;</code><button type="button" class="copy" data-cmd="kubectl exec deployment/unit6-postgres -- sh -ec &#x27;psql -U &quot;$POSTGRES_USER&quot; -d &quot;$POSTGRES_DB&quot; -c &quot;SELECT side, price FROM trades;&quot;&#x27;" aria-label="Copy command">Copy</button></div>
+<p class="desc">Is the trade still there after the pod was replaced?</p>
+<span class="src" title="Session 13">S13</span>
+</li><li class="row" data-text="kubectl delete pod -l app=unit6-postgres &quot;the pod crashed&quot;: the deployment makes a fresh one session 13">
+<div class="cmd"><code>kubectl delete pod -l app=unit6-postgres</code><button type="button" class="copy" data-cmd="kubectl delete pod -l app=unit6-postgres" aria-label="Copy command">Copy</button></div>
+<p class="desc">&quot;The pod crashed&quot;: the Deployment makes a fresh one</p>
+<span class="src" title="Session 13">S13</span>
+</li><li class="row" data-text="kubectl get sc storageclasses: unit6-ebs (gp3, encrypted, delete) + the default gp2 session 13">
+<div class="cmd"><code>kubectl get sc</code><button type="button" class="copy" data-cmd="kubectl get sc" aria-label="Copy command">Copy</button></div>
+<p class="desc">StorageClasses: unit6-ebs (gp3, encrypted, Delete) + the default gp2</p>
+<span class="src" title="Session 13">S13</span>
+</li><li class="row" data-text="kubectl scale deployment/unit6-postgres --replicas=0 stop the ephemeral postgres before switching to the claim session 13">
+<div class="cmd"><code>kubectl scale deployment/unit6-postgres --replicas=0</code><button type="button" class="copy" data-cmd="kubectl scale deployment/unit6-postgres --replicas=0" aria-label="Copy command">Copy</button></div>
+<p class="desc">Stop the ephemeral Postgres before switching to the claim</p>
+<span class="src" title="Session 13">S13</span>
+</li><li class="row" data-text="kubectl apply -f pvc.yaml create the claim (size, access mode, storageclass) session 13">
+<div class="cmd"><code>kubectl apply -f pvc.yaml</code><button type="button" class="copy" data-cmd="kubectl apply -f pvc.yaml" aria-label="Copy command">Copy</button></div>
+<p class="desc">Create the claim (size, access mode, StorageClass)</p>
+<span class="src" title="Session 13">S13</span>
+</li><li class="row" data-text="kubectl get pvc postgres-data-unit6 pending is normal until a pod uses it (waitforfirstconsumer) session 13">
+<div class="cmd"><code>kubectl get pvc postgres-data-unit6</code><button type="button" class="copy" data-cmd="kubectl get pvc postgres-data-unit6" aria-label="Copy command">Copy</button></div>
+<p class="desc">Pending is normal until a pod uses it (WaitForFirstConsumer)</p>
+<span class="src" title="Session 13">S13</span>
+</li><li class="row" data-text="kubectl describe pvc postgres-data-unit6 still pending after the pod exists? events say why session 13">
+<div class="cmd"><code>kubectl describe pvc postgres-data-unit6</code><button type="button" class="copy" data-cmd="kubectl describe pvc postgres-data-unit6" aria-label="Copy command">Copy</button></div>
+<p class="desc">Still Pending after the pod exists? Events say why</p>
+<span class="src" title="Session 13">S13</span>
+</li><li class="row" data-text="kubectl apply -f postgres-persistent.yaml postgres that mounts the claim at /var/lib/postgresql/data session 13">
+<div class="cmd"><code>kubectl apply -f postgres-persistent.yaml</code><button type="button" class="copy" data-cmd="kubectl apply -f postgres-persistent.yaml" aria-label="Copy command">Copy</button></div>
+<p class="desc">Postgres that mounts the claim at /var/lib/postgresql/data</p>
+<span class="src" title="Session 13">S13</span>
+</li><li class="row" data-text="kubectl get pvc,pv claim bound to a pv nobody wrote (made by dynamic provisioning) session 13">
+<div class="cmd"><code>kubectl get pvc,pv</code><button type="button" class="copy" data-cmd="kubectl get pvc,pv" aria-label="Copy command">Copy</button></div>
+<p class="desc">Claim Bound to a PV nobody wrote (made by dynamic provisioning)</p>
+<span class="src" title="Session 13">S13</span>
+</li></ul>
+</section><section class="block" id="jobs" data-g="k8s">
+<header class="block-head"><span class="grp grp-k8s">Kubernetes · cluster</span><h2>Jobs &amp; CronJobs</h2><p>A Job runs until exit 0, then stops. A CronJob makes a new Job on a schedule.</p></header>
+<ul class="rows"><li class="row" data-text="kubectl get svc unit6-db the service the job connects to. missing = could not translate host name session 13">
+<div class="cmd"><code>kubectl get svc unit6-db</code><button type="button" class="copy" data-cmd="kubectl get svc unit6-db" aria-label="Copy command">Copy</button></div>
+<p class="desc">The Service the Job connects to. Missing = could not translate host name</p>
+<span class="src" title="Session 13">S13</span>
+</li><li class="row" data-text="kubectl create configmap unit6-schema --from-file=schema.sql --dry-run=client -o yaml | kubectl apply -f - create-or-update a configmap from a file in one line session 13">
+<div class="cmd"><code>kubectl create configmap unit6-schema --from-file=schema.sql --dry-run=client -o yaml | kubectl apply -f -</code><button type="button" class="copy" data-cmd="kubectl create configmap unit6-schema --from-file=schema.sql --dry-run=client -o yaml | kubectl apply -f -" aria-label="Copy command">Copy</button></div>
+<p class="desc">Create-or-update a ConfigMap from a file in one line</p>
+<span class="src" title="Session 13">S13</span>
+</li><li class="row" data-text="kubectl apply -f schema-job.yaml run the schema job (psql creates the tables) session 13">
+<div class="cmd"><code>kubectl apply -f schema-job.yaml</code><button type="button" class="copy" data-cmd="kubectl apply -f schema-job.yaml" aria-label="Copy command">Copy</button></div>
+<p class="desc">Run the schema Job (psql creates the tables)</p>
+<span class="src" title="Session 13">S13</span>
+</li><li class="row" data-text="kubectl get jobs completions 1/1 = done, 0/1 = not yet or failed session 13">
+<div class="cmd"><code>kubectl get jobs</code><button type="button" class="copy" data-cmd="kubectl get jobs" aria-label="Copy command">Copy</button></div>
+<p class="desc">COMPLETIONS 1/1 = done, 0/1 = not yet or failed</p>
+<span class="src" title="Session 13">S13</span>
+</li><li class="row" data-text="kubectl wait --for=condition=complete job/unit6-schema --timeout=180s block until the job completes, then deploy the app session 13">
+<div class="cmd"><code>kubectl wait --for=condition=complete job/unit6-schema --timeout=180s</code><button type="button" class="copy" data-cmd="kubectl wait --for=condition=complete job/unit6-schema --timeout=180s" aria-label="Copy command">Copy</button></div>
+<p class="desc">Block until the Job completes, then deploy the app</p>
+<span class="src" title="Session 13">S13</span>
+</li><li class="row" data-text="kubectl logs job/unit6-schema what the job&#x27;s pod printed. read it before cleanup deletes the pod session 13">
+<div class="cmd"><code>kubectl logs job/unit6-schema</code><button type="button" class="copy" data-cmd="kubectl logs job/unit6-schema" aria-label="Copy command">Copy</button></div>
+<p class="desc">What the Job&#x27;s pod printed. Read it before cleanup deletes the pod</p>
+<span class="src" title="Session 13">S13</span>
+</li><li class="row" data-text="kubectl describe job unit6-schema backofflimitexceeded = it failed backofflimit times session 13">
+<div class="cmd"><code>kubectl describe job unit6-schema</code><button type="button" class="copy" data-cmd="kubectl describe job unit6-schema" aria-label="Copy command">Copy</button></div>
+<p class="desc">BackoffLimitExceeded = it failed backoffLimit times</p>
+<span class="src" title="Session 13">S13</span>
+</li><li class="row" data-text="kubectl delete -f schema-job.yaml &amp;&amp; kubectl apply -f schema-job.yaml rerun after a fix: a corrected run needs a fresh job session 13">
+<div class="cmd"><code>kubectl delete -f schema-job.yaml &amp;&amp; kubectl apply -f schema-job.yaml</code><button type="button" class="copy" data-cmd="kubectl delete -f schema-job.yaml &amp;&amp; kubectl apply -f schema-job.yaml" aria-label="Copy command">Copy</button></div>
+<p class="desc">Rerun after a fix: a corrected run needs a fresh Job</p>
+<span class="src" title="Session 13">S13</span>
+</li><li class="row" data-text="kubectl get cronjobs cronjobs: schedule, last schedule, active session 13">
+<div class="cmd"><code>kubectl get cronjobs</code><button type="button" class="copy" data-cmd="kubectl get cronjobs" aria-label="Copy command">Copy</button></div>
+<p class="desc">CronJobs: SCHEDULE, LAST SCHEDULE, ACTIVE</p>
+<span class="src" title="Session 13">S13</span>
+</li></ul>
+</section><section class="block" id="debug" data-g="k8s">
+<header class="block-head"><span class="grp grp-k8s">Kubernetes · cluster</span><h2>Debug &amp; clean up</h2><p>get → describe → logs, then make room (quota is 8 pods).</p></header>
+<ul class="rows"><li class="row" data-text="kubectl get pods 1. the status word tells you where to look next session 06">
+<div class="cmd"><code>kubectl get pods</code><button type="button" class="copy" data-cmd="kubectl get pods" aria-label="Copy command">Copy</button></div>
+<p class="desc">1. The status word tells you where to look next</p>
+<span class="src" title="Session 06">S06</span>
+</li><li class="row" data-text="kubectl describe pod &lt;pod&gt; 2. events: imagepullbackoff → not found (bad tag) or forbidden (repo policy) session 06">
+<div class="cmd"><code>kubectl describe pod &lt;pod&gt;</code><button type="button" class="copy" data-cmd="kubectl describe pod &lt;pod&gt;" aria-label="Copy command">Copy</button></div>
+<p class="desc">2. Events: ImagePullBackOff → not found (bad tag) or forbidden (repo policy)</p>
+<span class="src" title="Session 06">S06</span>
+</li><li class="row" data-text="kubectl logs &lt;pod&gt; 3. crashloopbackoff → exec format error or a traceback like keyerror: &#x27;db_host&#x27; session 06">
+<div class="cmd"><code>kubectl logs &lt;pod&gt;</code><button type="button" class="copy" data-cmd="kubectl logs &lt;pod&gt;" aria-label="Copy command">Copy</button></div>
+<p class="desc">3. CrashLoopBackOff → exec format error or a traceback like KeyError: &#x27;DB_HOST&#x27;</p>
+<span class="src" title="Session 06">S06</span>
+</li><li class="row" data-text="kubectl apply -f broken/ apply every file in a folder session 06">
+<div class="cmd"><code>kubectl apply -f broken/</code><button type="button" class="copy" data-cmd="kubectl apply -f broken/" aria-label="Copy command">Copy</button></div>
+<p class="desc">Apply every file in a folder</p>
+<span class="src" title="Session 06">S06</span>
+</li><li class="row" data-text="time kubectl delete pod drill time a delete: exec form ~3 s, shell form ~32 s session 06">
+<div class="cmd"><code>time kubectl delete pod drill</code><button type="button" class="copy" data-cmd="time kubectl delete pod drill" aria-label="Copy command">Copy</button></div>
+<p class="desc">Time a delete: exec form ~3 s, shell form ~32 s</p>
+<span class="src" title="Session 06">S06</span>
+</li><li class="row" data-text="kubectl delete -f . -f broken/ --ignore-not-found delete everything from these files; skip what&#x27;s already gone session 06">
+<div class="cmd"><code>kubectl delete -f . -f broken/ --ignore-not-found</code><button type="button" class="copy" data-cmd="kubectl delete -f . -f broken/ --ignore-not-found" aria-label="Copy command">Copy</button></div>
+<p class="desc">Delete everything from these files; skip what&#x27;s already gone</p>
+<span class="src" title="Session 06">S06</span>
+</li><li class="row" data-text="kubectl get events events for the whole namespace (noisy) session 09">
+<div class="cmd"><code>kubectl get events</code><button type="button" class="copy" data-cmd="kubectl get events" aria-label="Copy command">Copy</button></div>
+<p class="desc">Events for the whole namespace (noisy)</p>
+<span class="src" title="Session 09">S09</span>
+</li><li class="row" data-text="kubectl get pods,svc,ingress clean-up check; no resources found = clean session 08">
+<div class="cmd"><code>kubectl get pods,svc,ingress</code><button type="button" class="copy" data-cmd="kubectl get pods,svc,ingress" aria-label="Copy command">Copy</button></div>
+<p class="desc">Clean-up check; No resources found = clean</p>
+<span class="src" title="Session 08">S08</span>
+</li><li class="row" data-text="kubectl get pods,cm,secret clean-up check for unit 4 (kube-root-ca.crt always stays) session 09">
+<div class="cmd"><code>kubectl get pods,cm,secret</code><button type="button" class="copy" data-cmd="kubectl get pods,cm,secret" aria-label="Copy command">Copy</button></div>
+<p class="desc">Clean-up check for unit 4 (kube-root-ca.crt always stays)</p>
+<span class="src" title="Session 09">S09</span>
+</li><li class="row" data-text="kubectl logs &lt;pod&gt; --previous log of the container before its last restart (why restarts went up) session 11">
+<div class="cmd"><code>kubectl logs &lt;pod&gt; --previous</code><button type="button" class="copy" data-cmd="kubectl logs &lt;pod&gt; --previous" aria-label="Copy command">Copy</button></div>
+<p class="desc">Log of the container before its last restart (why RESTARTS went up)</p>
+<span class="src" title="Session 11">S11</span>
+</li><li class="row" data-text="kubectl describe rs -l app=&lt;app&gt; no pod at all? the replicaset&#x27;s events say why (failedcreate, quota) session 12">
+<div class="cmd"><code>kubectl describe rs -l app=&lt;app&gt;</code><button type="button" class="copy" data-cmd="kubectl describe rs -l app=&lt;app&gt;" aria-label="Copy command">Copy</button></div>
+<p class="desc">No pod at all? The ReplicaSet&#x27;s events say why (FailedCreate, quota)</p>
+<span class="src" title="Session 12">S12</span>
+</li><li class="row" data-text="kubectl get pod &lt;old-pod&gt; -o yaml | grep image: copy the image uri from an old pod when the deployment shows invalidimagename session 11">
+<div class="cmd"><code>kubectl get pod &lt;old-pod&gt; -o yaml | grep image:</code><button type="button" class="copy" data-cmd="kubectl get pod &lt;old-pod&gt; -o yaml | grep image:" aria-label="Copy command">Copy</button></div>
+<p class="desc">Copy the image URI from an old pod when the Deployment shows InvalidImageName</p>
+<span class="src" title="Session 11">S11</span>
+</li><li class="row" data-text="kubectl get pods,cm,secret,externalsecret clean-up check after external secrets session 11">
+<div class="cmd"><code>kubectl get pods,cm,secret,externalsecret</code><button type="button" class="copy" data-cmd="kubectl get pods,cm,secret,externalsecret" aria-label="Copy command">Copy</button></div>
+<p class="desc">Clean-up check after External Secrets</p>
+<span class="src" title="Session 11">S11</span>
+</li><li class="row" data-text="kubectl get pods,hpa clean-up check after unit 5 session 12">
+<div class="cmd"><code>kubectl get pods,hpa</code><button type="button" class="copy" data-cmd="kubectl get pods,hpa" aria-label="Copy command">Copy</button></div>
+<p class="desc">Clean-up check after unit 5</p>
+<span class="src" title="Session 12">S12</span>
+</li><li class="row" data-text="kubectl delete -f schema-job.yaml -f postgres-persistent.yaml -f pvc.yaml --ignore-not-found unit 6 clean-up. unit6-ebs is delete, so the ebs disk goes too (check ec2 → volumes) session 13">
+<div class="cmd"><code>kubectl delete -f schema-job.yaml -f postgres-persistent.yaml -f pvc.yaml --ignore-not-found</code><button type="button" class="copy" data-cmd="kubectl delete -f schema-job.yaml -f postgres-persistent.yaml -f pvc.yaml --ignore-not-found" aria-label="Copy command">Copy</button></div>
+<p class="desc">Unit 6 clean-up. unit6-ebs is Delete, so the EBS disk goes too (check EC2 → Volumes)</p>
+<span class="src" title="Session 13">S13</span>
+</li><li class="row" data-text="git pull origin main folder shows only a readme? make sure you&#x27;re on main, or re-clone session 11">
+<div class="cmd"><code>git pull origin main</code><button type="button" class="copy" data-cmd="git pull origin main" aria-label="Copy command">Copy</button></div>
+<p class="desc">Folder shows only a README? Make sure you&#x27;re on main, or re-clone</p>
+<span class="src" title="Session 11">S11</span>
+</li><li class="row" data-text="git pull get the new class folder before starting session 07">
+<div class="cmd"><code>git pull</code><button type="button" class="copy" data-cmd="git pull" aria-label="Copy command">Copy</button></div>
+<p class="desc">Get the new class folder before starting</p>
+<span class="src" title="Session 07">S07</span>
+</li></ul>
+</section>
+<p class="empty" id="empty" hidden>No command matches that. Try a shorter word, like <code>pod</code> or <code>push</code>.</p>
+<div class="rule"><strong>Before any apply, delete or scale</strong><span>Run <code>aws sts get-caller-identity</code> and <code>kubectl config get-contexts</code>. Know which account and which cluster you're pointing at.</span></div>
+<p class="legend">S01–S13 = Containers Session · OH = Office Hours Oct 10 · A01 / A02 = Containers Assignments. Swap anything in <code>&lt;angle brackets&gt;</code> for your own value.</p>
+</div>
+<script>
+(function(){
+  var q=document.getElementById('q'), chips=[].slice.call(document.querySelectorAll('.chip')),
+      blocks=[].slice.call(document.querySelectorAll('.block')), links=[].slice.call(document.querySelectorAll('.toc-link')),
+      count=document.getElementById('count'), empty=document.getElementById('empty'), filter='all';
+  function apply(){
+    var term=q.value.trim().toLowerCase(), total=0;
+    blocks.forEach(function(b){
+      var okG = filter==='all' || b.dataset.g===filter, shown=0;
+      [].slice.call(b.querySelectorAll('.row')).forEach(function(r){
+        var ok = okG && (!term || r.dataset.text.indexOf(term)!==-1);
+        r.hidden=!ok; if(ok) shown++;
+      });
+      b.hidden = shown===0; total+=shown;
+    });
+    links.forEach(function(l){ var b=document.getElementById(l.getAttribute('href').slice(1)); l.hidden=b.hidden; });
+    count.textContent = total + (total===1?' command':' commands');
+    empty.hidden = total>0;
+  }
+  q.addEventListener('input',apply);
+  chips.forEach(function(c){ c.addEventListener('click',function(){
+    filter=c.dataset.f; chips.forEach(function(x){x.setAttribute('aria-pressed', String(x===c));}); apply();
+  }); });
+  document.addEventListener('click',function(ev){
+    var b=ev.target.closest('.copy'); if(!b) return;
+    var text=b.dataset.cmd;
+    function ok(){ b.textContent='Copied'; b.classList.add('done'); setTimeout(function(){b.textContent='Copy'; b.classList.remove('done');},1400); }
+    function fallback(){ var code=b.previousElementSibling, r=document.createRange(); r.selectNodeContents(code); var s=getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent='Selected'; setTimeout(function(){b.textContent='Copy';},1400); }
+    try{ navigator.clipboard.writeText(text).then(ok,fallback); }catch(e){ fallback(); }
+  });
+})();
+</script>
+
+</body></html>

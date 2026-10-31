@@ -1,0 +1,378 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Session 05: The first Pod, the controller and the Deployment</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EEF2F7; --surface:#FFFFFF; --ink:#1B2A41; --muted:#56657C; --line:#C9D3E1;
+  --blue:#2459C8; --blue-soft:#DCE6FA;
+  --ok:#1F8A5B; --ok-soft:#D8F0E4;
+  --warn:#A86A00; --warn-soft:#FBEBC9;
+  --bad:#B83A30; --bad-soft:#F7DCD8;
+  --code-bg:#1B2A41; --code-ink:#E6ECF5;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1724; --surface:#172234; --ink:#E4EAF3; --muted:#9AA8BD; --line:#2C3B53;
+    --blue:#7FA6F5; --blue-soft:#1E3157;
+    --ok:#5CCB94; --ok-soft:#163A2B;
+    --warn:#E8B04D; --warn-soft:#3A2D12;
+    --bad:#F08A80; --bad-soft:#3E1C1A;
+    --code-bg:#0B111B; --code-ink:#DCE4F0;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1724; --surface:#172234; --ink:#E4EAF3; --muted:#9AA8BD; --line:#2C3B53;
+  --blue:#7FA6F5; --blue-soft:#1E3157;
+  --ok:#5CCB94; --ok-soft:#163A2B;
+  --warn:#E8B04D; --warn-soft:#3A2D12;
+  --bad:#F08A80; --bad-soft:#3E1C1A;
+  --code-bg:#0B111B; --code-ink:#DCE4F0;
+  color-scheme:dark;
+}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 72px)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:21;background:var(--bg)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size:17px;line-height:1.6}
+code,pre,.mono{font-family:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace}
+code{font-size:.88em;background:var(--blue-soft);padding:.1em .35em;border-radius:4px}
+.wrap{max-width:980px;margin:0 auto;padding:40px 20px 80px}
+header{margin-bottom:36px}
+h1{font-size:clamp(2rem,5vw,3rem);line-height:1.1;margin:.2em 0 .4em;letter-spacing:-.01em}
+.sub{color:var(--muted);margin:0;max-width:62ch}
+.rule-line{margin-top:24px;display:flex;flex-wrap:wrap;gap:12px}
+.rule-line div{flex:1 1 260px;padding:14px 16px;border-left:5px solid;background:var(--surface);border-radius:0 8px 8px 0}
+.rule-line .r{border-color:var(--ok)} .rule-line .l{border-color:var(--bad)}
+.rule-line strong{display:block;font-size:1.1rem}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;display:flex;flex-wrap:nowrap;gap:8px;overflow-x:auto;
+  margin:0 -20px;padding:10px 20px;background:var(--bg);border-bottom:1px solid var(--line);scrollbar-width:thin}
+@media(min-width:900px){nav{flex-wrap:wrap}}
+nav a{white-space:nowrap}
+nav a.active{background:var(--blue);color:var(--surface);border-color:var(--blue)}
+nav a{color:var(--blue);text-decoration:none;border:1px solid var(--line);padding:4px 12px;border-radius:999px;font-size:.92rem;background:var(--surface)}
+nav a:hover{border-color:var(--blue)}
+section{margin-top:56px}
+h2{font-size:1.6rem;margin:0 0 .3em;line-height:1.2}
+h3{font-size:1.15rem;margin:1.4em 0 .3em}
+p{max-width:70ch}
+.lede{color:var(--muted);margin-top:0}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px}
+button{font:inherit;font-size:.95rem;cursor:pointer;border-radius:8px;border:1px solid var(--line);
+  background:var(--surface);color:var(--ink);padding:8px 14px}
+button:hover{border-color:var(--blue)}
+button.primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+:root[data-theme="dark"] button.primary{color:#0F1724}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) button.primary{color:#0F1724}}
+button.danger{border-color:var(--bad);color:var(--bad)}
+button:focus-visible,a:focus-visible,summary:focus-visible,select:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+button:disabled{opacity:.45;cursor:not-allowed}
+.opts button:disabled{opacity:.7}
+.opts button.right:disabled,.opts button.nope:disabled{opacity:1}
+.controls{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;align-items:center}
+
+/* simulator */
+.sim{display:grid;grid-template-columns:1fr;gap:16px}
+@media(min-width:760px){.sim{grid-template-columns:1.25fr 1fr}}
+.rs{border:1px dashed var(--line);border-radius:10px;padding:12px;margin-bottom:12px;transition:opacity .4s}
+.rs.zero{opacity:.55}
+.rs-head{display:flex;justify-content:space-between;gap:8px;font-size:.9rem;color:var(--muted);margin-bottom:8px;flex-wrap:wrap}
+.rs-head b{color:var(--ink)}
+.pods{display:flex;flex-wrap:wrap;gap:10px;min-height:76px}
+.pod{width:150px;border-radius:10px;padding:10px;border:2px solid;font-size:.85rem;line-height:1.35;transition:opacity .5s, transform .3s}
+.pod .n{font-family:"JetBrains Mono",monospace;font-size:.78rem;word-break:break-all}
+.pod .st{font-weight:700;font-size:1rem}
+.pod.ready{border-color:var(--ok);background:var(--ok-soft)}
+.pod.notready{border-color:var(--warn);background:var(--warn-soft)}
+.pod.starting{border-color:var(--line);background:var(--bg)}
+.pod.term{border-color:var(--bad);background:var(--bad-soft);opacity:.6}
+.pod.flash{transform:scale(1.06)}
+.empty{color:var(--muted);font-size:.9rem;align-self:center}
+.log{background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:12px 14px;font-size:.8rem;
+  height:330px;overflow-y:auto;line-height:1.5}
+.log div{white-space:pre-wrap;word-break:break-word}
+.log .w{color:#F4BE5B} .log .e{color:#F49088} .log .g{color:#7FDCA8} .log .c{color:#8FB2F7}
+.users{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:.92rem;color:var(--muted);flex-wrap:wrap}
+.status-pill{display:inline-block;padding:2px 10px;border-radius:999px;font-weight:700;font-size:.85rem}
+.pill-ok{background:var(--ok-soft);color:var(--ok)} .pill-warn{background:var(--warn-soft);color:var(--warn)} .pill-bad{background:var(--bad-soft);color:var(--bad)}
+
+/* liveness */
+.live-grid{display:grid;grid-template-columns:1fr;gap:16px}
+@media(min-width:760px){.live-grid{grid-template-columns:280px 1fr}}
+.bigpod{border:2px solid var(--line);border-radius:14px;padding:18px;text-align:left}
+.bigpod .row{display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding:6px 0;font-size:.95rem}
+.bigpod .row:last-child{border:none}
+.bigpod .val{font-family:"JetBrains Mono",monospace;font-weight:600}
+select{font:inherit;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.backoff{display:flex;gap:4px;align-items:flex-end;height:90px;margin-top:14px}
+.backoff span{flex:1;background:var(--blue-soft);border-radius:4px 4px 0 0;position:relative;transition:background .3s}
+.backoff span.on{background:var(--bad)}
+.backoff-labels{display:flex;gap:4px;font-size:.72rem;color:var(--muted)}
+.backoff-labels span{flex:1;text-align:center}
+
+/* tables */
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:.95rem}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--bg);font-weight:700}
+tr:last-child td{border-bottom:none}
+
+/* request path */
+.path{display:flex;flex-direction:column;gap:0;margin-top:12px}
+.hop{display:grid;grid-template-columns:44px 1fr;gap:14px;position:relative;padding-bottom:18px}
+.hop .dot{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-weight:700;
+  background:var(--surface);border:2px solid var(--blue);color:var(--blue);z-index:1}
+.hop::before{content:"";position:absolute;left:21px;top:44px;bottom:0;width:2px;background:var(--line)}
+.hop:last-child::before{display:none}
+.hop h4{margin:8px 0 2px;font-size:1.05rem}
+.hop p{margin:0;color:var(--muted)}
+.hop.https .dot{border-color:var(--ok);color:var(--ok)}
+.tag{display:inline-block;font-size:.78rem;padding:1px 8px;border-radius:999px;margin-left:6px;vertical-align:2px}
+.tag.enc{background:var(--ok-soft);color:var(--ok)} .tag.plain{background:var(--warn-soft);color:var(--warn)}
+.note{border-left:4px solid var(--blue);background:var(--blue-soft);padding:12px 16px;border-radius:0 8px 8px 0;margin:16px 0;max-width:70ch}
+
+pre{background:var(--code-bg);color:var(--code-ink);padding:14px 16px;border-radius:10px;overflow-x:auto;font-size:.82rem;line-height:1.55;margin:10px 0}
+pre .cm{color:#8A9AB5}
+
+details{background:var(--surface);border:1px solid var(--line);border-radius:10px;margin-bottom:8px}
+summary{cursor:pointer;padding:12px 16px;font-weight:700}
+details > div{padding:0 16px 14px}
+.wrong{color:var(--bad);text-decoration:line-through;text-decoration-thickness:1px}
+
+/* quiz */
+.q{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:14px}
+.q p.prompt{font-weight:700;margin-top:0}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opts button{text-align:left;padding:10px 14px}
+.opts button.right{border-color:var(--ok);background:var(--ok-soft)}
+.opts button.nope{border-color:var(--bad);background:var(--bad-soft)}
+.explain{margin-top:10px;color:var(--muted);display:none}
+.explain.show{display:block}
+.score{font-weight:700}
+footer{margin-top:64px;color:var(--muted);font-size:.9rem}
+
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.tabs button[aria-selected="true"]{background:var(--blue);color:var(--surface);border-color:var(--blue)}
+.tabpane{display:none}.tabpane.show{display:block}
+.timeline{list-style:none;padding:0;margin:0;counter-reset:t}
+.timeline li{counter-increment:t;position:relative;padding:14px 18px 14px 64px;margin-bottom:10px;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.timeline li h4{margin:0 0 4px;font-size:1.08rem}
+.timeline li p{margin:0;color:var(--ink);max-width:68ch}
+.timeline li::before{content:counter(t);position:absolute;left:16px;top:14px;width:32px;height:32px;border-radius:50%;
+  background:var(--blue-soft);color:var(--blue);font-weight:700;display:grid;place-items:center;font-size:.9rem}
+.timeline details{margin:0}
+.yaml-toggle .ln{display:block;transition:background .2s,opacity .2s}
+.yaml-toggle.focus .ln{opacity:.35}
+.yaml-toggle.focus .ln.hl{opacity:1;background:rgba(127,166,245,.18)}
+.flow{display:flex;flex-direction:column;gap:6px;margin:14px 0;max-width:620px}
+.flow div{padding:10px 14px;border-radius:8px;border:1px solid var(--line);background:var(--surface)}
+.flow .arrow{border:none;background:none;padding:0 0 0 18px;color:var(--muted)}
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px}
+.compare > div{border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--bg)}
+.lbs{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.lbs span{display:inline-block;padding:3px 8px;border-radius:6px;font-size:.8rem;font-family:"JetBrains Mono",monospace}
+.lb-many span{background:var(--bad-soft);color:var(--bad)}
+.lb-one span{background:var(--ok-soft);color:var(--ok)}
+.form-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:14px}
+@media(min-width:640px){.form-grid{grid-template-columns:1fr 1fr}}
+.form-grid label{display:flex;flex-direction:column;font-size:.9rem;color:var(--muted);gap:4px}
+.form-grid input{font:inherit;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.verdict{padding:12px 16px;border-radius:8px;font-size:.9rem}
+.verdict.ok{background:var(--ok-soft);color:var(--ok)} .verdict.no{background:var(--bad-soft);color:var(--bad)} .verdict.warn{background:var(--warn-soft);color:var(--warn)}
+.step{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:12px}
+.step.done{border-color:var(--ok)}
+.step-head{display:flex;gap:12px;align-items:flex-start}
+.step-head input{width:22px;height:22px;margin-top:3px;accent-color:var(--ok);flex:none}
+.step-head h4{margin:0;font-size:1.05rem}
+.step-head p{margin:2px 0 0;color:var(--muted)}
+.step pre{margin:10px 0 6px}
+.step details{border:none;background:var(--bg)}
+.step summary{font-weight:400;color:var(--blue);padding:8px 12px}
+.progress{height:8px;background:var(--line);border-radius:999px;overflow:hidden;margin:10px 0 18px}
+.progress div{height:100%;background:var(--ok);width:0;transition:width .3s}
+.cards2{display:grid;grid-template-columns:1fr;gap:14px}
+@media(min-width:720px){.cards2{grid-template-columns:1fr 1fr}}
+.cards2 > div{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.cards2 h3{margin-top:0}
+.cards2 ul{margin:0;padding-left:20px}
+.cards2 li{margin-bottom:6px}
+.fixbox{border:1.5px solid var(--warn);border-radius:14px;padding:12px;background:var(--warn-soft)}
+.fixbox td:first-child{width:44%;color:var(--muted)}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+
+.term{background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:12px 14px;font-family:"JetBrains Mono",monospace;font-size:.8rem;line-height:1.5;overflow-x:auto;white-space:pre}
+.chip{display:inline-block;padding:3px 10px;border-radius:999px;font-size:.85rem;font-weight:700}
+.chip.ok{background:var(--ok-soft);color:var(--ok)}.chip.warn{background:var(--warn-soft);color:var(--warn)}.chip.bad{background:var(--bad-soft);color:var(--bad)}.chip.idle{background:var(--bg);color:var(--muted);border:1px solid var(--line)}
+.lab-row{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:12px}
+.lab-row label{display:flex;gap:6px;align-items:center;font-size:.95rem}
+.lab-row input[type=checkbox]{width:18px;height:18px;accent-color:var(--blue)}
+.layers{display:flex;flex-direction:column;gap:6px}
+.layer{display:flex;justify-content:space-between;gap:10px;padding:8px 12px;border-radius:8px;border:1px solid var(--line);font-family:"JetBrains Mono",monospace;font-size:.82rem;flex-wrap:wrap}
+.layer.cached{background:var(--ok-soft);border-color:var(--ok)}.layer.rebuilt{background:var(--warn-soft);border-color:var(--warn)}.layer.none{background:var(--bg);color:var(--muted)}
+.journey{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.journey .hopbox{padding:10px 14px;border-radius:10px;border:2px solid var(--line);background:var(--surface);font-weight:700;transition:all .3s}
+.journey .hopbox.on{border-color:var(--blue);background:var(--blue-soft);color:var(--blue)}
+.journey .ar{color:var(--muted)}
+</style></head><body><div class="wrap">
+<header><p class="sub">Containers &amp; Orchestration, unit 2</p><h1>Session 05: The first Pod, the controller and the Deployment</h1><p class="sub">A bare Pod that you delete stays deleted. A Deployment holds a count and a pod template, and a controller keeps that count true forever. This is the Auto Scaling group from Scale, rebuilt for containers, and it's the idea every Kubernetes interview starts from: you write down what should exist, and the cluster keeps matching it.</p><div class="rule-line"><div class="r"><strong>The kubelet restarts a container.</strong>Same pod, same node. It never creates a new pod.</div><div class="l"><strong>A controller replaces a pod.</strong>Terraform applies once; Kubernetes applies forever.</div></div></header>
+<nav aria-label="Sections"><a href="#timeline">What we did</a><a href="#kubelet">Kubelet</a><a href="#barepod">Bare Pod</a><a href="#controller">Controller</a><a href="#lab">Controller lab</a><a href="#deployment">Deployment</a><a href="#labels">Label refusal</a><a href="#rs">ReplicaSet</a><a href="#fixes">Corrections</a><a href="#demo">Redo the demo</a><a href="#commands">Commands</a><a href="#wrapup">Stressed &amp; homework</a><a href="#quiz">Check yourself</a></nav>
+<section id="timeline"><h2>What we actually did, in order</h2><p class="lede">Wed, Oct 7, 2026, with Maher, plus after-class with Bakhtiyar. Deck unit 2, slides 1–20. The first half went back over Monday because the room was lost.</p><ol class="timeline"><li><h4>Recap of Monday</h4><p>Control plane (API server, scheduler, controllers, etcd) plus nodes. New today: the kubelet on every node. Managed (EKS) vs unmanaged clusters.</p></li><li><h4>Pod vs container, again</h4><p>Pod = car body, container = engine. Then namespaces, <code>~/.kube/config</code>, <code>aws sso login</code>, <code>update-kubeconfig</code>, and the Forbidden error on default.</p></li><li><h4>A Pod applied live from a file</h4><p>Maher used nginx on port 80. A second container with a fake image showed <b>READY 1/2</b>.</p></li><li><h4>Read the pod</h4><p><code>-o wide</code> (IP and node), curl to the pod IP from the laptop timed out, <code>logs</code>, <code>describe</code>. Then delete, and nothing came back.</p></li><li><h4>First Deployment from the Kubernetes docs</h4><p><code>nginx-deployment</code>, 3 replicas. A Miro drawing showed how the selector finds pods by label. Break.</p></li><li><h4>The controller</h4><p>He deleted one of the three pods, and a replacement was running about 7 seconds later.</p></li><li><h4>The label trap</h4><p>He changed the template label to <code>ninix</code>. The API server refused the file, both with and without an existing Deployment.</p></li><li><h4>ReplicaSet</h4><p><code>kubectl get deploy,rs,pods</code>. Then <code>get pods -w</code> in a second terminal while deleting a pod: Terminating → Pending → ContainerCreating → Running.</p></li><li><h4>Scale</h4><p><code>kubectl scale --replicas=5</code>. Same ReplicaSet, now DESIRED 5. Q&amp;A on why the YAML file still says 3. Stopped at slide 20.</p></li><li><h4>After class with Bakhtiyar</h4><p>The sign-in steps again, <code>get-contexts</code>, <code>kubectl create namespace</code> (admins only), what IAM Identity Center is, and the drill Pod from the repo, start to finish.</p></li></ol></section>
+<section id="kubelet"><h2>The kubelet: the agent on every node</h2><p><b>Problem:</b> a node is just an EC2 instance. How does the cluster know it belongs, and that its containers are healthy?</p><p><b>What it is:</b> a program EKS installs on every node. It starts containers and reports their health back to the control plane. If a container exits, the kubelet restarts the container in the same pod, on the same node, and RESTARTS goes up by one. Like restarting a frozen laptop: same machine, fresh start.</p><div class="note">The kubelet restarts a container. It never creates a new pod. New pods come from a controller.</div></section>
+<section id="barepod"><h2>The bare Pod: nobody is counting</h2><p><code>kubectl apply -f pod.yaml</code> stores the object and returns. Then the scheduler picks a node, and the node pulls the image and starts the container. The pod's IP is on the cluster's network: your laptop can't reach it, only the API server through kubectl.</p><p>Delete it and it's gone. Nothing in <code>pod.yaml</code> says how many there should be, so nothing watches the count.</p><div class="tbl-wrap"><table><tr><th>STATUS / column</th><th>Means</th></tr><tr><td>Pending</td><td>No node yet. On this cluster AWS may be adding a node (a minute or more)</td></tr><tr><td>ContainerCreating</td><td>Has a node; the node is pulling the image</td></tr><tr><td>Running</td><td>Container started</td></tr><tr><td>READY 1/2</td><td>Containers ready out of containers in the pod. Here one image couldn't be pulled</td></tr><tr><td>RESTARTS</td><td>How many times the kubelet restarted the container in this pod</td></tr></table></div></section>
+<section id="controller"><h2>The controller: Kubernetes' Auto Scaling group</h2><p><b>Problem:</b> companies run tens of images with several copies of each. Someone has to notice when a copy dies and start another.</p><p><b>What it is:</b> a program in the control plane that compares desired state with what is running, fixes the difference, and repeats. It never stops. You already used one: the Scale ASG with desired capacity 2.</p><div class="flow"><div><code>kubectl apply</code> → API server stores "replicas: 2" in etcd → apply returns</div><div class="arrow">↓</div><div>controller loop: desired 2 vs running ? → 1? create one → check again …</div></div><div class="note">Terraform applies once; Kubernetes applies forever.</div></section>
+<section id="lab"><h2>Lab: bare pod vs Deployment</h2><p class="lede">Apply both, delete pods, scale, break the label, and re-apply the file. Watch who brings pods back and who doesn't.</p><div class="panel"><div class="controls"><button id="c5pod">apply pod.yaml</button><button id="c5dep" class="primary">apply deployment-drill.yaml (replicas: 2)</button><button id="c5delbare">delete pod drill</button><button id="c5delone">delete one Deployment pod</button><button id="c5scale">scale --replicas=3</button><button id="c5label">apply with template label drilx</button><button id="c5reset">Reset</button></div><div class="sim"><div><div class="rs-head" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px;color:var(--muted)"><span>ReplicaSet <b class="mono" style="color:var(--ink)">drill-7ff7775db6</b></span><span id="c5rs">no Deployment yet</span></div><div class="pods" id="c5pods"></div></div><div class="log mono" id="c5log" style="height:300px"></div></div></div></section>
+<section id="deployment"><h2>The Deployment: a count plus the Pod you already typed</h2><pre>apiVersion: apps/v1        # Pod is v1; Deployment is apps/v1
+kind: Deployment
+metadata:
+  name: drill
+spec:
+  replicas: 2              # the count = ASG desired capacity
+  selector:                # which pods are mine
+    matchLabels:
+      app: drill
+  template:                # the Pod to create = the launch template
+    metadata:
+      labels:
+        app: drill         # stamped on every pod; must match the selector
+    spec:
+      containers:
+        - name: drill
+          image: IMAGE_URI
+          ports:
+            - containerPort: 8080</pre><div class="tbl-wrap"><table><tr><th>Field</th><th>Job</th><th>Scale equivalent</th></tr><tr><td><code>replicas</code></td><td>How many pods should exist</td><td>Desired capacity</td></tr><tr><td><code>template</code></td><td>The full pod spec, written out. It can't point to pod.yaml</td><td>Launch template</td></tr><tr><td><code>selector</code></td><td>Which label marks this Deployment's pods</td><td>The ASG's membership</td></tr></table></div><p>Pods are found by label, not by name, because their names are generated: <code>&lt;deployment&gt;-&lt;ReplicaSet hash&gt;-&lt;random id&gt;</code>, e.g. <code>drill-7ff7775db6-fjb2v</code>.</p><p><code>deployment-drill.yaml</code> is a file on your laptop. <code>kubectl get deployments</code> shows the object in the cluster. apply copies the file in; nothing copies back.</p></section>
+<section id="labels"><h2>The label written twice, and the refusal</h2><p>Under <code>selector</code>: which pods this Deployment counts. Under <code>template</code>: the label stamped on new pods. If they differ, the Deployment would create pods it never counts, and keep creating them. So the API server refuses the file:</p><pre>The Deployment "drill" is invalid: spec.template.metadata.labels: Invalid value: ...: `selector` does not match template `labels`</pre><p>Nothing is created or changed. Fix it, apply again, and you get <code>unchanged</code>: the cluster already matches the file.</p></section>
+<section id="rs"><h2>Deployment → ReplicaSet → pods</h2><pre>Deployment  drill                 (you write this)
+ └─ ReplicaSet  drill-7ff7775db6  (the Deployment creates it: holds the count)
+      ├─ pod  drill-7ff7775db6-fjb2v
+      └─ pod  drill-7ff7775db6-x9k2p</pre><p><b>ReplicaSet:</b> the object the Deployment creates to hold the count and own the pods. Its controller creates the replacements. You never write one. <code>kubectl get rs</code> shows DESIRED / CURRENT / READY: desired 3, current 2 → the controller creates one. After <code>scale</code>, it's the same ReplicaSet (same hash, same age) with a new DESIRED number.</p><div class="note">One owner per level: Deployment owns the ReplicaSet, the ReplicaSet owns the pods.</div></section>
+<section id="fixes"><h2>Where the notes correct what was said live</h2>
+<p class="lede">Left: what was said in class. Right: the correct version from the site notes and deck.</p>
+<div class="fixbox"><div class="tbl-wrap"><table><tr><th>Said in class</th><th>Correct version (site notes and deck)</th></tr><tr><td>"Link traffic to the deployment and it splits it across the three pods"</td><td>A Deployment <b>doesn't receive traffic</b>. It only keeps a count. A <b>Service</b> gives the pods one address and spreads requests (unit 3).</td></tr><tr><td>"If there's a conflict between the file and the cluster, it always throws an error"</td><td><b>No error.</b> After <code>scale --replicas=5</code>, applying a file that says 3 quietly sets it back to 3. <b>The last write wins</b>, so in real work you edit replicas in the file and apply it.</td></tr><tr><td>"This cluster is in one zone"</td><td>An EKS cluster is in <b>one region, across several availability zones</b>, so one zone failing doesn't stop it. Another region needs a second cluster.</td></tr><tr><td>"The kubelet replaces the pod"</td><td>Maher corrected this himself: the kubelet <b>restarts the container</b> in the same pod. Replacing a deleted pod is the <b>ReplicaSet controller's</b> job.</td></tr></table></div></div></section><section id="demo"><h2>Redo the demo yourself</h2>
+<p class="lede">This uses the repo's drill image on port 8080, as in the notes and after-class. Maher's live demo used nginx on port 80; the steps are the same. Tick each step as you finish it; your ticks stay in this browser.</p>
+<h3>Before you start</h3><div class="note" style="max-width:none">The setup page is done (AWS CLI, kubectl, the <code>312-cluster</code> profile, <code>update-kubeconfig</code> run once). Open two terminals in <code>~/DevOps/containers/02-the-cluster-and-the-loop</code>. Your <code>pod.yaml</code> already has the drill image in it.</div>
+<p style="margin-bottom:0"><b id="demoCount">0 of 9 steps done</b></p><div class="progress"><div id="demoBar"></div></div>
+<div class="step" data-i="0"><div class="step-head"><input type="checkbox" aria-label="Mark step 1 done"><div><h4>1. Sign in and point at your namespace</h4><p>The SSO token lasts one day, so this is the first thing every class day.</p></div></div>
+<pre>aws sso login --profile 312-cluster
+aws sts get-caller-identity --profile 312-cluster   # check 1
+kubectl config use-context containers-26a
+kubectl config set-context --current --namespace=&lt;your-namespace&gt;
+kubectl config get-contexts                         # check 2
+kubectl get pods</pre>
+<details><summary>What you should see</summary><div><p><code>No resources found in &lt;your-namespace&gt; namespace.</code> That means it works and the namespace is empty.</p></div></details></div>
+<div class="step" data-i="1"><div class="step-head"><input type="checkbox" aria-label="Mark step 2 done"><div><h4>2. Apply the bare Pod</h4><p>apply stores the object; the cluster does the rest.</p></div></div>
+<pre>kubectl apply -f pod.yaml   # pod/drill created
+kubectl get pods            # run it twice, a few seconds apart</pre>
+<details><summary>What you should see</summary><div><p><code>0/1 ContainerCreating</code>, then <code>1/1 Running</code>.</p></div></details></div>
+<div class="step" data-i="2"><div class="step-head"><input type="checkbox" aria-label="Mark step 3 done"><div><h4>3. Read where it runs and what it did</h4><p></p></div></div>
+<pre>kubectl get pods -o wide
+curl --max-time 5 &lt;pod-ip&gt;:8080          # from the laptop: times out on purpose
+kubectl logs drill
+kubectl describe pod drill</pre>
+<details><summary>What you should see</summary><div><p><code>Connection timed out</code> from curl. <code>Listening at: http://0.0.0.0:8080</code> in the logs. Events read Scheduled, Pulled, Created, Started.</p></div></details></div>
+<div class="step" data-i="3"><div class="step-head"><input type="checkbox" aria-label="Mark step 4 done"><div><h4>4. Delete it and watch nothing happen</h4><p></p></div></div>
+<pre>kubectl delete pod drill
+kubectl get pods           # and again ten seconds later</pre>
+<details><summary>What you should see</summary><div><p><code>No resources found</code> both times. Nothing was counting.</p></div></details></div>
+<div class="step" data-i="4"><div class="step-head"><input type="checkbox" aria-label="Mark step 5 done"><div><h4>5. Put the image into the Deployment and apply it</h4><p><code>deployment-drill.yaml</code> still says IMAGE_URI.</p></div></div>
+<pre>sed -i &#x27;&#x27; &#x27;s|IMAGE_URI|SCHOOL_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/drill:v1|&#x27; deployment-drill.yaml   # macOS sed
+kubectl apply -f deployment-drill.yaml
+kubectl get deployments                  # READY 2/2
+kubectl get pods</pre>
+<details><summary>What you should see</summary><div><p>Two pods named <code>drill-&lt;hash&gt;-&lt;id&gt;</code>, both 1/1 Running. You never typed those names.</p></div></details></div>
+<div class="step" data-i="5"><div class="step-head"><input type="checkbox" aria-label="Mark step 6 done"><div><h4>6. See all three levels</h4><p><code>-l</code> selects by label, like the Deployment does.</p></div></div>
+<pre>kubectl get deploy,rs,pods -l app=drill</pre>
+<details><summary>What you should see</summary><div><p>One deployment, one replicaset <code>drill-&lt;hash&gt;</code> with desired 2, and two pods carrying the same hash.</p></div></details></div>
+<div class="step" data-i="6"><div class="step-head"><input type="checkbox" aria-label="Mark step 7 done"><div><h4>7. Delete one pod while watching</h4><p>Terminal 2 watches; terminal 1 deletes one pod by its full name.</p></div></div>
+<pre>kubectl get pods -w                          # terminal 2
+kubectl delete pod drill-&lt;hash&gt;-&lt;id&gt;         # terminal 1</pre>
+<details><summary>What you should see</summary><div><p>The old pod goes Terminating, and a new name goes Pending → ContainerCreating → Running within seconds.</p></div></details></div>
+<div class="step" data-i="7"><div class="step-head"><input type="checkbox" aria-label="Mark step 8 done"><div><h4>8. Trigger the label refusal</h4><p>Under <code>template: metadata: labels:</code>, change <code>app: drill</code> to <code>app: drilx</code>.</p></div></div>
+<pre>kubectl apply -f deployment-drill.yaml   # refused
+# change drilx back to drill, then:
+kubectl apply -f deployment-drill.yaml   # deployment.apps/drill unchanged</pre>
+<details><summary>What you should see</summary><div><p><code>`selector` does not match template `labels`</code>, then <code>unchanged</code>.</p></div></details></div>
+<div class="step" data-i="8"><div class="step-head"><input type="checkbox" aria-label="Mark step 9 done"><div><h4>9. Scale, then let the file win</h4><p></p></div></div>
+<pre>kubectl scale deploy/drill --replicas=3   # a third pod appears
+kubectl get rs                            # same ReplicaSet, DESIRED 3
+kubectl apply -f deployment-drill.yaml    # the file still says 2
+kubectl get pods</pre>
+<details><summary>What you should see</summary><div><p>Three pods, then back to two, with no warning. The last write wins.</p></div></details></div>
+<h3>If it goes wrong</h3><div class="tbl-wrap"><table><tr><th>Error</th><th>Meaning</th></tr><tr><td><code>Error from server (Forbidden) ... in the namespace "default"</code></td><td>The context has no namespace. Run the set-context line from step 1 again.</td></tr><tr><td>An SSO or expired-token error on any command</td><td>The one-day sign-in ran out. Run <code>aws sso login --profile 312-cluster</code>.</td></tr><tr><td>Pod stuck in Pending for a minute</td><td>Normal when the cluster has no room: AWS is adding a node. Wait.</td></tr><tr><td><code>ErrImagePull</code> / <code>ImagePullBackOff</code></td><td>The image can't be pulled. Most likely you skipped step 5 and IMAGE_URI is still in the file.</td></tr><tr><td>A new pod refused with a quota message</td><td>Your namespace allows 8 pods. Clean up old ones first.</td></tr></table></div>
+<h3>Clean up</h3><pre>kubectl delete -f deployment-drill.yaml -f pod.yaml --ignore-not-found
+kubectl get pods                                                         # No resources found</pre><p>The cluster is shared and your namespace allows 8 pods, so clear it before Thursday. Deleting the Deployment also deletes its ReplicaSet and every pod.</p>
+<button id="demoReset">Clear my ticks</button></section><section id="commands"><h2>Commands and config that came up</h2><div class="tbl-wrap"><table><tr><th>Command</th><th>What it does</th></tr><tr><td><code>aws sso login --profile 312-cluster</code></td><td>School sign-in; lasts one day</td></tr><tr><td><code>aws eks update-kubeconfig --name containers-26a --region us-east-1 --profile 312-cluster --alias containers-26a</code></td><td>Writes the context into <code>~/.kube/config</code> (once)</td></tr><tr><td><code>kubectl config get-contexts</code> / <code>current-context</code></td><td>Which cluster and namespace you're pointed at</td></tr><tr><td><code>kubectl config use-context containers-26a</code></td><td>Switch to the school cluster if you have others</td></tr><tr><td><code>kubectl config set-context --current --namespace=&lt;ns&gt;</code></td><td>Save your namespace in the context</td></tr><tr><td><code>kubectl apply -f &lt;file&gt;.yaml</code></td><td>Create or update the object described in the file</td></tr><tr><td><code>kubectl get pods -o wide</code></td><td>Adds pod IP and node</td></tr><tr><td><code>kubectl get pods -w</code></td><td>Keep watching; print every change</td></tr><tr><td><code>kubectl logs &lt;pod&gt;</code></td><td>What the container printed</td></tr><tr><td><code>kubectl describe pod &lt;pod&gt;</code></td><td>Details plus the Events: what the cluster did</td></tr><tr><td><code>kubectl delete pod &lt;pod&gt;</code></td><td>Delete one pod</td></tr><tr><td><code>kubectl get deployments</code> / <code>get rs</code></td><td>List Deployments / ReplicaSets</td></tr><tr><td><code>kubectl get deploy,rs,pods -l app=drill</code></td><td>All three levels, selected by label</td></tr><tr><td><code>kubectl scale deploy/drill --replicas=3</code></td><td>Change the stored count (not the file)</td></tr><tr><td><code>kubectl delete -f deployment-drill.yaml</code></td><td>Delete the Deployment in the file, with its ReplicaSet and pods</td></tr><tr><td><code>kubectl delete deploy drill</code></td><td>Same, by name, no file needed</td></tr><tr><td><code>kubectl create namespace &lt;name&gt;</code></td><td>Make a namespace (admins only on the school cluster)</td></tr><tr><td><code>alias k=kubectl</code></td><td>Type k like the instructors; add it to <code>~/.zshrc</code></td></tr></table></div></section><section id="wrapup"><h2>What the instructor stressed, and what's next</h2><div class="cards2"><div><h3>Stressed in class</h3><ul><li>Pod = car body, container = engine. No container, no pod. Docker and Kubernetes work together; one doesn't replace the other.</li><li>The manifest says what should exist, not steps. That's the difference from a Dockerfile.</li><li>Selector and template labels must match. Shown twice, with and without an existing Deployment.</li><li>The YAML file is a starting point. The cluster can drift from it, and kubectl never edits your file. His analogy: house plans on paper vs telling the builder "change that window" in person.</li><li>Check your context before you change anything. The dev script that ran against production and took hours to undo.</li><li>Use the docs. Copy the example manifest and change what you need.</li><li>Class beats the knowledge interview. If one is scheduled during class, message Aziz on Slack to reschedule.</li></ul></div><div><h3>Homework</h3><ul><li>No new assignment was set in class.</li><li>Clean up your namespace before Thursday. It allows 8 pods at once.</li><li>Thursday: the two things that restart things (kubelet vs controller), port-forward, the rolling update, the stop signal, then how to read a pod that doesn't start.</li></ul></div><div><h3>Worth replaying in the recording</h3><ul><li>The Miro drawing just before the break: three nginx pods with labels and two "Mo" pods without them, showing how the selector picks its own.</li><li>The two-terminal moment near the end: <code>get pods -w</code> on one side, a pod deleted on the other. Then <code>scale --replicas=5</code>.</li><li>The <code>ninix</code> error: Maher reads <code>spec.template.metadata.labels</code> key by key against the file. A good way to learn to read any Kubernetes error.</li></ul></div><div><h3>Left unclear</h3><ul><li><code>kubectl get rs -w</code> didn't print the change live, so the DESIRED 3 / CURRENT 2 moment was described but not shown.</li><li>The scale-vs-file question got a confusing answer in class. The notes settle it: no error, last write wins.</li><li>How IAM Identity Center grants your cluster access was only touched on. Bakhtiyar said it will be covered before the projects.</li><li>The deck says the after-class fills your namespace to 8 pods. The after-class recording only ran the single Pod.</li></ul></div></div></section><section id="quiz"><h2>Check yourself</h2><p class="lede">Pick an answer to see why. Score: <span class="score" id="score">0 / 0</span></p><div id="quizArea"></div></section>
+<footer>Built from your Session 05 recap. </footer></div>
+<script>
+(function(){
+ const $=id=>document.getElementById(id);let bare=null,dep=false,desired=0,pods=[],run=0;
+ const sleep=ms=>new Promise(r=>setTimeout(r,ms));const rnd=()=>Math.random().toString(36).slice(2,7);
+ function log(t,c){const d=document.createElement('div');if(c)d.className=c;d.textContent=t;$('c5log').appendChild(d);$('c5log').scrollTop=1e9}
+ function render(){const w=$('c5pods');w.innerHTML='';
+  if(bare){const e=document.createElement('div');e.className='pod '+(bare.st==='Running'?'ready':'starting');e.innerHTML='<div class="n">drill</div><div class="st">'+bare.st+'</div><div>bare pod, nobody counts it</div>';w.appendChild(e)}
+  pods.forEach(p=>{const e=document.createElement('div');e.className='pod '+(p.st==='Running'?'ready':(p.st==='Terminating'?'term':'notready'));e.innerHTML='<div class="n">'+p.name+'</div><div class="st">'+p.st+'</div><div>owned by the ReplicaSet</div>';w.appendChild(e)});
+  if(!bare&&!pods.length)w.innerHTML='<span class="empty">No resources found</span>';
+  const cur=pods.filter(p=>p.st!=='Terminating').length,rdy=pods.filter(p=>p.st==='Running').length;
+  $('c5rs').textContent=dep?('DESIRED '+desired+' · CURRENT '+cur+' · READY '+rdy):'no Deployment yet'}
+ async function startPod(p){for(const s of ['Pending','ContainerCreating','Running']){p.st=s;render();await sleep(700)}}
+ async function reconcile(){const my=++run;while(dep&&my===run){
+  const live=pods.filter(p=>p.st!=='Terminating');
+  if(live.length<desired){const p={name:'drill-7ff7775db6-'+rnd(),st:'Pending'};pods.push(p);log('controller: desired '+desired+', running '+live.length+' → create '+p.name,'g');startPod(p)}
+  else if(live.length>desired){const p=live[live.length-1];p.st='Terminating';log('controller: desired '+desired+', running '+live.length+' → remove '+p.name,'w');render();setTimeout(()=>{pods=pods.filter(x=>x!==p);render()},900)}
+  await sleep(900)}}
+ $('c5pod').onclick=async()=>{log('$ kubectl apply -f pod.yaml','c');if(bare){log('pod/drill unchanged');return}bare={st:'Pending'};log('pod/drill created');for(const s of ['ContainerCreating','Running']){render();await sleep(700);if(!bare)return;bare.st=s}render()};
+ $('c5delbare').onclick=async()=>{log('$ kubectl delete pod drill','c');if(!bare){log('Error from server (NotFound): pods "drill" not found','e');return}bare=null;log('pod "drill" deleted');render();await sleep(1500);log('... nothing comes back. No controller counts a bare pod.','w')};
+ $('c5dep').onclick=()=>{log('$ kubectl apply -f deployment-drill.yaml','c');if(dep&&desired===2){log('deployment.apps/drill unchanged');return}
+  if(dep){log('deployment.apps/drill configured   (file says replicas: 2, cluster had '+desired+')','w');log('No warning: the last write wins.')}else{log('deployment.apps/drill created');log('Deployment created ReplicaSet drill-7ff7775db6')}
+  dep=true;desired=2;render();reconcile()};
+ $('c5delone').onclick=()=>{const live=pods.filter(p=>p.st==='Running');log('$ kubectl delete pod '+(live[0]?live[0].name:'drill-…'),'c');if(!live.length){log('No running Deployment pod yet. Apply the Deployment first.','e');return}
+  const p=live[0];p.st='Terminating';render();setTimeout(()=>{pods=pods.filter(x=>x!==p);render()},800)};
+ $('c5scale').onclick=()=>{log('$ kubectl scale deploy/drill --replicas=3','c');if(!dep){log('Error from server (NotFound): deployments "drill" not found','e');return}desired=3;log('deployment.apps/drill scaled   (same ReplicaSet, DESIRED 3; your file still says 2)');render()};
+ $('c5label').onclick=()=>{log('$ kubectl apply -f deployment-drill.yaml   (template label: drilx)','c');log('The Deployment "drill" is invalid: spec.template.metadata.labels: Invalid value: ...: `selector` does not match template `labels`','e');log('Nothing created or changed. Old pods keep running.','w')};
+ $('c5reset').onclick=()=>{run++;bare=null;dep=false;desired=0;pods=[];$('c5log').innerHTML='';log('Empty namespace. Try: apply pod.yaml, then delete it.','g');render()};
+ $('c5reset').onclick();
+})();
+
+
+(function(){
+  const nav=document.querySelector('nav');const links=[...nav.querySelectorAll('a')];
+  const map=new Map(links.map(l=>[l.getAttribute('href').slice(1),l]));
+  const obs=new IntersectionObserver(es=>{es.forEach(e=>{if(!e.isIntersecting)return;
+    links.forEach(l=>l.classList.remove('active'));const l=map.get(e.target.id);
+    if(l){l.classList.add('active');nav.scrollTo({left:Math.max(0,l.offsetLeft-20),behavior:'smooth'})}})},
+    {rootMargin:'-25% 0px -65% 0px'});
+  map.forEach((l,id)=>{const el=document.getElementById(id);if(el)obs.observe(el)});
+})();
+(function(){
+  const KEY='s05-demo';let done={};
+  try{done=JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(e){done={}}
+  const steps=[...document.querySelectorAll('#demo .step')];
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(done))}catch(e){}}
+  function upd(){const n=steps.filter(s=>done[s.dataset.i]).length;
+    document.getElementById('demoCount').textContent=n+' of '+steps.length+' steps done';
+    document.getElementById('demoBar').style.width=(n/steps.length*100)+'%';}
+  steps.forEach(s=>{const cb=s.querySelector('input');cb.checked=!!done[s.dataset.i];s.classList.toggle('done',cb.checked);
+    cb.onchange=()=>{done[s.dataset.i]=cb.checked;s.classList.toggle('done',cb.checked);save();upd()};});
+  document.getElementById('demoReset').onclick=()=>{done={};save();steps.forEach(s=>{s.querySelector('input').checked=false;s.classList.remove('done')});upd()};
+  upd();
+})();
+(function(){
+  const Q=[{"q": "You have pod/drill from pod.yaml and a Deployment with 2 pods. You delete one pod of each. What's there ten seconds later?", "o": ["Nothing", "Two Deployment pods, and no drill", "drill and one Deployment pod"], "a": 1, "e": "The ReplicaSet controller counted 1 against 2 and made a new pod. Nothing counts the bare pod."}, {"q": "A teammate changes only the template label to app: drill-v2 and applies. What happens?", "o": ["A rolling update", "The API server refuses it: selector does not match template labels", "The old pods are deleted"], "a": 1, "e": "If allowed, the Deployment would stamp pods it doesn't count, see 0 of 2, and keep creating pods forever."}, {"q": "At 2 a.m. you scale to 6. At 9 a.m. a teammate applies api.yaml, which says replicas: 3. Result?", "o": ["An error", "It drops back to 3, with no warning", "It stays at 6"], "a": 1, "e": "scale changed only the stored count. The last write wins. Edit replicas in the file."}, {"q": "A container in your pod crashes. Who restarts it, and does the pod name change?", "o": ["The kubelet; same pod, RESTARTS +1", "The ReplicaSet; new pod name", "Nobody"], "a": 0, "e": "The kubelet restarts the container in place. New pods only come from a controller."}, {"q": "Why are a Deployment's pods found by label, not name?", "o": ["Labels are shorter", "Pod names are generated (deployment-hash-random)", "Names are secret"], "a": 1, "e": "The selector finds pods by label, including a pod created a second ago."}, {"q": "After kubectl scale --replicas=5, what does kubectl get rs show?", "o": ["A new ReplicaSet", "The same ReplicaSet, DESIRED 5", "Five ReplicaSets"], "a": 1, "e": "Scaling changes the count, not the template, so the same ReplicaSet keeps the pods."}, {"q": "Does a Deployment receive and split traffic between its pods?", "o": ["Yes", "No, it only keeps a count; a Service handles traffic", "Only in EKS"], "a": 1, "e": "That's the Service, in unit 3."}, {"q": "curl <pod-ip>:8080 from your laptop times out. Why?", "o": ["The app is broken", "The pod IP is on the cluster's network, which your laptop can't reach", "Wrong port"], "a": 1, "e": "Your laptop only reaches the API server, through kubectl."}];
+  const area=document.getElementById('quizArea'),scoreEl=document.getElementById('score');let answered=0,right=0;
+  Q.forEach((item,i)=>{const box=document.createElement('div');box.className='q';
+    const p=document.createElement('p');p.className='prompt';p.textContent=(i+1)+'. '+item.q;box.appendChild(p);
+    const opts=document.createElement('div');opts.className='opts';const ex=document.createElement('p');ex.className='explain';ex.textContent=item.e;
+    item.o.forEach((t,j)=>{const b=document.createElement('button');b.textContent=t;
+      b.onclick=()=>{if(box.dataset.done)return;box.dataset.done=1;answered++;
+        if(j===item.a){right++;b.classList.add('right')}else{b.classList.add('nope');opts.children[item.a].classList.add('right')}
+        [...opts.children].forEach(x=>x.disabled=true);ex.classList.add('show');scoreEl.textContent=right+' / '+answered;};
+      opts.appendChild(b);});
+    box.appendChild(opts);box.appendChild(ex);area.appendChild(box);});
+})();
+</script></body></html>
