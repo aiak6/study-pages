@@ -1,0 +1,463 @@
+<title>Project X Sessions 04 &amp; 05</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one reading column; sections as stacked "shipping manifest" blocks with a stencilled label; code and tables scroll in place. */
+:root{
+  --bg:#f3f5f7; --surface:#ffffff; --ink:#15202b; --muted:#56657a; --line:#d8dee6;
+  --accent:#c4501b; --accent-soft:#fbe9df; --steel:#1f5f8b; --steel-soft:#e3eef6;
+  --code-bg:#0f1b26; --code-fg:#dbe7f2; --code-cmt:#7f97ad;
+  --good:#2e7d4f; --bad:#b3261e;
+  --f-display:"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --f-body:"Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e151c; --surface:#16202a; --ink:#e6edf3; --muted:#9aabbd; --line:#2a3845;
+  --accent:#f0874f; --accent-soft:#3a2418; --steel:#7ab8e3; --steel-soft:#16303f;
+  --code-bg:#0a1016; --code-fg:#dbe7f2; --code-cmt:#6f879c;
+  --good:#6cc493; --bad:#f08a80; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0e151c; --surface:#16202a; --ink:#e6edf3; --muted:#9aabbd; --line:#2a3845;
+  --accent:#f0874f; --accent-soft:#3a2418; --steel:#7ab8e3; --steel-soft:#16303f;
+  --code-bg:#0a1016; --code-fg:#dbe7f2; --code-cmt:#6f879c;
+  --good:#6cc493; --bad:#f08a80; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:17px/1.6 var(--f-body);padding-inline:16px;padding-block:28px 64px}
+.wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.15;margin:0}
+h1{font-size:clamp(30px,6vw,44px);font-weight:800;letter-spacing:-.01em}
+h2{font-size:24px;font-weight:800}
+h3{font-size:18px;font-weight:600;margin-top:6px}
+p{margin:0}
+a{color:var(--steel)}
+code{font-family:var(--f-mono);font-size:.86em;background:var(--steel-soft);color:var(--ink);padding:1px 5px;border-radius:4px}
+strong{font-weight:700}
+.eyebrow{font:600 12px/1 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+header{display:flex;flex-direction:column;gap:12px;border-bottom:3px solid var(--ink);padding-bottom:20px}
+.meta{display:flex;flex-wrap:wrap;gap:8px 16px;color:var(--muted);font-size:15px}
+.lede{font-size:19px;max-width:65ch}
+nav{display:flex;flex-wrap:wrap;gap:8px}
+nav a{font:600 13px/1 var(--f-mono);text-decoration:none;color:var(--ink);border:1px solid var(--line);background:var(--surface);padding:8px 10px;border-radius:6px}
+nav a:hover,nav a:focus-visible{border-color:var(--accent);color:var(--accent);outline:none}
+section{display:flex;flex-direction:column;gap:14px;scroll-margin-top:16px}
+section > .label{display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--line);padding-bottom:8px}
+section > .label .tag{font:600 11px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--surface);background:var(--ink);padding:5px 7px;border-radius:3px}
+ul,ol{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px}
+.table{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:15.5px;min-width:480px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:600 12px/1.3 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--bg)}
+tr:last-child td{border-bottom:0}
+blockquote{margin:0;border-left:4px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 8px 8px 0;font-weight:600}
+pre{margin:0;background:var(--code-bg);color:var(--code-fg);font:14px/1.6 var(--f-mono);padding:14px 16px;border-radius:8px;overflow-x:auto}
+pre .c{color:var(--code-cmt)}
+.codebox{position:relative}
+.copy{position:absolute;top:8px;right:8px;font:600 11px/1 var(--f-mono);background:transparent;color:var(--code-cmt);border:1px solid var(--code-cmt);border-radius:4px;padding:5px 7px;cursor:pointer}
+.copy:hover,.copy:focus-visible{color:var(--code-fg);border-color:var(--code-fg);outline:none}
+.flow{font:600 14px/1.5 var(--f-mono);background:var(--steel-soft);color:var(--ink);padding:14px 16px;border-radius:8px;overflow-x:auto;white-space:pre}
+.step{display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:start}
+.step > .n{font:800 18px/34px var(--f-display);text-align:center;background:var(--ink);color:var(--bg);border-radius:50%;width:34px;height:34px}
+.step > div{min-width:0;display:flex;flex-direction:column;gap:8px}
+.see{font-size:15px;color:var(--good)}
+.see::before{content:"You should see: ";font-weight:700}
+.warn{border:1px solid var(--bad);border-radius:8px;padding:12px 16px;display:flex;flex-direction:column;gap:10px;background:var(--surface)}
+.warn .eyebrow{color:var(--bad)}
+details{border:1px solid var(--line);background:var(--surface);border-radius:8px}
+details summary{cursor:pointer;padding:12px 16px;font-weight:600;list-style-position:inside}
+details summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:8px}
+details > div{padding:0 16px 14px;display:flex;flex-direction:column;gap:8px}
+.q{display:flex;flex-direction:column;gap:10px}
+.q p.ask{font-weight:600}
+.reread{font-style:italic;color:var(--muted);font-size:15px}
+footer{color:var(--muted);font-size:15px;border-top:1px solid var(--line);padding-top:16px}
+@media (prefers-reduced-motion: reduce){*{scroll-behavior:auto!important}}
+html{scroll-behavior:smooth}
+</style>
+
+<div class="wrap">
+<header>
+  <span class="eyebrow">312 School · Cohort 26a · Project X</span>
+  <h1>Sessions 04 &amp; 05: Building EKS, then running the app on it</h1>
+  <div class="meta"><span>Wed, Nov 4 &amp; Thu, Nov 5, 2026</span><span>Tickets PX-107 &amp; PX-108</span><span>Sources: class slides, written notes, repo assignment pages</span></div>
+  <p class="lede">Session 03 decided to build EKS <strong>next to</strong> ECS. <strong>Session 04</strong> started the build: click a cluster together by hand first (<strong>ClickOps</strong>), watch the workers fail to join, learn why, then do it in Terraform. <strong>Session 05</strong> reviewed everyone's PRs and the reference build: plan with the AI before it builds, keep the PR readable, and understand <strong>Terraform state</strong> (three roots, recovery, locking). Next up: run the investment app on your cluster.</p>
+  <nav aria-label="Sections">
+    <a href="#homework">Homework</a><a href="#s4">Session 04</a><a href="#s5">Session 05</a><a href="#corrections">Corrections</a><a href="#commands">Commands</a><a href="#quiz4">Quiz 04</a><a href="#quiz5">Quiz 05</a>
+  </nav>
+</header>
+
+<section id="homework">
+  <div class="label"><span class="tag">Due Mon Nov 9</span><h2>Homework: what you need to do</h2></div>
+  <div class="warn">
+    <span class="eyebrow">Where you are</span>
+    <p>No personal branch or PR on GitHub yet, so <strong>PX-107 isn't started</strong>. PX-108 builds on it. Do PX-107 first, then PX-108, on the same branch.</p>
+  </div>
+
+  <h3>PX-107 · Build and verify EKS in your own AWS account</h3>
+  <div class="step"><span class="n">1</span><div>
+    <p><strong>Branch.</strong> In <code>projectx-26a-infra</code>, create <code>engineer/&lt;github-login&gt;</code> from <code>main</code>. Code goes in <code>class/04/terraform/</code>.</p>
+    <div class="codebox"><pre>git switch main &amp;&amp; git pull
+git switch -c engineer/&lt;github-login&gt; main
+mkdir -p class/04/terraform &amp;&amp; cd class/04/terraform</pre></div>
+  </div></div>
+  <div class="step"><span class="n">2</span><div>
+    <p><strong>Write at least 10% yourself.</strong> Start with the VPC lookup (Session 04, Terraform section). Commit it before you bring in AI.</p>
+  </div></div>
+  <div class="step"><span class="n">3</span><div>
+    <p><strong>Build.</strong> Choose workers (Auto Mode, managed node group or self-managed) and add-ons, and be ready to explain why. Check your identity, read the plan, apply.</p>
+    <div class="codebox"><pre>aws sts get-caller-identity          <span class="c"># your account, not the school's</span>
+terraform init &amp;&amp; terraform fmt -check &amp;&amp; terraform validate
+terraform plan -out=class4.tfplan     <span class="c"># read it</span>
+terraform apply class4.tfplan</pre></div>
+  </div></div>
+  <div class="step"><span class="n">4</span><div>
+    <p><strong>Prove it works.</strong></p>
+    <div class="codebox"><pre>aws eks update-kubeconfig --name "$CLUSTER_NAME" --region "$REGION" --alias class4-personal
+kubectl --context class4-personal run class4-check --image=nginx:stable-alpine --restart=Never
+kubectl --context class4-personal wait --for=condition=Ready pod/class4-check --timeout=10m
+kubectl --context class4-personal get nodes
+kubectl --context class4-personal get pod class4-check -o wide</pre></div>
+    <p class="see">a worker <code>Ready</code>, the pod <code>Running</code> with <code>1/1</code>. If it stays Pending: <code>kubectl describe pod class4-check</code>.</p>
+  </div></div>
+  <div class="step"><span class="n">5</span><div>
+    <p><strong>Clean up and confirm.</strong> Skip this if you go straight on to PX-108 with the same cluster, but don't leave it running for days.</p>
+    <div class="codebox"><pre>kubectl --context class4-personal delete pod class4-check --ignore-not-found
+terraform destroy
+aws eks list-clusters --region "$REGION"   <span class="c"># your cluster is gone</span></pre></div>
+  </div></div>
+  <div class="step"><span class="n">6</span><div>
+    <p><strong>Open a PR</strong> from your branch into <code>main</code>. Link PX-107, explain your worker and add-on choices, what you wrote yourself, how you verified, and the cleanup. <strong>Leave it open.</strong> Never commit credentials, <code>.tfstate</code> or saved plans. Do commit <code>.terraform.lock.hcl</code> and non-secret tfvars.</p>
+  </div></div>
+
+  <h3>PX-108 · Run the investment app on Dev EKS (try before Monday, Nov 9)</h3>
+  <ol>
+    <li><strong>ECS first, if your account doesn't have it.</strong> Build the app from <code>projectx-26a-app/candidate</code> and push it to <strong>your own ECR</strong> (the template doesn't make it). Deploy <code>cloudformation/projectx-app.yaml</code> with your account, region, image <strong>digest</strong>, a hostname and ACM certificate you control (or a restricted access method your agent plans), and your allowed CIDR. Keep RDS private. Check the app works on ECS.</li>
+    <li><strong>Plan with AI before building.</strong> It asks you the missing decisions, explains options and shows the files it'll change. Keep at least 10% written by you.</li>
+    <li><strong>Deploy the same image to EKS.</strong> Work out manifests, image pull from ECR, DB host, <strong>credentials</strong> (Secret or External Secrets) and <strong>network access</strong>: the RDS security group has to let your pods in on 5432.</li>
+    <li><strong>Use the existing RDS.</strong> A separate database inside it is optional. If ECS and EKS share it, their trades show in one history.</li>
+    <li><strong>If you use the reference build</strong> (branch <code>codex/dev-eks-foundation</code>, PR #18): change account IDs, bucket names, admin role and VPC lookups to yours, apply <strong>bootstrap → network → eks</strong>, then <strong>install Karpenter with Helm</strong> and check its controller runs.</li>
+    <li><strong>Verify:</strong> pods Ready, app opens and works. Record the image, commands, results and anything unsolved. Keep ECS running during the comparison.</li>
+    <li><strong>Clean up your account:</strong> Kubernetes-made load balancers and workers → cluster → network. Keep the state bucket until everything it tracks is gone. Check RDS deletion protection, snapshots and ECR images separately: they keep costing money.</li>
+    <li><strong>PR:</strong> close the PX-107 PR <strong>without merging</strong>, keep the branch, push, open a <strong>new</strong> PR for PX-108 that links the old one. Write what changed, decisions, testing, what's unfinished and cleanup. Leave it open.</li>
+  </ol>
+  <h3>Also from Session 03 (still on the list)</h3>
+  <ul>
+    <li>Spend a couple of hours on the <strong>EKS guide</strong>, <strong>Terraform layout</strong> and <strong>pitch deck</strong> pages in <code>assessments/2026-11-02-ecs-to-eks/</code>.</li>
+    <li>Watch the recorded PX-107 walkthrough (Loom, 56 min) and compare it with your own build.</li>
+  </ul>
+</section>
+
+<section id="s4">
+  <div class="label"><span class="tag">Wed Nov 4</span><h2>Session 04: Build EKS by hand first</h2></div>
+  <div class="table"><table>
+    <thead><tr><th>Topic</th><th>Key point</th></tr></thead>
+    <tbody>
+      <tr><td><strong>ClickOps first</strong></td><td>Build it once by hand in a test account → understand → delete → then Terraform/AI</td></tr>
+      <tr><td><strong>Creating a cluster</strong></td><td>Creates only the <strong>control plane</strong>. No workers = no pods run</td></tr>
+      <tr><td><strong>Worker options</strong></td><td><strong>Managed node group</strong>, <strong>self-managed</strong> (ASG + user data), <strong>Auto Mode</strong></td></tr>
+      <tr><td><strong>Cost</strong></td><td>Same for managed vs self-managed: you pay for the <strong>EC2s</strong></td></tr>
+      <tr><td><strong>Workers didn't join</strong></td><td>Placed in <strong>DB subnets</strong> with no route out. Workers need a <strong>NAT</strong> path to reach AWS APIs</td></tr>
+      <tr><td><strong>Two IAM roles</strong></td><td><strong>Cluster role</strong> (trusts EKS) + <strong>node role</strong> (trusts EC2)</td></tr>
+      <tr><td><strong>Connect</strong></td><td><code>aws sts get-caller-identity</code> → <code>aws eks update-kubeconfig --name X --region Y</code></td></tr>
+      <tr><td><strong>Add-ons</strong></td><td><strong>VPC CNI</strong> (pod IPs), <strong>kube-proxy</strong> (Service rules), <strong>CoreDNS</strong> (Service names)</td></tr>
+      <tr><td><strong>Your first Terraform</strong></td><td><code>var.vpc_id</code> → <code>data.aws_vpc.existing</code> → <code>output</code>. Read, don't create</td></tr>
+      <tr><td><strong>Branch protection</strong></td><td><code>main</code> needs a PR + approvals. You push to <code>engineer/&lt;login&gt;</code></td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>🖱️ ClickOps first: why build it by hand once</h3>
+  <ul>
+    <li>New rhythm: <strong>explain → demo → task → solo work</strong>. The morning after class the instructor posts a recording of his own AI-assisted solution to compare with yours.</li>
+    <li><strong>ClickOps</strong> = operations by clicking through the console. Do it once before automating, so you have a <strong>mental picture</strong> of every piece and dependency.</li>
+    <li>Without it you either patch errors one by one or write a pile of untested code. Like building a whole car before you ever turn the key.</li>
+    <li>Same at a real job: test account → create by hand → understand → delete → write the code.</li>
+  </ul>
+  <blockquote>Context is not fixable later. Understand it now.</blockquote>
+
+  <h3>🧠 Control plane vs worker nodes</h3>
+  <ul>
+    <li>Creating an EKS cluster creates only the <strong>control plane</strong> (API server, etcd, scheduler, controller manager). AWS runs it.</li>
+    <li><strong>Worker nodes</strong> are a separate step. Without them pods stay <code>Pending</code>.</li>
+    <li>One account can hold several clusters, so always switch explicitly:</li>
+  </ul>
+  <div class="codebox"><pre>aws sso login
+aws sts get-caller-identity
+aws eks list-clusters --region us-east-1
+aws eks update-kubeconfig --name CLUSTER_NAME --region REGION
+kubectl get nodes</pre></div>
+
+  <h3>⚙️ Three ways to run workers</h3>
+  <div class="table"><table>
+    <thead><tr><th>Option</th><th>Who does what</th><th>Trade-off</th></tr></thead>
+    <tbody>
+      <tr><td><strong>EKS managed node group</strong></td><td>AWS bootstraps and joins the EC2s, replaces them during a managed update</td><td>Simpler, less control</td></tr>
+      <tr><td><strong>Self-managed nodes</strong></td><td>Your <strong>Auto Scaling Group</strong>; EC2s join through <strong>user data</strong></td><td>More control, easier to fix yourself</td></tr>
+      <tr><td><strong>EKS Auto Mode</strong> (late 2024)</td><td>EKS makes nodes when a pod needs room</td><td>Least work; AWS owns more of the node lifecycle</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li>Big enterprises often go <strong>self-managed</strong>: with a 400-node fleet you want direct control, not a support ticket.</li>
+    <li><strong>Karpenter</strong> is another way: it watches pending pods and launches EC2s for them.</li>
+    <li>The reference build uses a <strong>managed node group</strong> in the existing private subnets. For the homework, the choice is yours. Make it a <strong>reasoned</strong> one.</li>
+  </ul>
+
+  <h3>🚨 Troubleshooting: why the workers didn't join</h3>
+  <ul>
+    <li><strong>Root cause 1:</strong> the cluster used four subnets, including the <strong>database subnets</strong>. Those have <strong>no route to the internet</strong>, so a worker there can't reach the AWS APIs it needs to register (EKS endpoint, IAM/STS, ECR).</li>
+    <li><strong>Fix:</strong> recreate the node group in the <strong>app subnets</strong> only, the ones that route through <strong>NAT gateway → internet gateway</strong>.</li>
+    <li><strong>Root cause 2:</strong> the node role was missing <code>AmazonEKSWorkerNodePolicy</code> (calls like <code>ec2:DescribeInstances</code>).</li>
+    <li>To reach AWS services without the internet you need <strong>VPC endpoints</strong>, which cost extra.</li>
+    <li>Good AI job: a specific problem, a clear "done" condition, lots of config to read.</li>
+  </ul>
+
+  <h3>🔐 Two IAM roles (they can't share one)</h3>
+  <div class="table"><table>
+    <thead><tr><th>Role</th><th>Trusts</th><th>Attach</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Cluster (control plane)</strong></td><td>the <strong>EKS</strong> service</td><td><code>AmazonEKSClusterPolicy</code></td></tr>
+      <tr><td><strong>Node (worker)</strong></td><td><strong>EC2</strong></td><td><code>AmazonEKSWorkerNodePolicy</code>, <code>AmazonEC2ContainerRegistryReadOnly</code>, more as needed (Secrets Manager, SSM)</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li>Create <strong>both roles first</strong>, then the cluster. In real environments use your own <strong>custom</strong> roles, not console-generated defaults.</li>
+  </ul>
+
+  <h3>🧩 Add-ons: how a pod finds a Service</h3>
+  <ul>
+    <li><strong>VPC CNI</strong> gives each pod an IP from the VPC.</li>
+    <li><strong>kube-proxy</strong> programs the rules on each worker that send Service traffic to backend pods.</li>
+    <li><strong>CoreDNS</strong> answers "what's the address of Service <code>db</code>?" so pods use names, not IPs.</li>
+  </ul>
+  <div class="flow">client pod → CoreDNS: "db?" → ClusterIP → kube-proxy rules → backend pod (VPC IP from the CNI)</div>
+
+  <h3>📐 Terraform: modules, layout and your first piece</h3>
+  <ul>
+    <li>A <strong>module</strong> is a reusable block of Terraform. A company might have 20–40 (EKS, S3, load balancer, networking, Lambda, RDS…).</li>
+    <li>Public modules are on the <strong>Terraform Registry</strong>, but many companies write their own: public ones are over-engineered, harder to maintain, and need a security audit.</li>
+    <li>Flat layout: <code>main.tf</code>, <code>variables.tf</code>, <code>provider.tf</code>, <code>outputs.tf</code>, <code>project-x-dev.tfvars</code>. With modules: <code>modules/eks/</code> plus a root that calls <code>source = "../../modules/eks"</code>.</li>
+    <li><strong>State, variable values and tfvars live in the root, never in a child module.</strong></li>
+    <li><strong>The piece you write yourself:</strong> find the VPC in the console (CloudFormation stack → Resources → <code>Vpc</code>), then look it up:</li>
+  </ul>
+  <div class="codebox"><pre>variable "vpc_id" {
+  type = string
+}
+
+data "aws_vpc" "existing" {    <span class="c"># data = look up, don't create</span>
+  id = var.vpc_id
+}
+
+output "vpc_cidr" {
+  value = data.aws_vpc.existing.cidr_block   <span class="c"># compare with the console</span>
+}</pre></div>
+  <p>When you review the bigger plan, sort it into what Terraform <strong>reads</strong> (VPC, subnets) and what it <strong>creates</strong> (EKS pieces).</p>
+
+  <h3>🤖 Starting the agent session</h3>
+  <ul>
+    <li><strong>AGENTS.md</strong> travels with the repo and Codex reads it. Claude Code reads <strong>CLAUDE.md</strong> (which can include <code>@AGENTS.md</code>). The starter ships AGENTS.md only, so ask Claude to open it.</li>
+    <li>First prompt after your manual commit: <em>"Read AGENTS.md, the Class 4 assignment and my VPC lookup. Before editing, show me what Terraform will reuse and what it would create."</em></li>
+    <li>The <strong>ticket</strong> gives the goal, the <strong>instruction file</strong> gives conventions, <strong>GitHub rules and AWS permissions</strong> enforce who can merge or deploy.</li>
+  </ul>
+
+  <h3>🌿 Branch protection</h3>
+  <ul>
+    <li><code>main</code> is protected: changes go through a PR and approvals. You push your own <code>engineer/&lt;login&gt;</code> branch, and classmates can see it. Don't merge.</li>
+  </ul>
+  <blockquote>Golden rule: build it once by hand so you know every piece, then let code and AI build it again. Workers need a way out to the AWS APIs, or they never join.</blockquote>
+</section>
+
+<section id="s5">
+  <div class="label"><span class="tag">Thu Nov 5</span><h2>Session 05: EKS foundation &amp; Terraform state</h2></div>
+  <div class="table"><table>
+    <thead><tr><th>Topic</th><th>Key point</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Good PR</strong></td><td>Short <strong>one-pager</strong> a coworker can read, linking to details. Push non-secret tfvars</td></tr>
+      <tr><td><strong>Plan before build</strong></td><td>"<strong>Interview me</strong> on the decisions, one at a time, with your suggestion and why. I decide."</td></tr>
+      <tr><td><strong>AI's first answer</strong></td><td>Often marketing-first (it picked <strong>Auto Mode</strong> without checking fees). Ask: what are teams actually using?</td></tr>
+      <tr><td><strong>Reference design</strong></td><td>Managed node group = <strong>system</strong> workers. <strong>Karpenter</strong> launches EC2s for <strong>app</strong> pods</td></tr>
+      <tr><td><strong>Karpenter install</strong></td><td><code>terraform apply</code> makes AWS prerequisites only. Controller = <strong>separate Helm step</strong></td></tr>
+      <tr><td><strong>Three roots</strong></td><td><strong>bootstrap</strong> (bucket, local state) → <strong>network</strong> (2 subnets) → <strong>eks</strong> (~43 resources)</td></tr>
+      <tr><td><strong>Sharing IDs</strong></td><td><code>terraform_remote_state</code>, or publish IDs to <strong>SSM Parameter Store</strong></td></tr>
+      <tr><td><strong>Lost state</strong></td><td>Resources still exist. <strong>Restore</strong> from S3 versioning before you apply again</td></tr>
+      <tr><td><strong>Locking</strong></td><td><code>use_lockfile = true</code> → <code>.tflock</code> in S3 → "Error acquiring state lock"</td></tr>
+      <tr><td><strong>Two "lock" files</strong></td><td><code>.tflock</code> = temporary state lock. <code>.terraform.lock.hcl</code> = provider versions, committed</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>🔍 Reviewing classmates' PX-107 PRs</h3>
+  <div class="table"><table>
+    <thead><tr><th></th><th>PR A (~900 lines)</th><th>PR B (292 lines)</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Network</strong></td><td>New VPC, two public subnets</td><td>Flat files, no modules</td></tr>
+      <tr><td><strong>Cluster</strong></td><td>EKS module, 1 worker (scales to 2), <code>t3.medium</code>, three add-ons</td><td>Wrote <code>main.tf</code> himself, AI wrote EKS. VPC CNI, kube-proxy, CoreDNS, on-demand node group</td></tr>
+      <tr><td><strong>Feedback</strong></td><td>Plain-text description; <code>evidence.md</code> read like an AI dump; use the newest Kubernetes version</td><td>No docs at all</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li><strong>Both</strong> forgot to push <code>terraform.tfvars</code> (AI probably put it in <code>.gitignore</code>). If a value isn't secret, commit it or add an example file.</li>
+    <li>More AI-written lines don't mean a better design.</li>
+  </ul>
+
+  <h3>📄 The reference PR: readable on purpose</h3>
+  <ul>
+    <li><code>eks-foundation.md</code>: ~20-line one-pager a coworker reads first.</li>
+    <li><code>eks-foundation-details.md</code>: ~140 lines of detail, linked from the one-pager.</li>
+    <li><code>decisions.md</code>: log of choices (more for agents than humans).</li>
+    <li>AI makes code cheap. Keeping it <strong>organized and reviewable</strong> is now the hard part.</li>
+  </ul>
+
+  <h3>🤖 Plan-first prompting: make the AI interview you</h3>
+  <ul>
+    <li>About <strong>an hour of planning</strong> before anything ran.</li>
+    <li>First prompt, roughly: <em>"Interview me on what decisions we need to make. Include your suggestion and why, but I make the final choice."</em></li>
+    <li>Its first pick was <strong>EKS Auto Mode</strong>: a marketing-first answer that hadn't checked the extra fee. Better question: <strong>"What are teams actually using?"</strong> Real engineering write-ups (Freshworks was cited) beat a quick opinion.</li>
+    <li>Ask for the <strong>downsides</strong>. Ask what a recommendation is <strong>based on</strong>. Tell it not to question the company's growth plans or treat you as a student.</li>
+    <li>Final prompt: <em>"Build this in dev, structure it professionally, test until success, create a draft PR, destroy after testing, don't come back until it's ready."</em></li>
+  </ul>
+
+  <h3>🏛️ Architecture decisions in the reference build</h3>
+  <ul>
+    <li><strong>Managed node group for system workloads only</strong>: 1 node in dev, 2 in prod.</li>
+    <li><strong>Karpenter</strong> runs on that node, watches for pending pods, and launches EC2 workers for the app. More to manage than Fargate, more control than Cluster Autoscaler, and it looks at pending pods directly.</li>
+    <li><strong>Database:</strong> the existing RDS Postgres, shared with ECS for now.</li>
+    <li><strong>Subnets:</strong> two new private <strong>/19</strong> subnets (~8,000 IPs each) in the existing VPC. NAT gateway reused.</li>
+    <li><strong>State:</strong> S3 with versioning and encryption.</li>
+    <li>In class the cluster and system node came up, but <strong>Karpenter wasn't installed</strong> live: its Helm install is a separate step. PR #17 tried Auto Mode for comparison.</li>
+  </ul>
+
+  <h3>🌳 Three roots, three state files</h3>
+  <div class="table"><table>
+    <thead><tr><th>Order</th><th>Root</th><th>Creates</th><th>State</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td><strong>bootstrap</strong></td><td>S3 state bucket</td><td><strong>local</strong> (no backend yet)</td></tr>
+      <tr><td>2</td><td><strong>network</strong></td><td>2 EKS subnets in the existing VPC</td><td><code>network.tfstate</code></td></tr>
+      <tr><td>3</td><td><strong>eks</strong></td><td>cluster, node group, add-ons (~43 resources)</td><td><code>eks.tfstate</code></td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li>A <strong>root</strong> is the folder where you run <code>terraform</code>. Each has its own state. Child modules: <code>eks-cluster</code>, <code>eks-network</code>, <code>state-backend</code>.</li>
+    <li><strong>Why separate?</strong> Different lifecycles: change the cluster without touching the network.</li>
+    <li>EKS reads subnet IDs with <code>terraform_remote_state</code>. It doesn't update by itself when network changes, and it needs read access to the <strong>whole</strong> network state. HashiCorp prefers explicit sharing, e.g. <strong>SSM Parameter Store</strong>. Inside one root, plain module outputs are simpler.</li>
+    <li><strong>To copy it:</strong> change the account ID in bootstrap (bucket names are global), backend bucket names, cluster admin role, and the VPC lookup. Don't overlap existing subnets.</li>
+  </ul>
+
+  <h3>💾 State: memory, recovery and locking</h3>
+  <ul>
+    <li><strong>State</strong> = Terraform's memory: resource address ↔ real resource.</li>
+    <li><strong>Lose it</strong> and the resources still exist, but Terraform plans to create them again. Don't apply that plan.</li>
+    <li><strong>Recovery:</strong> with S3 versioning, download the previous version and put it back at the <strong>exact original key</strong>. This fixes Terraform's memory only. It doesn't roll back infrastructure or data. Protect the local bootstrap state too.</li>
+    <li><strong>Locking:</strong> <code>use_lockfile = true</code> writes a temporary <code>.tflock</code> while a run is going. A second run gets "Error acquiring state lock". It locks <strong>that state only</strong>: not AWS, not another root.</li>
+  </ul>
+  <div class="codebox"><pre>terraform {
+  backend "s3" {
+    bucket       = "my-tfstate-ACCOUNTID"
+    key          = "eks.tfstate"
+    region       = "us-east-1"
+    encrypt      = true
+    use_lockfile = true   <span class="c"># S3-native lock, no DynamoDB table</span>
+  }
+}</pre></div>
+  <p>Next class: <strong>locals</strong> and <strong>data sources</strong> (<code>data</code> finds something that exists; <code>resource</code> creates it).</p>
+  <blockquote>Golden rule: plan with the AI before it builds and question its first answer. Keep the result small enough for a coworker to read, and never apply a plan made from lost state.</blockquote>
+</section>
+
+<section id="corrections">
+  <div class="warn">
+    <span class="eyebrow">Where these notes correct the class notes</span>
+    <div class="table"><table>
+      <thead><tr><th>In the notes</th><th>More exact version</th></tr></thead>
+      <tbody>
+        <tr><td>"Lock file is created automatically during terraform apply"</td><td>The <strong>state lock</strong> (<code>.tflock</code>) is temporary, in S3, never in Git. <code>.terraform.lock.hcl</code> is the <strong>provider</strong> lock from <code>terraform init</code>, and you commit it.</td></tr>
+        <tr><td>"Workers need internet to reach AWS IAM"</td><td>Workers need a path to several AWS APIs to join: the EKS endpoint, STS (identity) and ECR (images). No NAT and no VPC endpoints means they can't register.</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<section id="commands">
+  <div class="label"><span class="tag">Reference</span><h2>Commands that came up</h2></div>
+  <div class="table"><table>
+    <thead><tr><th>Command</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td><code>aws sts get-caller-identity</code></td><td>Which account and role you are right now</td></tr>
+      <tr><td><code>aws eks list-clusters --region R</code></td><td>Clusters in this account and region</td></tr>
+      <tr><td><code>aws eks update-kubeconfig --name N --region R --alias A</code></td><td>Point kubectl at a cluster, with a short context name</td></tr>
+      <tr><td><code>terraform plan -out=x.tfplan</code> / <code>apply x.tfplan</code></td><td>Save the plan you reviewed, then apply exactly that</td></tr>
+      <tr><td><code>kubectl run NAME --image=nginx:stable-alpine --restart=Never</code></td><td>One test pod</td></tr>
+      <tr><td><code>kubectl wait --for=condition=Ready pod/NAME --timeout=10m</code></td><td>Wait until it's Ready (or fail)</td></tr>
+      <tr><td><code>kubectl describe pod NAME</code></td><td>Why a pod is Pending (scheduling events)</td></tr>
+      <tr><td><code>terraform destroy</code></td><td>Delete everything this root created</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="quiz4">
+  <div class="label"><span class="tag">Self-test</span><h2>Quiz: Session 04</h2></div>
+  <div class="q"><p class="ask">1. You create an EKS cluster, it shows <code>Active</code>, and a pod stays <code>Pending</code> forever. What's missing?</p>
+    <details><summary>Show answer</summary><div><p><strong>Worker nodes.</strong> Creating a cluster only gives the control plane. The scheduler has nowhere to put the pod. "Active" means the brain is up, not that there's a body to run anything.</p></div></details></div>
+  <div class="q"><p class="ask">2. Node group created, EC2s running, but <code>kubectl get nodes</code> is empty. The subnets include the DB subnets. Why does that break it?</p>
+    <details><summary>Show answer</summary><div><p><strong>The workers can't reach the AWS APIs they need to join.</strong> DB subnets have no route out. Workers must talk to the EKS endpoint, STS and ECR. Fix: app subnets with a NAT route, or pay for VPC endpoints.</p></div></details></div>
+  <div class="q"><p class="ask">3. Subnets fixed, still no nodes. What do you check next, and which policy was missing in class?</p>
+    <details><summary>Show answer</summary><div><p><strong>The node IAM role.</strong> It must trust EC2 and have <code>AmazonEKSWorkerNodePolicy</code> plus <code>AmazonEC2ContainerRegistryReadOnly</code>. The worker policy was missing. Network first, then identity.</p></div></details></div>
+  <div class="q"><p class="ask">4. Why can't the control plane and workers share one IAM role?</p>
+    <details><summary>Show answer</summary><div><p><strong>Different principals, different trust.</strong> The cluster role trusts the EKS service; the node role trusts EC2 (worn through an instance profile). Their permissions differ too. Least privilege keeps them apart.</p></div></details></div>
+  <div class="q"><p class="ask">5. Interviewer: "Managed node groups, self-managed or Auto Mode for a 400-node production fleet? Defend it."</p>
+    <details><summary>Show answer</summary><div><p><strong>Weigh control against effort.</strong> Managed: AWS joins and rolls nodes, less control. Self-managed: full control over AMI, bootstrap and upgrades, fix it yourself, which is popular at scale. Auto Mode: least work, extra fee. EC2 cost is the same for managed vs self-managed. Pick one and say why.</p></div></details></div>
+  <div class="q"><p class="ask">6. Isn't ClickOps the opposite of Infrastructure as Code?</p>
+    <details><summary>Show answer</summary><div><p><strong>ClickOps is for learning, IaC is for running.</strong> Click it once in a test account to see every piece, delete it, then write code. Production still goes through code.</p></div></details></div>
+  <div class="q"><p class="ask">7. A pod calls <code>http://db:5432</code>. Which add-ons make that work?</p>
+    <details><summary>Show answer</summary><div><p><strong>CoreDNS resolves the name, kube-proxy routes the ClusterIP, VPC CNI gave the pod its IP.</strong> Without CoreDNS names fail; without kube-proxy the Service IP goes nowhere.</p></div></details></div>
+  <div class="q"><p class="ask">8. You wrote <code>data "aws_vpc" "existing"</code>. Then you run <code>terraform destroy</code>. What happens to the VPC?</p>
+    <details><summary>Show answer</summary><div><p><strong>Nothing. A data source only reads.</strong> CloudFormation owns the VPC, so it isn't a managed resource in your state. That's why the homework starts with a lookup.</p></div></details></div>
+  <div class="q"><p class="ask">9. Where do <code>terraform.tfvars</code> and state go with modules: root or <code>modules/eks/</code>?</p>
+    <details><summary>Show answer</summary><div><p><strong>The root.</strong> You run Terraform there; tfvars are only auto-loaded from the working directory. A child module just receives inputs.</p></div></details></div>
+  <div class="q"><p class="ask">10. One classmate approved your PR. Why can't you merge into <code>main</code>?</p>
+    <details><summary>Show answer</summary><div><p><strong>GitHub branch protection</strong> requires a PR and the set number of approvals. Your write access only lets you push your own branch.</p></div></details></div>
+  <p class="reread">Scoring: 9–10, your workers join on the first try 🏆 · 7–8, solid 💪 · below 7, reread Session 04 and retry 🔁</p>
+</section>
+
+<section id="quiz5">
+  <div class="label"><span class="tag">Self-test</span><h2>Quiz: Session 05</h2></div>
+  <div class="q"><p class="ask">1. Someone deletes <code>eks.tfstate</code>. Next morning <code>terraform plan</code> says "43 to add". What happened to the cluster, and what do you do?</p>
+    <details><summary>Show answer</summary><div><p><strong>The cluster still runs; Terraform lost its memory.</strong> Don't apply. Restore the previous version from S3 versioning at the exact same key, then <code>plan</code> should show no changes.</p></div></details></div>
+  <div class="q"><p class="ask">2. You restored yesterday's state, but last night someone added a node group by hand. What does restoring do and not do?</p>
+    <details><summary>Show answer</summary><div><p><strong>It fixes Terraform's memory, not AWS.</strong> The hand-made node group still exists and isn't in state. Import it or remove it on purpose.</p></div></details></div>
+  <div class="q"><p class="ask">3. Two people run <code>apply</code> on the eks root at once. One gets "Error acquiring state lock". What's locked?</p>
+    <details><summary>Show answer</summary><div><p><strong>Only that root's state.</strong> Not AWS (console clicks still work) and not the network root. Released when the run ends.</p></div></details></div>
+  <div class="q"><p class="ask">4. "Don't commit the lock file, it's temporary." Which lock file, and is that right?</p>
+    <details><summary>Show answer</summary><div><p><strong>Two files.</strong> <code>.tflock</code> (state lock, S3, temporary) never goes in Git. <code>.terraform.lock.hcl</code> (provider versions) does.</p></div></details></div>
+  <div class="q"><p class="ask">5. Why split network and EKS into two roots? A pro and a con.</p>
+    <details><summary>Show answer</summary><div><p><strong>Pro:</strong> separate lifecycles, smaller blast radius. <strong>Con:</strong> IDs must cross the gap through remote state (full read access, no auto-update) or SSM Parameter Store.</p></div></details></div>
+  <div class="q"><p class="ask">6. Why does bootstrap keep its state locally?</p>
+    <details><summary>Show answer</summary><div><p><strong>It creates the bucket.</strong> The backend must exist before <code>init</code> can use it. So protect that local file, and keep the bucket until everything it tracks is gone.</p></div></details></div>
+  <div class="q"><p class="ask">7. The AI picks EKS Auto Mode right away. What should you do?</p>
+    <details><summary>Show answer</summary><div><p><strong>Push back.</strong> Ask about fees and downsides, ask what teams actually use, ask what the answer is based on. Make it interview you so you decide.</p></div></details></div>
+  <div class="q"><p class="ask">8. In the reference build, 6 new app pods don't fit on the system node. What happens?</p>
+    <details><summary>Show answer</summary><div><p><strong>Pending → Karpenter sees them → launches fitting EC2s → pods scheduled.</strong> Unless you skipped the Helm install: then nothing launches and they stay Pending.</p></div></details></div>
+  <div class="q"><p class="ask">9. PX-108: EKS pods crash with "connection timed out" to RDS. First place to look?</p>
+    <details><summary>Show answer</summary><div><p><strong>The RDS security group.</strong> A timeout = dropped packets. It probably only allows the ECS tasks' SG. Allow 5432 from the EKS nodes/pods SG or the new subnet CIDRs. Then check host and credentials.</p></div></details></div>
+  <div class="q"><p class="ask">10. Your PR is 900 lines of AI code plus a long <code>evidence.md</code>. How do you make it reviewable?</p>
+    <details><summary>Show answer</summary><div><p><strong>A ~20-line one-pager on top</strong> (what changed, decisions, testing, unfinished, cleanup), linking a details file and a decisions log. Commit non-secret tfvars or an example.</p></div></details></div>
+  <p class="reread">Scoring: 9–10, you never apply a plan from lost state 🏆 · 7–8, solid 💪 · below 7, reread Session 05 and retry 🔁</p>
+</section>
+
+<footer>The full study pages and quizzes are in Notion under DevOps / 312 - Notes / 🏁 ProjectX.</footer>
+</div>
+
+<script>
+document.querySelectorAll('.codebox').forEach(function(box){
+  var pre = box.querySelector('pre'); var b = document.createElement('button');
+  b.className = 'copy'; b.type = 'button'; b.textContent = 'Copy';
+  b.addEventListener('click', function(){
+    var text = pre.innerText.split('\n').map(function(l){ return l.replace(/\s+#.*$/, ''); }).join('\n').trim();
+    var done = function(){ b.textContent = 'Copied'; setTimeout(function(){ b.textContent = 'Copy'; }, 1500); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(function(){ selectPre(); });
+    } else { selectPre(); }
+    function selectPre(){ var r = document.createRange(); r.selectNodeContents(pre); var s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = 'Selected'; }
+  });
+  box.appendChild(b);
+});
+</script>
