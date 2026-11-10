@@ -1,0 +1,368 @@
+<title>Project X Session 03</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one reading column; sections as stacked "shipping manifest" blocks with a stencilled label; code and tables scroll in place. */
+:root{
+  --bg:#f3f5f7; --surface:#ffffff; --ink:#15202b; --muted:#56657a; --line:#d8dee6;
+  --accent:#c4501b; --accent-soft:#fbe9df; --steel:#1f5f8b; --steel-soft:#e3eef6;
+  --code-bg:#0f1b26; --code-fg:#dbe7f2; --code-cmt:#7f97ad;
+  --good:#2e7d4f; --bad:#b3261e;
+  --f-display:"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --f-body:"Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e151c; --surface:#16202a; --ink:#e6edf3; --muted:#9aabbd; --line:#2a3845;
+  --accent:#f0874f; --accent-soft:#3a2418; --steel:#7ab8e3; --steel-soft:#16303f;
+  --code-bg:#0a1016; --code-fg:#dbe7f2; --code-cmt:#6f879c;
+  --good:#6cc493; --bad:#f08a80; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0e151c; --surface:#16202a; --ink:#e6edf3; --muted:#9aabbd; --line:#2a3845;
+  --accent:#f0874f; --accent-soft:#3a2418; --steel:#7ab8e3; --steel-soft:#16303f;
+  --code-bg:#0a1016; --code-fg:#dbe7f2; --code-cmt:#6f879c;
+  --good:#6cc493; --bad:#f08a80; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:17px/1.6 var(--f-body);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 64px}
+.wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.15;margin:0}
+h1{font-size:clamp(30px,6vw,44px);font-weight:800;letter-spacing:-.01em}
+h2{font-size:24px;font-weight:800}
+h3{font-size:18px;font-weight:600;margin-top:6px}
+p{margin:0}
+a{color:var(--steel)}
+code{font-family:var(--f-mono);font-size:.86em;background:var(--steel-soft);color:var(--ink);padding:1px 5px;border-radius:4px}
+strong{font-weight:700}
+.eyebrow{font:600 12px/1 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+header{display:flex;flex-direction:column;gap:12px;border-bottom:3px solid var(--ink);padding-bottom:20px}
+.meta{display:flex;flex-wrap:wrap;gap:8px 16px;color:var(--muted);font-size:15px}
+.lede{font-size:19px;max-width:65ch}
+nav{display:flex;flex-wrap:wrap;gap:8px}
+nav a{font:600 13px/1 var(--f-mono);text-decoration:none;color:var(--ink);border:1px solid var(--line);background:var(--surface);padding:8px 10px;border-radius:6px}
+nav a:hover,nav a:focus-visible{border-color:var(--accent);color:var(--accent);outline:none}
+section{display:flex;flex-direction:column;gap:14px;scroll-margin-top:16px}
+section > .label{display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--line);padding-bottom:8px}
+section > .label .tag{font:600 11px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--surface);background:var(--ink);padding:5px 7px;border-radius:3px}
+ul,ol{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px}
+.table{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:15.5px;min-width:480px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:600 12px/1.3 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--bg)}
+tr:last-child td{border-bottom:0}
+blockquote{margin:0;border-left:4px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 8px 8px 0;font-weight:600}
+pre{margin:0;background:var(--code-bg);color:var(--code-fg);font:14px/1.6 var(--f-mono);padding:14px 16px;border-radius:8px;overflow-x:auto}
+pre .c{color:var(--code-cmt)}
+.codebox{position:relative}
+.copy{position:absolute;top:8px;right:8px;font:600 11px/1 var(--f-mono);background:transparent;color:var(--code-cmt);border:1px solid var(--code-cmt);border-radius:4px;padding:5px 7px;cursor:pointer}
+.copy:hover,.copy:focus-visible{color:var(--code-fg);border-color:var(--code-fg);outline:none}
+.flow{font:600 14px/1.5 var(--f-mono);background:var(--steel-soft);color:var(--ink);padding:14px 16px;border-radius:8px;overflow-x:auto;white-space:pre}
+.step{display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:start}
+.step > .n{font:800 18px/34px var(--f-display);text-align:center;background:var(--ink);color:var(--bg);border-radius:50%;width:34px;height:34px}
+.step > div{min-width:0;display:flex;flex-direction:column;gap:8px}
+.see{font-size:15px;color:var(--good)}
+.see::before{content:"You should see: ";font-weight:700}
+.warn{border:1px solid var(--bad);border-radius:8px;padding:12px 16px;display:flex;flex-direction:column;gap:10px;background:var(--surface)}
+.warn .eyebrow{color:var(--bad)}
+details{border:1px solid var(--line);background:var(--surface);border-radius:8px}
+details summary{cursor:pointer;padding:12px 16px;font-weight:600;list-style-position:inside}
+details summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:8px}
+details > div{padding:0 16px 14px;display:flex;flex-direction:column;gap:8px}
+.q{display:flex;flex-direction:column;gap:10px}
+.q p.ask{font-weight:600}
+.reread{font-style:italic;color:var(--muted);font-size:15px}
+footer{color:var(--muted);font-size:15px;border-top:1px solid var(--line);padding-top:16px}
+@media (prefers-reduced-motion: reduce){*{scroll-behavior:auto!important}}
+html{scroll-behavior:smooth}
+</style>
+
+<div class="wrap">
+<header>
+  <span class="eyebrow">312 School · Cohort 26a · Project X</span>
+  <h1>Session 03: Assessing ECS → EKS</h1>
+  <div class="meta"><span>Mon, Nov 2, 2026</span><span>Marcel</span><span>Ticket #2 · infra repo</span></div>
+  <p class="lede">Our second ticket, and the first one about infrastructure: <strong>"Assess moving the app from ECS to EKS."</strong> It isn't a build task yet. It's a <strong>decision</strong> we have to back with reasons Nadia will accept. The class showed how that work happens today: move the ticket to In Progress, open an <strong>agent session</strong> in the infra repo (in its own <strong>worktree</strong>), feed it context, then <strong>argue with it</strong>, because AI's first answer is the shortest one, not the best one. We ended with a plan to <strong>build EKS alongside ECS</strong>, shift traffic slowly, and two AI-made HTML guides to study before Wednesday.</p>
+  <nav aria-label="Sections">
+    <a href="#ref">Quick reference</a><a href="#tickets">Tickets</a><a href="#ticket2">Ticket #2</a><a href="#blueprint">Code as blueprint</a><a href="#agent">Agent session</a><a href="#worktrees">Worktrees</a><a href="#context">Context</a><a href="#argue">Arguing with AI</a><a href="#plan">Migration plan</a><a href="#eks">EKS picture</a><a href="#speed">What AI speeds up</a><a href="#homework">Homework</a><a href="#check">Quiz</a>
+  </nav>
+</header>
+
+<section id="ref">
+  <div class="label"><span class="tag">Glance</span><h2>Quick reference</h2></div>
+  <div class="table"><table>
+    <thead><tr><th>Topic</th><th>Key point</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Ticket board</strong></td><td>Jira, Trello, Linear, Asana, monday.com, ClickUp. Columns = status. A ticket has an <strong>owner</strong> and a <strong>history</strong>; Slack messages get buried</td></tr>
+      <tr><td><strong>Task / story / ticket / issue</strong></td><td>Different names for the <strong>same thing</strong>. Teams pick one</td></tr>
+      <tr><td><strong>First step on any ticket</strong></td><td>Understand the <strong>current situation</strong> first. Today that means <strong>opening an agent session</strong></td></tr>
+      <tr><td><strong>Code is the blueprint</strong></td><td>Read the house plan, not the house: <strong>IaC</strong> + app code show what's running. <strong>GitOps</strong> = everything goes through Git</td></tr>
+      <tr><td><strong>Worktree</strong></td><td>Each agent session works in its <strong>own copy</strong> of the repo (<code>.claude/worktrees/…</code>), so parallel sessions don't touch each other's files</td></tr>
+      <tr><td><strong>Context for an agent</strong></td><td>Ticket, <strong>meeting transcript</strong> (the most valuable), Slack threads, docs, <strong>read-only</strong> access to the live environment</td></tr>
+      <tr><td><strong>AI's bias</strong></td><td>Trained for <strong>token efficiency</strong> → gives the <strong>fastest</strong> answer, not the best. Push back. For a fair second opinion, launch a <strong>fresh sub-agent</strong></td></tr>
+      <tr><td><strong>Build alongside</strong></td><td>New EKS next to ECS, same image, same RDS → test → shift traffic <strong>gradually</strong> (weighted) → decommission ECS</td></tr>
+      <tr><td><strong>EKS cost split</strong></td><td>Control plane <strong>$0.10/hr (~$73/mo)</strong>, run by AWS. Worker nodes = your EC2s. Fargate for pods costs more</td></tr>
+      <tr><td><strong>Where AI speeds things up</strong></td><td>It nearly <strong>zeroes the build step</strong>. Plan, design, test, verify, and <strong>learn</strong> stay with you</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="tickets">
+  <div class="label"><span class="tag">Work</span><h2>Tickets &amp; boards: why Slack isn't enough</h2></div>
+  <ul>
+    <li>Work comes from <strong>Slack</strong> or from your <strong>board</strong>. A board is a <strong>Kanban</strong>-style view: each column is a status (To Do → In Progress → Review → Done), each card is a ticket.</li>
+    <li>Common tools: <strong>Jira</strong> (Atlassian), <strong>Trello</strong>, <strong>Linear</strong>, <strong>Asana</strong>, <strong>monday.com</strong>, <strong>ClickUp</strong>. Views: <strong>board</strong> (columns, often per sprint) and <strong>backlog</strong> (a list of everything waiting).</li>
+    <li>A ticket has fields: <strong>title, description, assignee, labels/priority, comments, history</strong>, and <strong>sub-tasks</strong> (each can have its own owner).</li>
+    <li><strong>Why not just Slack?</strong> You post "can someone look at this Kubernetes node problem?", ten more messages land after it, and it's buried. Nobody owns it, and you can't follow up properly. A ticket stays on the board, assigned to someone, with a history.</li>
+    <li><strong>Same thing, four names:</strong> task, story, ticket, issue. In Jira it might officially be a <em>story</em>, but engineers still say "I got a ticket".</li>
+    <li><strong>Finishing a ticket:</strong> our PR #1 deploy from Session 02 moved to <strong>Review</strong> with a comment ("Deployed to dev. Pending Jordan's validation. Close after."). Some teams also <strong>reassign</strong> it to the person who must validate (Jordan, QA), since they own the next step.</li>
+    <li>The class Slack and Jira pages are <strong>static front-end copies</strong>, read-only for students. Marcel pushes changes to Git and you refresh to see them.</li>
+  </ul>
+</section>
+
+<section id="ticket2">
+  <div class="label"><span class="tag">Ticket #2</span><h2>"Assess moving the app from ECS to EKS"</h2></div>
+  <ul>
+    <li>Found in the backlog, linked to a Slack thread: <strong>Alex</strong> (back-end) asked <strong>Nadia</strong> about the ECS release path; Nadia owns the ECS setup and wants to see real <strong>benefits</strong> before any change. Since we "have Kubernetes experience", it landed on us.</li>
+    <li>Ticket #1 was an <strong>app deployment</strong>. Ticket #2 is <strong>infrastructure</strong>, and platform engineering owns it. First present the plan; if approved, do the migration.</li>
+    <li>Move it to <strong>In Progress</strong> when you start, so anyone checking the board can see you're on it.</li>
+    <li><strong>The first step</strong> (the "trick question"): before planning anything, understand <strong>where you are</strong>. Like day one in an Amazon warehouse asked to reorganize the food section: first you go look at what's there.</li>
+    <li>Where the current situation lives:
+      <ul>
+        <li>the <strong>live cloud</strong> (AWS console/CLI, if you have access)</li>
+        <li><strong>people</strong> (ask in Slack, meetings, onboarding)</li>
+        <li><strong>code</strong>: infrastructure code and application code</li>
+        <li><strong>docs</strong>: Markdown in repos, code comments, Confluence, Notion, Obsidian, SharePoint, Azure DevOps wiki, Google Drive</li>
+      </ul>
+    </li>
+    <li>Documentation is often missing or out of date. New hires are usually expected to dig in and figure things out.</li>
+  </ul>
+</section>
+
+<section id="blueprint">
+  <div class="label"><span class="tag">Concept</span><h2>Code is the blueprint: IaC &amp; GitOps</h2></div>
+  <ul>
+    <li>Over the last 10–15 years, companies moved to creating real environments <strong>from code</strong>. If you want to know what a house looks like, read its <strong>blueprint</strong>. You often don't need access to the environment at all.</li>
+    <li><strong>Infrastructure as Code (IaC)</strong>: Terraform, CloudFormation, Pulumi, AWS CDK. Nadia's ECS is CloudFormation in the infra repo (Session 02).</li>
+    <li><strong>GitOps</strong>: everything goes through Git. Every change is a commit, and the cluster follows the repo. More on this later (Argo CD).</li>
+    <li>Manual changes are avoided. Only an old-school company 10–15 years behind still clicks things together by hand.</li>
+    <li>Why this matters with AI: an agent can <strong>read the code first</strong>, without touching the real environment, and explain what's running.</li>
+  </ul>
+</section>
+
+<section id="agent">
+  <div class="label"><span class="tag">Tools</span><h2>Open an agent session, not a chat</h2></div>
+  <ul>
+    <li>Use the <strong>work</strong> AI, never your personal account at work.</li>
+    <li>Technical people use <strong>agentic harnesses</strong>: <strong>Claude Code</strong>, <strong>Codex</strong>, <strong>Cursor</strong>. Not claude.ai or chatgpt.com in a browser. Chat with connectors is fine for marketing or sales; we need more.</li>
+    <li><strong>Why a harness?</strong> It uses everything on your machine: Bash, your AWS credentials, the browser, installing packages, running and testing commands, back and forth. That's heavy-duty work a chat can't do.</li>
+    <li>Cursor lets you pick models from different vendors. Claude Code runs only Claude models; Codex runs only GPT.</li>
+    <li><strong>Which repo?</strong> Launch from the one that fits the ticket. Moving the app to EKS is about the <strong>house</strong>, not the tenant, so: the <strong>infra</strong> repo.</li>
+    <li>Model and effort: Marcel used <strong>Opus</strong> at <strong>high</strong> effort. He rarely sees a difference with extra/max.</li>
+  </ul>
+</section>
+
+<section id="worktrees">
+  <div class="label"><span class="tag">Tools</span><h2>Worktrees: parallel sessions without collisions</h2></div>
+  <ul>
+    <li><strong>The problem:</strong> two Claude Code sessions launched from the <strong>same folder</strong> share the same files and branch.
+      <ul>
+        <li>Session A: "create a file called <code>chips</code>". Session B: "list 15 EC2 types in a file". Both files show up in <code>git status</code>.</li>
+        <li>B is asked to commit and open a PR. Will it commit only its own file, or both? This time it got it right, but with 10 or 50 changed files you get conflicts. And A was now sitting on B's branch.</li>
+      </ul>
+    </li>
+    <li><strong>The fix: a worktree.</strong> The session gets its <strong>own folder</strong> with its own branch copy:</li>
+  </ul>
+  <div class="codebox"><pre>ls -a                           <span class="c"># inside the repo</span>
+.claude/worktrees/
+    dummy-chips-file/           <span class="c"># session A works here</span>
+    ec2-types-list/             <span class="c"># session B works here</span>
+cd .claude/worktrees/dummy-chips-file &amp;&amp; git status   <span class="c"># its own branch, its own files</span></pre></div>
+  <ul>
+    <li>It's like two people working on two different machines. Turn on the worktree option when starting the session. If it reuses a folder, tell it "create the worktree properly" (it sometimes messes up).</li>
+    <li><strong>Archiving</strong> the session removes the worktree, unless it holds commits that aren't saved anywhere else.</li>
+    <li>Q: do worktree sessions share context? <strong>No.</strong> They don't know about each other unless you tell one to go read the other's folder.</li>
+  </ul>
+</section>
+
+<section id="context">
+  <div class="label"><span class="tag">Concept</span><h2>Context engineering for a real ticket</h2></div>
+  <p>What to hand the agent (this is <strong>context engineering</strong>, Session 02):</p>
+  <ol>
+    <li>The <strong>ticket</strong>: text, link or ID (with a Jira connector it can look it up itself)</li>
+    <li>The <strong>meeting transcript</strong>: Teams, Zoom, Google Meet or Granola. <strong>The most valuable source.</strong> Your team's judgment, preferences and company quirks never appear on the internet</li>
+    <li>A <strong>prompt</strong>, if useful. A bare prompt is fine; prompts matter less than context</li>
+    <li><strong>Slack channels</strong> where it was discussed</li>
+    <li><strong>Read-only access to the live environment</strong>: it can check real usage, for example node resource use (self-managed nodes may beat serverless on cost) or high CloudWatch logs/metrics bills</li>
+  </ol>
+  <ul>
+    <li>People told Marcel: "I gave it the ticket and the meeting call, and it knew the rest."</li>
+    <li>Ask for an <strong>HTML artifact</strong> for anything complex. A visual page with diagrams is easier to understand than a wall of text. Say your level ("I know Kubernetes basics, not EKS").</li>
+    <li>Ask it to <strong>research the latest docs</strong>. Otherwise it builds from memory and gives you an old version or misses a newer feature.</li>
+    <li>Q: can I download skills for best practices? Skills capture <strong>your</strong> process, and we don't have one yet. Outside skills for platform work vary a lot (some overcomplicated, some too simple), so we'll build our own later.</li>
+  </ul>
+</section>
+
+<section id="argue">
+  <div class="label"><span class="tag">Judgment</span><h2>Arguing with AI: the shortcut bias</h2></div>
+  <ul>
+    <li>The agent's first answer: <strong>stay on ECS</strong>. One service, one task, no load. EKS adds a control plane fee and ongoing work (version upgrades, add-ons, the load balancer controller) and a second management tool. For <strong>today's</strong> workload, that's fair.</li>
+    <li>Then add the real future: launch in ~30 days, <strong>$3M marketing spend</strong>, organic growth after. It still leaned on the simple answer.</li>
+    <li><strong>Why:</strong> models are trained for <strong>token efficiency</strong>. It's like telling a person "decide fast, as fast as possible, but make the best decision". Those conflict, so you get the <strong>easiest, fastest</strong> answer, almost never the best. It even skips checking: "probably not needed anymore, but I haven't checked."</li>
+    <li>AI is <strong>very knowledgeable but not that smart yet</strong>. The human stays the <strong>navigator</strong>. If you just follow it, it can lead you into wrong solutions.</li>
+    <li><strong>Push back:</strong> "You're dismissing every reason for Kubernetes. What do I tell my coworkers? You may be biased." After pushback it came back with:
+      <ul>
+        <li>Kubernetes gets <strong>more valuable with every service and team</strong> you add; ECS doesn't (each new service = another CloudFormation block)</li>
+        <li><strong>Shared tooling</strong>: a paved road on standard pieces (<strong>Argo CD, Argo Rollouts, External Secrets</strong>) instead of custom CloudFormation per app</li>
+        <li><strong>Hiring</strong>: engineers you hire will expect Kubernetes</li>
+        <li><strong>Cost at scale</strong>: <strong>Karpenter</strong> + <strong>spot</strong> + denser packing beats Fargate pricing once load is steady</li>
+        <li><strong>The longer you wait, the more you move</strong>: every ECS-native service adds to the migration later</li>
+        <li>The honest case against: two people, one deadline, new ways to fail at launch</li>
+      </ul>
+    </li>
+    <li>Q: won't it just agree to please me? Launch a <strong>fresh sub-agent</strong> without your pushback and ask for an <strong>independent review</strong>.</li>
+    <li>AI doesn't count <strong>its own progress</strong>. Ask: "Does agentic AI make Kubernetes easier to run? Does that change the choice?"</li>
+    <li>It's weak at <strong>new ideas</strong> and <strong>timelines</strong> too (it estimated two weeks for what an agent can build in hours).</li>
+    <li>Most teams end up on Kubernetes: runs on any cloud, rich ecosystem. Complexity is less of a problem for people who know it.</li>
+  </ul>
+  <blockquote>Have your own opinion. Don't hand coworkers "A or B, you choose". Say "I think we should do this" and argue for it.</blockquote>
+</section>
+
+<section id="plan">
+  <div class="label"><span class="tag">Plan</span><h2>The migration plan: build alongside, shift traffic</h2></div>
+  <div class="flow">Today (CloudFormation):
+users → ALB → ECS Fargate task → RDS Postgres
+        + ECR (image) · Secrets Manager (DB creds) · CloudWatch (logs &amp; metrics)
+
+Next to it (Terraform):
+users → ALB ─┬─ 90% → ECS Fargate task ─┐
+             └─ 10% → EKS pods ─────────┴→ same RDS Postgres</div>
+  <ul>
+    <li><strong>Why Terraform for the new part:</strong> CloudFormation is AWS-only and turns into one 1,000–5,000-line YAML file. Terraform splits into files and <strong>modules</strong> (Scale Session 15), works on any cloud, and most enterprises use it. Others: <strong>Pulumi</strong>, <strong>AWS CDK</strong>. Don't get locked into one cloud.</li>
+  </ul>
+  <ol>
+    <li>Build a new <strong>EKS</strong> cluster (control plane + worker nodes) with Terraform, <strong>next to</strong> ECS. Both keep running.</li>
+    <li>Deploy the <strong>same image</strong> to EKS. Test it (yourself or with QA).</li>
+    <li>Point it at the <strong>same RDS</strong>. Only the <strong>compute layer</strong> moves; the database stays.</li>
+    <li><strong>Shift traffic</strong> gradually: 1% → 10% → 50% → 100%. You can run 70/30 for a while.</li>
+    <li><strong>Decommission</strong> ECS once everything works.</li>
+  </ol>
+  <ul>
+    <li><strong>Why users don't notice:</strong> same DNS name, same container image, same database. Only the load balancer and the place the container runs change. Done right, there's no downtime.</li>
+    <li><strong>How to split traffic:</strong> Marcel showed <strong>Route 53 weighted routing</strong> (90% to the ECS load balancer, 10% to the EKS one). The infra repo's write-up chose a <strong>weighted second target group on the existing ALB</strong> for dev. Same idea, done at the load balancer instead of DNS.</li>
+    <li>Plan phases: decide &amp; record (put it in <code>AGENTS.md</code>) → build EKS foundation → cut over. Prod is a separate project.</li>
+    <li><strong>The VPC question (a real interview story):</strong> the VPC and RDS were made by CloudFormation. Options: (1) new VPC + new RDS from a snapshot, (2) new VPC only, (3) <strong>reuse the existing VPC</strong> and later move the VPC and RDS under Terraform (<strong>transfer ownership</strong>, don't recreate). Marcel picked <strong>3</strong>: that's how you'd handle prod, where you can't just recreate the database.</li>
+    <li><strong>Decision for dev:</strong> EKS goes into the <strong>existing CloudFormation VPC</strong> (<code>10.40.0.0/16</code>) and uses the <strong>existing RDS</strong>. Moving them under Terraform is a later ticket.</li>
+  </ul>
+</section>
+
+<section id="eks">
+  <div class="label"><span class="tag">EKS</span><h2>EKS in one picture (from the AI guide)</h2></div>
+  <p>Kubernetes has two halves (Containers Session 04):</p>
+  <div class="table"><table>
+    <thead><tr><th>Half</th><th>What it is</th><th>Who runs it on EKS</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Control plane</strong></td><td>API server, scheduler, etcd (the brain)</td><td><strong>AWS</strong>. $0.10/hour ≈ <strong>$73/month</strong></td></tr>
+      <tr><td><strong>Data plane</strong> (worker nodes)</td><td>Where the pods run</td><td><strong>You</strong>, on EC2 (m5.large, m5.xlarge, …)</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li><strong>Fargate for EKS</strong> hands the nodes to AWS too. It costs more and isn't really simpler.</li>
+    <li><strong>How to run the nodes</strong> (decision #2, from the latest docs): <strong>EKS Auto Mode</strong>, <strong>managed node groups</strong>, or <strong>Karpenter</strong> (a node autoscaler; Office Hours Oct 24). Study what Karpenter is before choosing.</li>
+    <li><strong>Other open decisions</strong> in the guide: secrets, Argo CD, traffic API, observability, who can reach the API endpoint, Kubernetes version.</li>
+    <li><strong>Upgrades</strong> are the most annoying part of running Kubernetes yourself, along with extra controllers.</li>
+    <li><strong>Practice cheaply:</strong> if you want your own cluster, <strong>GKE</strong> (Google) has a free tier that covers the control plane fee; you pay only for VMs. If you use <strong>EKS</strong>, build it with Terraform and <code>terraform destroy</code> as soon as you're done. It's billed by the hour.</li>
+  </ul>
+  <div class="warn">
+    <span class="eyebrow">Correction</span>
+    <p>Marcel said upgrades come "every six months or something". Kubernetes ships ~3 minor versions a year, and EKS standard support lasts ~14 months per version, so plan on upgrading <strong>at least once a year</strong>.</p>
+  </div>
+</section>
+
+<section id="speed">
+  <div class="label"><span class="tag">Big picture</span><h2>What AI speeds up, and what it doesn't</h2></div>
+  <div class="flow">plan → design → BUILD → test → deploy → maintain
+                 ↑ agents nearly zero this
+learn  ← mixed into every step for you</div>
+  <ul>
+    <li>Before AI, <strong>build</strong> took the biggest chunk. A cluster AI says takes "two weeks" now gets built in 30 minutes to an hour once you know what you want.</li>
+    <li>What still takes time, and stays with humans: <strong>planning, designing, testing, verifying</strong>. That's why the "one engineer = 10 engineers" hype didn't come true.</li>
+    <li>For you, add a step: <strong>learn</strong>. It's no longer "learn, then plan". It's mixed in everywhere: plan &amp; learn, build &amp; learn, test &amp; learn. You don't need to learn to write the plan; you need to learn to <strong>make the decisions</strong>.</li>
+    <li>This class was ~70–80% of how work gets done now: start a session, give context, have it explain and plan, question it, decide, then let it build, test and deploy.</li>
+  </ul>
+</section>
+
+<section id="homework">
+  <div class="label"><span class="tag">Due Wed</span><h2>Homework</h2></div>
+  <ul>
+    <li>Read the two AI-made pages <strong>at least twice</strong> (a couple of hours) before <strong>Wednesday</strong>, research what you don't get, and ask AI follow-up questions:
+      <ol>
+        <li><strong>EKS guide</strong>: control plane and nodes, VPC and RDS, Auto Mode, add-ons, identity, secrets, GitOps, upgrades, cost, cutover</li>
+        <li><strong>Terraform layout</strong>: Dev/Staging/Prod structure, modules, how inputs and outputs flow from root to child modules and between child modules, <code>variables.tf</code> vs <code>.tfvars</code>, state, CI</li>
+      </ol>
+    </li>
+    <li>Both are already in your clone:</li>
+  </ul>
+  <div class="codebox"><pre>open ~/DevOps/projectx/projectx-26a-infra/assessments/2026-11-02-ecs-to-eks/eks-guide.html
+open ~/DevOps/projectx/projectx-26a-infra/assessments/2026-11-02-ecs-to-eks/terraform-layout.html
+open ~/DevOps/projectx/projectx-26a-infra/assessments/2026-11-02-ecs-to-eks/pitch-deck.html</pre></div>
+  <ul><li>Wednesday: break it all down and start building.</li></ul>
+  <blockquote>The golden rule of this class: AI's first answer is the shortcut. Understand where you are, give it real context, argue with it, then make the decision yourself.</blockquote>
+</section>
+
+<section id="check">
+  <div class="label"><span class="tag">Self-test</span><h2>Quiz: score yourself out of 10</h2></div>
+  <p class="reread">Answer each question out loud first, then open the answer.</p>
+
+  <div class="q"><p class="ask">1. You asked a teammate in Slack to look at a failing node. Two days later nothing has happened. What went wrong, and what should you have done?</p>
+    <details><summary>Show answer</summary><div><p><strong>A Slack message has no owner and no status. A ticket has both.</strong> Your message got buried under newer ones, nobody was assigned, and there's no easy way to follow up. Create a ticket (or ask them to), <strong>assign</strong> it, and post the link in Slack. Now it sits on the board with a history until someone moves it to Done.</p></div></details></div>
+
+  <div class="q"><p class="ask">2. You get the ticket "Assess moving the app from ECS to EKS." What is your very first step, and why not start with the AWS console?</p>
+    <details><summary>Show answer</summary><div><p><strong>Understand the current situation by opening an agent session in the infra repo.</strong> The code is the blueprint: CloudFormation/Terraform show what's running without you clicking through an account you may not even have access to yet. The console is one source, but the code, docs and people come first. You can't plan a future state without knowing the current one.</p></div></details></div>
+
+  <div class="q"><p class="ask">3. Two Claude Code sessions run from the same repo folder. One is asked to commit and open a PR. What can go wrong, and what fixes it?</p>
+    <details><summary>Show answer</summary><div><p><strong>They share one working folder and one branch, so one session can commit the other's files or end up on its branch.</strong> With a couple of tiny files it may work out. With 10–50 changed files you get conflicts and messy PRs. Fix: run each session in a <strong>worktree</strong> (<code>.claude/worktrees/&lt;name&gt;</code>), its own folder with its own branch copy. Like two people on two machines.</p></div></details></div>
+
+  <div class="q"><p class="ask">4. Interview question: "What's the most useful context you can give an AI agent for a team decision, and why?"</p>
+    <details><summary>Show answer</summary><div><p><strong>The meeting transcript where the team discussed it.</strong> AI already has general knowledge. What it lacks is <em>your</em> company: teammates' preferences, constraints, the reasons behind past choices. That only exists in human conversation. Add the ticket, relevant Slack threads, docs, and read-only access to the live environment, and it often knows the rest.</p></div></details></div>
+
+  <div class="q"><p class="ask">5. Your agent recommends "stay on ECS" in 20 seconds. Why should you be suspicious, and what do you do?</p>
+    <details><summary>Show answer</summary><div><p><strong>Models are trained to be token-efficient, so the first answer is the fastest one, not the best one.</strong> It judged today's tiny workload and ignored the future (launch, $3M marketing, more services). Push back with the missing context, ask it to check the latest docs, and ask whether agentic AI changes the trade-off. It almost never thinks of its own progress.</p></div></details></div>
+
+  <div class="q"><p class="ask">6. You pushed back and the AI now agrees with you. How do you know it didn't just cave to please you?</p>
+    <details><summary>Show answer</summary><div><p><strong>Launch a fresh sub-agent that never saw your pushback, give it the same facts, and ask for an independent review.</strong> If it reaches the same conclusion on its own, the reasoning holds. If not, compare the two arguments. Same idea as a second reviewer on a PR.</p></div></details></div>
+
+  <div class="q"><p class="ask">7. Give three strong reasons to move a growing startup from ECS Fargate to EKS, and one honest reason to wait.</p>
+    <details><summary>Show answer</summary><div><p><strong>For:</strong> (1) Kubernetes gets more valuable with every new service and team; ECS just adds another CloudFormation block each time. (2) A shared paved road built on standard tools like Argo CD, Argo Rollouts and External Secrets. (3) Cost at scale: Karpenter with spot instances and denser packing beats Fargate pricing once load is steady. Bonus: hiring, portability across clouds, and "the longer you wait, the more you have to move".</p><p><strong>Against right now:</strong> a two-person team with a launch deadline adds new ways to fail. Ongoing work like version upgrades and add-ons is real.</p></div></details></div>
+
+  <div class="q"><p class="ask">8. You move the app from ECS to EKS and switch traffic. Why don't users notice?</p>
+    <details><summary>Show answer</summary><div><p><strong>Nothing they touch changes: same DNS name, same container image, same database.</strong> Behind the name, traffic now goes to a different load balancer and a container running in a different place. Because RDS stays put and only the compute layer moves, there's no data to copy and no downtime. Shift it gradually (1% → 10% → 100%) with weighted routing in Route 53 or a weighted second target group on the ALB, so you can roll back by changing the weights.</p></div></details></div>
+
+  <div class="q"><p class="ask">9. Interview question: "The VPC and RDS were built with CloudFormation, and you're building EKS with Terraform. What do you do with the VPC and database?"</p>
+    <details><summary>Show answer</summary><div><p><strong>Reuse them: launch EKS into the existing VPC and point it at the existing RDS, then later transfer ownership of the VPC and RDS to Terraform (import) instead of recreating them.</strong> A new VPC plus a new RDS from a snapshot works for a throwaway dev account, but in prod you can't casually recreate a database or move its network. Changing who manages a resource, not the resource itself, is the safe pattern. It's also a good "challenge I faced" story.</p></div></details></div>
+
+  <div class="q"><p class="ask">10. Your manager says: "With AI, this migration should take a day, right?" How do you answer?</p>
+    <details><summary>Show answer</summary><div><p><strong>The build part, maybe. The work around it, no.</strong> Agents nearly zero the build step: once decisions are made, Terraform for the cluster can be written in hours. But planning, design decisions (node setup, secrets, GitOps, traffic split), testing, verifying with QA, a gradual cutover, and the learning you need to make those calls still take human time. That's why AI didn't turn one engineer into ten. The cutover also waits on other people.</p></div></details></div>
+
+  <p><strong>Scoring:</strong> 9–10 — ready to pitch Nadia on EKS 🏆 · 7–8 — solid 💪 · below 7 — reread the sections above and retry 🔁</p>
+</section>
+
+<footer>The same notes and quiz are in Notion under DevOps / 312 - Notes / 🏁 ProjectX.</footer>
+</div>
+<script>
+document.querySelectorAll('.codebox').forEach(function(box){
+  var pre = box.querySelector('pre'); var b = document.createElement('button');
+  b.className = 'copy'; b.type = 'button'; b.textContent = 'Copy';
+  b.addEventListener('click', function(){
+    var text = pre.innerText.split('\n').map(function(l){ return l.replace(/\s+#.*$/, ''); }).join('\n').trim();
+    var done = function(){ b.textContent = 'Copied'; setTimeout(function(){ b.textContent = 'Copy'; }, 1500); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(function(){ selectPre(); });
+    } else { selectPre(); }
+    function selectPre(){ var r = document.createRange(); r.selectNodeContents(pre); var s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = 'Selected'; }
+  });
+  box.appendChild(b);
+});
+</script>
