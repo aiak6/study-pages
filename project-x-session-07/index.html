@@ -1,0 +1,555 @@
+<title>Project X Session 07</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one reading column; sections as stacked "shipping manifest" blocks with a stencilled label; code and tables scroll in place. */
+:root{
+  --bg:#f3f5f7; --surface:#ffffff; --ink:#15202b; --muted:#56657a; --line:#d8dee6;
+  --accent:#c4501b; --accent-soft:#fbe9df; --steel:#1f5f8b; --steel-soft:#e3eef6;
+  --code-bg:#0f1b26; --code-fg:#dbe7f2; --code-cmt:#7f97ad;
+  --good:#2e7d4f; --bad:#b3261e;
+  --f-display:"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --f-body:"Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e151c; --surface:#16202a; --ink:#e6edf3; --muted:#9aabbd; --line:#2a3845;
+  --accent:#f0874f; --accent-soft:#3a2418; --steel:#7ab8e3; --steel-soft:#16303f;
+  --code-bg:#0a1016; --code-fg:#dbe7f2; --code-cmt:#6f879c;
+  --good:#6cc493; --bad:#f08a80; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0e151c; --surface:#16202a; --ink:#e6edf3; --muted:#9aabbd; --line:#2a3845;
+  --accent:#f0874f; --accent-soft:#3a2418; --steel:#7ab8e3; --steel-soft:#16303f;
+  --code-bg:#0a1016; --code-fg:#dbe7f2; --code-cmt:#6f879c;
+  --good:#6cc493; --bad:#f08a80; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:17px/1.6 var(--f-body);padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:28px 64px}
+.wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.15;margin:0}
+h1{font-size:clamp(30px,6vw,44px);font-weight:800;letter-spacing:-.01em}
+h2{font-size:24px;font-weight:800}
+h3{font-size:18px;font-weight:600;margin-top:6px}
+p{margin:0}
+a{color:var(--steel)}
+code{font-family:var(--f-mono);font-size:.86em;background:var(--steel-soft);color:var(--ink);padding:1px 5px;border-radius:4px}
+strong{font-weight:700}
+.eyebrow{font:600 12px/1 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+header{display:flex;flex-direction:column;gap:12px;border-bottom:3px solid var(--ink);padding-bottom:20px}
+.meta{display:flex;flex-wrap:wrap;gap:8px 16px;color:var(--muted);font-size:15px}
+.lede{font-size:19px;max-width:65ch}
+nav{display:flex;flex-wrap:wrap;gap:8px}
+nav a{font:600 13px/1 var(--f-mono);text-decoration:none;color:var(--ink);border:1px solid var(--line);background:var(--surface);padding:8px 10px;border-radius:6px}
+nav a:hover,nav a:focus-visible{border-color:var(--accent);color:var(--accent);outline:none}
+section{display:flex;flex-direction:column;gap:14px;scroll-margin-top:16px}
+section > .label{display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--line);padding-bottom:8px}
+section > .label .tag{font:600 11px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--surface);background:var(--ink);padding:5px 7px;border-radius:3px}
+ul,ol{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px}
+.table{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:15.5px;min-width:480px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:600 12px/1.3 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--bg)}
+tr:last-child td{border-bottom:0}
+blockquote{margin:0;border-left:4px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 8px 8px 0;font-weight:600}
+pre{margin:0;background:var(--code-bg);color:var(--code-fg);font:14px/1.6 var(--f-mono);padding:14px 16px;border-radius:8px;overflow-x:auto}
+pre .c{color:var(--code-cmt)}
+.codebox{position:relative}
+.copy{position:absolute;top:8px;right:8px;font:600 11px/1 var(--f-mono);background:transparent;color:var(--code-cmt);border:1px solid var(--code-cmt);border-radius:4px;padding:5px 7px;cursor:pointer}
+.copy:hover,.copy:focus-visible{color:var(--code-fg);border-color:var(--code-fg);outline:none}
+.flow{font:600 14px/1.5 var(--f-mono);background:var(--steel-soft);color:var(--ink);padding:14px 16px;border-radius:8px;overflow-x:auto;white-space:pre}
+.step{display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:start}
+.step > .n{font:800 18px/34px var(--f-display);text-align:center;background:var(--ink);color:var(--bg);border-radius:50%;width:34px;height:34px}
+.step > div{min-width:0;display:flex;flex-direction:column;gap:8px}
+.see{font-size:15px;color:var(--good)}
+.see::before{content:"You should see: ";font-weight:700}
+.warn{border:1px solid var(--bad);border-radius:8px;padding:12px 16px;display:flex;flex-direction:column;gap:10px;background:var(--surface)}
+.warn .eyebrow{color:var(--bad)}
+details{border:1px solid var(--line);background:var(--surface);border-radius:8px}
+details summary{cursor:pointer;padding:12px 16px;font-weight:600;list-style-position:inside}
+details summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:8px}
+details > div{padding:0 16px 14px;display:flex;flex-direction:column;gap:8px}
+.q{display:flex;flex-direction:column;gap:10px}
+.q p.ask{font-weight:600}
+.reread{font-style:italic;color:var(--muted);font-size:15px}
+footer{color:var(--muted);font-size:15px;border-top:1px solid var(--line);padding-top:16px}
+@media (prefers-reduced-motion: reduce){*{scroll-behavior:auto!important}}
+html{scroll-behavior:smooth}
+</style>
+
+<div class="wrap">
+<header>
+  <span class="eyebrow">312 School · Cohort 26a · Project X</span>
+  <h1>Session 07: EKS add-ons, Helm &amp; Karpenter</h1>
+  <div class="meta"><span>Wed, Nov 11, 2026</span><span>Ticket PX-108 (continues)</span><span>Sources: class recording, written notes, class page, repo examples</span></div>
+  <p class="lede">Class 7 finished the EKS foundation and turned toward the app. Three layers went on top of the cluster: <strong>EKS add-ons</strong> (shared cluster services AWS installs for you, like CoreDNS and the VPC CNI), <strong>Helm</strong> (the tool almost every team uses to install things into Kubernetes: templates plus values instead of plain YAML), and <strong>Karpenter</strong> (a controller that launches a new EC2 worker when a pod has nowhere to run). The instructor installed Karpenter <strong>by hand from the docs</strong> instead of running the AI's script, then one waiting pod made a brand-new worker appear. No new homework: keep going with <strong>PX-108</strong>.</p>
+  <nav aria-label="Sections"><a href="#s7">Notes</a><a href="#corrections">Corrections</a><a href="#homework">Homework</a><a href="#quiz7">Check yourself</a></nav>
+</header>
+
+<section id="s7">
+  <div class="label"><span class="tag">Notes</span><h2>Quick reference and notes</h2></div>
+  <div class="table"><table>
+    <thead><tr><th>Topic</th><th>Key point</th></tr></thead>
+    <tbody>
+      <tr><td><strong>EKS add-on</strong></td><td>Extra cluster software AWS installs through the <strong>EKS API</strong> (<code>aws_eks_addon</code>). In our Terraform you must <strong>list every one</strong>, even the basics</td></tr>
+      <tr><td><strong>CoreDNS vs Route 53</strong></td><td>CoreDNS = DNS <strong>inside</strong> the cluster only (<code>service.namespace</code>). Route 53 = <strong>public</strong> DNS</td></tr>
+      <tr><td><strong>VPC CNI</strong></td><td>Pods get <strong>real VPC IPs</strong> from the EKS subnets. That's why each subnet is a /19 (about 8,000 IPs)</td></tr>
+      <tr><td><strong>Metrics Server</strong></td><td>Without it there is no <code>kubectl top</code> and no <strong>HPA</strong></td></tr>
+      <tr><td><strong>Helm chart</strong></td><td><code>Chart.yaml</code> (info) + a values file (variables) + <code>templates/</code> (YAML with placeholders). Everything in <code>templates/</code> gets deployed</td></tr>
+      <tr><td><strong>Install or update</strong></td><td><code>helm upgrade --install &lt;release&gt; &lt;chart&gt; -f &lt;values&gt;</code> ≈ <code>kubectl apply</code>. Works the first time and every time after</td></tr>
+      <tr><td><strong><code>--set</code></strong></td><td>Overrides one value from the command line without editing the file</td></tr>
+      <tr><td><strong>Helm ≠ kubectl</strong></td><td>Helm creates, updates and removes. You still <strong>look and debug</strong> with <code>kubectl get / describe / logs</code></td></tr>
+      <tr><td><strong>Karpenter = 3 steps</strong></td><td>1) AWS pieces (Terraform, already done) → 2) the controller with <strong>Helm</strong> → 3) <strong>NodePool + EC2NodeClass</strong> YAML</td></tr>
+      <tr><td><strong>nodeSelector</strong></td><td><code>karpenter.sh/nodepool: general</code> sends a pod to a Karpenter worker instead of the system node</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>🔁 Where we started: rebuilding the cluster</h3>
+  <ul>
+    <li>Last class was Terraform features: data sources, resources, variables, locals, outputs, <code>for_each</code>, dependencies and drift.</li>
+    <li>The instructor had <strong>destroyed the cluster</strong> after that class because nobody was using it. He rebuilt it live:</li>
+  </ul>
+  <div class="codebox"><pre>git status                 <span class="c"># one small local change he didn't need</span>
+git stash                  <span class="c"># put it aside</span>
+git pull
+
+cd terraform/envs/dev/network
+terraform init &amp;&amp; terraform plan     <span class="c"># no changes: the two subnets were never deleted</span>
+
+cd ../eks
+terraform plan                       <span class="c"># 43 to add</span>
+terraform apply
+
+aws eks update-kubeconfig --name &lt;cluster-name&gt; --region us-east-1
+kubectl get nodes                    <span class="c"># one system worker</span></pre></div>
+  <ul>
+    <li>This is the payoff of the <strong>three roots</strong> from Session 05: the cluster can be destroyed and rebuilt without touching the network.</li>
+    <li>💡 Do the same in your own account: destroy the cluster when you stop for the day, rebuild with one <code>apply</code>.</li>
+  </ul>
+
+  <h3>🧩 EKS add-ons: shared cluster services</h3>
+  <ul>
+    <li>An <strong>add-on</strong> is extra software that extends the cluster. It is a native EKS feature: AWS console → your cluster → <strong>Add-ons</strong> → "Get more add-ons" (about 23 from AWS, plus community and marketplace ones like Datadog).</li>
+    <li><strong>How one gets installed:</strong> Terraform <code>aws_eks_addon</code> → calls the <strong>EKS API</strong> → EKS creates the Kubernetes objects (for example the <code>coredns</code> Deployment) → the pods run on your workers. AWS manages the install.</li>
+  </ul>
+  <div class="table"><table>
+    <thead><tr><th>Add-on</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td><strong>CoreDNS</strong></td><td>DNS for Service names inside the cluster. Practically required</td></tr>
+      <tr><td><strong>VPC CNI</strong></td><td>Gives every pod an IP address from the VPC subnets</td></tr>
+      <tr><td><strong>kube-proxy</strong></td><td>Routes Service traffic to pods. Required for networking</td></tr>
+      <tr><td><strong>Pod Identity Agent</strong></td><td>Lets pods get AWS credentials (assume IAM roles)</td></tr>
+      <tr><td><strong>Metrics Server</strong></td><td>CPU and memory numbers for <code>kubectl top</code> and the HPA (Containers Session 12)</td></tr>
+      <tr><td><strong>EBS CSI driver</strong></td><td>Lets pods use EBS volumes (PVCs from Containers Session 13)</td></tr>
+      <tr><td><strong>CloudWatch Observability</strong></td><td>Ships container and node logs and metrics to CloudWatch</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li>Also in the catalog but not in our build: the <strong>EFS CSI driver</strong> (shared file storage), GuardDuty (security), and more.</li>
+    <li><strong>In our code:</strong> <code>terraform/modules/eks-cluster/addons.tf</code>. Two <code>aws_eks_addon</code> resources, each with <code>for_each</code>: first <code>vpc-cni</code>, <code>kube-proxy</code>, <code>eks-pod-identity-agent</code>; then <code>coredns</code>, <code>metrics-server</code>, <code>aws-ebs-csi-driver</code> and <code>amazon-cloudwatch-observability</code>.</li>
+    <li><strong>Nothing is pre-selected in Terraform.</strong> The console picks the basic add-ons for you. Our code sets <code>bootstrap_self_managed_addons = false</code>, so every add-on has to be declared. Leave them out and the cluster still gets created, but it doesn't work properly.</li>
+    <li><strong>Cost:</strong> there is no fee per add-on. You pay for what it uses: CloudWatch logs (not cheap, so retention is set to <strong>2 weeks</strong> in the Terraform), EBS volumes, and a little CPU and memory on your nodes.</li>
+    <li>The CloudWatch add-on made four log groups: <code>/aws/containerinsights/&lt;cluster&gt;/application</code>, <code>dataplane</code>, <code>host</code>, <code>performance</code>. The application logs are the same lines <code>kubectl logs</code> shows.</li>
+    <li>Before EKS add-ons existed, teams installed all of this themselves <strong>with Helm</strong>.</li>
+    <li>📝 Metrics Server and <strong>kube-state-metrics</strong> are different things (see Corrections).</li>
+  </ul>
+
+  <h3>🌐 CoreDNS vs Route 53</h3>
+  <div class="table"><table>
+    <thead><tr><th></th><th>Route 53</th><th>CoreDNS</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Where it runs</strong></td><td>An AWS service</td><td>Pods inside your cluster</td></tr>
+      <tr><td><strong>Who can use the names</strong></td><td>Anyone on the internet (public records)</td><td>Only pods in the <strong>same cluster</strong></td></tr>
+      <tr><td><strong>Example</strong></td><td><code>app.example.com</code> → the load balancer's long AWS name</td><td><code>trading-api.trading</code> → the Service's ClusterIP</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li>Short form: <code>service.namespace</code>. Full form: <code>service.namespace.svc.cluster.local</code>.</li>
+    <li>These names don't work from the internet and don't work from another cluster. CoreDNS is a small local DNS server for the cluster's own little world.</li>
+    <li>Same cluster DNS as Containers Session 07 (Services) and Session 09 (the <code>db</code> Service name in config).</li>
+  </ul>
+
+  <h3>⛵ Helm: why teams use it</h3>
+  <ul>
+    <li><strong>Helm</strong> is a command-line tool like <code>kubectl</code>, called the <strong>Kubernetes package manager</strong>. It uses the same kubeconfig and talks to the same API server. Install: <code>brew install helm</code>.</li>
+    <li><strong>Why:</strong> scale. It is the same reason we use Terraform instead of clicking: variables, reuse, and one set of files for dev, staging and prod.</li>
+    <li>Helm only creates <strong>Kubernetes objects</strong> (Deployments, Services, StatefulSets, DaemonSets…). It can't create a cluster, an EC2 or an S3 bucket. That is Terraform's job.</li>
+  </ul>
+  <div class="table"><table>
+    <thead><tr><th>Terraform idea</th><th>Helm idea</th></tr></thead>
+    <tbody>
+      <tr><td><code>.tfvars</code> values</td><td>a <strong>values</strong> file</td></tr>
+      <tr><td>resource code with <code>var.name</code></td><td><strong>templates</strong> with <code>{{ .Values.name }}</code></td></tr>
+      <tr><td><code>terraform apply</code></td><td><code>helm upgrade --install</code></td></tr>
+      <tr><td>a public module with hundreds of inputs</td><td>a public chart with a 2,000-line values file</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li>A <strong>release</strong> is one installed copy of a chart, with a name you choose. Helm manages everything in it <strong>as one unit</strong>: <code>helm uninstall</code> removes all of it, whether that is 1 pod or 50 objects.</li>
+    <li><strong>How teams use it:</strong>
+      <ul>
+        <li><strong>Platform software</strong> from public charts: Karpenter, External Secrets Operator (Containers Session 11), Grafana, OpenTelemetry Collector.</li>
+        <li>Mostly their <strong>own apps</strong>, with one values file per environment. Our investment app gets its own chart later.</li>
+        <li>Later, <strong>Argo CD</strong> runs the Helm upgrades automatically. It sits on top of Helm, it doesn't replace it.</li>
+      </ul>
+    </li>
+    <li><strong>81%</strong> of organizations in the 2025 CNCF survey reported using Helm in production. Helm tasks also appear in the CKA and CKAD exams. The instructor's point: if you say you work with Kubernetes, an interviewer expects Helm, the same way Terraform implies modules.</li>
+    <li>📝 Helm is its own CNCF project, not part of Kubernetes itself (see Corrections).</li>
+  </ul>
+
+  <h3>📦 Inside a chart: Chart.yaml, values and templates</h3>
+  <p>Class example: <code>class/07/live-helm/</code> in the infra repo. The same nginx pod, once as plain YAML and once as a chart.</p>
+  <div class="flow">nginx-pod-chart/
+├── Chart.yaml            # required: the chart's name and version (its ID card)
+├── dev-values.yaml       # the variables, one file per environment
+├── staging-values.yaml
+├── prod-values.yaml
+└── templates/
+    └── pod.yaml          # normal Kubernetes YAML with placeholders</div>
+  <p>The values file (<code>dev-values.yaml</code>):</p>
+  <div class="codebox"><pre>podName: nginx
+
+container:
+  name: nginx
+  port: 80
+
+image:
+  repository: nginx
+  tag: "1.14.2"</pre></div>
+  <p>The template (<code>templates/pod.yaml</code>):</p>
+  <div class="codebox"><pre>apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ .Values.podName }}
+spec:
+  containers:
+  - name: {{ .Values.container.name }}
+    image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+    ports:
+    - containerPort: {{ .Values.container.port }}</pre></div>
+  <ul>
+    <li>Helm fills the placeholders with the values and sends normal YAML to the cluster.</li>
+    <li><strong>Everything in <code>templates/</code> is read automatically.</strong> You never name a template file in the command. You only choose the values.</li>
+    <li><code>Chart.yaml</code> doesn't connect to the templates. It only describes the chart. The version matters when you share the chart with others.</li>
+    <li>Values live <strong>outside</strong> <code>templates/</code>. One values file feeds every template in the chart. One chart = one set of templates.</li>
+    <li>The default file name is <code>values.yaml</code>, and Helm picks it up by itself. The class chart has no default, so you must pass one with <code>-f</code>.</li>
+    <li><strong>Different environments = different values files</strong>, same templates.</li>
+    <li><strong>Real-life chart: Grafana.</strong> Its <code>templates/</code> folder holds a Deployment, ConfigMaps, HPA, Ingress, NetworkPolicy, Secret, Service, Role and RoleBinding, ServiceAccount, StatefulSet and more. Its <code>values.yaml</code> is about <strong>2,000 lines</strong>. You never edit those templates. You supply your own values.</li>
+    <li>💡 Don't mix the two up: Grafana is a dashboard product. Helm is just one way to install it. Grafana comes back in the monitoring classes.</li>
+  </ul>
+
+  <h3>⌨️ Helm commands next to kubectl</h3>
+  <div class="table"><table>
+    <thead><tr><th>kubectl</th><th>Helm</th><th>Note</th></tr></thead>
+    <tbody>
+      <tr><td><code>kubectl create -f</code></td><td><code>helm install</code></td><td>First time only. Fails if it already exists</td></tr>
+      <tr><td><code>kubectl apply -f</code></td><td><code>helm upgrade --install</code></td><td>Installs if missing, updates if there. <strong>Use this one</strong></td></tr>
+      <tr><td><code>kubectl delete -f</code></td><td><code>helm uninstall &lt;release&gt;</code></td><td>Removes everything the release created</td></tr>
+      <tr><td><code>kubectl rollout undo</code></td><td><code>helm rollback &lt;release&gt;</code></td><td>Helm takes <strong>every object</strong> in the release back</td></tr>
+      <tr><td>(nothing)</td><td><code>helm template</code></td><td>Only prints the final YAML. Nothing goes to the cluster</td></tr>
+      <tr><td><code>kubectl get / describe / logs</code></td><td>(nothing)</td><td>Keep using kubectl to look and debug</td></tr>
+    </tbody>
+  </table></div>
+  <div class="codebox"><pre><span class="c"># from class/07/live-helm/</span>
+
+<span class="c"># render only: see the YAML Helm would send (nothing is created)</span>
+helm template demo ./nginx-pod-chart -f ./nginx-pod-chart/dev-values.yaml
+
+<span class="c"># install or update a release called "demo"</span>
+helm upgrade --install demo ./nginx-pod-chart \
+  -f ./nginx-pod-chart/dev-values.yaml
+<span class="c"># other namespace: add  -n my-space --create-namespace</span>
+
+helm ls                    <span class="c"># list releases</span>
+kubectl get pods           <span class="c"># Helm made the pod, kubectl shows it</span>
+helm uninstall demo        <span class="c"># delete everything in the release</span>
+
+<span class="c"># change one value without editing the file</span>
+helm upgrade --install demo ./nginx-pod-chart \
+  -f ./nginx-pod-chart/dev-values.yaml --set image.tag=1.27.0</pre></div>
+  <ul>
+    <li><strong>Scaling the Helm way:</strong> change <code>replicaCount</code> in the values file, then run <code>helm upgrade</code> again. Don't edit the live object.</li>
+    <li><strong>Remote charts:</strong> <code>helm repo add</code> then <code>helm install</code> (Grafana), or an <code>oci://</code> address (Karpenter).</li>
+    <li><strong>A Helm install failed?</strong> After Helm sends the YAML it is ordinary Kubernetes. Go back to get → describe → logs (Containers Session 06).</li>
+    <li><code>kubectl rollout undo</code> brings back the previous pod template of <strong>one</strong> workload. <code>helm rollback</code> covers the Deployment, the ConfigMap, the Service and anything else the release changed.</li>
+    <li>💡 A new release name doesn't rename the pod. The class values hard-code <code>podName: nginx</code>, so a second release in the same namespace clashes. Installing a chart twice only works when the templates use the release name, like <code>{{ .Release.Name }}</code> in the class <code>service-chart</code>.</li>
+  </ul>
+
+  <h3>🪚 Karpenter: what it is and why there is a system node</h3>
+  <ul>
+    <li><strong>Karpenter</strong> is an autoscaler for <strong>nodes</strong>. It runs as a pod in the cluster, watches for pods that can't be scheduled, and launches EC2 workers that fit them. (Containers Session 12: the HPA adds pods, Karpenter adds nodes.)</li>
+    <li><strong>Our design</strong> (Session 05): a managed node group called <strong>system</strong> (1 node in dev) runs the system pods, including Karpenter. Application pods go on workers that Karpenter launches.</li>
+  </ul>
+  <div class="table"><table>
+    <thead><tr><th></th><th>EKS managed node group</th><th>Karpenter</th></tr></thead>
+    <tbody>
+      <tr><td><strong>What it is</strong></td><td>A feature of the AWS EKS service</td><td>Software running as a pod in your cluster</td></tr>
+      <tr><td><strong>Defined in</strong></td><td>Terraform: <code>aws_eks_node_group</code> and <code>aws_launch_template</code></td><td>Kubernetes YAML: <code>NodePool</code> and <code>EC2NodeClass</code></td></tr>
+      <tr><td><strong>Change instance types</strong></td><td>Terraform or the EKS console</td><td><code>kubectl edit nodepool general</code>, or re-apply the YAML</td></tr>
+      <tr><td><strong>Used here for</strong></td><td>System pods (CoreDNS, Karpenter…)</td><td>Application pods</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li><strong>vs an Auto Scaling group</strong> (Scale Session 09): ASG settings live in the EC2 console and an AWS service does the scaling. Karpenter lives in your cluster and reads YAML objects.</li>
+    <li><strong>vs Cluster Autoscaler:</strong> the older Kubernetes autoscaler that scales node groups. Most AWS teams now choose Karpenter, and Karpenter's docs include a "migrating from Cluster Autoscaler" guide. For your résumé: Karpenter.</li>
+    <li><strong>Why Karpenter gets resource requests:</strong> if Karpenter can't run, nobody launches new nodes, and everything waiting stays stuck. Requests reserve its CPU and memory (Containers Session 11).</li>
+    <li><strong>High availability:</strong> the chart starts <strong>2 Karpenter pods</strong> with <strong>pod anti-affinity</strong>, meaning "never both on the same node". With one system node, the second pod stays <strong>Pending</strong>. That is expected in dev. In production run at least <strong>2 system nodes</strong>.</li>
+    <li>📝 Karpenter is open-source software that AWS built. It is not a managed AWS service (see Corrections).</li>
+  </ul>
+
+  <h3>🔧 Installing Karpenter by hand (3 steps)</h3>
+  <div class="step"><span class="n">1</span><div>
+    <p><strong>AWS prerequisites.</strong> IAM role, instance profile and permissions. Already created by Terraform in the eks root (Session 05: <code>terraform apply</code> makes the prerequisites only).</p>
+  </div></div>
+  <div class="step"><span class="n">2</span><div>
+    <p><strong>The controller, with Helm.</strong> The instructor followed the Karpenter "Getting Started" docs instead of running the PR's <code>install.sh</code>. The script works, but it is hard to read (jq and long pipelines). He asked Claude to check each doc setting against our Terraform. What changed from the doc command:</p>
+    <ul>
+      <li>Removed <code>settings.interruptionQueue</code>: our Terraform never created an SQS queue.</li>
+      <li>CPU request <code>1</code> → <code>250m</code>, memory request <code>1Gi</code> → <code>512Mi</code>. Limits stayed.</li>
+      <li>Added a <strong>nodeSelector</strong> so Karpenter itself runs on the system node.</li>
+      <li>Namespace <code>kube-system</code>. The zonal shift setting stays <code>false</code>.</li>
+    </ul>
+    <div class="codebox"><pre>export KARPENTER_NAMESPACE="kube-system"
+export KARPENTER_VERSION="&lt;latest release&gt;"
+export CLUSTER_NAME="&lt;your-cluster-name&gt;"
+
+helm registry logout public.ecr.aws    <span class="c"># fine if it says you were not logged in</span>
+
+helm upgrade --install karpenter oci://public.ecr.aws/karpenter/karpenter \
+  --version "${KARPENTER_VERSION}" \
+  --namespace "${KARPENTER_NAMESPACE}" --create-namespace \
+  --set "settings.clusterName=${CLUSTER_NAME}" \
+  --set controller.resources.requests.cpu=250m \
+  --set controller.resources.requests.memory=512Mi \
+  --set controller.resources.limits.cpu=1 \
+  --set controller.resources.limits.memory=1Gi \
+  --set-string 'nodeSelector.projectx\.io/node-role=system' \
+  --wait
+
+kubectl -n kube-system get pods        <span class="c"># karpenter: 1 Running, 1 Pending (anti-affinity)</span></pre></div>
+    <ul>
+      <li>This is the shape of the class command. The instructor shared his exact one in the class chat.</li>
+      <li>Every <code>--set</code> changes a value of the Karpenter chart without downloading the chart and editing its values file.</li>
+      <li>💡 Pasting <code>export</code> lines that carry <code># comments</code> into the terminal gave errors. Remove the comments before pasting.</li>
+    </ul>
+  </div></div>
+  <div class="step"><span class="n">3</span><div>
+    <p><strong>Tell Karpenter what to build.</strong> Two objects in one file. The doc sample doesn't work as written: it points at a node role and tags our Terraform doesn't create. Fill in <strong>three values</strong> from <code>terraform output</code> in the eks root (the <code>platform</code> output): the <strong>Karpenter instance profile</strong>, the two <strong>private subnet IDs</strong>, and the <strong>security group ID</strong>.</p>
+    <div class="table"><table>
+      <thead><tr><th>Object</th><th>Answers</th><th>Main fields</th></tr></thead>
+      <tbody>
+        <tr><td><strong>EC2NodeClass</strong></td><td><strong>How</strong> to build a worker</td><td>AMI (Amazon Linux 2023, pinned), subnets, security group, instance profile</td></tr>
+        <tr><td><strong>NodePool</strong></td><td><strong>When and what</strong> to launch</td><td>Spot or on-demand, instance types, <code>expireAfter</code>, the CPU limit, when to remove empty workers</td></tr>
+      </tbody>
+    </table></div>
+    <div class="codebox"><pre>apiVersion: karpenter.k8s.aws/v1
+kind: EC2NodeClass
+metadata:
+  name: general
+spec:
+  instanceProfile: REPLACE_WITH_YOUR_KARPENTER_INSTANCE_PROFILE   <span class="c"># IAM identity for new workers</span>
+  amiSelectorTerms:
+    - alias: al2023@v20261031                 <span class="c"># pinned Amazon Linux 2023 image</span>
+  subnetSelectorTerms:                        <span class="c"># your two private EKS subnets</span>
+    - id: REPLACE_WITH_YOUR_PRIVATE_EKS_SUBNET_ID_1
+    - id: REPLACE_WITH_YOUR_PRIVATE_EKS_SUBNET_ID_2
+  securityGroupSelectorTerms:
+    - id: REPLACE_WITH_YOUR_EKS_SECURITY_GROUP_ID
+  associatePublicIPAddress: false             <span class="c"># workers stay private</span>
+---
+apiVersion: karpenter.sh/v1
+kind: NodePool
+metadata:
+  name: general
+spec:
+  template:
+    spec:
+      nodeClassRef:
+        group: karpenter.k8s.aws
+        kind: EC2NodeClass
+        name: general
+      requirements:
+        - key: karpenter.sh/capacity-type
+          operator: In
+          values: ["spot"]                    <span class="c"># Spot, because this is dev</span>
+        - key: node.kubernetes.io/instance-type
+          operator: In
+          values: ["t3.medium", "m5.large"]
+      expireAfter: 720h                       <span class="c"># replace workers every 30 days</span>
+  limits:
+    cpu: "8"                                  <span class="c"># never more than 8 vCPUs in total</span>
+  disruption:
+    consolidationPolicy: WhenEmpty            <span class="c"># only remove empty workers</span>
+    consolidateAfter: 1m</pre></div>
+    <div class="codebox"><pre>kubectl apply -f karpenter-node-settings.yaml
+kubectl get ec2nodeclass,nodepool
+kubectl edit nodepool general          <span class="c"># change instance types later</span></pre></div>
+    <ul>
+      <li><code>limits.cpu: "8"</code> counts <strong>total vCPUs</strong> in the pool, not instances. A <code>t3.medium</code> has 2 vCPUs, so at most four of them.</li>
+      <li>The instructor changed the sample from on-demand to <strong>Spot</strong> (it is dev) and cut the instance list down to two types.</li>
+      <li>The full example with comments is <code>class/07/karpenter-node-settings.example.yaml</code>. These were class settings, not general recommendations.</li>
+      <li>💡 AI likes one-liners such as <code>terraform -chdir=...</code> piped into jq. Ask for the version a human can read: <code>cd</code> into the root, then <code>terraform output</code>.</li>
+    </ul>
+  </div></div>
+
+  <h3>🏷️ nodeSelector and the first Karpenter worker</h3>
+  <p><strong>nodeSelector</strong> is a field in the pod spec. The pod may only run on a node that carries that label.</p>
+  <div class="codebox"><pre>kubectl get nodes --show-labels
+<span class="c"># one label per line, easier to read</span>
+kubectl get nodes --show-labels | tail -1 | awk '{print $6}' | tr ',' '\n'
+<span class="c"># or show just the two labels we care about</span>
+kubectl get nodes -L projectx.io/node-role,karpenter.sh/nodepool</pre></div>
+  <p>The system node carries <code>projectx.io/node-role=system</code>. Workers launched by Karpenter carry <code>karpenter.sh/nodepool=general</code>.</p>
+  <p><strong>The test:</strong></p>
+  <div class="codebox"><pre>kubectl apply -f - &lt;&lt;'EOF'
+apiVersion: v1
+kind: Pod
+metadata:
+  name: demo
+spec:
+  nodeSelector:
+    karpenter.sh/nodepool: general
+  containers:
+  - name: demo
+    image: busybox
+    command: ["sleep", "3600"]
+EOF
+
+kubectl get pods -o wide
+kubectl get nodeclaims                        <span class="c"># Karpenter's record of each worker it launched</span>
+kubectl -n kube-system logs &lt;karpenter-pod&gt;   <span class="c"># launch decisions and errors</span></pre></div>
+  <div class="flow">pod Pending (no node has the label)
+  → Karpenter sees it
+  → new EC2 within seconds, tagged karpenter.sh/nodepool: general
+  → pod Running        (log: launched a t3.medium in us-east-1a)</div>
+  <ul>
+    <li><code>kubectl apply -f - &lt;&lt;'EOF'</code> applies YAML typed inline, without saving a file.</li>
+    <li>A ready-made version of this test is <code>class/07/capacity-check.yaml</code>.</li>
+    <li>A pod with <strong>no selector</strong> (<code>kubectl run testpod --image=nginx</code>) landed on the <strong>system node</strong>. Nothing stops it yet. The stronger fix comes later: <strong>taints and tolerations</strong>, so only system pods may run there.</li>
+    <li><strong>More than one NodePool</strong> makes sense only with a real reason, for example <code>general</code> plus a GPU pool for machine-learning workloads. Not just to separate frontend from backend.</li>
+    <li><strong>Project rule from now on:</strong> every app Deployment carries the selector below. The class <code>app/deployment.yaml</code> already has it.</li>
+  </ul>
+  <div class="codebox"><pre>spec:
+  nodeSelector:
+    karpenter.sh/nodepool: general</pre></div>
+
+  <h3>🧪 The test that stayed Pending (not solved in class)</h3>
+  <ul>
+    <li>A pod with a big CPU request (<code>1500m</code>, later <code>1800m</code>) stayed <strong>Pending</strong> and Karpenter launched nothing. <code>kubectl describe pod</code> said, roughly, that no instance type has enough resources.</li>
+    <li>The first explanation in class was "no nodeSelector, so Karpenter ignores it". With the selector added and the big request, it was still Pending. The instructor left it open.</li>
+    <li>The class README is more careful than the lecture: whether a selector is needed <strong>depends on the nodes and NodePools you have</strong>, and the cause of this Pending pod was <strong>not established</strong>. Karpenter looks at any pod the scheduler can't place and launches a node when a NodePool can satisfy it.</li>
+    <li>The written class notes guess the 8-vCPU limit. That doesn't fit: only one 2-vCPU Karpenter worker was running, so 2 of 8 were used.</li>
+    <li><strong>Most likely cause (my reading, not confirmed in class):</strong> both allowed types, <code>t3.medium</code> and <code>m5.large</code>, have only <strong>2 vCPUs</strong>. Part of that is reserved for the system, and every node also runs DaemonSet pods (VPC CNI, kube-proxy, the CloudWatch agent…). A 1500–1800m request doesn't fit in what is left on either type, which matches the "no instance type has enough resources" message.</li>
+  </ul>
+  <p><strong>How to check next time:</strong></p>
+  <div class="codebox"><pre>kubectl describe pod &lt;pod&gt;                    <span class="c"># Events: the scheduler's reason</span>
+kubectl -n kube-system logs &lt;karpenter-pod&gt;   <span class="c"># Karpenter's reason</span>
+kubectl get nodepool general -o yaml          <span class="c"># limits and allowed instance types</span></pre></div>
+  <p>Then try a smaller request, or add a 4-vCPU type to the NodePool.</p>
+
+  <blockquote>Golden rule: install with Helm, look with kubectl. And when a pod is Pending, read its events and the Karpenter logs before you change anything: Karpenter only builds what a NodePool allows.</blockquote>
+</section>
+
+<section id="corrections">
+  <div class="warn">
+    <span class="eyebrow">Where these notes correct the class</span>
+    <div class="table"><table>
+      <thead><tr><th>Said in class or in the notes</th><th>More exact version</th></tr></thead>
+      <tbody>
+        <tr><td>Metrics Server and kube-state-metrics are "probably the same"</td><td>Different tools. <strong>Metrics Server</strong> gives live CPU and memory (for <code>kubectl top</code> and the HPA). <strong>kube-state-metrics</strong> reports facts about objects (replicas wanted vs ready) for Prometheus dashboards.</td></tr>
+        <tr><td>Helm is "an official product of the Kubernetes project"</td><td>Helm is its <strong>own project</strong> under the CNCF (the foundation that also hosts Kubernetes), with its own site, helm.sh. It is not part of Kubernetes itself.</td></tr>
+        <tr><td>"Karpenter is not AWS"</td><td>It is open-source software that AWS built. The point: it is <strong>not a managed AWS service</strong> like an Auto Scaling group. You install it and you run it.</td></tr>
+        <tr><td>"Without a nodeSelector, Karpenter won't launch a node for the pod"</td><td>It <strong>depends on your nodes and NodePools</strong> (the class README says so). Karpenter acts on any pod the scheduler can't place, when a NodePool can satisfy it. In this project the selector's real job is keeping app pods off the system node.</td></tr>
+        <tr><td>Written notes: the last Pending pod "likely hit the 8-CPU limit"</td><td>Only 2 of 8 vCPUs were in use. More likely the 1500–1800m request didn't fit on any allowed 2-vCPU instance type. Not confirmed in class.</td></tr>
+        <tr><td>Written notes: add-ons live in <code>modules/eks/cluster_addons.tf</code>; node group resource <code>aws_eks_nodegroup</code></td><td>The file is <code>terraform/modules/eks-cluster/addons.tf</code>. The resource is <code>aws_eks_node_group</code>.</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<section id="homework">
+  <div class="label"><span class="tag">No new ticket</span><h2>Homework: keep going with PX-108</h2></div>
+  <p>The class page says: the investment app still runs on ECS. Continue <strong>PX-108</strong> in your own AWS account. The EKS app deployment and its verification are next class (Thu, Nov 12).</p>
+  <p>Practice files are in <code>class/07/</code> of <code>projectx-26a-infra</code> (branch <code>main</code>):</p>
+  <ol>
+    <li><code>live-helm/</code>: run <code>helm lint</code>, <code>helm template</code>, <code>helm upgrade --install demo …</code>, <code>helm list</code>, <code>helm uninstall demo</code>.</li>
+    <li><code>helm/service-chart</code>: run <code>helm template demo-web helm/service-chart --set port=9000</code> and watch the Service port change from 80 to 9000 while the target port stays 8080.</li>
+    <li><code>karpenter-node-settings.example.yaml</code>: fill the placeholders from your own Terraform outputs.</li>
+    <li><code>capacity-check.yaml</code>: apply it, run <code>kubectl get nodeclaims -w</code> in a second terminal, and watch a worker appear.</li>
+  </ol>
+  <ul>
+    <li>The instructor shared his handmade Karpenter install command in the class chat.</li>
+    <li>Next: package the investment app as its own Helm chart with dev and prod values, then CI/CD and Argo CD.</li>
+  </ul>
+</section>
+
+<section id="quiz7">
+  <div class="label"><span class="tag">Self-test</span><h2>Check yourself</h2></div>
+  <p class="reread">Answer each question out loud first, then open the answer. Score yourself out of 10.</p>
+
+  <div class="q"><p class="ask">1. A pod in the <code>web</code> namespace calls <code>http://trading-api.trading:8080</code> and it works. You paste the same URL into your laptop's browser and it fails. Who answered the name inside the cluster, and why can't your laptop use it?</p>
+    <details><summary>Show answer</summary><div><p><strong>CoreDNS answered it, and CoreDNS only serves pods inside that cluster.</strong> <code>trading-api.trading</code> is short for <code>trading-api.trading.svc.cluster.local</code>. That name exists only in the cluster's own DNS. Your laptop asks public DNS, where Route 53 keeps public records, and nobody there knows the name. Even with the IP in hand, a ClusterIP is only reachable from inside the cluster.</p>
+    <ul><li>To reach it from outside you need a <code>kubectl port-forward</code>, or an Ingress / load balancer with a Route 53 record in front.</li><li>Analogy: CoreDNS is the office extension list. Route 53 is the public phone book.</li></ul></div></details></div>
+
+  <div class="q"><p class="ask">2. CoreDNS is an EKS add-on in our cluster. Karpenter was installed with Helm. Both end up as pods on the system node. What is different about who installs and upgrades each? And which forgotten add-on makes <code>kubectl top nodes</code> fail?</p>
+    <details><summary>Show answer</summary><div><p><strong>An EKS add-on is installed by AWS through the EKS API. A Helm release is installed by you, straight into the Kubernetes API.</strong></p>
+    <ul><li>Add-on: Terraform <code>aws_eks_addon</code> → EKS API → EKS creates the objects (the <code>coredns</code> Deployment) and tracks the version.</li><li>Helm: you pick the chart version and the values, and you run the upgrade.</li><li><code>kubectl top</code> and the HPA need <strong>Metrics Server</strong>. Without it nothing collects CPU and memory numbers.</li><li>In our Terraform nothing is pre-selected (<code>bootstrap_self_managed_addons = false</code>), so a forgotten add-on is simply missing.</li></ul></div></details></div>
+
+  <div class="q"><p class="ask">3. An interviewer asks: "What is the difference between <code>helm install</code>, <code>helm upgrade --install</code> and <code>helm template</code>? Which one belongs in a deploy pipeline, and why?"</p>
+    <details><summary>Show answer</summary><div><p><strong><code>helm upgrade --install</code> belongs in the pipeline, because it is safe to run again and again.</strong></p>
+    <ul><li><code>helm install</code> works the first time only, like <code>kubectl create</code>. The second run fails because the release already exists.</li><li><code>helm upgrade --install</code> installs if the release is missing and updates it if it is there, like <code>kubectl apply</code>. That is idempotent (Scale Session 21): same command, same end state.</li><li><code>helm template</code> only renders the final YAML on your machine. Nothing reaches the cluster. Good for reviewing what a change would send.</li></ul></div></details></div>
+
+  <div class="q"><p class="ask">4. A chart has <code>Chart.yaml</code>, <code>dev-values.yaml</code>, <code>prod-values.yaml</code> and a <code>templates/</code> folder with a Deployment and a Service. There is no <code>values.yaml</code>. A teammate runs <code>helm upgrade --install shop ./chart</code>. What goes wrong, and how did Helm decide which template files to use?</p>
+    <details><summary>Show answer</summary><div><p><strong>The placeholders have nothing to fill them, because no values file was given.</strong> Helm only loads a file by itself when it is named exactly <code>values.yaml</code>. Here the command needs <code>-f dev-values.yaml</code>. Without it Helm stops with a template error, or renders empty fields that the API server rejects.</p>
+    <ul><li>Helm did not "decide" on templates at all: <strong>everything</strong> in <code>templates/</code> is rendered, every time. The values are the only thing you choose.</li><li>Two fixes: pass <code>-f</code>, or add a <code>values.yaml</code> with safe defaults and keep the per-environment files for overrides.</li></ul></div></details></div>
+
+  <div class="q"><p class="ask">5. Friday release: one <code>helm upgrade</code> changed a Deployment's image, a ConfigMap and a Service port. The app breaks. Compare fixing it with <code>kubectl rollout undo</code> versus <code>helm rollback</code>.</p>
+    <details><summary>Show answer</summary><div><p><strong><code>kubectl rollout undo</code> fixes one workload. <code>helm rollback</code> takes the whole release back.</strong></p>
+    <ul><li><code>kubectl rollout undo deployment/shop</code> brings back the Deployment's previous pod template. The ConfigMap and the Service port stay new, so you get old pods with new config. It may still be broken.</li><li>Helm saves every upgrade as a revision of the release. <code>helm rollback shop</code> returns all three objects to the previous revision in one step.</li><li>After either one, check with kubectl: <code>get pods</code>, <code>describe</code>, <code>logs</code>.</li></ul></div></details></div>
+
+  <div class="q"><p class="ask">6. Prod is down. A teammate fixes it with <code>helm upgrade --install shop ./chart -f prod-values.yaml --set image.tag=1.4.1</code>. It works and everyone goes home. What is the risk at the next normal deploy?</p>
+    <details><summary>Show answer</summary><div><p><strong>The fix lives only in that one command, not in Git.</strong> <code>--set</code> overrides a value without touching the file, so <code>prod-values.yaml</code> still names the broken tag. The next deploy that uses the file puts the broken version back.</p>
+    <ul><li>Same idea as Terraform drift: reality and code disagree, and the code wins on the next run.</li><li>Use <code>--set</code> for a quick test or an emergency. Then write the value into the values file and commit it.</li></ul></div></details></div>
+
+  <div class="q"><p class="ask">7. After installing Karpenter on a dev cluster with one system node you see one Karpenter pod <code>1/1 Running</code> and a second one <code>0/1 Pending</code>. Is the install broken? What would you change for production?</p>
+    <details><summary>Show answer</summary><div><p><strong>Not broken. That is pod anti-affinity doing its job.</strong> The Karpenter chart runs 2 replicas and forbids both on the same node, because one node failure would take out both. With one system node, the second pod has no allowed place and stays Pending. <code>kubectl describe pod</code> says the node "didn't match pod anti-affinity rules".</p>
+    <ul><li>Dev: one running controller is enough.</li><li>Production: at least <strong>2 system nodes</strong>, so each Karpenter pod gets its own node.</li></ul></div></details></div>
+
+  <div class="q"><p class="ask">8. Karpenter launches nodes. So why does our design still keep an EKS managed node group? And what happens if Karpenter has no resource requests and the system node fills up with other pods?</p>
+    <details><summary>Show answer</summary><div><p><strong>Karpenter is a pod, and a pod needs a node before it can create nodes.</strong> On a brand-new cluster there are zero nodes. The managed node group (built by Terraform, run by AWS) provides the first one, where CoreDNS and Karpenter can start.</p>
+    <ul><li>If Karpenter gets squeezed out or can't be scheduled, nobody adds capacity. New pods stay Pending, and it looks like "the app is broken" when the real problem is the autoscaler.</li><li><strong>Requests</strong> reserve CPU and memory for it, so the scheduler always keeps its seat.</li><li>The <code>nodeSelector</code> for <code>projectx.io/node-role=system</code> pins it to the steady on-demand system node, not to a worker that Karpenter itself may remove.</li></ul></div></details></div>
+
+  <div class="q"><p class="ask">9. You run <code>kubectl run test --image=nginx</code> with no nodeSelector, and it starts on the system node. Why there? Name two ways to keep app pods off system nodes, and say which one is stronger.</p>
+    <details><summary>Show answer</summary><div><p><strong>The scheduler puts a pod on any node that has room and no rule against it.</strong> The system node has room and no taint, so the pod lands there.</p>
+    <ul><li><strong>Way 1: nodeSelector on the pod.</strong> <code>karpenter.sh/nodepool: general</code> on every app Deployment. It works, but only if everybody remembers to add it.</li><li><strong>Way 2: taint the system nodes</strong> and give only system pods a toleration. Now the node itself refuses everything else.</li><li>Taints are stronger because the rule is enforced on the node, not hoped for in each manifest. Our project uses way 1 for now. Taints and tolerations come later.</li></ul></div></details></div>
+
+  <div class="q"><p class="ask">10. NodePool <code>general</code> allows <code>t3.medium</code> and <code>m5.large</code>, Spot only, with <code>limits.cpu: "8"</code>. One <code>t3.medium</code> is running. A new pod with the right nodeSelector and a CPU request of <code>1800m</code> stays Pending, and Karpenter launches nothing. How do you diagnose it? Is the 8-vCPU limit the reason? Which object would you edit?</p>
+    <details><summary>Show answer</summary><div><p><strong>Read the reasons first, then do the math: the request doesn't fit on any instance type the NodePool allows.</strong></p>
+    <div class="codebox"><pre>kubectl describe pod &lt;pod&gt;                    <span class="c"># Events: the scheduler's reason</span>
+kubectl -n kube-system logs &lt;karpenter-pod&gt;   <span class="c"># Karpenter's reason</span>
+kubectl get nodepool general -o yaml          <span class="c"># limits and allowed types</span></pre></div>
+    <ul><li><strong>The limit is not it.</strong> One <code>t3.medium</code> uses 2 of the 8 vCPUs.</li><li><strong>Both allowed types have only 2 vCPUs.</strong> Part is reserved for the system, and every node runs DaemonSet pods (VPC CNI, kube-proxy, the CloudWatch agent…). Less than 1800m is left, even on an empty node. That matches the message "no instance type has enough resources".</li><li><strong>Fix it in the NodePool</strong> (it decides <em>what</em> to launch): add a 4-vCPU type, or lower the pod's request. The <strong>EC2NodeClass</strong> (<em>how</em> to build a worker: AMI, subnets, security group, instance profile) is not involved.</li><li>This is the likely explanation for the test that stayed Pending in class. It was not confirmed there.</li></ul></div></details></div>
+
+  <p class="reread">Scoring: 9–10, you can steer a cluster with Helm and Karpenter ⛵ 🏆 · 7–8, solid 💪 · below 7, reread Session 07 and retry 🔁</p>
+</section>
+
+<footer>The full study page and 10-question quiz are in Notion under DevOps / 312 - Notes / 🏁 ProjectX.</footer>
+</div>
+
+<script>
+document.querySelectorAll('.codebox').forEach(function(box){
+  var pre = box.querySelector('pre'); var b = document.createElement('button');
+  b.className = 'copy'; b.type = 'button'; b.textContent = 'Copy';
+  b.addEventListener('click', function(){
+    var text = pre.innerText.split('\n').map(function(l){ return l.replace(/\s+#.*$/, ''); }).join('\n').trim();
+    var done = function(){ b.textContent = 'Copied'; setTimeout(function(){ b.textContent = 'Copy'; }, 1500); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(function(){ selectPre(); });
+    } else { selectPre(); }
+    function selectPre(){ var r = document.createRange(); r.selectNodeContents(pre); var s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = 'Selected'; }
+  });
+  box.appendChild(b);
+});
+</script>

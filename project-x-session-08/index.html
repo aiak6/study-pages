@@ -1,0 +1,600 @@
+<title>Project X Session 08</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one reading column; sections as stacked "shipping manifest" blocks with a stencilled label; code and tables scroll in place. */
+:root{
+  --bg:#f3f5f7; --surface:#ffffff; --ink:#15202b; --muted:#56657a; --line:#d8dee6;
+  --accent:#c4501b; --accent-soft:#fbe9df; --steel:#1f5f8b; --steel-soft:#e3eef6;
+  --code-bg:#0f1b26; --code-fg:#dbe7f2; --code-cmt:#7f97ad;
+  --good:#2e7d4f; --bad:#b3261e;
+  --f-display:"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --f-body:"Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e151c; --surface:#16202a; --ink:#e6edf3; --muted:#9aabbd; --line:#2a3845;
+  --accent:#f0874f; --accent-soft:#3a2418; --steel:#7ab8e3; --steel-soft:#16303f;
+  --code-bg:#0a1016; --code-fg:#dbe7f2; --code-cmt:#6f879c;
+  --good:#6cc493; --bad:#f08a80; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0e151c; --surface:#16202a; --ink:#e6edf3; --muted:#9aabbd; --line:#2a3845;
+  --accent:#f0874f; --accent-soft:#3a2418; --steel:#7ab8e3; --steel-soft:#16303f;
+  --code-bg:#0a1016; --code-fg:#dbe7f2; --code-cmt:#6f879c;
+  --good:#6cc493; --bad:#f08a80; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:17px/1.6 var(--f-body);padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:28px 64px}
+.wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.15;margin:0}
+h1{font-size:clamp(30px,6vw,44px);font-weight:800;letter-spacing:-.01em}
+h2{font-size:24px;font-weight:800}
+h3{font-size:18px;font-weight:600;margin-top:6px}
+p{margin:0}
+a{color:var(--steel)}
+code{font-family:var(--f-mono);font-size:.86em;background:var(--steel-soft);color:var(--ink);padding:1px 5px;border-radius:4px}
+strong{font-weight:700}
+.eyebrow{font:600 12px/1 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+header{display:flex;flex-direction:column;gap:12px;border-bottom:3px solid var(--ink);padding-bottom:20px}
+.meta{display:flex;flex-wrap:wrap;gap:8px 16px;color:var(--muted);font-size:15px}
+.lede{font-size:19px;max-width:65ch}
+nav{display:flex;flex-wrap:wrap;gap:8px}
+nav a{font:600 13px/1 var(--f-mono);text-decoration:none;color:var(--ink);border:1px solid var(--line);background:var(--surface);padding:8px 10px;border-radius:6px}
+nav a:hover,nav a:focus-visible{border-color:var(--accent);color:var(--accent);outline:none}
+section{display:flex;flex-direction:column;gap:14px;scroll-margin-top:16px}
+section > .label{display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--line);padding-bottom:8px}
+section > .label .tag{font:600 11px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--surface);background:var(--ink);padding:5px 7px;border-radius:3px}
+ul,ol{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px}
+.table{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:15.5px;min-width:480px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:600 12px/1.3 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--bg)}
+tr:last-child td{border-bottom:0}
+blockquote{margin:0;border-left:4px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 8px 8px 0;font-weight:600}
+pre{margin:0;background:var(--code-bg);color:var(--code-fg);font:14px/1.6 var(--f-mono);padding:14px 16px;border-radius:8px;overflow-x:auto}
+pre .c{color:var(--code-cmt)}
+.codebox{position:relative}
+.copy{position:absolute;top:8px;right:8px;font:600 11px/1 var(--f-mono);background:transparent;color:var(--code-cmt);border:1px solid var(--code-cmt);border-radius:4px;padding:5px 7px;cursor:pointer}
+.copy:hover,.copy:focus-visible{color:var(--code-fg);border-color:var(--code-fg);outline:none}
+.flow{font:600 14px/1.5 var(--f-mono);background:var(--steel-soft);color:var(--ink);padding:14px 16px;border-radius:8px;overflow-x:auto;white-space:pre}
+.step{display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:start}
+.step > .n{font:800 18px/34px var(--f-display);text-align:center;background:var(--ink);color:var(--bg);border-radius:50%;width:34px;height:34px}
+.step > div{min-width:0;display:flex;flex-direction:column;gap:8px}
+.see{font-size:15px;color:var(--good)}
+.see::before{content:"You should see: ";font-weight:700}
+.warn{border:1px solid var(--bad);border-radius:8px;padding:12px 16px;display:flex;flex-direction:column;gap:10px;background:var(--surface)}
+.warn .eyebrow{color:var(--bad)}
+details{border:1px solid var(--line);background:var(--surface);border-radius:8px}
+details summary{cursor:pointer;padding:12px 16px;font-weight:600;list-style-position:inside}
+details summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:8px}
+details > div{padding:0 16px 14px;display:flex;flex-direction:column;gap:8px}
+.q{display:flex;flex-direction:column;gap:10px}
+.q p.ask{font-weight:600}
+.reread{font-style:italic;color:var(--muted);font-size:15px}
+footer{color:var(--muted);font-size:15px;border-top:1px solid var(--line);padding-top:16px}
+@media (prefers-reduced-motion: reduce){*{scroll-behavior:auto!important}}
+html{scroll-behavior:smooth}
+</style>
+
+<div class="wrap">
+<header>
+  <span class="eyebrow">312 School · Cohort 26a · Project X</span>
+  <h1>Session 08: Run the investment app on EKS</h1>
+  <div class="meta"><span>Thu, Nov 12, 2026</span><span>Ticket PX-108</span><span>Sources: class recording, written notes, class materials page, class/08 files in the app repo</span></div>
+  <p class="lede">Class 8 made the new cluster do real work: the <strong>investment app</strong> now runs on EKS. The request (ticket <strong>PX-108</strong>) was to run the <strong>same image</strong> ECS already uses and connect it to the <strong>same RDS</strong> database. Before any YAML, the instructor walked through the questions a platform engineer answers first: which <strong>workload type</strong>, which <strong>Service</strong>, what the <strong>Dockerfile</strong> tells you, and which settings go in a <strong>ConfigMap</strong> or a <strong>Secret</strong>. Then a Deployment with two Pods went up, sat <strong>Running but not Ready</strong> until the <strong>RDS security group</strong> let the Karpenter workers in, and was tested with <code>kubectl port-forward</code>. No Service and no Helm chart yet: that's the next class.</p>
+  <nav aria-label="Sections"><a href="#s8">Notes</a><a href="#corrections">Corrections</a><a href="#homework">Homework</a><a href="#quiz8">Check yourself</a></nav>
+</header>
+
+<section id="s8">
+  <div class="label"><span class="tag">Notes</span><h2>Quick reference and notes</h2></div>
+  <div class="table"><table>
+    <thead><tr><th>Topic</th><th>Key point</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Workload type</strong></td><td>Default is a <strong>Deployment</strong>. StatefulSet = own storage. Job = runs once. CronJob = on a schedule. DaemonSet = one Pod per node</td></tr>
+      <tr><td><strong>Service types</strong></td><td><strong>ClusterIP</strong> = inside the cluster only. <strong>NodePort</strong> = a port on every node. <strong>LoadBalancer</strong> = a cloud load balancer</td></tr>
+      <tr><td><strong>Karpenter recap</strong></td><td><strong>Terraform</strong> makes the AWS side (IAM roles). <strong>Helm</strong> installs the controller. A <strong>Spot-only</strong> NodePool can be slow to give you nodes</td></tr>
+      <tr><td><strong>Read the Dockerfile</strong></td><td>It tells you the language, the <strong>port (8080)</strong> and the start command (<code>gunicorn</code>) before you write any YAML</td></tr>
+      <tr><td><strong>Ask the developer</strong></td><td>Alex's <code>docs/deployment.md</code>: port, <strong>7 env variables</strong>, the database must already exist, what <code>/health</code> checks</td></tr>
+      <tr><td><strong>Settings</strong></td><td>Plain settings → <strong>ConfigMap</strong>. Password and API key → <strong>Secret</strong>. The Pod gets both as <strong>env variables</strong></td></tr>
+      <tr><td><strong>RDS access</strong></td><td>The <strong>database's</strong> security group needs an <strong>inbound</strong> rule: port <code>5432</code> from the <strong>Karpenter workers'</strong> security group</td></tr>
+      <tr><td><strong>Probes</strong></td><td>Liveness <code>GET /health</code> (no database check). Readiness <code>GET /</code> (reads trades, so it <strong>needs the database</strong>)</td></tr>
+      <tr><td><strong>Test without exposing</strong></td><td><code>kubectl port-forward pod/&lt;name&gt; 8080:8080</code>, then open <code>localhost:8080</code>. Works only while the command runs</td></tr>
+      <tr><td><strong>Where the YAML lives</strong></td><td>Kubernetes manifests and Helm charts go with the <strong>app repo</strong>, not the infra repo</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>🛠️ Warm-up: build small things with AI</h3>
+  <ul>
+    <li>The instructor showed a tiny app he built for himself: a <strong>"curtain"</strong> he can pull down over his vertical monitor to hide distractions.</li>
+    <li>It took about <strong>one prompt</strong> plus a few small fixes. Then he asked for a <code>.dmg</code> (how Mac apps are packaged) that works on both Apple silicon and Intel, and copied it to his MacBook.</li>
+    <li>The AI added things he didn't ask for: a display picker, a few designs.</li>
+    <li>Another example: a <strong>time tracker</strong> that saves to a local <strong>SQLite</strong> file.</li>
+    <li>You don't need a serious project to practice. Build something small, even silly, just for you.</li>
+    <li>He also mentioned a new Claude Code feature, <strong>Projects</strong>: one main session that can start and coordinate other sessions. He said it's only on personal plans for now.</li>
+  </ul>
+
+  <h3>🔁 Karpenter recap: two halves and why Spot was slow</h3>
+  <ul>
+    <li>A classmate asked: if Terraform already had Karpenter code, why was Karpenter installed from the terminal in Session 07?</li>
+    <li>Answer: Karpenter needs <strong>two parts</strong>, and both must exist.</li>
+  </ul>
+  <div class="table"><table>
+    <thead><tr><th>Part</th><th>What it creates</th><th>How we did it</th></tr></thead>
+    <tbody>
+      <tr><td><strong>AWS side</strong></td><td>IAM roles and the other AWS pieces Karpenter needs</td><td><strong>Terraform</strong>, already applied with the <code>eks</code> root (Session 05)</td></tr>
+      <tr><td><strong>Kubernetes side</strong></td><td>The Karpenter controller (a Helm chart) and the <strong>NodePool</strong></td><td><strong>Terminal</strong>, in Session 07</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li>The Terraform module creates <strong>what Karpenter needs</strong>, not Karpenter itself.</li>
+    <li>At the end of Session 07 it looked like new workers weren't launching. They <strong>did</strong> launch, just late. The instructor's guess: the NodePool is <strong>Spot only</strong>, and Spot capacity isn't always free right away. (The class page says the real cause was never confirmed.)</li>
+    <li><strong>Dev and staging:</strong> fully Spot is fine. <strong>Production:</strong> on-demand, or a <strong>mix</strong> of on-demand and Spot. <strong>System nodes:</strong> on-demand, at least in production (a classmate's point).</li>
+    <li>Karpenter itself is from Containers Session 12.</li>
+  </ul>
+
+  <h3>💼 The job: why platform work stays valuable</h3>
+  <ul>
+    <li>This ticket is what <strong>real work</strong> looks like: someone asks, you build, you open a PR, it's reviewed and deployed, then the next request comes.</li>
+    <li>Platform work affects <strong>reliability</strong>. An app bug is usually fixed in the next release. A broken system can take down many apps at once, and it's hard to test (you can't easily fake real production traffic).</li>
+    <li>He calls it a <strong>core operator</strong> job: someone has to operate the systems. Jobs that are too simple for a human are too simple for AI too, and those go first.</li>
+    <li>The job has two big areas: <strong>(1) building infrastructure</strong> and <strong>(2) deploying applications</strong>. Today was area 2.</li>
+    <li><strong>AI closes the gap</strong> between beginners and experienced engineers. Writing YAML by hand has been losing value since ChatGPT came out (end of 2022). What counts now is the <strong>outcome</strong> and knowing <strong>which questions to answer</strong>.</li>
+    <li>Still write something by hand when you want to really understand it. Just don't do everything by hand.</li>
+    <li><strong>Soft skills:</strong> don't say "I'm a team player". <strong>Show it in your stories</strong>: "I asked the developer in the ticket whether the app needs persistent storage."</li>
+    <li><strong>You don't need to read the application code.</strong> Read what belongs to you: <code>Dockerfile</code>, <code>requirements.txt</code>, Helm charts, Terraform, the README, ignore files. Nobody expects a platform engineer to explain the app's logic.</li>
+  </ul>
+
+  <h3>📦 Workload types: how do I run it?</h3>
+  <p>The first question for anything on Kubernetes: <strong>what kind of object runs it?</strong></p>
+  <div class="table"><table>
+    <thead><tr><th>Kind</th><th>Fits</th><th>Example</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Deployment</strong></td><td>The default. The app keeps its data somewhere else (a database)</td><td>The investment app</td></tr>
+      <tr><td><strong>StatefulSet</strong></td><td>Each Pod needs its <strong>own persistent storage</strong> and a stable name</td><td>A database running inside the cluster</td></tr>
+      <tr><td><strong>Job</strong></td><td>Runs <strong>once</strong> and finishes</td><td>A data import, a conversion, a cleanup</td></tr>
+      <tr><td><strong>CronJob</strong></td><td>A Job <strong>on a schedule</strong></td><td>Weekly cleanup, nightly import</td></tr>
+      <tr><td><strong>DaemonSet</strong></td><td><strong>One Pod on every worker node</strong></td><td>Monitoring and log agents</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li><strong>Why never a bare Pod:</strong> if it dies, nothing brings it back, and you can't scale it from 1 to 2.</li>
+    <li>A Deployment is a <strong>manager</strong>: Deployment → ReplicaSet → Pods (Containers Session 05).</li>
+    <li>Our app stores its trades in <strong>RDS</strong>, so a <strong>Deployment</strong> is right.</li>
+    <li><strong>Do we need a StatefulSet for the database?</strong> No. RDS is a <strong>managed</strong> database: we pay AWS for backups and maintenance. Running Postgres ourselves as a StatefulSet would be cheaper, but then backups and restores are on us (Containers Session 13).</li>
+    <li><strong>Not sure which kind?</strong> Read the code and README, or just <strong>ask the developer</strong>: a short Slack message or a comment on the ticket. A simple question doesn't need a meeting.</li>
+    <li>A classmate asked: <strong>could S3 replace the database?</strong> No.</li>
+  </ul>
+  <div class="table"><table>
+    <thead><tr><th></th><th>S3</th><th>Database (RDS, DynamoDB)</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Works with</strong></td><td>Whole files</td><td>Records you can query</td></tr>
+      <tr><td><strong>Speed</strong></td><td>Slower, over HTTP</td><td>Fast, its own protocol</td></tr>
+      <tr><td><strong>Structure</strong></td><td>Folders and file types</td><td>Tables, columns, relations</td></tr>
+      <tr><td><strong>Cost</strong></td><td>You also pay <strong>per request</strong></td><td>—</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>🔌 Service types: how do I reach it?</h3>
+  <p>A <strong>Service</strong> gives changing Pods one stable address. It picks its Pods with a <strong>selector</strong> (Containers Session 07).</p>
+  <div class="table"><table>
+    <thead><tr><th>Type</th><th>What it does</th><th>When</th></tr></thead>
+    <tbody>
+      <tr><td><strong>ClusterIP</strong></td><td>An internal address. Only Pods in the same cluster can reach it</td><td>App-to-app inside the cluster</td></tr>
+      <tr><td><strong>NodePort</strong></td><td>Opens the same port on <strong>every worker node</strong> (30000–32767 by default). The node passes the request to a Pod</td><td>Rare. Our workers are in <strong>private subnets</strong> behind a NAT gateway, so this can't give public access</td></tr>
+      <tr><td><strong>LoadBalancer</strong></td><td>Asks AWS for a <strong>load balancer</strong> that forwards to the Pods</td><td>Access from outside the cluster</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li>In class <strong>no Service was created</strong>. The types were only discussed.</li>
+    <li>Workload types and Service types must be instant answers in an interview. Not being able to define ClusterIP is "a bit embarrassing".</li>
+  </ul>
+
+  <h3>🧩 The whole picture: system design in one breath</h3>
+  <div class="flow">Dockerfile → image → ECR → Deployment (2 replicas) → Pods on Karpenter workers
+                              ↑ settings: ConfigMap + Secret (as env variables)
+Pods → RDS        same VPC + DB address + credentials + security group rule
+You  → Pod        kubectl port-forward (a Service comes later)</div>
+  <p>For the app to reach RDS it needs <strong>four things</strong>:</p>
+  <ol>
+    <li>To be in the <strong>same VPC</strong> (or a connected one). Already true.</li>
+    <li>The <strong>database address</strong>: in a ConfigMap or a Secret.</li>
+    <li>The <strong>credentials</strong>: in a Secret.</li>
+    <li><strong>Network permission</strong>: the <strong>database's</strong> security group must allow it in.</li>
+  </ol>
+  <ul>
+    <li><strong>Whoever lets traffic in opens their firewall.</strong> Traffic goes <em>to</em> RDS, so the rule is <strong>inbound on the RDS security group</strong>. Outbound is normally already allowed (Scale Session 06).</li>
+    <li>If an interviewer asks "how would you deploy an app to Kubernetes?", walk the same path: <strong>package it</strong> (Dockerfile → image → ECR) → <strong>choose the runtime</strong> (Deployment, StatefulSet, Job…) → <strong>database?</strong> → <strong>settings</strong> (ConfigMap, Secret) → <strong>expose it?</strong> (which Service type).</li>
+  </ul>
+
+  <h3>🐳 Reading the Dockerfile and requirements.txt</h3>
+  <ul>
+    <li>First question on any deploy task: <strong>where is the code?</strong> Here it's small: <code>candidate/</code> in the app repo, with <code>app.py</code>, <code>requirements.txt</code> and a <code>Dockerfile</code>.</li>
+    <li><strong>ECS → EKS is the lucky case:</strong> ECS runs containers too, so the Dockerfile and the image already exist. Moving from EC2 (Ansible, custom AMIs) would mean someone has to write the Dockerfile: you or the developer.</li>
+    <li><code>requirements.txt</code> = the list of Python packages (and versions) the app needs: Flask, gunicorn, psycopg, requests. They get installed with <code>pip install -r requirements.txt</code>.</li>
+  </ul>
+  <div class="codebox"><pre><span class="c"># Python app on a small base image</span>
+FROM python:3.12-slim
+ENV PYTHONUNBUFFERED=1
+<span class="c"># the files live in /app</span>
+WORKDIR /app
+RUN useradd --system investment-app
+<span class="c"># standard in every Python image: copy the list, install the packages</span>
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+COPY app.py .
+<span class="c"># don't run as root</span>
+USER investment-app
+<span class="c"># the port to remember</span>
+EXPOSE 8080
+ENV name=investment-app
+CMD ["gunicorn", "--workers", "2", "--preload", "--bind", "0.0.0.0:8080", "app:app"]</pre></div>
+  <ul>
+    <li><code>--workers 2</code> = two gunicorn <strong>worker processes</strong> inside the container. Nothing to do with Kubernetes worker nodes.</li>
+    <li><code>--bind 0.0.0.0:8080</code> = listen on port 8080 on every address.</li>
+    <li><code>app:app</code> = the file <code>app.py</code>, and the Flask object called <code>app</code> inside it.</li>
+    <li><code>--preload</code> = load the app once, before the workers start (Containers Session 03).</li>
+    <li><strong>What would be a red flag:</strong> real settings hard-coded with <code>ENV</code>. Those should move to a ConfigMap or a Secret. Nothing like that here.</li>
+    <li><strong>Know these cold:</strong> <code>FROM</code>, <code>WORKDIR</code>, <code>COPY</code>, <code>RUN</code>, <code>ENV</code>, <code>EXPOSE</code>, <code>USER</code>, <code>CMD</code>, <code>ENTRYPOINT</code>, plus <code>docker build -t</code> and keeping the image small (Containers Session 02).</li>
+    <li>Decision: <strong>don't touch the Dockerfile</strong>. Reuse the image that's already in ECR.</li>
+  </ul>
+
+  <h3>📨 Ask the developer: Alex's deployment notes</h3>
+  <ul>
+    <li>In the simulated Slack, we asked <strong>Alex</strong> (backend developer): which image and port, what settings and secrets, what database setup, what the health check does.</li>
+    <li>He answered with a file on a branch: <code>docs/deployment.md</code> (branch <code>codex/px-108-deployment-notes</code> in the app repo). This is the information a platform engineer needs. Not the app's logic.</li>
+    <li><strong>No app or database schema changes</strong> for this move. Use the <strong>same image</strong> that runs on ECS.</li>
+    <li>The app serves <strong>HTTP on port 8080</strong>.</li>
+    <li><strong>When it starts, it connects to Postgres</strong> and creates the <code>trades</code> table if it's missing. So the database and the login must <strong>already exist</strong>, with permission to create the table and read/write trades.</li>
+    <li>It calls the <strong>Finnhub</strong> API for prices. If that fails, it shows <code>$100.00</code>.</li>
+    <li><code>/health</code> returns <code>200</code> when the app is serving. It does <strong>not</strong> check Postgres or Finnhub. <code>/</code> reads trades. Buying or selling <strong>writes</strong> a trade.</li>
+    <li>ECS and EKS show the <strong>same trade history</strong> if they use the same database. The app has no login.</li>
+  </ul>
+  <p>All <strong>seven</strong> env variables are required:</p>
+  <div class="table"><table>
+    <thead><tr><th>Variable</th><th>Meaning</th><th>Where it went in class</th></tr></thead>
+    <tbody>
+      <tr><td><code>TICKER</code></td><td>Stock symbol, e.g. <code>AAPL</code></td><td>ConfigMap</td></tr>
+      <tr><td><code>DB_HOST</code></td><td>Postgres hostname (the RDS endpoint)</td><td>ConfigMap</td></tr>
+      <tr><td><code>DB_PORT</code></td><td><code>5432</code></td><td>ConfigMap</td></tr>
+      <tr><td><code>DB_NAME</code></td><td>The database with the trades</td><td>ConfigMap</td></tr>
+      <tr><td><code>DB_USER</code></td><td>Database login</td><td>ConfigMap</td></tr>
+      <tr><td><code>DB_PASSWORD</code></td><td>Database password</td><td><strong>Secret</strong></td></tr>
+      <tr><td><code>FINNHUB_KEY</code></td><td>Finnhub API key</td><td><strong>Secret</strong></td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li><code>PGSSLMODE</code> is optional (the class file sets it to <code>require</code>).</li>
+    <li>You may put the database host and user in the Secret too. The app only cares that they arrive as <strong>env variables</strong>.</li>
+  </ul>
+
+  <h3>❓ The questions to answer before the YAML</h3>
+  <p><strong>Your job is answering these.</strong> The AI can write the syntax.</p>
+  <div class="table"><table>
+    <thead><tr><th>Question</th><th>Class answer</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Which image?</strong></td><td>The one ECS already runs, from ECR. The instructor used the tag; Alex's note says use the <strong>digest</strong> (Containers Session 03)</td></tr>
+      <tr><td><strong>Which labels?</strong></td><td><code>app: investment-app</code>. A Service will reuse the same label later</td></tr>
+      <tr><td><strong>Which port?</strong></td><td><code>8080</code></td></tr>
+      <tr><td><strong>How many replicas?</strong></td><td><code>2</code></td></tr>
+      <tr><td><strong>Requests and limits?</strong></td><td>CPU <code>0.5</code> / <code>0.5</code>, memory <code>50Mi</code> / <code>100Mi</code> (the AI's suggestion). Real numbers come from metrics</td></tr>
+      <tr><td><strong>Probes?</strong></td><td>Liveness <code>GET /health</code>, readiness <code>GET /</code></td></tr>
+      <tr><td><strong>Node selector?</strong></td><td><code>karpenter.sh/nodepool: general</code>, so Karpenter's NodePool provides the worker</td></tr>
+      <tr><td><strong>Env variables, and from where?</strong></td><td>Seven: from a ConfigMap and a Secret</td></tr>
+      <tr><td><strong>HPA?</strong></td><td>Decide later: do we need it, on which metric, at what threshold</td></tr>
+      <tr><td><strong>Persistent storage?</strong></td><td>No. Rare for a Deployment</td></tr>
+      <tr><td><strong>Service account?</strong></td><td>The default one. A custom one only if the app needs AWS access (e.g. S3) or Kubernetes permissions</td></tr>
+      <tr><td><strong>Sidecar?</strong></td><td>Edge case. Not here</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li>You don't have to answer every one from your head. Reason it out with AI, send an agent to look at the metrics, or just run it and see.</li>
+    <li>A classmate worried about losing their own reasoning by leaning on AI. The honest answer: it's a trade-off of <strong>time and goals</strong>. What gets you hired and paid is the <strong>outcome</strong>, and being good at working with AI is itself the skill.</li>
+  </ul>
+
+  <h3>📂 Where the YAML lives: app repo vs infra repo</h3>
+  <ul>
+    <li>We have three repos: <strong>infra</strong> (Terraform), <strong>platform</strong> (cluster tools such as monitoring; a Karpenter chart could live there) and <strong>app</strong>.</li>
+    <li>Kubernetes manifests and Helm charts belong with the <strong>app repo</strong> (some companies give them their own repo). They're tied to <strong>one application</strong>: you build it here, you deploy it from here. Infra stands on its own: you can create an EKS cluster without thinking about any app.</li>
+    <li><strong>Then why is the ECS setup in the infra repo?</strong> Because it was written in <strong>CloudFormation</strong>, next to the ECS cluster itself. Not ideal.</li>
+    <li>You <em>can</em> create Kubernetes objects with Terraform (the <code>kubernetes</code> provider), and some teams do everything that way. The instructor wouldn't.</li>
+    <li>Many questions in this job have <strong>no single right answer</strong>. It comes down to taste and team rules. The safe, widely respected answer: <strong>Helm charts</strong>.</li>
+  </ul>
+
+  <h3>🚀 The live build: manifests, values from ECS and apply</h3>
+  <ul>
+    <li>A new folder for Kubernetes manifests in the <strong>app repo</strong>. The Deployment was started <strong>by hand</strong> from the Kubernetes docs (copy the example, change the name, image, port, probes, node selector, env), then the <strong>AI finished it</strong> and created the ConfigMap and Secret.</li>
+    <li><strong>Where things go in the YAML</strong> (count the levels, like in a game): <code>nodeSelector</code> goes in the <strong>Pod spec</strong> (<code>spec.template.spec</code>), not the Deployment's top <code>spec</code>. <code>env</code>, <code>resources</code> and the probes go <strong>inside the container</strong>, at the same level as <code>image</code>.</li>
+    <li><strong>Where the real values came from:</strong> the app is already running on ECS, so copy from there. ECS console → cluster → task → <strong>Environment variables</strong>. The database user and password were in a <strong>Secrets Manager</strong> secret (Retrieve secret value).</li>
+    <li>The AI didn't know the variable names until it was given Alex's doc.</li>
+    <li>The Secret is in <strong>its own file</strong>, which normally goes in <code>.gitignore</code>. The class repo only has <code>secret.example.yaml</code> with placeholders.</li>
+    <li>Letting the AI read real database details is OK in dev. In production, be careful what you let it read.</li>
+  </ul>
+  <div class="codebox"><pre>apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: investment-app-deployment
+  labels:
+    app: investment-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: investment-app
+  template:
+    metadata:
+      labels:
+        app: investment-app
+    spec:
+      nodeSelector:
+        karpenter.sh/nodepool: general      <span class="c"># run on Karpenter's workers</span>
+      containers:
+      - name: investment-app
+        image: ACCOUNT_ID.dkr.ecr.REGION.amazonaws.com/REPOSITORY:TAG   <span class="c"># same image as ECS</span>
+        ports:
+        - containerPort: 8080
+        env:
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:                <span class="c"># plain setting</span>
+              name: investment-app-config
+              key: DB_HOST
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:                   <span class="c"># sensitive value</span>
+              name: investment-app-secret
+              key: DB_PASSWORD
+        <span class="c"># ...same pattern for TICKER, DB_PORT, DB_NAME, DB_USER, FINNHUB_KEY</span>
+        resources:
+          requests: { cpu: "0.5", memory: "50Mi" }
+          limits:   { cpu: "0.5", memory: "100Mi" }
+        livenessProbe:
+          httpGet: { path: /health, port: 8080 }
+          initialDelaySeconds: 3
+          periodSeconds: 3
+        readinessProbe:
+          httpGet: { path: /, port: 8080 }
+          initialDelaySeconds: 3
+          periodSeconds: 3</pre></div>
+  <p>The class file also has a <strong>preferred pod anti-affinity</strong>: try to put the two Pods on <strong>different nodes</strong>.</p>
+  <div class="codebox"><pre>apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: investment-app-config
+data:
+  TICKER: "AAPL"
+  DB_HOST: "YOUR_RDS_HOSTNAME"
+  DB_PORT: "5432"
+  DB_NAME: "YOUR_DB_NAME"
+  DB_USER: "YOUR_DB_USER"
+  PGSSLMODE: "require"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: investment-app-secret
+type: Opaque
+stringData:                 <span class="c"># plain text here, Kubernetes base64-encodes it</span>
+  DB_PASSWORD: "REPLACE_ME"
+  FINNHUB_KEY: "REPLACE_ME"</pre></div>
+  <div class="codebox"><pre>aws eks list-clusters
+aws eks update-kubeconfig --name &lt;cluster-name&gt;       <span class="c"># point kubectl at the cluster</span>
+kubectl create namespace main-product-line
+kubectl -n main-product-line apply -f &lt;manifests-folder&gt;/   <span class="c"># a folder: applies every file in it</span>
+kubectl -n main-product-line get configmaps,secrets,pods</pre></div>
+  <p>First the Pods were <strong>Pending</strong> (Karpenter was bringing up a worker), then <strong>Running</strong>, but <strong>0/1 Ready</strong>.</p>
+
+  <h3>🔒 Running but not Ready: the RDS security group</h3>
+  <p>The RDS security group only allowed the <strong>ECS</strong> security group. Nobody had let <strong>EKS</strong> in yet. The fix, in the console:</p>
+  <ol>
+    <li>RDS → the database → <strong>Connectivity &amp; security</strong> → open its security group.</li>
+    <li><strong>Inbound rules</strong> → Edit → Add rule: type <strong>PostgreSQL</strong> (<code>5432</code>), source = the <strong>security group the Karpenter workers use</strong>.</li>
+    <li>Save, then <strong>restart the Pods</strong>, because the app only tries the database when it starts.</li>
+  </ol>
+  <ul>
+    <li>Check you picked the security group of the <strong>Karpenter-launched workers</strong>. Not the system node group's, not the control plane's.</li>
+    <li>After that, <strong>both Pods became Ready</strong>.</li>
+    <li><strong>Why "Running" but not "Ready"?</strong> The two probes ask different questions (Containers Session 08):</li>
+  </ul>
+  <div class="table"><table>
+    <thead><tr><th>Probe</th><th>Path</th><th>What it proves</th><th>If it fails</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Liveness</strong></td><td><code>GET /health</code></td><td>The process answers. Doesn't touch the database</td><td>The container is <strong>restarted</strong></td></tr>
+      <tr><td><strong>Readiness</strong></td><td><code>GET /</code></td><td>The app can read trades, so the <strong>database works</strong></td><td>The Pod gets <strong>no traffic</strong>, but keeps running</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li>A readiness path made by the developer for this purpose would be better than <code>/</code>.</li>
+    <li>Same lesson as Scale Session 06: a <strong>timeout</strong> to the database almost always means a security group.</li>
+  </ul>
+
+  <h3>🔦 Testing with kubectl port-forward</h3>
+  <p>A way to open the app <strong>without exposing it to the internet</strong>: a tunnel from your laptop, through the <strong>API server</strong>, straight to <strong>one Pod</strong> (Containers Session 06). No Service, no load balancer.</p>
+  <div class="codebox"><pre>kubectl -n main-product-line get pods                                   <span class="c"># copy a real Pod name</span>
+kubectl -n main-product-line port-forward pod/&lt;app-pod-name&gt; 8080:8080  <span class="c"># LOCAL:CONTAINER</span>
+<span class="c"># now open http://localhost:8080</span>
+
+kubectl -n main-product-line port-forward pod/&lt;app-pod-name&gt; 10000:8080 <span class="c"># local 10000 → container 8080</span></pre></div>
+  <ul>
+    <li>The <strong>right</strong> number is the container's port and must be <code>8080</code>. The <strong>left</strong> number is your laptop's port: any free one.</li>
+    <li>The tunnel lives <strong>only while the command runs</strong>. <code>Ctrl+C</code> closes it.</li>
+    <li>Result: the page opened and a <strong>buy worked</strong>. A buy writes to Postgres, so that's real proof the Pod can use the database. A passing <code>/health</code> alone wouldn't show that.</li>
+    <li>It's a <strong>partial success / proof of concept</strong>: the app runs on EKS, but there's <strong>no Service</strong>, nothing is public, and ECS still serves the traffic.</li>
+  </ul>
+
+  <blockquote>Golden rule: answer the questions before you write the YAML: how does it run, what does it need, who has to let it in, and how will I check it. And "Running" isn't "working": believe it when the page opens and a buy lands in the database.</blockquote>
+</section>
+
+<section id="corrections">
+  <div class="warn">
+    <span class="eyebrow">Where these notes correct the class</span>
+    <div class="table"><table>
+      <thead><tr><th>Said in class</th><th>More exact version</th></tr></thead>
+      <tbody>
+        <tr><td>A LoadBalancer Service gives you an ALB or an NLB</td><td>A <strong>Service</strong> of type LoadBalancer gets a <strong>Network</strong> Load Balancer (or the old Classic one). An <strong>ALB</strong> is created from an <strong>Ingress</strong>, like the shared ALB in Containers Session 08.</td></tr>
+        <tr><td>The gunicorn flag was read as <code>--reload</code></td><td>The Dockerfile says <code>--preload</code>: load the app once, before the workers start.</td></tr>
+        <tr><td>"Four variables in the ConfigMap, three in the Secret" (also in the written notes)</td><td>The finished files have <strong>five + two</strong>: <code>DB_USER</code> ended up in the ConfigMap. Both splits are fine.</td></tr>
+        <tr><td>Liveness kept passing because <code>/health</code> doesn't check the database</td><td>From Alex's notes and the class README: the app connects to Postgres <strong>when it starts</strong>. With the database blocked, the server may never start, and then <code>/health</code> fails too. That fits what we saw: the Pods were also being <strong>restarted</strong>. The lesson stays the same: liveness = "is the process alive?", readiness = "can it do real work?".</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<section id="homework">
+  <div class="label"><span class="tag">Through Mon Nov 16</span><h2>Homework: keep going on PX-108</h2></div>
+  <p><strong>No new homework.</strong> Finish <strong>PX-108</strong> in <strong>your own AWS account</strong>. Use AI, but do some pieces yourself.</p>
+  <ol>
+    <li><strong>ECS first, if you don't have it:</strong> create the ECS environment with the <strong>CloudFormation</strong> stack in the infra repo (<code>cloudformation/</code>). The Class 5 task page explains the account-specific image, DNS and certificate parts.</li>
+    <li><strong>Run the same app image on your EKS cluster</strong> and connect it to <strong>your RDS</strong>: Deployment, ConfigMap, Secret, and the inbound rule on the RDS security group.</li>
+    <li><strong>Check it like in class:</strong> <code>port-forward</code> to a Pod, the page opens, and a buy works.</li>
+    <li><strong>Practice (optional):</strong> turn the manifests into a <strong>Helm chart</strong> yourself. It wasn't built in this class.</li>
+    <li><strong>Keep ECS running</strong> for comparison. Continue the existing <strong>PX-108 PR</strong> in the infra repo, and link your app branch if the manifests live there. Never commit a file with real credentials.</li>
+  </ol>
+  <ul>
+    <li>Class files: <code>class/08/</code> in <code>projectx-26a-app</code> (<code>deploy.yaml</code>, <code>configmap.yaml</code>, <code>secret.example.yaml</code>). All account values are placeholders: replace them with your own.</li>
+    <li>Next class (Mon Nov 16): the same app as a <strong>Helm chart</strong>, usable for several environments. <strong>CI/CD</strong> comes later next week.</li>
+  </ul>
+</section>
+
+<section id="quiz8">
+  <div class="label"><span class="tag">Self-test</span><h2>Check yourself</h2></div>
+  <p class="reread">Answer each question out loud first, then open the answer. Score yourself out of 10.</p>
+
+  <div class="q"><p class="ask">1. An interviewer says: "We have a Python app in a Git repo. How would you get it running on Kubernetes?" Walk through your answer in order.</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>Package it, choose how it runs, give it its data, its settings and a door, then check it.</strong></p>
+      <ul>
+        <li><strong>Package:</strong> Dockerfile → image → push to ECR.</li>
+        <li><strong>Runtime:</strong> pick the workload type. Usually a Deployment.</li>
+        <li><strong>Database:</strong> same VPC, the address, the credentials, and a security group rule.</li>
+        <li><strong>Settings:</strong> plain ones in a ConfigMap, sensitive ones in a Secret, both read as env variables.</li>
+        <li><strong>Door:</strong> a Service. ClusterIP for inside the cluster, a load balancer or Ingress for outside.</li>
+        <li><strong>Check:</strong> Pods Ready, then a real action through <code>port-forward</code>.</li>
+      </ul>
+      <p>It's like moving a shop to a new building: pack the goods, pick the room, connect water and power, hang the sign, then make one real sale.</p>
+    </div></details></div>
+
+  <div class="q"><p class="ask">2. Pick the workload type for each and say why: (a) the investment app, (b) Postgres running inside the cluster, (c) a log-collecting agent, (d) a one-time data import, (e) a weekly cleanup. Why is a bare Pod never the answer at work?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>(a) Deployment, (b) StatefulSet, (c) DaemonSet, (d) Job, (e) CronJob.</strong></p>
+      <ul>
+        <li><strong>Deployment:</strong> the app keeps its data in RDS, so any Pod can be replaced at any time.</li>
+        <li><strong>StatefulSet:</strong> each Pod needs its own persistent storage and a stable name.</li>
+        <li><strong>DaemonSet:</strong> one Pod on every worker node, which is what an agent needs.</li>
+        <li><strong>Job:</strong> runs once and finishes. <strong>CronJob:</strong> the same thing on a schedule.</li>
+        <li><strong>Bare Pod:</strong> if it dies, nothing brings it back, and you can't scale it. A Deployment is the manager that keeps the number of Pods you asked for.</li>
+      </ul>
+    </div></details></div>
+
+  <div class="q"><p class="ask">3. Your workers are in private subnets behind a NAT gateway. A teammate says: "Just use a NodePort Service to make the app public." What's wrong with that, and what are the real options? Which Kubernetes object gets you an ALB on AWS?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>A NodePort only opens a port on the nodes, and nobody on the internet can reach a private node.</strong></p>
+      <ul>
+        <li><strong>NodePort:</strong> the same port (30000–32767) on every worker. Useful only for something else inside the VPC.</li>
+        <li><strong>ClusterIP:</strong> inside the cluster only.</li>
+        <li><strong>LoadBalancer Service:</strong> AWS creates a load balancer in front of the Pods. For a Service that's a <strong>Network</strong> Load Balancer.</li>
+        <li><strong>An ALB comes from an Ingress</strong>, not from a Service (the shared ALB from Containers Session 08).</li>
+      </ul>
+      <p>Think of NodePort as a side door on each warehouse building. It doesn't help if the whole yard is fenced off.</p>
+    </div></details></div>
+
+  <div class="q"><p class="ask">4. You apply a Deployment with <code>nodeSelector: karpenter.sh/nodepool: general</code>. The Pods stay <code>Pending</code> for a few minutes, then start. Is something broken? Which two things must already exist for a worker to appear at all?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>Probably nothing is broken: Karpenter is launching a node, and Spot capacity can be slow.</strong></p>
+      <ul>
+        <li>Karpenter has <strong>two halves</strong>, and both must exist. <strong>AWS side:</strong> IAM roles and friends, created by Terraform. <strong>Kubernetes side:</strong> the Karpenter controller (installed with Helm) and a <strong>NodePool</strong>.</li>
+        <li>If the controller was never installed, the Pods stay Pending <strong>forever</strong>.</li>
+        <li>Check with <code>kubectl describe pod</code> (events) and <code>kubectl get nodes</code>.</li>
+        <li>Our NodePool is <strong>Spot only</strong>. Fine for dev. Production uses on-demand or a mix so it doesn't wait for capacity.</li>
+      </ul>
+    </div></details></div>
+
+  <div class="q"><p class="ask">5. Two app Pods show <code>Running</code> but <code>0/1 Ready</code> for ten minutes. Liveness is <code>GET /health</code>, readiness is <code>GET /</code>. The developer's notes say <code>/health</code> doesn't check the database and <code>/</code> reads trades. What's your first guess, and how do you confirm it?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>The Pod can't reach the database.</strong></p>
+      <ul>
+        <li><code>kubectl describe pod</code>: the events show the <strong>readiness probe failing</strong>.</li>
+        <li><code>kubectl logs</code>: look at the error text. <strong>Timed out</strong> → network: check the RDS security group's inbound rules. <strong>Password authentication failed</strong> → the Secret has the wrong credentials. <strong>Host name not found</strong> → wrong <code>DB_HOST</code> in the ConfigMap.</li>
+        <li>"Running" only means the container process started. "Ready" means it passed the check that it can do real work.</li>
+      </ul>
+    </div></details></div>
+
+  <div class="q"><p class="ask">6. The app on EKS must reach RDS on port 5432. Which security group do you edit, inbound or outbound, and what's the source? Why use a security group as the source and not the nodes' IP addresses?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>The database's security group: an inbound rule for 5432, with the Karpenter workers' security group as the source.</strong></p>
+      <ul>
+        <li>Whoever <strong>lets traffic in</strong> opens their firewall. The traffic goes <em>to</em> RDS.</li>
+        <li>Outbound from the workers is already allowed, and security groups are <strong>stateful</strong>, so the reply comes back on its own.</li>
+        <li><strong>Why a security group as the source:</strong> Karpenter adds and removes nodes all the time, so their IPs change. A rule that points at the group follows whatever nodes are in it.</li>
+        <li>Make sure it's the group of the <strong>Karpenter-launched</strong> workers, not the system node group's or the control plane's.</li>
+      </ul>
+    </div></details></div>
+
+  <div class="q"><p class="ask">7. You add the missing rule to the RDS security group. Two minutes later the Pods still aren't Ready. Give two likely reasons and what you do about each.</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>The app only tries the database when it starts, and you may have allowed the wrong security group.</strong></p>
+      <ul>
+        <li><strong>Restart the Pods</strong> so the app connects again, for example <code>kubectl -n main-product-line rollout restart deployment/investment-app-deployment</code>.</li>
+        <li><strong>Check the source group:</strong> open one Karpenter-launched instance in EC2 and see which security group it really uses.</li>
+        <li>If it's still failing after that, read <code>kubectl logs</code>: it may be the credentials or the database name, not the network.</li>
+      </ul>
+      <p>A firewall change fixes the road. It doesn't make a driver who already gave up try again.</p>
+    </div></details></div>
+
+  <div class="q"><p class="ask">8. A teammate wants both probes on <code>GET /</code> "so we know the database is fine". Then the database has a 5-minute failover. What happens to the Pods, and why is the class setup better?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>Every Pod gets restarted again and again for a problem a restart can't fix.</strong></p>
+      <ul>
+        <li>A failed <strong>liveness</strong> probe makes the kubelet <strong>kill and restart</strong> the container. With the database down, the new container fails too, and you land in <code>CrashLoopBackOff</code>.</li>
+        <li>When the database comes back, the Pods may still be waiting out the back-off, so recovery is <strong>slower</strong>.</li>
+        <li>With the class setup (liveness <code>/health</code>, readiness <code>/</code>), the Pods just become <strong>not Ready</strong>: they get no traffic, keep running, and are back the moment the database answers.</li>
+        <li>Rule: <strong>liveness</strong> asks "is this process stuck?" and should not depend on other systems. <strong>Readiness</strong> asks "can I serve right now?" and may.</li>
+      </ul>
+    </div></details></div>
+
+  <div class="q"><p class="ask">9. You run <code>kubectl port-forward pod/&lt;pod&gt; 10000:8080</code>, open <code>localhost:10000</code>, buy one share, and it works. QA asks: "So the app is live on EKS?" What has your test proven, and what hasn't it?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>It proves one Pod works end to end. It doesn't prove anyone else can reach it.</strong></p>
+      <ul>
+        <li><strong>Proven:</strong> the image starts, the env values are right, and <strong>that Pod</strong> can read and write the RDS database (a buy is a write).</li>
+        <li><strong>Not proven:</strong> the second Pod; a Service and its selector (none exists yet); a load balancer, DNS or HTTPS; real users, whose traffic still goes to ECS.</li>
+        <li>The tunnel exists only while the command runs. <code>10000</code> is your laptop's port, <code>8080</code> is the container's.</li>
+      </ul>
+      <p>It's a test drive in the factory yard, not the car on the road.</p>
+    </div></details></div>
+
+  <div class="q"><p class="ask">10. The app needs seven env variables. Which go in a ConfigMap, which in a Secret, and where did the real values come from in this migration? What happens if you apply the Deployment before the Secret exists?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>Plain settings go in the ConfigMap, the password and the API key go in the Secret, and the values were copied from the running ECS task.</strong></p>
+      <ul>
+        <li><strong>ConfigMap:</strong> <code>TICKER</code>, <code>DB_HOST</code>, <code>DB_PORT</code>, <code>DB_NAME</code>, <code>DB_USER</code>.</li>
+        <li><strong>Secret:</strong> <code>DB_PASSWORD</code>, <code>FINNHUB_KEY</code>. Putting the host and user in the Secret too is also fine.</li>
+        <li><strong>Source of the values:</strong> the ECS task's environment variables in the console, and the Secrets Manager secret it points to.</li>
+        <li><strong>Secret missing:</strong> the Pod is created, but the container can't start: <code>CreateContainerConfigError</code> (Containers Session 09). Create the Secret and it starts by itself.</li>
+        <li>Keep the Secret file <strong>out of Git</strong>. A Kubernetes Secret is only base64, not encryption. The grown-up version is External Secrets (Containers Session 11).</li>
+      </ul>
+    </div></details></div>
+
+  <p class="reread">Scoring: 9–10, you can take an app from image to a working Pod 🏆 · 7–8, solid 💪 · below 7, reread Session 08 and retry 🔁</p>
+</section>
+
+<footer>The full study page and 10-question quiz are in Notion under DevOps / 312 - Notes / 🏁 ProjectX.</footer>
+</div>
+
+<script>
+document.querySelectorAll('.codebox').forEach(function(box){
+  var pre = box.querySelector('pre'); var b = document.createElement('button');
+  b.className = 'copy'; b.type = 'button'; b.textContent = 'Copy';
+  b.addEventListener('click', function(){
+    var text = pre.innerText.split('\n').map(function(l){ return l.replace(/\s+#.*$/, ''); }).join('\n').trim();
+    var done = function(){ b.textContent = 'Copied'; setTimeout(function(){ b.textContent = 'Copy'; }, 1500); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(function(){ selectPre(); });
+    } else { selectPre(); }
+    function selectPre(){ var r = document.createRange(); r.selectNodeContents(pre); var s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = 'Selected'; }
+  });
+  box.appendChild(b);
+});
+</script>

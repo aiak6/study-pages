@@ -1,0 +1,565 @@
+<title>Project X Session 06</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one reading column; sections as stacked "shipping manifest" blocks with a stencilled label; code and tables scroll in place. */
+:root{
+  --bg:#f3f5f7; --surface:#ffffff; --ink:#15202b; --muted:#56657a; --line:#d8dee6;
+  --accent:#c4501b; --accent-soft:#fbe9df; --steel:#1f5f8b; --steel-soft:#e3eef6;
+  --code-bg:#0f1b26; --code-fg:#dbe7f2; --code-cmt:#7f97ad;
+  --good:#2e7d4f; --bad:#b3261e;
+  --f-display:"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --f-body:"Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e151c; --surface:#16202a; --ink:#e6edf3; --muted:#9aabbd; --line:#2a3845;
+  --accent:#f0874f; --accent-soft:#3a2418; --steel:#7ab8e3; --steel-soft:#16303f;
+  --code-bg:#0a1016; --code-fg:#dbe7f2; --code-cmt:#6f879c;
+  --good:#6cc493; --bad:#f08a80; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0e151c; --surface:#16202a; --ink:#e6edf3; --muted:#9aabbd; --line:#2a3845;
+  --accent:#f0874f; --accent-soft:#3a2418; --steel:#7ab8e3; --steel-soft:#16303f;
+  --code-bg:#0a1016; --code-fg:#dbe7f2; --code-cmt:#6f879c;
+  --good:#6cc493; --bad:#f08a80; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:17px/1.6 var(--f-body);padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:28px 64px}
+.wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.15;margin:0}
+h1{font-size:clamp(30px,6vw,44px);font-weight:800;letter-spacing:-.01em}
+h2{font-size:24px;font-weight:800}
+h3{font-size:18px;font-weight:600;margin-top:6px}
+p{margin:0}
+a{color:var(--steel)}
+code{font-family:var(--f-mono);font-size:.86em;background:var(--steel-soft);color:var(--ink);padding:1px 5px;border-radius:4px}
+strong{font-weight:700}
+.eyebrow{font:600 12px/1 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+header{display:flex;flex-direction:column;gap:12px;border-bottom:3px solid var(--ink);padding-bottom:20px}
+.meta{display:flex;flex-wrap:wrap;gap:8px 16px;color:var(--muted);font-size:15px}
+.lede{font-size:19px;max-width:65ch}
+nav{display:flex;flex-wrap:wrap;gap:8px}
+nav a{font:600 13px/1 var(--f-mono);text-decoration:none;color:var(--ink);border:1px solid var(--line);background:var(--surface);padding:8px 10px;border-radius:6px}
+nav a:hover,nav a:focus-visible{border-color:var(--accent);color:var(--accent);outline:none}
+section{display:flex;flex-direction:column;gap:14px;scroll-margin-top:16px}
+section > .label{display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--line);padding-bottom:8px}
+section > .label .tag{font:600 11px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--surface);background:var(--ink);padding:5px 7px;border-radius:3px}
+ul,ol{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px}
+.table{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:15.5px;min-width:480px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:600 12px/1.3 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--bg)}
+tr:last-child td{border-bottom:0}
+blockquote{margin:0;border-left:4px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 8px 8px 0;font-weight:600}
+pre{margin:0;background:var(--code-bg);color:var(--code-fg);font:14px/1.6 var(--f-mono);padding:14px 16px;border-radius:8px;overflow-x:auto}
+pre .c{color:var(--code-cmt)}
+.codebox{position:relative}
+.copy{position:absolute;top:8px;right:8px;font:600 11px/1 var(--f-mono);background:transparent;color:var(--code-cmt);border:1px solid var(--code-cmt);border-radius:4px;padding:5px 7px;cursor:pointer}
+.copy:hover,.copy:focus-visible{color:var(--code-fg);border-color:var(--code-fg);outline:none}
+.flow{font:600 14px/1.5 var(--f-mono);background:var(--steel-soft);color:var(--ink);padding:14px 16px;border-radius:8px;overflow-x:auto;white-space:pre}
+.step{display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:start}
+.step > .n{font:800 18px/34px var(--f-display);text-align:center;background:var(--ink);color:var(--bg);border-radius:50%;width:34px;height:34px}
+.step > div{min-width:0;display:flex;flex-direction:column;gap:8px}
+.see{font-size:15px;color:var(--good)}
+.see::before{content:"You should see: ";font-weight:700}
+.warn{border:1px solid var(--bad);border-radius:8px;padding:12px 16px;display:flex;flex-direction:column;gap:10px;background:var(--surface)}
+.warn .eyebrow{color:var(--bad)}
+details{border:1px solid var(--line);background:var(--surface);border-radius:8px}
+details summary{cursor:pointer;padding:12px 16px;font-weight:600;list-style-position:inside}
+details summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:8px}
+details > div{padding:0 16px 14px;display:flex;flex-direction:column;gap:8px}
+.q{display:flex;flex-direction:column;gap:10px}
+.q p.ask{font-weight:600}
+.reread{font-style:italic;color:var(--muted);font-size:15px}
+footer{color:var(--muted);font-size:15px;border-top:1px solid var(--line);padding-top:16px}
+@media (prefers-reduced-motion: reduce){*{scroll-behavior:auto!important}}
+html{scroll-behavior:smooth}
+</style>
+
+<div class="wrap">
+<header>
+  <span class="eyebrow">312 School · Cohort 26a · Project X</span>
+  <h1>Session 06: Terraform values &amp; the EKS foundation</h1>
+  <div class="meta"><span>Mon, Nov 9, 2026</span><span>Ticket PX-107 (PX-108 still open)</span><span>Sources: class recording, written notes, class 6 materials, reference repo</span></div>
+  <p class="lede">Class 6 slowed down and read the EKS foundation PR line by line (still <strong>PX-107</strong>, branch <code>codex/dev-eks-foundation</code>, PR #18). One question ran through the whole night: <strong>how does a value travel in Terraform?</strong> The network root finds the old CloudFormation VPC with a <strong>data source</strong>, makes two subnets with <strong><code>for_each</code></strong>, and saves their IDs as <strong>outputs</strong> in its state. The EKS root reads them back with <strong><code>terraform_remote_state</code></strong>. After that: how to read a plan, why <strong><code>depends_on</code></strong> exists, what <strong>drift</strong> is, how we and the workers reach the cluster, and why the cluster is still not finished: <strong>Karpenter</strong> isn't installed yet.</p>
+  <nav aria-label="Sections"><a href="#s6">Notes</a><a href="#corrections">Corrections</a><a href="#homework">Homework</a><a href="#quiz6">Check yourself</a></nav>
+</header>
+
+<section id="s6">
+  <div class="label"><span class="tag">Notes</span><h2>Quick reference and notes</h2></div>
+  <div class="table"><table>
+    <thead><tr><th>Topic</th><th>Key point</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Root vs child</strong></td><td><strong>Root</strong> = the folder where you run <code>terraform</code>, with its own state. <strong>Child</strong> = reusable block that only runs when a root calls it</td></tr>
+      <tr><td><strong>Data source</strong></td><td><code>data</code> = <strong>look up</strong> something that already exists (the VPC, by its CloudFormation tags). Creates nothing, runs on every plan</td></tr>
+      <tr><td><strong>Variable / local / output</strong></td><td><strong>Variable</strong> = input. <strong>Local</strong> = a local variable, seen only inside its module. <strong>Output</strong> = value going out</td></tr>
+      <tr><td><strong>Across two roots</strong></td><td>Root outputs are saved in state. EKS reads <code>network.tfstate</code> with <code>terraform_remote_state</code>. Other way: tag the subnets, look them up by tag</td></tr>
+      <tr><td><strong><code>for_each</code></strong></td><td>One block, <strong>one copy per map key</strong>: <code>aws_subnet.eks["use1-az6"]</code>. Add a key → one more subnet</td></tr>
+      <tr><td><strong><code>depends_on</code></strong></td><td><strong>Guarantees</strong> order when Terraform can't see it (policies attached → then cluster / nodes). Across roots, <strong>you</strong> keep the order</td></tr>
+      <tr><td><strong>Reading a plan</strong></td><td>Read <strong>add / change / destroy</strong> first. <code># forces replacement</code> = destroy + create</td></tr>
+      <tr><td><strong>Drift</strong></td><td>Console change ≠ files. Found only on the next run, which puts AWS back to what the <strong>files</strong> say. Change the file first</td></tr>
+      <tr><td><strong>Reaching EKS</strong></td><td><code>kubectl</code> → <strong>API server</strong> only. Needs a <strong>network path</strong> plus <strong>two permission checks</strong> (AWS identity → Kubernetes RBAC)</td></tr>
+      <tr><td><strong>Karpenter</strong></td><td>Terraform built only its <strong>AWS side</strong>. The controller needs <code>install.sh</code> (Helm). Until then: <strong>no general workers</strong></td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>🗺️ Where we are: inherited CloudFormation + new Terraform</h3>
+  <ul>
+    <li><strong>Inherited</strong> (made by our imaginary coworkers with <strong>CloudFormation</strong>): the VPC, the ECS app, the RDS database.</li>
+    <li><strong>Added by us with Terraform:</strong> two private <strong>EKS subnets</strong>, the <strong>EKS cluster</strong>, one <strong>managed system worker</strong>. All launched <em>inside</em> the old CloudFormation VPC.</li>
+    <li>ECS keeps serving the app while EKS is built next to it (the build-alongside plan from Session 03). Moving the app is <strong>PX-108</strong>.</li>
+    <li>The code is the instructor's reference build: branch <code>codex/dev-eks-foundation</code>, <strong>PR #18</strong>, still not merged to <code>main</code>.</li>
+    <li>Later the VPC will be moved under Terraform with <strong>import</strong>. Not yet: deploying the app comes first.</li>
+  </ul>
+
+  <h3>🌳 Root vs child modules, and why split at all</h3>
+  <ul>
+    <li><strong>Root module</strong> = the folder where you run <code>terraform init / plan / apply</code>. It's the starting point where files turn into real resources. Each root has its <strong>own state</strong>.</li>
+    <li><strong>Child module</strong> = a reusable block in <code>terraform/modules/</code>. It only runs when a root <strong>calls</strong> it with a <code>module</code> block.</li>
+    <li>Our roots: <code>bootstrap</code> (run once, makes the state bucket), <code>network</code>, <code>eks</code>. Day to day you only touch <strong>network</strong> and <strong>eks</strong>.</li>
+  </ul>
+  <div class="table"><table>
+    <thead><tr><th>Root (where you run)</th><th>Child it calls</th><th>Creates</th></tr></thead>
+    <tbody>
+      <tr><td><code>terraform/envs/dev/network</code></td><td><code>modules/eks-network</code></td><td>2 private subnets + their route table associations</td></tr>
+      <tr><td><code>terraform/envs/dev/eks</code></td><td><code>modules/eks-cluster</code></td><td>Log group, cluster, access entry, launch template, system node group, add-ons, Karpenter's AWS side</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li>One root can call <strong>one or many</strong> children. Ours call one each for now.</li>
+    <li><strong>Why split?</strong> One word: <strong>scale</strong>. With 150 modules and six roots, small pieces are easier to <strong>reuse</strong>, <strong>maintain</strong> and review. It helps AI too: a smaller piece of code to read means fewer mistakes. (Same idea as Scale Session 15.)</li>
+    <li><strong>Blast radius</strong> is limited first by <strong>AWS account</strong> (dev / staging / prod), then by <strong>root</strong> (each has its own state).</li>
+    <li>First job at a new company: find out how many roots they have and which children each one calls.</li>
+  </ul>
+  <div class="codebox"><pre>aws sts get-caller-identity          <span class="c"># am I logged in to the right account?</span>
+
+cd terraform/envs/dev/network        <span class="c"># root 1</span>
+terraform init                       <span class="c"># needs login: the state is in S3</span>
+terraform plan
+
+cd ../eks                            <span class="c"># root 2, its own state</span>
+terraform init
+terraform plan                       <span class="c"># asks for admin_role_arn (a variable with no value)</span></pre></div>
+
+  <h3>🔎 Data sources: find it, don't create it</h3>
+  <ul>
+    <li><code>resource</code> = <strong>create</strong> something. <code>data</code> = <strong>read</strong> something that already exists, whether Terraform manages it or not.</li>
+    <li>The network root needs the VPC ID, but CloudFormation made the VPC. So it <strong>looks it up</strong> by the tags CloudFormation leaves on everything it creates:</li>
+  </ul>
+  <div class="codebox"><pre>locals {
+  stack_name = "projectx-dev"
+}
+
+data "aws_vpc" "dev" {
+  tags = {
+    "aws:cloudformation:stack-name" = local.stack_name
+    "aws:cloudformation:logical-id" = "Vpc"
+  }
+}
+
+data "aws_route_table" "private_app" {
+  vpc_id = data.aws_vpc.dev.id          <span class="c"># only search inside that VPC</span>
+  tags = {
+    "aws:cloudformation:stack-name" = local.stack_name
+    "aws:cloudformation:logical-id" = "AppRouteTable"
+  }
+}</pre></div>
+  <ul>
+    <li><strong>Docs trick:</strong> in the Terraform Registry every type has two pages. "Resources → aws_vpc" shows how to create one. "Data Sources → aws_vpc" shows how to find one and what you can filter by.</li>
+    <li><strong>"Why keep the data block after the first run?"</strong> Terraform has no chat memory. Every run it reads all the files again and checks them against state and AWS. Delete the lookup and <code>vpc_id</code> points at nothing, so the plan fails.</li>
+    <li>It's also a safety check. If someone deletes the VPC or changes its tag, the next plan <strong>fails loudly</strong> instead of building in the wrong place.</li>
+    <li>Use <code>data</code> only when you need it. If the same root creates the thing, point at the resource directly.</li>
+    <li><strong><code>data</code> vs <code>import</code>:</strong> <code>data</code> only reads. <code>import</code> makes Terraform the <strong>owner</strong> of an existing resource. Import comes later, when the VPC leaves CloudFormation.</li>
+  </ul>
+
+  <h3>📥 Variables, locals &amp; outputs: which way the value moves</h3>
+  <div class="table"><table>
+    <thead><tr><th>Object</th><th>Direction</th><th>Used for</th><th>In our repo</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Variable</strong></td><td><strong>In</strong></td><td>Root → child. From <code>terraform.tfvars</code>. Typed by a human at the prompt</td><td>Root: <code>vpc_id = data.aws_vpc.dev.id</code> → child: <code>variable "vpc_id"</code> → used as <code>var.vpc_id</code></td></tr>
+      <tr><td><strong>Local</strong></td><td>Stays <strong>inside</strong> one module</td><td>Name a value once, reuse it, avoid repeating code</td><td><code>local.stack_name = "projectx-dev"</code>, used in both lookups</td></tr>
+      <tr><td><strong>Output</strong></td><td><strong>Out</strong></td><td>Print to the terminal. Child → parent. Root outputs are saved in the <strong>state file</strong></td><td><code>output "subnet_ids"</code> in the child, then again in the root</td></tr>
+      <tr><td><strong>Data source</strong></td><td>A <strong>lookup</strong>, not an input</td><td>Read existing things from AWS (or from another state)</td><td><code>data.aws_vpc.dev.id</code></td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li><strong>Local = a local variable.</strong> That's the two-word definition. It lives only in the module that defines it: the child <code>eks-network</code> can't read the root's <code>local.stack_name</code>.</li>
+    <li>A local can't "become" a variable. If a child needs the value, declare a <code>variable</code> in the child and pass it in.</li>
+    <li>A variable with <strong>no value and no default</strong> makes Terraform ask you. That's why the EKS root prompts for <code>admin_role_arn</code>.</li>
+    <li>A data source is not an input by itself. It's a request to go and look. You can then <strong>use</strong> its result as an input.</li>
+    <li>AI likes locals too: change one line and every use changes.</li>
+  </ul>
+
+  <h3>🔁 for_each: one block, many resources</h3>
+  <p>Two subnets, but only <strong>one</strong> <code>resource "aws_subnet"</code> block. <code>for_each</code> repeats the block once per item in a map.</p>
+  <div class="codebox"><pre><span class="c"># network root: the map (2 keys = 2 subnets)</span>
+private_subnets = {
+  use1-az6 = { cidr_block = "10.40.32.0/19", route_table_id = data.aws_route_table.private_app.id }
+  use1-az1 = { cidr_block = "10.40.64.0/19", route_table_id = data.aws_route_table.private_app.id }
+}
+
+<span class="c"># child module eks-network</span>
+resource "aws_subnet" "eks" {
+  for_each = var.private_subnets
+
+  vpc_id               = var.vpc_id
+  availability_zone_id = each.key                 <span class="c"># use1-az6, then use1-az1</span>
+  cidr_block           = each.value.cidr_block    <span class="c"># 10.40.32.0/19, then 10.40.64.0/19</span>
+
+  tags = {
+    Name = "${var.cluster_name}-${each.key}"      <span class="c"># projectx-dev-eks-use1-az6</span>
+  }
+}
+
+resource "aws_route_table_association" "eks" {
+  for_each = var.private_subnets
+
+  subnet_id      = aws_subnet.eks[each.key].id
+  route_table_id = each.value.route_table_id      <span class="c"># the same route table for both</span>
+}</pre></div>
+  <ul>
+    <li><code>each.key</code> = what's <strong>before</strong> the <code>=</code> (the AZ ID). <code>each.value</code> = everything <strong>after</strong> it. <code>each.value.cidr_block</code> = one field inside the value.</li>
+    <li>It's a repetition with <strong>different values</strong> each turn, like a <code>for</code> loop in programming.</li>
+    <li>Each copy gets its own address: <code>module.eks_network.aws_subnet.eks["use1-az6"]</code>.</li>
+    <li>Add a third key → a third subnet. No change in the child module.</li>
+    <li>An <strong>empty map</strong> means zero copies, so Terraform would plan to destroy the existing ones. This module blocks that: a <code>validation</code> rule wants at least two zones, because EKS needs two AZs.</li>
+    <li>You can put <code>for_each</code> on a <code>module</code> block too and call the same child several times.</li>
+    <li>Same tool as Scale Session 08 (two app servers from one block).</li>
+    <li>Practice without AWS: the class 6 <code>terraform console</code> example.</li>
+  </ul>
+  <pre>cd terraform-console &amp;&amp; terraform init &amp;&amp; terraform console
+&gt; local.private_subnets
+&gt; keys(local.private_subnets)
+&gt; local.private_subnets["use1-az6"].cidr_block     <span class="c"># "10.40.32.0/19"</span></pre>
+
+  <h3>🔗 Getting the subnet IDs from the network root into the EKS root</h3>
+  <ul>
+    <li><strong>Problem:</strong> the cluster needs subnet IDs. The <strong>network</strong> root made them. The <strong>eks</strong> root is a separate run with a separate memory. Nothing connects the two.</li>
+    <li><strong>What the PR does:</strong> save the IDs in the network state, then read that state from the EKS root.</li>
+  </ul>
+  <ol>
+    <li>Child <code>eks-network</code> declares <code>output "subnet_ids"</code> (zone → subnet ID).</li>
+    <li>The network root <strong>publishes it again</strong> as its own output. Root outputs are written into the state file.</li>
+    <li><code>terraform apply</code> in network → the IDs now sit in <code>foundation/network.tfstate</code> in S3.</li>
+    <li>The EKS root reads that file with a data source and passes the IDs down as a variable.</li>
+  </ol>
+  <div class="flow">eks-network child → output subnet_ids
+      → network root output → foundation/network.tfstate (S3)
+      → eks root: data "terraform_remote_state" "network"
+      → module "eks": subnet_ids = values(...) → the cluster</div>
+  <div class="codebox"><pre><span class="c"># network root</span>
+output "subnet_ids" {
+  value = module.eks_network.subnet_ids
+}
+
+<span class="c"># eks root</span>
+data "terraform_remote_state" "network" {
+  backend = "s3"
+  config = {
+    bucket = "projectx-dev-eks-tfstate-ACCOUNT_ID-us-east-1"
+    key    = "foundation/network.tfstate"
+    region = "us-east-1"
+  }
+}
+
+module "eks" {
+  source     = "../../../modules/eks-cluster"
+  vpc_id     = data.terraform_remote_state.network.outputs.vpc_id
+  subnet_ids = values(data.terraform_remote_state.network.outputs.subnet_ids)   <span class="c"># drop the AZ keys, keep the IDs</span>
+}</pre></div>
+  <ul>
+    <li>It's "reading the <strong>memory</strong> of another Terraform run". Really it's just reading a file in S3.</li>
+    <li>The read happens <strong>when you plan EKS</strong>. EKS doesn't update by itself when network changes (Session 05).</li>
+    <li><strong>Order is on you:</strong> apply <strong>network</strong> first, then <strong>eks</strong>. The other way round, the EKS plan fails: there's no network state yet.</li>
+  </ul>
+  <div class="table"><table>
+    <thead><tr><th>Way to share</th><th>How</th><th>Good / bad</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Remote state</strong> (used here)</td><td><code>terraform_remote_state</code> reads the other root's outputs</td><td>Simple and common in companies. Needs read access to the whole state file</td></tr>
+      <tr><td><strong>Tags + data source</strong></td><td>Give the subnets a unique tag, look them up by tag in the EKS root</td><td>No state access needed. You must keep the tag unique</td></tr>
+      <tr><td><strong>One root</strong></td><td><code>subnet_ids = module.eks_network.subnet_ids</code></td><td>Simplest: the parent passes the value from one child to the other. But one state and one lifecycle</td></tr>
+    </tbody>
+  </table></div>
+  <p>Session 05 named one more: publish the IDs to <strong>SSM Parameter Store</strong>.</p>
+
+  <h3>⛓️ Dependencies &amp; depends_on</h3>
+  <ul>
+    <li>Real clouds have an order: network before servers, <strong>cluster before workers</strong>, <strong>IAM role before cluster</strong>, <strong>policies attached</strong> before the cluster starts.</li>
+    <li><strong>Obvious order = automatic.</strong> When one block <strong>references</strong> another (<code>cluster_name = aws_eks_cluster.this.name</code> in the node group), Terraform sees it and builds in the right order.</li>
+    <li><strong>Not obvious = <code>depends_on</code>.</strong> A node group references its IAM <strong>role</strong>, so the role will exist. Nothing tells Terraform the <strong>policies</strong> must be attached too. Without them the worker may not come up.</li>
+  </ul>
+  <div class="codebox"><pre>resource "aws_eks_cluster" "this" {
+  <span class="c"># ...</span>
+  depends_on = [
+    aws_cloudwatch_log_group.control_plane,
+    aws_iam_role_policy_attachment.cluster,
+  ]
+}
+
+resource "aws_eks_node_group" "system" {
+  cluster_name  = aws_eks_cluster.this.name              <span class="c"># reference = automatic order</span>
+  node_role_arn = aws_iam_role.system.arn
+  <span class="c"># ...</span>
+  depends_on = [aws_iam_role_policy_attachment.system]   <span class="c"># explicit: wait for the policies</span>
+}</pre></div>
+  <ul>
+    <li><code>depends_on</code> <strong>guarantees</strong> the order. Without it you rely on luck: it works today and fails next month when one step runs a bit slower.</li>
+    <li>You don't need it everywhere. The reference build has only a few, almost all about IAM.</li>
+    <li><strong>Across roots there is no <code>depends_on</code>.</strong> You (or your AI) run network first, then eks. Run them the wrong way round and it simply fails.</li>
+  </ul>
+
+  <h3>📋 Reading a plan: log retention &amp; a replaced subnet</h3>
+  <ul>
+    <li>AI added a <strong>CloudWatch log group</strong> for the cluster. It holds <strong>control plane</strong> logs (the system side that AWS runs), <strong>not</strong> your pod logs.</li>
+    <li>Logging is part of any real work. So is <strong>retention</strong>: 7, 14 or 30 days is usually enough. Keeping logs forever costs money.</li>
+    <li>Here retention comes from a variable with a default: <code>log_retention_days = 14</code>. The root doesn't set it, so 14 is used.</li>
+    <li>To change it, set it <strong>in the root</strong>, inside the <code>module "eks"</code> block:</li>
+  </ul>
+  <div class="codebox"><pre>module "eks" {
+  <span class="c"># ...</span>
+  log_retention_days = 30
+}</pre></div>
+  <pre><span class="c"># module.eks.aws_cloudwatch_log_group.control_plane will be updated in-place</span>
+  ~ retention_in_days = 14 -&gt; 30
+
+Plan: 0 to add, 1 to change, 0 to destroy.</pre>
+  <p>A scarier edit, in the network root: change one subnet's CIDR (from the class rehearsal, which used small /24 subnets).</p>
+  <pre><span class="c"># module.eks_network.aws_subnet.eks["use1-az6"] must be replaced</span>
+-/+ cidr_block = "10.40.96.0/24" -&gt; "10.40.98.0/24" <span class="c"># forces replacement</span>
+<span class="c"># module.eks_network.aws_route_table_association.eks["use1-az6"] must be replaced</span>
+
+Plan: 2 to add, 0 to change, 2 to destroy.</pre>
+  <ul>
+    <li>A subnet's CIDR can't be edited in place, so Terraform <strong>destroys and recreates</strong> it. The association points at the subnet ID, so it's replaced too. One edit, two replacements.</li>
+    <li>Read the last line first: <strong>add / change / destroy</strong>. If destroy isn't 0, find out exactly what dies before you type <code>yes</code>.</li>
+    <li>Before any plan, check three things: the <strong>folder</strong> (which root), the <strong>account</strong> (<code>aws sts get-caller-identity</code>), the <strong>state key</strong> (<code>foundation/eks.tfstate</code>).</li>
+  </ul>
+
+  <h3>🌊 Drift: the files always win</h3>
+  <div class="flow">files (the code)  →  state (Terraform's memory)  →  actual environment (AWS)</div>
+  <ul>
+    <li><strong>Drift</strong> = reality no longer matches the files. Example: Git says log retention <strong>14</strong> days, someone sets <strong>7</strong> in the console.</li>
+    <li>Nothing happens by itself. Drift is only found <strong>when you run</strong> <code>plan</code> or <code>apply</code>.</li>
+    <li>The next run compares all three and plans to put AWS back to what the <strong>files</strong> say: <code>7 -&gt; 14</code>. It doesn't tell you who changed it.</li>
+    <li><strong>Terraform is file-first.</strong> To change something properly: edit the file → apply → state and AWS follow.</li>
+    <li>Careful with "the files fix everything". Files say what <strong>should</strong> exist. State is how Terraform knows what <strong>already</strong> exists. If the state itself is lost or broken, restore it first (Session 05). Don't apply a plan that wants to create everything again.</li>
+  </ul>
+
+  <h3>🚪 How we, the workers and the pods reach things</h3>
+  <div class="table"><table>
+    <thead><tr><th>Route</th><th>Path</th><th>Needs</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Engineer</strong></td><td><code>kubectl</code> → the cluster's <strong>API server</strong> (public endpoint in Dev)</td><td>kubeconfig + a network path (public endpoint, or VPN if it's private) + permission</td></tr>
+      <tr><td><strong>Workers → control plane</strong></td><td>Private, inside the VPC, through <strong>EKS ENIs</strong> (network interfaces EKS places in our subnets)</td><td>Nothing from us: EKS wires it</td></tr>
+      <tr><td><strong>Workers / pods → outside</strong></td><td>Private subnet → <code>AppRouteTable</code> → <strong>NAT gateway</strong> in the public subnet → internet and AWS services (ECR, S3, EC2 API)</td><td>The NAT gateway CloudFormation already made</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li>Every <code>kubectl</code> command (get, delete, run) goes to the <strong>API server</strong>. That's the only door we use.</li>
+    <li><strong>A network route gets your request to the API. It doesn't give you permission.</strong></li>
+    <li><strong>Human access = two checks</strong> (Containers Session 10): your <strong>AWS identity</strong> (IAM role) → an <strong>EKS access entry + policy</strong> maps it to a Kubernetes identity → Kubernetes permissions (<strong>RBAC</strong>).</li>
+    <li><strong>Pod access to AWS:</strong> an app pod that reads files from S3 (the example was a video-processing app) needs AWS permission. Simple way: give it to the <strong>worker's IAM role</strong>, and every pod on that worker gets it. Pod-level permissions come in a later class. The <strong>EKS Pod Identity Agent</strong> add-on is already installed for that.</li>
+  </ul>
+  <div class="codebox"><pre>aws eks update-kubeconfig --region us-east-1 --name projectx-dev-eks
+kubectl config current-context        <span class="c"># check the context before anything else</span>
+kubectl get nodes
+kubectl -n kube-system get pods       <span class="c"># the add-on pods</span>
+kubectl auth whoami                   <span class="c"># which Kubernetes identity am I?</span></pre></div>
+  <ul>
+    <li><strong>Three kinds of IAM role here:</strong> yours (human), the <strong>cluster</strong> role, the <strong>node</strong> role. Every cluster gets its own cluster and node roles. A role lives in <strong>one account</strong>, so another account means another role.</li>
+    <li><strong>How does a worker join the cluster?</strong> We use an <strong>EKS managed node group</strong> (<code>aws_eks_node_group</code>), not a plain Auto Scaling group. EKS launches workers from its own AMI with <strong>kubelet</strong> already inside and hands them the cluster name. With the node role's permissions they join.</li>
+    <li>Want to really understand joining? Swap the managed node group for a plain Auto Scaling group and make the node join yourself.</li>
+  </ul>
+
+  <h3>🧰 Cluster services: the system worker, add-ons &amp; the missing Karpenter step</h3>
+  <ul>
+    <li>Terraform creates <strong>one</strong> node group: the <strong>managed system worker</strong> (<code>t3.medium</code>, 1 node), labelled <code>projectx.io/node-role=system</code>. It runs the cluster's own helper pods.</li>
+    <li><strong>Add-ons</strong> (in <code>addons.tf</code>), installed by Terraform as EKS add-ons. More on them next class:</li>
+  </ul>
+  <div class="table"><table>
+    <thead><tr><th>Add-on</th><th>Job</th></tr></thead>
+    <tbody>
+      <tr><td><strong>VPC CNI</strong></td><td>Gives every pod an IP from the VPC</td></tr>
+      <tr><td><strong>kube-proxy</strong></td><td>Makes Services reach pods on each node (Containers Session 07)</td></tr>
+      <tr><td><strong>EKS Pod Identity Agent</strong></td><td>Lets a pod get its own AWS permissions</td></tr>
+      <tr><td><strong>CoreDNS</strong></td><td>DNS inside the cluster (Containers Session 07)</td></tr>
+      <tr><td><strong>metrics-server</strong></td><td>CPU and memory numbers for <code>kubectl top</code> and the HPA (Containers Session 12)</td></tr>
+      <tr><td><strong>EBS CSI driver</strong></td><td>Makes EBS volumes for PVCs (Containers Session 13)</td></tr>
+      <tr><td><strong>CloudWatch Observability</strong></td><td>Sends container logs and metrics to CloudWatch</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li><strong>What's missing: the general workers.</strong> No node group makes them. <strong>Karpenter</strong> is supposed to, and Karpenter isn't installed.</li>
+    <li><code>terraform apply</code> only built Karpenter's <strong>AWS side</strong> (the <code>module "karpenter"</code> block: IAM roles and an instance profile). The <strong>controller</strong> is installed by a script, described in <code>terraform/README.md</code>:</li>
+  </ul>
+  <div class="codebox"><pre>terraform/platform/install.sh terraform/envs/dev/eks "$context"   <span class="c"># Helm charts + Karpenter's capacity rules</span></pre></div>
+  <ul>
+    <li>So today the cluster is <strong>not complete</strong>: system worker yes, room for the app no. Next class: Helm, install Karpenter, then test with a pod that makes a new worker appear.</li>
+    <li><strong>Karpenter vs Auto Scaling group:</strong> an ASG is an <strong>AWS service</strong>. Karpenter is <strong>open-source software running in your cluster</strong> that creates EC2s itself (Containers Session 12, Project X Session 05).</li>
+  </ul>
+
+  <h3>💬 Class Q&amp;A worth keeping</h3>
+  <ul>
+    <li><strong>"Do I still need to learn the Terraform docs site?"</strong> Know it exists and how the resource and data pages differ. Don't train for speed on it. Work that took two days now takes an hour with AI, and the result is <strong>more</strong> work per engineer, not less. Spend your time on understanding.</li>
+    <li><strong>"Will interviews test the old way?"</strong> Interview time is short and most employers won't spend it there. They will ask you to <strong>explain</strong> these ideas: root vs child, <code>for_each</code>, <code>depends_on</code>, drift.</li>
+    <li><strong>"Why did CloudFormation make the VPC?"</strong> It's the story of the project: we joined a company with a legacy setup and we're moving it to Terraform.</li>
+    <li><strong>"Could network and EKS be one root?"</strong> Yes. Then the parent passes the IDs between the children and you don't need remote state.</li>
+    <li><strong>Interview stories</strong> start once CI/CD is covered. We don't have one full story yet.</li>
+    <li>The Terraform chapter is closed for now. It comes back with automation.</li>
+  </ul>
+
+  <blockquote>Golden rule: follow the value. Know where it comes from (data, variable, local) and where it goes (output, state), and read the plan's add / change / destroy line before you apply. The files are the truth.</blockquote>
+</section>
+
+<section id="corrections">
+  <div class="warn">
+    <span class="eyebrow">Where these notes correct the class or the written notes</span>
+    <div class="table"><table>
+      <thead><tr><th>Said or written</th><th>More exact version</th></tr></thead>
+      <tbody>
+        <tr><td>"You cannot run a child module"</td><td>Terraform treats <strong>any</strong> folder you run it in as a root. A child folder has no backend, no provider settings and empty inputs, so nobody runs it that way.</td></tr>
+        <tr><td><code>for_each</code> is a "function"</td><td>It's a <strong>meta-argument</strong> (like <code>depends_on</code>). Say that in an interview.</td></tr>
+        <tr><td>The system worker has a "tag" <code>projectx.io node role</code></td><td>On a node it's a Kubernetes <strong>label</strong>: <code>projectx.io/node-role=system</code>.</td></tr>
+        <tr><td>If state breaks, Terraform "still relies on the files"</td><td>Files say what <strong>should</strong> exist; state says what <strong>already</strong> exists. Lost or broken state gets <strong>restored</strong> first (Session 05).</td></tr>
+        <tr><td>Written notes: "session five", "ATS", branch "codex-wts"</td><td><strong>Session 06</strong> on the site, <strong>EKS</strong>, branch <code>codex/dev-eks-foundation</code>.</td></tr>
+        <tr><td>Written notes list "install Karpenter with <code>install.sh</code>" as a next step</td><td>In class it was left for <strong>Wednesday's session</strong>, not homework.</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<section id="homework">
+  <div class="label"><span class="tag">Before Wed Nov 11</span><h2>Homework</h2></div>
+  <ul>
+    <li><strong>Keep trying PX-108</strong> (run the investment app on your EKS, connected to PostgreSQL on RDS) before <strong>Wed Nov 11</strong>. It gets worked through in class, so bring your errors. Instructions: the class 5 task page, or <code>class/05/README.md</code> in your clone.</li>
+    <li><strong>Practice</strong> (the "Class 6 practical examples" page):
+      <ol>
+        <li>Run <code>terraform console</code> on the small <code>main.tf</code>. No AWS needed.</li>
+        <li>Read the recorded plan for log retention <code>14 -&gt; 30</code>.</li>
+        <li>Optional, in your own account: add <code>log_retention_days = 30</code>, run <code>terraform plan</code>, <strong>stop after the plan</strong>, remove the line, plan again.</li>
+      </ol>
+    </li>
+    <li><strong>Play with <code>for_each</code>:</strong> make a few resources from one block and output their IDs.</li>
+    <li><strong>Warm up for next class:</strong> read a little about <strong>EKS add-ons</strong> and <strong>Karpenter</strong>.</li>
+  </ul>
+</section>
+
+<section id="quiz6">
+  <div class="label"><span class="tag">Self-test</span><h2>Check yourself</h2></div>
+  <p class="reread">Answer each question out loud first, then open the answer. Score yourself out of 10.</p>
+
+  <div class="q"><p class="ask">1. An interviewer asks: "What's the difference between a root module and a child module? And what happens if I run <code>terraform apply</code> inside <code>modules/eks-network</code>?"</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>The root is where you run Terraform and where the state lives. The child is a reusable block that a root calls.</strong> A root has a backend, provider settings and real values. A child only has variables waiting for values.</p>
+      <p>If you run Terraform inside the child folder, Terraform treats that folder as a root. There's no S3 backend there, so it starts a new empty local state, and it asks you to type <code>vpc_id</code>, <code>cluster_name</code> and <code>private_subnets</code>. It knows nothing about the subnets that already exist and would try to make new ones. That's why you always run from <code>terraform/envs/dev/network</code>.</p>
+      <p>Think of the child as a recipe and the root as the cook who actually turns on the stove.</p>
+    </div></details></div>
+
+  <div class="q"><p class="ask">2. The network root creates the subnets. The EKS root needs their IDs. Give three ways to get the IDs across, with one trade-off for each.</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>Remote state, tags plus a data source, or one root.</strong></p>
+      <ul>
+        <li><strong>Remote state</strong> (what the PR does): the network root publishes <code>subnet_ids</code> as a root output, it lands in <code>network.tfstate</code>, and the EKS root reads it with <code>terraform_remote_state</code>. Simple, but EKS needs read access to the whole network state file, and it only sees new values when you plan EKS again.</li>
+        <li><strong>Tags + data source:</strong> tag the subnets with something unique and look them up in the EKS root. No state access needed, but the tag has to stay unique and correct.</li>
+        <li><strong>One root:</strong> call both children from one root and write <code>subnet_ids = module.eks_network.subnet_ids</code>. Simplest, but now network and cluster share one state and one lifecycle.</li>
+      </ul>
+      <p>Bonus from Session 05: publish the IDs to <strong>SSM Parameter Store</strong> and read them with a data source.</p>
+    </div></details></div>
+
+  <div class="q"><p class="ask">3. A teammate says: "The subnets exist now, so I deleted the <code>data "aws_vpc" "dev"</code> block. We already know the VPC ID." What happens on the next <code>terraform plan</code> in the network root, and why?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>The plan fails.</strong> The module call still says <code>vpc_id = data.aws_vpc.dev.id</code>, and the route table lookup uses it too. Terraform reports a reference to something that isn't declared.</p>
+      <p>Terraform has no chat memory. Every run it reads all the files again and checks them against state and AWS. A lookup is not a one-time step.</p>
+      <p>He could hardcode the ID and the plan would work. But he'd lose the safety check: today, if someone deletes the VPC or changes its tag, the lookup fails loudly instead of building in the wrong place.</p>
+    </div></details></div>
+
+  <div class="q"><p class="ask">4. In <code>private_subnets</code> you rename the key <code>use1-az1</code> to <code>use1-az2</code> and keep the same CIDR. What does the plan show, and why isn't it "1 to change"?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>It destroys the old subnet and its association and creates new ones: 2 to add, 2 to destroy.</strong></p>
+      <p>With <code>for_each</code>, the map key <strong>is</strong> the identity of the copy: <code>aws_subnet.eks["use1-az1"]</code>. A new key is a new address, so Terraform sees a brand-new resource. The old address has nothing in the files any more, so it's destroyed.</p>
+      <p>Here it's even stronger: the key is also used as the <strong>AZ ID</strong>, and a subnet can't move to another zone in place.</p>
+      <p>And it doesn't stop there. The network state now holds a different subnet ID, so the next EKS plan reads different subnets for the cluster. On a live cluster that's a big change.</p>
+      <p>Lesson: <code>for_each</code> keys are names. Pick stable ones and don't rename them casually.</p>
+    </div></details></div>
+
+  <div class="q"><p class="ask">5. You change one subnet's <code>cidr_block</code>. The plan ends with <code>Plan: 2 to add, 0 to change, 2 to destroy</code>. You edited one value. Why 2 and 2? Would you apply it on a cluster with running workers?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>A subnet's CIDR can't be changed in place, so the subnet is replaced. The route table association points at the subnet's ID, so it's replaced with it.</strong> In the plan you see <code>-/+</code> and <code># forces replacement</code>.</p>
+      <p>On a live cluster: no, not like this. Workers and their network interfaces live in that subnet. AWS won't delete a subnet that still has network interfaces in it, so the apply would get stuck or fail halfway. If it did go through, the nodes in that zone would be gone.</p>
+      <p>Safer: add a <strong>new</strong> subnet next to it (one more key in the map), move the workloads, then remove the old key.</p>
+      <p>Habit to keep: read the add / change / destroy line first, then find every line that says "must be replaced".</p>
+    </div></details></div>
+
+  <div class="q"><p class="ask">6. The node group block already has <code>node_role_arn = aws_iam_role.system.arn</code>. Why does the code still add <code>depends_on = [aws_iam_role_policy_attachment.system]</code>?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>The reference only guarantees the role exists. It doesn't guarantee the policies are attached to it.</strong></p>
+      <p>The role and its policy attachments are separate resources. When Terraform sees no link between two things, it's free to build them in any order or at the same time. So a worker could boot with an empty role: it can't register with the cluster and it can't pull what it needs.</p>
+      <p><code>depends_on</code> makes the order <strong>guaranteed</strong>. Without it, it may still work today, by luck, and fail next month when one step runs a bit slower.</p>
+      <p>Rule of thumb: references handle the obvious order. <code>depends_on</code> is for the order Terraform can't see.</p>
+    </div></details></div>
+
+  <div class="q"><p class="ask">7. The code says log retention is 14 days. Someone sets it to 7 in the console. (a) What does Terraform do right now? (b) What does the next plan show? (c) The team actually wants 7. What's the right fix?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>(a) Nothing. (b) <code>~ retention_in_days = 7 -&gt; 14</code>. (c) Change the file, then apply.</strong></p>
+      <ul>
+        <li>Drift is only found when someone runs <code>plan</code> or <code>apply</code>. Until then files and state say 14 and AWS says 7.</li>
+        <li>The next run compares files, state and AWS and plans to put AWS back to what the <strong>files</strong> say. It doesn't tell you who changed it.</li>
+        <li>If 7 is what you want, set <code>log_retention_days = 7</code> in the root's <code>module "eks"</code> block, commit, apply. If you leave it as a console change, the next apply by anyone on the team quietly reverts it.</li>
+      </ul>
+      <p>Terraform is file-first.</p>
+    </div></details></div>
+
+  <div class="q"><p class="ask">8. Inside the child module <code>eks-network</code> you write <code>Name = "${local.stack_name}-subnet"</code>. The local is defined in the network root. What happens, and how do you fix it?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>Error: the child can't see the root's locals.</strong> A local lives only in the module that defines it. That's what "local" means.</p>
+      <p>Fix: declare <code>variable "stack_name"</code> in the child, and pass it from the root's module block: <code>stack_name = local.stack_name</code>.</p>
+      <p>Easy way to remember: a <strong>local</strong> is a note on your own desk. A <strong>variable</strong> is the door between two modules. An <strong>output</strong> is the door going the other way.</p>
+    </div></details></div>
+
+  <div class="q"><p class="ask">9. You run <code>kubectl get nodes</code> against the Dev cluster. Case A: it hangs and then times out. Case B: it answers at once with <code>Unauthorized</code> or <code>Forbidden</code>. Which layer do you check in each case?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>A = the network path. B = permissions.</strong></p>
+      <ul>
+        <li><strong>Timeout:</strong> the request never reached the API server. Is the endpoint public or private? Do you need the VPN? Is your IP allowed? Does your kubeconfig point at the right cluster?</li>
+        <li><strong>Fast "no":</strong> you reached the API server, and it refused you. Now walk the two checks from Containers Session 10. First the <strong>AWS identity</strong>: right profile, session not expired, is there an EKS <strong>access entry</strong> for this role? Then <strong>Kubernetes</strong>: does the access policy or RBAC role allow listing nodes?</li>
+      </ul>
+      <p>Useful commands: <code>aws sts get-caller-identity</code>, <code>kubectl config current-context</code>, <code>kubectl auth whoami</code>.</p>
+      <p>A route gets your request to the door. It doesn't open the door. Same idea as "timed out vs refused" from Scale Assignment 04.</p>
+    </div></details></div>
+
+  <div class="q"><p class="ask">10. <code>terraform apply</code> on the EKS root says "Apply complete". <code>kubectl get nodes</code> shows one node. You deploy the app with 4 replicas and most pods stay <code>Pending</code>. What's going on, and what step is missing?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>The cluster isn't finished: the Karpenter controller was never installed.</strong></p>
+      <ul>
+        <li>The one node is the <strong>managed system worker</strong> (<code>t3.medium</code>, min 1, max 1). It runs the add-on pods and can't grow.</li>
+        <li>Terraform built only Karpenter's <strong>AWS side</strong> (IAM roles, instance profile). The controller and its capacity rules come from <code>terraform/platform/install.sh</code>, which uses Helm.</li>
+        <li>Until that runs, nothing is watching Pending pods, so no general workers are launched.</li>
+      </ul>
+      <p>How you'd confirm: <code>kubectl describe pod</code> shows a scheduling event like "0/1 nodes are available", and <code>kubectl -n kube-system get pods</code> shows no Karpenter pod.</p>
+      <p>Lesson: "Apply complete" means Terraform did what the files say. It doesn't mean the platform is complete.</p>
+    </div></details></div>
+
+  <p class="reread">Scoring: 9–10, you can follow any value through Terraform 🏆 · 7–8, solid 💪 · below 7, reread Session 06 and retry 🔁</p>
+</section>
+
+<footer>The full study page and 10-question quiz are in Notion under DevOps / 312 - Notes / 🏁 ProjectX.</footer>
+</div>
+
+<script>
+document.querySelectorAll('.codebox').forEach(function(box){
+  var pre = box.querySelector('pre'); var b = document.createElement('button');
+  b.className = 'copy'; b.type = 'button'; b.textContent = 'Copy';
+  b.addEventListener('click', function(){
+    var text = pre.innerText.split('\n').map(function(l){ return l.replace(/\s+#.*$/, ''); }).join('\n').trim();
+    var done = function(){ b.textContent = 'Copied'; setTimeout(function(){ b.textContent = 'Copy'; }, 1500); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(function(){ selectPre(); });
+    } else { selectPre(); }
+    function selectPre(){ var r = document.createRange(); r.selectNodeContents(pre); var s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = 'Selected'; }
+  });
+  box.appendChild(b);
+});
+</script>
