@@ -1,0 +1,836 @@
+<title>How Project X Fits Together</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  /* Layout: a stack of wide poster diagrams in the style of "The Whole Picture"; short headings between them.
+     Owner colors are the same in every picture: blue = CloudFormation, purple = Terraform, green = Helm/kubectl, slate = AWS runs it. */
+  :root {
+    --bg: #eef1f5; --ink: #16202f; --muted: #5c6b80; --accent: #7c3aed; --rule: #d6dde7;
+    --font: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --bg: #0f1620; --ink: #e6ecf4; --muted: #9aa8bc; --accent: #b79cf7; --rule: #2a3645; color-scheme: dark; }
+  }
+  :root[data-theme="dark"] { --bg: #0f1620; --ink: #e6ecf4; --muted: #9aa8bc; --accent: #b79cf7; --rule: #2a3645; color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); line-height: 1.5; }
+  .wrap { max-width: 1440px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 32px 56px; display: flex; flex-direction: column; gap: 14px; }
+  .eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); margin: 0; }
+  h1 { font-size: clamp(24px, 3.6vw, 34px); margin: 0; letter-spacing: -.01em; text-wrap: balance; }
+  h2 { font-size: 21px; margin: 30px 0 0; text-wrap: balance; }
+  .note { color: var(--muted); max-width: 72ch; margin: 0; font-size: 15.5px; }
+  .key { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 14px; color: var(--muted); }
+  .key span { display: inline-flex; align-items: center; gap: 7px; }
+  .key i { width: 14px; height: 14px; border-radius: 4px; border: 2px solid; display: inline-block; }
+  figure { margin: 0; background: #eef1f6; border: 1px solid var(--rule); border-radius: 14px; padding: 12px; overflow-x: auto; }
+  figure svg { display: block; width: 100%; height: auto; min-width: 1000px; }
+  footer { color: var(--muted); font-size: 14px; border-top: 1px solid var(--rule); padding-top: 14px; margin-top: 24px; }
+
+  /* diagram vocabulary (the figures are light posters in both themes, like The Whole Picture) */
+  .card { fill: #ffffff; }
+  .navy { fill: #1c2b3a; }
+  .s-cfn{stroke:#2563b0}.s-tf{stroke:#7c3aed}.s-k8s{stroke:#2f8f4e}.s-aws{stroke:#475569}.s-img{stroke:#c0631f}.s-sec{stroke:#159e8c}.s-cw{stroke:#b23a86}.s-grey{stroke:#94a3b8}
+  .f-cfn{fill:#2563b0}.f-tf{fill:#7c3aed}.f-k8s{fill:#2f8f4e}.f-aws{fill:#475569}.f-img{fill:#c0631f}.f-sec{fill:#159e8c}.f-cw{fill:#b23a86}.f-red{fill:#d43a3a}
+  .w1{stroke-width:1.4}.w15{stroke-width:1.6}.w2{stroke-width:2}.dash{stroke-dasharray:7 5}
+  .ink{fill:#16202f}.mut{fill:#5c6b80}.wht{fill:#eef2f7}.wht2{fill:#aebccd}
+  .b-pub{fill:#e8f1fb;stroke:#2563b0;stroke-width:1.4}
+  .b-app{fill:#f2f4f8;stroke:#94a3b8;stroke-width:1.4}
+  .b-eks{fill:#f4effe;stroke:#7c3aed;stroke-width:1.6;stroke-dasharray:8 6}
+  .b-db{fill:#fdeeee;stroke:#e03e3e;stroke-width:1.4}
+  .vpc{fill:none;stroke:#5c6b80;stroke-width:1.6;stroke-dasharray:8 6}
+  .rulebox{fill:#eef4fb;stroke:#2563b0;stroke-width:1.2}
+  .in-k8s{fill:#eef8f1;stroke:#2f8f4e;stroke-width:1.4}
+  .in-tf{fill:#f4effe;stroke:#7c3aed;stroke-width:1.2}
+  .bdg-img{fill:#fbeee3;stroke:#c0631f;stroke-width:1.2}
+  .bdg-sec{fill:#e3f5f2;stroke:#159e8c;stroke-width:1.2}
+  .sg{fill:#fdeaea;stroke:#e03e3e;stroke-width:1.6}
+  .sg-tf{fill:#f4effe;stroke:#7c3aed;stroke-width:1.6;stroke-dasharray:6 4}
+  .num{fill:#e03e3e}.num-tf{fill:#7c3aed}
+  .cnum{font:700 12px var(--font);fill:#fff;text-anchor:middle}
+  .pill-cfn{fill:#2563b0}.pill-tf{fill:#7c3aed}.pill-k8s{fill:#2f8f4e}.pill-grey{fill:#64748b}.pill-org{fill:#c0631f}
+  .ptxt{font:700 11px var(--font);fill:#fff;text-anchor:middle}
+  .hdr-cfn{fill:#2563b0}.hdr-tf{fill:#7c3aed}.hdr-k8s{fill:#2f8f4e}
+  .foot-cfn{fill:#eef4fb}.foot-tf{fill:#f4effe}.foot-org{fill:#fff5ec;stroke:#c0631f;stroke-width:1.6}
+  .chip-tf{fill:#f4effe;stroke:#7c3aed;stroke-width:1.4}.chip-cfn{fill:#e8f1fb;stroke:#2563b0;stroke-width:1.4}
+  .outline{fill:none}
+  .arw{stroke:#6b7a8d;stroke-width:1.8;fill:none}
+  .arw-d{stroke:#6b7a8d;stroke-width:1.6;fill:none;stroke-dasharray:6 5}
+  .arw-cfn{stroke:#2563b0;stroke-width:2;fill:none}
+  .arw-tf{stroke:#7c3aed;stroke-width:2;fill:none}
+  .arw-k8s{stroke:#2f8f4e;stroke-width:2;fill:none}
+  .axis{stroke:#9aa8b8;stroke-width:3}
+  .tick{stroke:#9aa8b8;stroke-width:1.4}
+  .grid{stroke:#d6dde7;stroke-width:1.2}
+  .big{font:700 25px var(--font)}
+  .tt{font:700 17px var(--font)}.tt15{font:700 15px var(--font)}.tt14{font:700 14px var(--font)}.tt13{font:700 13px var(--font)}.tt12{font:700 12px var(--font)}
+  .bd{font:400 14px var(--font)}.bd13{font:400 13px var(--font)}.bd12{font:400 12px var(--font)}
+  .mono{font:500 13px var(--mono)}.mono12{font:500 12px var(--mono)}.mono14b{font:600 15px var(--mono)}
+  .lab{font:700 12.5px var(--font);fill:#6b7a8d;letter-spacing:.06em}
+  .mid{text-anchor:middle}.end{text-anchor:end}.it{font-style:italic}
+</style>
+
+<div class="wrap">
+  <p class="eyebrow">Project X · the whole infrastructure</p>
+  <h1>How Project X fits together</h1>
+  <p class="note">Dev runs on ECS today, built by one CloudFormation stack. You are building EKS next to it with Terraform, in the same VPC, on the same database. Checked against the four repos and the class board on Nov 15, 2026.</p>
+  <div class="key" aria-label="Color key">
+    <span><i style="border-color:#2563b0;background:#e8f1fb"></i>CloudFormation · Nadia</span>
+    <span><i style="border-color:#7c3aed;background:#f4effe"></i>Terraform · you</span>
+    <span><i style="border-color:#2f8f4e;background:#eef8f1"></i>Helm and kubectl · you</span>
+    <span><i style="border-color:#475569;background:#ffffff"></i>AWS runs it</span>
+  </div>
+
+  <h2>The whole picture: today and next</h2>
+  <p class="note">Follow a request from the top. The solid blue path serves users today. The purple dashed path is where traffic goes after the cutover.</p>
+  <figure>
+    <svg viewBox="0 0 1800 1330" role="img" aria-label="Users reach one DNS name, then the internet gateway and the Application Load Balancer in the public subnets of VPC 10.40.0.0/16, made by CloudFormation. The ALB's listener forwards by weight to two target groups: ECS gets 100 percent today, EKS gets 0 until the cutover. The ECS Fargate task runs in the private app subnets. Two new Terraform subnets hold the EKS system node, with Karpenter, the AWS Load Balancer Controller and add-ons, and a Karpenter worker running two app pods. Both ECS and the pods reach the same RDS PostgreSQL in isolated subnets on port 5432, through two security group rules, one from CloudFormation and one new from Terraform. Outside the VPC: the EKS control plane, ECR with one image digest, Secrets Manager with the database password, CloudWatch, the Terraform state bucket in S3 and the CloudFormation stack.">
+      <defs>
+        <marker id="f1-ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><polygon points="0,0 10,5 0,10" fill="#6b7a8d"/></marker>
+        <marker id="f1-cfn" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><polygon points="0,0 10,5 0,10" fill="#2563b0"/></marker>
+        <marker id="f1-tf" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><polygon points="0,0 10,5 0,10" fill="#7c3aed"/></marker>
+        <marker id="f1-k8s" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><polygon points="0,0 10,5 0,10" fill="#2f8f4e"/></marker>
+      </defs>
+
+      <!-- outside AWS -->
+      <text class="lab" x="360" y="24">OUTSIDE AWS</text>
+      <rect class="navy" x="360" y="34" width="230" height="70" rx="8"/>
+      <text class="tt mid wht" x="475" y="64">Users</text>
+      <text class="bd13 mid wht2" x="475" y="86">a browser, over HTTPS</text>
+      <line class="arw" x1="592" y1="69" x2="684" y2="69" marker-end="url(#f1-ah)"/>
+      <rect class="card s-sec w15" x="690" y="34" width="240" height="70" rx="8"/>
+      <text class="tt14 mid f-sec" x="810" y="62">DNS name</text>
+      <text class="bd13 mid mut" x="810" y="84">one address, never changes</text>
+      <line class="arw" x1="810" y1="104" x2="810" y2="155" marker-end="url(#f1-ah)"/>
+
+      <rect class="navy" x="1300" y="34" width="480" height="70" rx="8"/>
+      <text class="tt mid wht" x="1540" y="62">You · kubectl, helm, terraform</text>
+      <text class="bd13 mid wht2" x="1540" y="84">admin access through an EKS access entry</text>
+      <line class="arw" x1="1540" y1="104" x2="1540" y2="155" marker-end="url(#f1-ah)"/>
+      <text class="bd12 mut" x="1550" y="134">kubectl · port-forward</text>
+
+      <!-- VPC -->
+      <rect class="vpc" x="20" y="120" width="1240" height="1190" rx="16"/>
+      <text class="tt15 ink" x="44" y="152">VPC 10.40.0.0/16</text>
+      <text class="bd13 mut" x="44" y="172">made by CloudFormation stack projectx-dev · the purple parts were added by Terraform</text>
+      <rect class="card s-aws w1" x="700" y="158" width="220" height="52" rx="8"/>
+      <text class="tt14 mid f-aws" x="810" y="181">Internet Gateway</text>
+      <text class="bd12 mid mut" x="810" y="199">the VPC's front door</text>
+      <line class="arw" x1="810" y1="210" x2="810" y2="286" marker-end="url(#f1-ah)"/>
+
+      <!-- public subnets -->
+      <rect class="b-pub" x="44" y="222" width="1196" height="228" rx="10"/>
+      <text class="tt14 f-cfn" x="60" y="248">PUBLIC SUBNETS</text>
+      <text class="mono12 mut" x="60" y="268">10.40.0.0/24</text>
+      <text class="mono12 mut" x="60" y="286">10.40.1.0/24</text>
+      <text class="bd12 mut" x="60" y="306">route 0.0.0.0/0 →</text>
+      <text class="bd12 mut" x="60" y="322">internet gateway</text>
+
+      <rect class="card s-cfn w2" x="310" y="290" width="620" height="146" rx="10"/>
+      <text class="tt f-cfn" x="328" y="316">Application Load Balancer</text>
+      <rect class="pill-cfn" x="812" y="300" width="104" height="20" rx="10"/><text class="ptxt" x="864" y="314">CloudFormation</text>
+      <text class="bd13 mut" x="328" y="336">HTTPS :443 · ACM certificate · HTTP redirects to HTTPS</text>
+      <rect class="rulebox" x="328" y="348" width="584" height="76" rx="8"/>
+      <text class="tt13 f-cfn" x="344" y="368">Listener rule: forward to two target groups, by weight</text>
+      <rect class="card s-cfn w15" x="344" y="380" width="270" height="32" rx="16"/>
+      <text class="bd13 mid ink" x="479" y="401">target group ECS · weight 100</text>
+      <rect class="card s-tf w15 dash" x="630" y="380" width="270" height="32" rx="16"/>
+      <text class="bd13 mid f-tf" x="765" y="401">target group EKS · weight 0 (later)</text>
+
+      <rect class="card s-aws w15" x="980" y="300" width="240" height="84" rx="8"/>
+      <text class="tt14 mid f-aws" x="1100" y="326">NAT gateway</text>
+      <text class="bd12 mid mut" x="1100" y="346">private subnets reach</text>
+      <text class="bd12 mid mut" x="1100" y="362">the internet through it</text>
+
+      <line class="arw-cfn" x1="479" y1="412" x2="479" y2="506" marker-end="url(#f1-cfn)"/>
+      <text class="bd13 f-cfn" x="489" y="462">100% today</text>
+      <line class="arw-tf dash" x1="765" y1="412" x2="765" y2="696" marker-end="url(#f1-tf)"/>
+      <text class="bd13 f-tf" x="775" y="462">later: 0 → 10 → 50 → 100%</text>
+
+      <!-- private app subnets -->
+      <rect class="b-app" x="44" y="468" width="1196" height="170" rx="10"/>
+      <text class="tt14 ink" x="60" y="494">PRIVATE APP</text>
+      <text class="tt14 ink" x="60" y="512">SUBNETS</text>
+      <text class="mono12 mut" x="60" y="532">10.40.2.0/24</text>
+      <text class="mono12 mut" x="60" y="550">10.40.3.0/24</text>
+      <text class="bd12 mut" x="60" y="570">route 0.0.0.0/0 → NAT</text>
+
+      <rect class="card s-cfn w2" x="310" y="510" width="420" height="114" rx="8"/>
+      <text class="tt f-cfn" x="328" y="536">ECS Fargate service</text>
+      <rect class="pill-cfn" x="616" y="518" width="104" height="20" rx="10"/><text class="ptxt" x="668" y="532">CloudFormation</text>
+      <text class="bd13 ink" x="328" y="558">1 task · 0.25 vCPU / 0.5 GB · no servers to patch</text>
+      <rect class="bdg-img" x="328" y="570" width="150" height="24" rx="12"/><text class="bd12 mid f-img" x="403" y="587">image from ECR</text>
+      <rect class="bdg-sec" x="488" y="570" width="200" height="24" rx="12"/><text class="bd12 mid f-sec" x="588" y="587">password: Secrets Manager</text>
+      <text class="bd12 mut" x="328" y="614">serving 100% of users today</text>
+
+      <!-- new EKS subnets -->
+      <rect class="b-eks" x="44" y="656" width="1196" height="336" rx="10"/>
+      <text class="tt14 f-tf" x="60" y="682">NEW EKS</text>
+      <text class="tt14 f-tf" x="60" y="700">SUBNETS</text>
+      <text class="mono12 mut" x="60" y="720">10.40.32.0/19</text>
+      <text class="mono12 mut" x="60" y="738">10.40.64.0/19</text>
+      <text class="bd12 mut" x="60" y="758">same route table</text>
+      <text class="bd12 mut" x="60" y="774">→ same NAT</text>
+      <rect class="pill-tf" x="60" y="786" width="74" height="20" rx="10"/><text class="ptxt" x="97" y="800">Terraform</text>
+
+      <rect class="card s-tf w2" x="310" y="700" width="380" height="272" rx="8"/>
+      <text class="tt f-tf" x="328" y="726">System node</text>
+      <rect class="pill-tf" x="604" y="708" width="74" height="20" rx="10"/><text class="ptxt" x="641" y="722">Terraform</text>
+      <text class="bd13 ink" x="328" y="748">managed node group · 1 × t3.medium</text>
+      <rect class="in-k8s" x="328" y="762" width="344" height="58" rx="7"/>
+      <text class="tt14 f-k8s" x="342" y="784">Karpenter</text>
+      <rect class="pill-k8s" x="616" y="770" width="46" height="20" rx="10"/><text class="ptxt" x="639" y="784">Helm</text>
+      <text class="bd12 mut" x="342" y="806">sees pending pods → launches EC2 workers</text>
+      <rect class="in-k8s" x="328" y="830" width="344" height="58" rx="7"/>
+      <text class="tt14 f-k8s" x="342" y="852">AWS Load Balancer Controller</text>
+      <rect class="pill-k8s" x="616" y="838" width="46" height="20" rx="10"/><text class="ptxt" x="639" y="852">Helm</text>
+      <text class="bd12 mut" x="342" y="874">connects pods to the ALB target group</text>
+      <rect class="in-tf" x="328" y="898" width="344" height="58" rx="7"/>
+      <text class="tt14 f-tf" x="342" y="920">EKS add-ons</text>
+      <rect class="pill-tf" x="588" y="906" width="74" height="20" rx="10"/><text class="ptxt" x="625" y="920">Terraform</text>
+      <text class="bd12 mut" x="342" y="942">VPC CNI · CoreDNS · kube-proxy and more</text>
+
+      <line class="arw-k8s dash" x1="672" y1="791" x2="718" y2="791" marker-end="url(#f1-k8s)"/>
+
+      <rect class="card s-k8s w2" x="720" y="700" width="500" height="272" rx="8"/>
+      <text class="tt f-k8s" x="738" y="726">Worker node, launched by Karpenter</text>
+      <text class="bd13 mut" x="738" y="748">NodePool "general" · private IP only</text>
+      <rect class="card s-k8s w15" x="738" y="762" width="226" height="150" rx="8"/>
+      <text class="tt14 mid f-k8s" x="851" y="786">app pod 1</text>
+      <text class="bd12 mid ink" x="851" y="806">investment-app on :8080</text>
+      <rect class="bdg-img" x="757" y="818" width="188" height="24" rx="12"/><text class="bd12 mid f-img" x="851" y="835">same image digest</text>
+      <rect class="bdg-sec" x="757" y="850" width="188" height="24" rx="12"/><text class="bd12 mid f-sec" x="851" y="867">ConfigMap + Secret</text>
+      <text class="bd12 mid mut" x="851" y="898">Deployment, 2 replicas</text>
+      <rect class="card s-k8s w15" x="978" y="762" width="226" height="150" rx="8"/>
+      <text class="tt14 mid f-k8s" x="1091" y="786">app pod 2</text>
+      <text class="bd12 mid ink" x="1091" y="806">investment-app on :8080</text>
+      <rect class="bdg-img" x="997" y="818" width="188" height="24" rx="12"/><text class="bd12 mid f-img" x="1091" y="835">same image digest</text>
+      <rect class="bdg-sec" x="997" y="850" width="188" height="24" rx="12"/><text class="bd12 mid f-sec" x="1091" y="867">ConfigMap + Secret</text>
+      <text class="bd12 mid mut" x="1091" y="898">Deployment, 2 replicas</text>
+      <text class="bd12 mut" x="738" y="934">Session 08: tested with kubectl port-forward</text>
+      <text class="bd12 mut" x="738" y="952">next: a Service, then a Helm chart</text>
+
+      <!-- isolated DB subnets -->
+      <rect class="b-db" x="44" y="1010" width="1196" height="286" rx="10"/>
+      <text class="tt14 f-red" x="60" y="1036">ISOLATED DB</text>
+      <text class="tt14 f-red" x="60" y="1054">SUBNETS</text>
+      <text class="mono12 mut" x="60" y="1074">10.40.4.0/24</text>
+      <text class="mono12 mut" x="60" y="1092">10.40.5.0/24</text>
+      <text class="bd12 f-red" x="60" y="1112">no route to</text>
+      <text class="bd12 f-red" x="60" y="1128">the internet</text>
+
+      <rect class="sg" x="320" y="1046" width="390" height="34" rx="17"/>
+      <circle class="num" cx="342" cy="1063" r="11"/><text class="cnum" x="342" y="1067">1</text>
+      <text class="tt13 f-red" x="362" y="1068">RDS SG: 5432 ← ECS task SG</text>
+      <text class="bd12 mut" x="560" y="1068">· CloudFormation</text>
+      <rect class="sg-tf" x="730" y="1046" width="430" height="34" rx="17"/>
+      <circle class="num-tf" cx="752" cy="1063" r="11"/><text class="cnum" x="752" y="1067">2</text>
+      <text class="tt13 f-tf" x="772" y="1068">RDS SG: 5432 ← EKS cluster SG</text>
+      <text class="bd12 mut" x="990" y="1068">· new, Terraform</text>
+
+      <line class="arw-cfn" x1="705" y1="624" x2="705" y2="1043" marker-end="url(#f1-cfn)"/>
+      <text class="bd12 f-cfn end" x="697" y="1004">:5432 from ECS</text>
+      <line class="arw-tf" x1="960" y1="972" x2="960" y2="1043" marker-end="url(#f1-tf)"/>
+      <text class="bd12 f-tf" x="968" y="1004">:5432 from the pods</text>
+      <line class="arw" x1="515" y1="1080" x2="515" y2="1117" marker-end="url(#f1-ah)"/>
+      <line class="arw" x1="945" y1="1080" x2="945" y2="1117" marker-end="url(#f1-ah)"/>
+
+      <rect class="navy" x="310" y="1120" width="850" height="150" rx="10"/>
+      <text class="mid wht" x="735" y="1160" style="font:700 19px var(--font)">RDS PostgreSQL 17</text>
+      <rect class="pill-cfn" x="1044" y="1130" width="104" height="20" rx="10"/><text class="ptxt" x="1096" y="1144">CloudFormation</text>
+      <text class="bd13 mid wht2" x="735" y="1186">db.t4g.micro · single-AZ · encrypted · 7-day backups · deletion protection</text>
+      <text class="bd13 mid wht" x="735" y="1212">ONE database: trades made on ECS and on EKS land in the same table</text>
+      <text class="bd12 mid wht2" x="735" y="1240">the password lives in Secrets Manager · the app connects on port 5432</text>
+
+      <!-- outside the VPC -->
+      <text class="lab" x="1300" y="146">AWS · OUTSIDE THE VPC</text>
+      <rect class="card s-aws w2" x="1300" y="158" width="480" height="128" rx="8"/>
+      <text class="tt f-aws" x="1318" y="184">EKS control plane</text>
+      <text class="bd13 ink" x="1318" y="206">API server · etcd · scheduler</text>
+      <text class="bd13 mut" x="1318" y="226">AWS runs it in its own account · about $73 a month</text>
+      <text class="bd13 mut" x="1318" y="246">created by Terraform's eks root</text>
+      <text class="bd13 mut" x="1318" y="266">talks to the nodes in the EKS subnets</text>
+      <path class="arw-d" d="M1300,272 H1250 V800 H1224" marker-end="url(#f1-ah)"/>
+
+      <rect class="card s-img w15" x="1300" y="306" width="480" height="96" rx="8"/>
+      <text class="tt14 f-img" x="1318" y="332">ECR · the app image</text>
+      <text class="bd13 ink" x="1318" y="354">built from projectx-26a-app/candidate</text>
+      <text class="bd13 mut" x="1318" y="374">one sha256 digest, run by ECS and by EKS</text>
+      <text class="bd12 mut" x="1318" y="392">= the orange badges</text>
+
+      <rect class="card s-sec w15" x="1300" y="420" width="480" height="96" rx="8"/>
+      <text class="tt14 f-sec" x="1318" y="446">Secrets Manager · DB password</text>
+      <text class="bd13 ink" x="1318" y="468">ECS injects it when the task starts</text>
+      <text class="bd13 mut" x="1318" y="488">on EKS: copied into a Kubernetes Secret (Session 08)</text>
+      <text class="bd12 mut" x="1318" y="506">= the teal badges</text>
+
+      <rect class="card s-cw w15" x="1300" y="534" width="480" height="76" rx="8"/>
+      <text class="tt14 f-cw" x="1318" y="560">CloudWatch</text>
+      <text class="bd13 mut" x="1318" y="582">app logs · alarms · EKS control-plane logs</text>
+
+      <rect class="card s-tf w15" x="1300" y="628" width="480" height="100" rx="8"/>
+      <text class="tt14 f-tf" x="1318" y="654">S3 · Terraform state bucket</text>
+      <rect class="pill-tf" x="1694" y="636" width="74" height="20" rx="10"/><text class="ptxt" x="1731" y="650">Terraform</text>
+      <text class="bd13 ink" x="1318" y="676">made by the bootstrap root</text>
+      <text class="mono12 mut" x="1318" y="698">network.tfstate · eks.tfstate</text>
+      <text class="bd12 mut" x="1318" y="716">+ a lock file while a run is going</text>
+
+      <rect class="card s-cfn w2" x="1300" y="746" width="480" height="124" rx="8"/>
+      <text class="tt14 f-cfn" x="1318" y="772">CloudFormation stack projectx-dev</text>
+      <rect class="pill-cfn" x="1666" y="754" width="104" height="20" rx="10"/><text class="ptxt" x="1718" y="768">CloudFormation</text>
+      <text class="bd13 ink" x="1318" y="794">AWS remembers everything it built:</text>
+      <text class="bd13 mut" x="1318" y="814">VPC · subnets · NAT · ALB · ECS · RDS · secret · alarms</text>
+      <text class="bd13 mut" x="1318" y="834">changed only through reviewed change sets</text>
+      <text class="bd13 mut" x="1318" y="854">Terraform reads it by its tags, never edits it</text>
+
+      <rect class="card s-grey w1" x="1300" y="890" width="480" height="196" rx="8"/>
+      <text class="tt14 ink" x="1318" y="916">Who built each piece</text>
+      <rect class="card s-cfn w2" x="1318" y="928" width="18" height="18" rx="4"/><text class="bd13 ink" x="1346" y="942">CloudFormation · Nadia, Oct 29</text>
+      <rect class="card s-tf w2 dash" x="1318" y="958" width="18" height="18" rx="4"/><text class="bd13 ink" x="1346" y="972">Terraform · you, PX-107</text>
+      <rect class="card s-k8s w2" x="1318" y="988" width="18" height="18" rx="4"/><text class="bd13 ink" x="1346" y="1002">Helm and kubectl · you, Sessions 07–08</text>
+      <rect class="card s-aws w2" x="1318" y="1018" width="18" height="18" rx="4"/><text class="bd13 ink" x="1346" y="1032">AWS runs it for you</text>
+      <rect class="navy" x="1318" y="1048" width="18" height="18" rx="4"/><text class="bd13 ink" x="1346" y="1062">the database</text>
+
+      <rect class="card s-grey w1" x="1300" y="1104" width="480" height="166" rx="8"/>
+      <text class="tt14 ink" x="1318" y="1130">Why users never notice the move</text>
+      <text class="bd13 ink" x="1318" y="1156">✓ same DNS name and the same ALB</text>
+      <text class="bd13 ink" x="1318" y="1180">✓ same image digest</text>
+      <text class="bd13 ink" x="1318" y="1204">✓ same database and password</text>
+      <text class="bd13 f-tf" x="1318" y="1234">only the place the container runs changes:</text>
+      <text class="tt13 f-tf" x="1318" y="1254">ECS task → EKS pods</text>
+    </svg>
+  </figure>
+
+  <h2>Why it was built this way</h2>
+  <p class="note">Two decisions, four days apart. The first fit a pilot. The second fits a launch.</p>
+  <figure>
+    <svg viewBox="0 0 1800 600" role="img" aria-label="Left: on Oct 29 Nadia chose ECS Fargate with CloudFormation because the class EKS cluster was gone and a cluster is heavy for one app, Fargate needs no servers, Terraform had nowhere to keep state, and RDS avoids the data loss of Postgres in a pod. Right: on Nov 2 the PX-105 assessment chose EKS with Terraform, built alongside, because four of six signals lean Kubernetes for a launch with more services; Terraform because state now has a home, modules are reusable across environments, and states stay small.">
+      <defs>
+        <marker id="f2-ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><polygon points="0,0 10,5 0,10" fill="#6b7a8d"/></marker>
+      </defs>
+      <!-- left: Oct 29 -->
+      <rect class="card" x="20" y="20" width="760" height="560" rx="12"/>
+      <rect class="hdr-cfn" x="20" y="20" width="760" height="56" rx="12"/><rect class="hdr-cfn" x="20" y="50" width="760" height="26"/>
+      <rect class="outline s-cfn w2" x="20" y="20" width="760" height="560" rx="12"/>
+      <text class="tt wht" x="44" y="55">Oct 29 · Nadia's decision</text>
+      <text class="mono12 wht2 end" x="756" y="55">Session 02 · decision record</text>
+      <text class="big f-cfn" x="44" y="118">ECS Fargate + CloudFormation</text>
+      <text class="bd it mut" x="44" y="146">Question: what is the simplest safe way to run ONE small app in Dev, today?</text>
+
+      <circle class="f-cfn" cx="62" cy="192" r="15"/><text class="cnum" x="62" y="197">1</text>
+      <text class="tt15 ink" x="90" y="196">The class EKS cluster was gone</text>
+      <text class="bd mut" x="90" y="220">A cluster for one app = a control plane (about $73 a month) + nodes to look after.</text>
+      <circle class="f-cfn" cx="62" cy="272" r="15"/><text class="cnum" x="62" y="277">2</text>
+      <text class="tt15 ink" x="90" y="276">Fargate means no servers</text>
+      <text class="bd mut" x="90" y="300">Give AWS a container and a size. AWS runs it.</text>
+      <circle class="f-cfn" cx="62" cy="352" r="15"/><text class="cnum" x="62" y="357">3</text>
+      <text class="tt15 ink" x="90" y="356">Terraform had nowhere to keep its state</text>
+      <text class="bd mut" x="90" y="380">CloudFormation keeps its state inside AWS: the stack IS the state.</text>
+      <circle class="f-cfn" cx="62" cy="432" r="15"/><text class="cnum" x="62" y="437">4</text>
+      <text class="tt15 ink" x="90" y="436">RDS, not Postgres in a pod</text>
+      <text class="bd mut" x="90" y="460">The rehearsal's Postgres pod used emptyDir and lost its data.</text>
+
+      <rect class="foot-cfn" x="40" y="496" width="720" height="64" rx="8"/>
+      <text class="tt13 f-cfn" x="58" y="520">A release on ECS</text>
+      <text class="mono12 ink" x="58" y="544">new ImageDigest → change set → a person reviews → execute → new task</text>
+
+      <!-- middle -->
+      <line class="arw" x1="792" y1="300" x2="1006" y2="300" style="stroke-width:4" marker-end="url(#f2-ah)"/>
+      <text class="tt14 mid ink" x="900" y="282">the question changed</text>
+      <text class="bd12 mid mut" x="900" y="328">one pilot app</text>
+      <text class="bd12 mid mut" x="900" y="346">→ a launch with a $3M</text>
+      <text class="bd12 mid mut" x="900" y="364">campaign, more services</text>
+      <text class="bd12 mid mut" x="900" y="382">and more engineers</text>
+
+      <!-- right: Nov 2 -->
+      <rect class="card" x="1020" y="20" width="760" height="560" rx="12"/>
+      <rect class="hdr-tf" x="1020" y="20" width="760" height="56" rx="12"/><rect class="hdr-tf" x="1020" y="50" width="760" height="26"/>
+      <rect class="outline s-tf w2" x="1020" y="20" width="760" height="560" rx="12"/>
+      <text class="tt wht" x="1044" y="55">Nov 2 · PX-105 assessment</text>
+      <text class="mono12 wht2 end" x="1756" y="55">Session 03 · pitch deck</text>
+      <text class="big f-tf" x="1044" y="118">EKS + Terraform, built alongside</text>
+      <text class="bd it mut" x="1044" y="146">Question: what should the company run on after launch?</text>
+      <text class="tt13 ink" x="1044" y="178">The pitch deck scored six signals</text>
+
+      <rect class="chip-tf" x="1044" y="190" width="228" height="58" rx="8"/>
+      <text class="tt13 ink" x="1056" y="213">Services</text><text class="tt12 f-tf end" x="1260" y="213">→ K8s</text>
+      <text class="bd12 mut" x="1056" y="236">1 now, more after launch</text>
+      <rect class="chip-cfn" x="1284" y="190" width="228" height="58" rx="8"/>
+      <text class="tt13 ink" x="1296" y="213">Teams</text><text class="tt12 f-cfn end" x="1500" y="213">→ ECS</text>
+      <text class="bd12 mut" x="1296" y="236">one team ships everything</text>
+      <rect class="chip-tf" x="1524" y="190" width="228" height="58" rx="8"/>
+      <text class="tt13 ink" x="1536" y="213">Platform staff</text><text class="tt12 f-tf end" x="1740" y="213">→ K8s</text>
+      <text class="bd12 mut" x="1536" y="236">full-time platform + infra</text>
+      <rect class="chip-tf" x="1044" y="258" width="228" height="58" rx="8"/>
+      <text class="tt13 ink" x="1056" y="281">Ecosystem</text><text class="tt12 f-tf end" x="1260" y="281">→ K8s</text>
+      <text class="bd12 mut" x="1056" y="304">Helm, Karpenter, Argo CD</text>
+      <rect class="chip-tf" x="1284" y="258" width="228" height="58" rx="8"/>
+      <text class="tt13 ink" x="1296" y="281">Scale economics</text><text class="tt12 f-tf end" x="1500" y="281">→ K8s</text>
+      <text class="bd12 mut" x="1296" y="304">campaign traffic, shared nodes</text>
+      <rect class="chip-cfn" x="1524" y="258" width="228" height="58" rx="8"/>
+      <text class="tt13 ink" x="1536" y="281">Deadline</text><text class="tt12 f-cfn end" x="1740" y="281">→ ECS</text>
+      <text class="bd12 mut" x="1536" y="304">hard launch date, for now</text>
+
+      <rect x="1044" y="330" width="708" height="16" rx="8" fill="#2563b0"/>
+      <rect x="1044" y="330" width="472" height="16" rx="8" fill="#7c3aed"/>
+      <text class="bd13 ink" x="1044" y="370">4 of 6 lean Kubernetes · the deadline row is about timing</text>
+
+      <text class="tt13 ink" x="1044" y="404">Why Terraform for the new parts</text>
+      <circle cx="1052" cy="424" r="8" fill="#7c3aed"/><text class="cnum" x="1052" y="428" style="font-size:10px">✓</text>
+      <text class="bd ink" x="1068" y="429">State has a home now: the bootstrap root makes the S3 bucket</text>
+      <circle cx="1052" cy="450" r="8" fill="#7c3aed"/><text class="cnum" x="1052" y="454" style="font-size:10px">✓</text>
+      <text class="bd ink" x="1068" y="455">The same modules for Dev, Staging and Prod, each with its own state</text>
+      <circle cx="1052" cy="476" r="8" fill="#7c3aed"/><text class="cnum" x="1052" y="480" style="font-size:10px">✓</text>
+      <text class="bd ink" x="1068" y="481">Small separate states: a mistake in eks can't touch network</text>
+
+      <rect class="foot-tf" x="1040" y="500" width="720" height="60" rx="8"/>
+      <text class="tt14 f-tf" x="1058" y="525">Kubernetes is the destination. The risk is timing.</text>
+      <text class="bd13 ink" x="1058" y="546">So: keep ECS serving, build EKS next to it, switch when it's proven.</text>
+    </svg>
+  </figure>
+
+  <h2>How we got here</h2>
+  <figure>
+    <svg viewBox="0 0 1800 280" role="img" aria-label="Timeline to scale, one tick per day, from Oct 27 to Nov 16. Oct 27–28 rehearsal on the class EKS cluster, then the cluster is gone. Oct 29 ECS stack projectx-dev and PX-104. Nov 2 PX-105 assessment. Nov 4 PX-107, your PR 99. Nov 5 reference PR 18. Nov 9 Session 06 Terraform values. Nov 11 Session 07 add-ons and Helm. Nov 12 Session 08 app on EKS, PX-108. Today is Nov 15. Nov 16 Session 09 Helm chart.">
+      <line class="axis" x1="60" y1="150" x2="1600" y2="150"/>
+      <line class="axis dash" x1="1600" y1="150" x2="1740" y2="150"/>
+      <path class="tick" d="M80,145V155M160,145V155M240,145V155M320,145V155M400,145V155M480,145V155M560,145V155M640,145V155M720,145V155M800,145V155M880,145V155M960,145V155M1040,145V155M1120,145V155M1200,145V155M1280,145V155M1360,145V155M1440,145V155M1520,145V155M1600,145V155M1680,145V155"/>
+
+      <!-- Oct 27–28 -->
+      <rect x="80" y="145" width="80" height="10" rx="5" fill="#e03e3e"/>
+      <line class="tick" x1="120" y1="126" x2="120" y2="140"/>
+      <text class="tt14 mid ink" x="120" y="72">Rehearsal on class EKS</text>
+      <text class="bd12 mid mut" x="120" y="92">Postgres pod lost · cluster gone</text>
+      <text class="mono12 mid f-red" x="120" y="118">Oct 27–28</text>
+      <!-- Oct 29 -->
+      <circle cx="240" cy="150" r="10" fill="#2563b0" stroke="#fff" stroke-width="2"/>
+      <line class="tick" x1="240" y1="162" x2="240" y2="174"/>
+      <text class="mono12 mid f-cfn" x="240" y="190">Oct 29 · S02</text>
+      <text class="tt14 mid ink" x="240" y="214">ECS stack projectx-dev</text>
+      <text class="bd12 mid mut" x="240" y="234">PX-104: PR #1 to Dev</text>
+      <!-- Nov 2 -->
+      <circle cx="560" cy="150" r="10" fill="#475569" stroke="#fff" stroke-width="2"/>
+      <line class="tick" x1="560" y1="126" x2="560" y2="138"/>
+      <text class="tt14 mid ink" x="560" y="72">PX-105 assessment</text>
+      <text class="bd12 mid mut" x="560" y="92">decision: EKS + Terraform</text>
+      <text class="mono12 mid f-aws" x="560" y="118">Nov 2 · S03</text>
+      <!-- Nov 4 -->
+      <circle cx="720" cy="150" r="12" fill="#7c3aed" stroke="#fff" stroke-width="2"/>
+      <line class="tick" x1="720" y1="164" x2="720" y2="174"/>
+      <text class="mono12 mid f-tf" x="720" y="190">Nov 4 · S04</text>
+      <text class="tt14 mid ink" x="720" y="214">PX-107: build EKS</text>
+      <text class="tt13 mid f-tf" x="720" y="234">your PR #99 · in review</text>
+      <!-- Nov 5 -->
+      <circle cx="800" cy="150" r="10" fill="#7c3aed" stroke="#fff" stroke-width="2"/>
+      <line class="tick" x1="800" y1="126" x2="800" y2="138"/>
+      <text class="tt14 mid ink" x="800" y="72">Reference PR #18</text>
+      <text class="bd12 mid mut" x="800" y="92">3 roots + Karpenter</text>
+      <text class="mono12 mid f-tf" x="800" y="118">Nov 5 · S05</text>
+      <!-- Nov 9 -->
+      <circle cx="1120" cy="150" r="10" fill="#7c3aed" stroke="#fff" stroke-width="2"/>
+      <line class="tick" x1="1120" y1="162" x2="1120" y2="174"/>
+      <text class="mono12 mid f-tf" x="1120" y="190">Nov 9 · S06</text>
+      <text class="tt14 mid ink" x="1120" y="214">Terraform values</text>
+      <text class="bd12 mid mut" x="1120" y="234">data · outputs · remote state</text>
+      <!-- Nov 11 -->
+      <circle cx="1280" cy="150" r="10" fill="#2f8f4e" stroke="#fff" stroke-width="2"/>
+      <line class="tick" x1="1280" y1="126" x2="1280" y2="138"/>
+      <text class="tt14 mid ink" x="1280" y="72">Add-ons + Helm</text>
+      <text class="bd12 mid mut" x="1280" y="92">Karpenter installed by hand</text>
+      <text class="mono12 mid f-k8s" x="1280" y="118">Nov 11 · S07</text>
+      <!-- Nov 12 -->
+      <circle cx="1360" cy="150" r="10" fill="#2f8f4e" stroke="#fff" stroke-width="2"/>
+      <line class="tick" x1="1360" y1="162" x2="1360" y2="174"/>
+      <text class="mono12 mid f-k8s" x="1360" y="190">Nov 12 · S08</text>
+      <text class="tt14 mid ink" x="1360" y="214">App on EKS</text>
+      <text class="bd12 mid mut" x="1360" y="234">PX-108 · 2 pods → RDS</text>
+      <!-- today -->
+      <path d="M1600,160 l-7,12 h14 z" fill="#e03e3e"/>
+      <text class="tt12 mid f-red" x="1600" y="190">today</text>
+      <text class="mono12 mid f-red" x="1600" y="206">Nov 15</text>
+      <!-- Nov 16 -->
+      <circle cx="1680" cy="150" r="10" fill="#ffffff" stroke="#2f8f4e" stroke-width="2.4" stroke-dasharray="4 3"/>
+      <line class="tick" x1="1680" y1="126" x2="1680" y2="138"/>
+      <text class="tt14 mid ink" x="1680" y="72">Helm chart</text>
+      <text class="bd12 mid mut" x="1680" y="92">next class</text>
+      <text class="mono12 mid f-k8s" x="1680" y="118">Nov 16 · S09</text>
+
+      <text class="bd12 mut" x="60" y="268">To scale: one tick per day. Dot colors follow the key at the top.</text>
+    </svg>
+  </figure>
+
+  <h2>Same idea, two tools</h2>
+  <figure>
+    <svg viewBox="0 0 1800 300" role="img" aria-label="CloudFormation and Terraform words side by side: template equals .tf files, parameters.json equals terraform.tfvars, the stack equals the state file, a change set equals terraform plan, executing a change set equals terraform apply. CloudFormation keeps its memory inside AWS; Terraform keeps it in a file you store yourself.">
+      <rect class="card s-cfn w2" x="20" y="20" width="340" height="72" rx="8"/>
+      <text class="mono12 f-cfn" x="36" y="44">CLOUDFORMATION</text>
+      <text class="tt15 ink" x="36" y="72">template (projectx-app.yaml)</text>
+      <circle cx="190" cy="118" r="16" fill="#e2e8f0"/><text class="tt15 mid ink" x="190" y="124">=</text>
+      <rect class="card s-tf w2" x="20" y="144" width="340" height="72" rx="8"/>
+      <text class="mono12 f-tf" x="36" y="168">TERRAFORM</text>
+      <text class="mono14b ink" x="36" y="196">.tf files</text>
+      <text class="bd mid mut" x="190" y="246">what you want to exist</text>
+
+      <rect class="card s-cfn w2" x="376" y="20" width="340" height="72" rx="8"/>
+      <text class="mono12 f-cfn" x="392" y="44">CLOUDFORMATION</text>
+      <text class="mono14b ink" x="392" y="72">parameters.json</text>
+      <circle cx="546" cy="118" r="16" fill="#e2e8f0"/><text class="tt15 mid ink" x="546" y="124">=</text>
+      <rect class="card s-tf w2" x="376" y="144" width="340" height="72" rx="8"/>
+      <text class="mono12 f-tf" x="392" y="168">TERRAFORM</text>
+      <text class="mono14b ink" x="392" y="196">terraform.tfvars</text>
+      <text class="bd mid mut" x="546" y="246">the values for one environment</text>
+
+      <rect class="card s-cfn w2" x="732" y="20" width="340" height="72" rx="8"/>
+      <text class="mono12 f-cfn" x="748" y="44">CLOUDFORMATION</text>
+      <text class="tt15 ink" x="748" y="72">the stack</text>
+      <circle cx="902" cy="118" r="16" fill="#e2e8f0"/><text class="tt15 mid ink" x="902" y="124">=</text>
+      <rect class="card s-tf w2" x="732" y="144" width="340" height="72" rx="8"/>
+      <text class="mono12 f-tf" x="748" y="168">TERRAFORM</text>
+      <text class="tt15 ink" x="748" y="196">the state file</text>
+      <text class="bd mid mut" x="902" y="246">what was really built, remembered</text>
+
+      <rect class="card s-cfn w2" x="1088" y="20" width="340" height="72" rx="8"/>
+      <text class="mono12 f-cfn" x="1104" y="44">CLOUDFORMATION</text>
+      <text class="tt15 ink" x="1104" y="72">change set</text>
+      <circle cx="1258" cy="118" r="16" fill="#e2e8f0"/><text class="tt15 mid ink" x="1258" y="124">=</text>
+      <rect class="card s-tf w2" x="1088" y="144" width="340" height="72" rx="8"/>
+      <text class="mono12 f-tf" x="1104" y="168">TERRAFORM</text>
+      <text class="mono14b ink" x="1104" y="196">terraform plan</text>
+      <text class="bd mid mut" x="1258" y="246">a preview before anything changes</text>
+
+      <rect class="card s-cfn w2" x="1444" y="20" width="340" height="72" rx="8"/>
+      <text class="mono12 f-cfn" x="1460" y="44">CLOUDFORMATION</text>
+      <text class="tt15 ink" x="1460" y="72">execute change set</text>
+      <circle cx="1614" cy="118" r="16" fill="#e2e8f0"/><text class="tt15 mid ink" x="1614" y="124">=</text>
+      <rect class="card s-tf w2" x="1444" y="144" width="340" height="72" rx="8"/>
+      <text class="mono12 f-tf" x="1460" y="168">TERRAFORM</text>
+      <text class="mono14b ink" x="1460" y="196">terraform apply</text>
+      <text class="bd mid mut" x="1614" y="246">make the change</text>
+
+      <text class="bd ink" x="20" y="286">The big difference: CloudFormation's memory lives inside AWS. Terraform's memory is a file you store yourself, which is why the reference build starts with a bootstrap root that makes an S3 bucket.</text>
+    </svg>
+  </figure>
+
+  <h2>Roots, child modules and state</h2>
+  <p class="note">A root is the folder where you run <code>terraform</code>; it owns one state file. A child module is a folder the root calls with a <code>module</code> block, like a function.</p>
+  <figure>
+    <svg viewBox="0 0 1800 640" role="img" aria-label="Left: your PX-107 build, one root envs/dev calling child modules vpc and eks; the vpc module's public_subnet_ids output becomes the eks module's subnet_ids input; one local state file. A child module works like a function: variables.tf are the parameters, main.tf the body, outputs.tf the return value. A note says PX-108 needs the cluster in the CloudFormation VPC. Right: the reference build, three roots run in order: bootstrap makes the S3 state bucket, network adds two subnets inside the CloudFormation VPC which it finds with data blocks, eks reads network's outputs with terraform_remote_state; then Helm installs Karpenter and the load balancer controller.">
+      <defs>
+        <marker id="f5-ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><polygon points="0,0 10,5 0,10" fill="#6b7a8d"/></marker>
+        <marker id="f5-tf" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><polygon points="0,0 10,5 0,10" fill="#7c3aed"/></marker>
+        <marker id="f5-cfn" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><polygon points="0,0 10,5 0,10" fill="#2563b0"/></marker>
+        <marker id="f5-k8s" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><polygon points="0,0 10,5 0,10" fill="#2f8f4e"/></marker>
+      </defs>
+      <!-- left: yours -->
+      <rect class="card s-grey w1" x="20" y="20" width="820" height="600" rx="12"/>
+      <text class="tt15 ink" x="44" y="52">Your PX-107 · one root, two child modules</text>
+      <text class="bd13 mut" x="44" y="74">class/04/terraform on your branch · built, tested, destroyed</text>
+      <rect class="b-eks" x="44" y="92" width="772" height="300" rx="10"/>
+      <text class="tt14 f-tf" x="62" y="118">ROOT · envs/dev</text>
+      <text class="bd13 mut" x="62" y="138">you run terraform here · it holds the backend, the provider and the state</text>
+      <rect class="card s-tf w15" x="72" y="160" width="300" height="150" rx="8"/>
+      <text class="tt14 f-tf" x="90" y="186">module "vpc"</text>
+      <text class="mono12 mut" x="90" y="206">modules/vpc</text>
+      <text class="bd13 ink" x="90" y="232">a NEW VPC + 2 public subnets</text>
+      <text class="mono12 mut" x="90" y="264">out: vpc_id</text>
+      <text class="mono12 f-tf" x="90" y="284">out: public_subnet_ids</text>
+      <rect class="card s-tf w15" x="488" y="160" width="300" height="150" rx="8"/>
+      <text class="tt14 f-tf" x="506" y="186">module "eks"</text>
+      <text class="mono12 mut" x="506" y="206">modules/eks</text>
+      <text class="bd13 ink" x="506" y="232">cluster · IAM · 1 worker · add-ons</text>
+      <text class="mono12 f-tf" x="506" y="264">in: subnet_ids</text>
+      <text class="mono12 mut" x="506" y="284">in: node_count, kubernetes_version</text>
+      <line class="arw-tf" x1="372" y1="276" x2="486" y2="268" marker-end="url(#f5-tf)"/>
+      <text class="bd12 mid f-tf" x="430" y="252">output → input</text>
+      <text class="mono ink" x="72" y="342">subnet_ids = module.vpc.public_subnet_ids</text>
+      <text class="mono12 f-tf" x="72" y="374">state: one terraform.tfstate on your laptop</text>
+
+      <rect class="card s-aws w1" x="44" y="410" width="244" height="64" rx="8"/>
+      <text class="mono ink" x="60" y="436">variables.tf</text>
+      <text class="bd13 mut" x="60" y="458">= the parameters</text>
+      <rect class="card s-aws w1" x="308" y="410" width="244" height="64" rx="8"/>
+      <text class="mono ink" x="324" y="436">main.tf</text>
+      <text class="bd13 mut" x="324" y="458">= the body (the resources)</text>
+      <rect class="card s-aws w1" x="572" y="410" width="244" height="64" rx="8"/>
+      <text class="mono ink" x="588" y="436">outputs.tf</text>
+      <text class="bd13 mut" x="588" y="458">= the return value</text>
+
+      <rect class="foot-org" x="44" y="494" width="772" height="106" rx="10"/>
+      <text class="tt14 f-img" x="62" y="520">What this means for PX-108</text>
+      <text class="bd13 ink" x="62" y="544">Your lab made its own VPC. The app's RDS lives in the CloudFormation VPC, with no internet route.</text>
+      <text class="bd13 ink" x="62" y="566">So the cluster belongs in that VPC, the way the reference network root does it (right),</text>
+      <text class="bd13 ink" x="62" y="588">plus the 5432 rule on the RDS security group.</text>
+
+      <!-- right: reference -->
+      <rect class="card s-grey w1" x="870" y="20" width="910" height="600" rx="12"/>
+      <text class="tt15 ink" x="894" y="52">Reference PR #18 · three roots, three state files</text>
+      <text class="bd13 mut" x="894" y="74">branch codex/dev-eks-foundation · run in order, top to bottom</text>
+
+      <rect class="b-eks" x="894" y="96" width="430" height="120" rx="10"/>
+      <text class="tt14 f-tf" x="912" y="122">① ROOT · bootstrap</text>
+      <text class="bd13 ink" x="912" y="146">makes the S3 state bucket (versioned, encrypted)</text>
+      <text class="mono12 mut" x="912" y="172">state: a local file (no bucket yet)</text>
+      <line class="arw" x1="1109" y1="216" x2="1109" y2="253" marker-end="url(#f5-ah)"/>
+      <text class="bd12 mut" x="1119" y="240">bucket is ready</text>
+
+      <rect class="b-eks" x="894" y="256" width="430" height="120" rx="10"/>
+      <text class="tt14 f-tf" x="912" y="282">② ROOT · network</text>
+      <text class="bd13 ink" x="912" y="306">adds 2 subnets inside the CloudFormation VPC</text>
+      <text class="mono12 mut" x="912" y="330">state: network.tfstate in S3</text>
+      <text class="mono12 f-tf" x="912" y="352">outputs: vpc_id, subnet_ids</text>
+      <line class="arw-tf" x1="1109" y1="376" x2="1109" y2="413" marker-end="url(#f5-tf)"/>
+      <text class="mono12 f-tf" x="1119" y="400">terraform_remote_state</text>
+
+      <rect class="b-eks" x="894" y="416" width="430" height="120" rx="10"/>
+      <text class="tt14 f-tf" x="912" y="442">③ ROOT · eks</text>
+      <text class="bd13 ink" x="912" y="466">cluster · system node · add-ons · IAM (~43 resources)</text>
+      <text class="mono12 mut" x="912" y="490">state: eks.tfstate in S3</text>
+      <text class="mono12 f-tf" x="912" y="512">reads: network's outputs</text>
+
+      <rect class="card s-tf w15" x="1380" y="96" width="380" height="120" rx="10"/>
+      <text class="tt14 f-tf" x="1398" y="122">S3 state bucket</text>
+      <text class="mono12 ink" x="1398" y="146">network.tfstate</text>
+      <text class="mono12 ink" x="1398" y="166">eks.tfstate</text>
+      <text class="bd13 mut" x="1398" y="190">+ a lock file while a run is going</text>
+      <line class="arw-tf" x1="1326" y1="156" x2="1376" y2="156" marker-end="url(#f5-tf)"/>
+      <text class="bd12 mid f-tf" x="1352" y="146">makes</text>
+
+      <rect class="card s-cfn w2" x="1380" y="256" width="380" height="120" rx="10"/>
+      <text class="tt14 f-cfn" x="1398" y="282">CloudFormation stack</text>
+      <text class="mono12 ink" x="1398" y="304">projectx-dev</text>
+      <text class="bd13 mut" x="1398" y="328">VPC · app route table</text>
+      <text class="bd13 mut" x="1398" y="350">found by its tags, never changed</text>
+      <line class="arw-cfn dash" x1="1378" y1="316" x2="1328" y2="316" marker-end="url(#f5-cfn)"/>
+      <text class="bd12 mid f-cfn" x="1353" y="306">data</text>
+
+      <rect class="card s-k8s w2" x="1380" y="416" width="380" height="120" rx="10"/>
+      <text class="tt14 f-k8s" x="1398" y="442">Helm · install.sh</text>
+      <text class="bd13 ink" x="1398" y="466">Karpenter · AWS Load Balancer Controller</text>
+      <text class="bd13 mut" x="1398" y="488">NodePool · EC2NodeClass · gp3 storage</text>
+      <text class="bd13 mut" x="1398" y="510">installed after terraform apply</text>
+      <line class="arw-k8s" x1="1326" y1="476" x2="1376" y2="476" marker-end="url(#f5-k8s)"/>
+      <text class="bd12 mid f-k8s" x="1352" y="466">then</text>
+
+      <text class="mono12 ink" x="894" y="574">eks root:      subnet_ids = data.terraform_remote_state.network.outputs.subnet_ids</text>
+      <text class="mono12 ink" x="894" y="598">network root:  data "aws_vpc" "dev" { tags = { "aws:cloudformation:stack-name" = "projectx-dev" } }</text>
+    </svg>
+  </figure>
+
+  <h2>The tickets and how they connect</h2>
+  <p class="note">Top row: the infrastructure path you own as the platform engineer. Bottom row: other roles' tickets that feed into it. Statuses are from the class board on Nov 15.</p>
+  <figure>
+    <svg viewBox="0 0 1800 560" role="img" aria-label="Ticket chain: PX-104 deploy PR 1 to Dev (Review), then PX-105 assess ECS to EKS (In progress), then PX-107 bring up EKS in Dev (Ready on the board; your PR 99 is in review, the 10% hand-written part still open), then PX-108 run the app on Dev EKS (Ready; your next task through Nov 16), then a traffic cutover and moving the VPC and RDS into Terraform, which are not tickets yet. Other tickets: PX-001 the recent trades feature that PX-104 deployed, PX-103 the build path feeding PX-108, PX-106 identity and secret access feeding PX-108, and PX-101 product work.">
+      <defs>
+        <marker id="f6-ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><polygon points="0,0 10,5 0,10" fill="#6b7a8d"/></marker>
+      </defs>
+      <text class="lab" x="20" y="28">THE INFRASTRUCTURE PATH · YOU ARE THE PLATFORM ENGINEER</text>
+
+      <!-- PX-104 -->
+      <rect class="card s-cfn w2" x="20" y="44" width="264" height="190" rx="10"/>
+      <text class="mono14b ink" x="36" y="72">PX-104</text>
+      <rect class="pill-cfn" x="176" y="56" width="96" height="22" rx="11"/><text class="ptxt" x="224" y="71">REVIEW</text>
+      <text class="tt15 ink" x="36" y="102">Deploy PR #1 to Dev</text>
+      <text class="tt15 ink" x="36" y="122">for QA</text>
+      <text class="bd13 mut" x="36" y="148">first release on ECS:</text>
+      <text class="bd13 mut" x="36" y="166">new digest → change set</text>
+      <rect x="32" y="192" width="240" height="30" rx="6" fill="#eef1f6"/><text class="bd13 ink" x="44" y="212">done in class · Session 02</text>
+      <line class="arw" x1="284" y1="139" x2="320" y2="139" marker-end="url(#f6-ah)"/>
+
+      <!-- PX-105 -->
+      <rect class="card s-aws w2" x="323" y="44" width="264" height="190" rx="10"/>
+      <text class="mono14b ink" x="339" y="72">PX-105</text>
+      <rect class="pill-org" x="467" y="56" width="108" height="22" rx="11"/><text class="ptxt" x="521" y="71">IN PROGRESS</text>
+      <text class="tt15 ink" x="339" y="102">Assess moving</text>
+      <text class="tt15 ink" x="339" y="122">ECS → EKS</text>
+      <text class="bd13 mut" x="339" y="148">outcome: build EKS</text>
+      <text class="bd13 mut" x="339" y="166">alongside, in Terraform</text>
+      <rect x="335" y="192" width="240" height="30" rx="6" fill="#eef1f6"/><text class="bd13 ink" x="347" y="212">assessment pages · Session 03</text>
+      <line class="arw" x1="587" y1="139" x2="623" y2="139" marker-end="url(#f6-ah)"/>
+
+      <!-- PX-107 -->
+      <rect class="card s-tf w2" x="626" y="44" width="264" height="190" rx="10"/>
+      <text class="mono14b ink" x="642" y="72">PX-107</text>
+      <rect class="pill-k8s" x="782" y="56" width="96" height="22" rx="11"/><text class="ptxt" x="830" y="71">READY</text>
+      <text class="tt15 ink" x="642" y="102">Bring up EKS in Dev</text>
+      <text class="tt15 ink" x="642" y="122">with Terraform</text>
+      <text class="bd13 mut" x="642" y="148">a pod Ready on a worker,</text>
+      <text class="bd13 mut" x="642" y="166">ECS still answers</text>
+      <rect x="638" y="192" width="240" height="30" rx="6" fill="#7c3aed"/><text class="tt13 wht" x="650" y="212">YOU: PR #99 in review</text>
+      <line class="arw" x1="890" y1="139" x2="926" y2="139" marker-end="url(#f6-ah)"/>
+
+      <!-- PX-108 -->
+      <rect class="card s-tf w2" x="929" y="44" width="264" height="190" rx="10" style="stroke-width:3"/>
+      <text class="mono14b ink" x="945" y="72">PX-108</text>
+      <rect class="pill-k8s" x="1085" y="56" width="96" height="22" rx="11"/><text class="ptxt" x="1133" y="71">READY</text>
+      <text class="tt15 ink" x="945" y="102">Run the app</text>
+      <text class="tt15 ink" x="945" y="122">on Dev EKS</text>
+      <text class="bd13 mut" x="945" y="148">same image + same RDS,</text>
+      <text class="bd13 mut" x="945" y="166">the page and a trade work</text>
+      <rect x="941" y="192" width="240" height="30" rx="6" fill="#c0631f"/><text class="tt13 wht" x="953" y="212">YOU: next · through Nov 16</text>
+      <line class="arw-d" x1="1193" y1="139" x2="1229" y2="139" marker-end="url(#f6-ah)"/>
+
+      <!-- cutover -->
+      <rect class="card s-grey w15 dash" x="1232" y="44" width="264" height="190" rx="10"/>
+      <text class="mono14b mut" x="1248" y="72">next</text>
+      <rect class="pill-grey" x="1356" y="56" width="128" height="22" rx="11"/><text class="ptxt" x="1420" y="71">NOT A TICKET YET</text>
+      <text class="tt15 ink" x="1248" y="102">Shift traffic</text>
+      <text class="tt15 ink" x="1248" y="122">ECS → EKS</text>
+      <text class="bd13 mut" x="1248" y="148">weighted ALB rules</text>
+      <text class="bd13 mut" x="1248" y="166">0 → 10 → 50 → 100%</text>
+      <rect x="1244" y="192" width="240" height="30" rx="6" fill="#eef1f6"/><text class="bd13 ink" x="1256" y="212">plan from PX-105</text>
+      <line class="arw-d" x1="1496" y1="139" x2="1532" y2="139" marker-end="url(#f6-ah)"/>
+
+      <!-- import -->
+      <rect class="card s-grey w15 dash" x="1535" y="44" width="250" height="190" rx="10"/>
+      <text class="mono14b mut" x="1551" y="72">later</text>
+      <rect class="pill-grey" x="1645" y="56" width="128" height="22" rx="11"/><text class="ptxt" x="1709" y="71">NOT A TICKET YET</text>
+      <text class="tt15 ink" x="1551" y="102">Move VPC + RDS</text>
+      <text class="tt15 ink" x="1551" y="122">into Terraform</text>
+      <text class="bd13 mut" x="1551" y="148">Retain → remove from stack</text>
+      <text class="bd13 mut" x="1551" y="166">→ terraform import</text>
+      <rect x="1547" y="192" width="226" height="30" rx="6" fill="#eef1f6"/><text class="bd13 ink" x="1559" y="212">a separate, careful job</text>
+
+      <text class="lab" x="20" y="316">AROUND IT · OTHER ROLES' TICKETS</text>
+
+      <!-- PX-001 -->
+      <rect class="card s-grey w15" x="20" y="330" width="330" height="140" rx="10"/>
+      <text class="mono14b ink" x="36" y="358">PX-001</text>
+      <rect class="pill-cfn" x="242" y="342" width="96" height="22" rx="11"/><text class="ptxt" x="290" y="357">REVIEW</text>
+      <text class="tt14 ink" x="36" y="388">Review recent trades in PR #1</text>
+      <text class="bd13 mut" x="36" y="412">Jordan (QA) checks the feature</text>
+      <text class="bd13 mut" x="36" y="432">that PX-104 deployed</text>
+      <line class="arw-d" x1="150" y1="328" x2="150" y2="238" marker-end="url(#f6-ah)"/>
+      <text class="bd12 mut" x="160" y="290">the feature PX-104 shipped</text>
+
+      <!-- PX-103 -->
+      <rect class="card s-grey w15" x="560" y="330" width="330" height="140" rx="10"/>
+      <text class="mono14b ink" x="576" y="358">PX-103</text>
+      <rect class="pill-k8s" x="782" y="342" width="96" height="22" rx="11"/><text class="ptxt" x="830" y="357">READY</text>
+      <text class="tt14 ink" x="576" y="388">Confirm the build path</text>
+      <text class="bd13 mut" x="576" y="412">Sam: repeatable test and build</text>
+      <text class="bd13 mut" x="576" y="432">commands → the image you deploy</text>
+      <line class="arw-d" x1="760" y1="328" x2="990" y2="238" marker-end="url(#f6-ah)"/>
+      <text class="bd12 mut" x="830" y="292">builds the image</text>
+
+      <!-- PX-106 -->
+      <rect class="card s-grey w15" x="920" y="330" width="330" height="140" rx="10"/>
+      <text class="mono14b ink" x="936" y="358">PX-106</text>
+      <rect class="pill-grey" x="1142" y="342" width="96" height="22" rx="11"/><text class="ptxt" x="1190" y="357">BACKLOG</text>
+      <text class="tt14 ink" x="936" y="388">Review identity + secret access</text>
+      <text class="bd13 mut" x="936" y="412">Casey: how a release gets AWS</text>
+      <text class="bd13 mut" x="936" y="432">access, and the DB password</text>
+      <line class="arw-d" x1="1100" y1="328" x2="1100" y2="238" marker-end="url(#f6-ah)"/>
+      <text class="bd12 mut" x="1110" y="292">how pods get the password</text>
+
+      <!-- PX-101 -->
+      <rect class="card s-grey w15" x="1450" y="330" width="330" height="140" rx="10"/>
+      <text class="mono14b ink" x="1466" y="358">PX-101</text>
+      <rect class="pill-org" x="1660" y="342" width="108" height="22" rx="11"/><text class="ptxt" x="1714" y="357">IN PROGRESS</text>
+      <text class="tt14 ink" x="1466" y="388">Compare two customer problems</text>
+      <text class="bd13 mut" x="1466" y="412">Maya: product work,</text>
+      <text class="bd13 mut" x="1466" y="432">not infrastructure</text>
+
+      <text class="bd12 mut" x="20" y="520">Board status:</text>
+      <rect class="pill-grey" x="112" y="506" width="78" height="20" rx="10"/><text class="ptxt" x="151" y="520">BACKLOG</text>
+      <rect class="pill-k8s" x="200" y="506" width="66" height="20" rx="10"/><text class="ptxt" x="233" y="520">READY</text>
+      <rect class="pill-org" x="276" y="506" width="100" height="20" rx="10"/><text class="ptxt" x="326" y="520">IN PROGRESS</text>
+      <rect class="pill-cfn" x="386" y="506" width="70" height="20" rx="10"/><text class="ptxt" x="421" y="520">REVIEW</text>
+      <text class="bd12 mut" x="470" y="520">· the board is shared by the class, so it doesn't show your own progress</text>
+    </svg>
+  </figure>
+
+  <h2>The cutover plan</h2>
+  <figure>
+    <svg viewBox="0 0 1800 430" role="img" aria-label="Planned traffic shift on the shared ALB, drawn to scale. Today ECS gets 100 percent and EKS 0. Step 1: ECS 90, EKS 10. Step 2: 50 and 50. Step 3: ECS 0, EKS 100, with ECS kept deployable. Rollback at any step means moving the weight back to ECS. The DNS name, ALB, database, image, password and certificate do not change.">
+      <defs>
+        <marker id="f7-red" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><polygon points="0,0 10,5 0,10" fill="#d43a3a"/></marker>
+      </defs>
+      <text class="lab" x="260" y="28">PLAN FROM THE PX-105 ASSESSMENT · NOT DONE YET · ONE ALB, TWO TARGET GROUPS</text>
+      <line class="grid" x1="260" y1="44" x2="260" y2="320"/>
+      <line class="grid" x1="560" y1="44" x2="560" y2="320"/>
+      <line class="grid" x1="860" y1="44" x2="860" y2="320"/>
+      <line class="grid" x1="1160" y1="44" x2="1160" y2="320"/>
+      <line class="grid" x1="1460" y1="44" x2="1460" y2="320"/>
+      <text class="mono12 mid mut" x="260" y="340">0%</text>
+      <text class="mono12 mid mut" x="560" y="340">25%</text>
+      <text class="mono12 mid mut" x="860" y="340">50%</text>
+      <text class="mono12 mid mut" x="1160" y="340">75%</text>
+      <text class="mono12 mid mut" x="1460" y="340">100%</text>
+
+      <text class="tt14 end ink" x="240" y="85">Today</text>
+      <rect x="260" y="56" width="1200" height="46" fill="#2563b0"/>
+      <text class="tt13 mid wht" x="860" y="84">ECS 100%</text>
+      <text class="bd13 ink" x="1480" y="76">EKS 0%</text>
+      <text class="bd12 mut" x="1480" y="94">ECS serves everyone</text>
+
+      <text class="tt14 end ink" x="240" y="155">Step 1</text>
+      <rect x="260" y="126" width="1080" height="46" fill="#2563b0"/>
+      <rect x="1340" y="126" width="120" height="46" fill="#7c3aed"/>
+      <text class="tt13 mid wht" x="800" y="154">ECS 90%</text>
+      <text class="tt13 mid wht" x="1400" y="154">EKS 10%</text>
+      <text class="bd12 mut" x="1480" y="154">watch errors and latency</text>
+
+      <text class="tt14 end ink" x="240" y="225">Step 2</text>
+      <rect x="260" y="196" width="600" height="46" fill="#2563b0"/>
+      <rect x="860" y="196" width="600" height="46" fill="#7c3aed"/>
+      <text class="tt13 mid wht" x="560" y="224">ECS 50%</text>
+      <text class="tt13 mid wht" x="1160" y="224">EKS 50%</text>
+      <text class="bd12 mut" x="1480" y="224">both use the same RDS</text>
+
+      <text class="tt14 end ink" x="240" y="295">Step 3</text>
+      <rect x="260" y="266" width="1200" height="46" fill="#7c3aed"/>
+      <text class="tt13 mid wht" x="860" y="294">EKS 100%</text>
+      <text class="bd13 ink" x="1480" y="286">ECS 0%</text>
+      <text class="bd12 mut" x="1480" y="304">kept, ready to take traffic back</text>
+
+      <path d="M120,289 C40,289 40,79 120,79" fill="none" stroke="#d43a3a" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#f7-red)"/>
+      <text class="tt12 f-red mid" x="44" y="188" transform="rotate(-90 44 184)">rollback</text>
+
+      <text class="bd f-red" x="20" y="384">Rollback at any step = move the weight back to ECS. Nothing is rebuilt.</text>
+      <text class="bd ink" x="20" y="410">Unchanged the whole time: the DNS name · the ALB · the RDS database · the image · the password · the certificate.</text>
+    </svg>
+  </figure>
+
+  <h2>Who owns what</h2>
+  <figure>
+    <svg viewBox="0 0 1800 440" role="img" aria-label="Three columns. CloudFormation, Nadia's stack projectx-dev: the VPC and subnets, internet and NAT gateways and route tables, the ALB, ECS, RDS and its security group, the Secrets Manager password, CloudWatch alarms and logs, Cognito sign-in switched off. Terraform, you: the S3 state bucket, two EKS subnets and route table associations, the control plane and IAM, the admin access entry, the system node group, EKS add-ons, and the RDS rule allowing 5432 from EKS. Helm and kubectl, you as platform engineer: Karpenter, the AWS Load Balancer Controller, NodePool and EC2NodeClass, the gp3 StorageClass, the app Deployment, its ConfigMap and Secret, and the Helm chart coming next.">
+      <rect class="hdr-cfn" x="20" y="20" width="572" height="64" rx="10"/>
+      <text class="tt15 wht" x="40" y="48">CloudFormation</text>
+      <text class="bd13 wht2" x="40" y="70">Nadia · stack projectx-dev · Oct 29</text>
+      <rect class="card s-cfn w1" x="20" y="98" width="572" height="34" rx="8"/><text class="bd ink" x="36" y="120">VPC 10.40.0.0/16 and its subnets</text>
+      <rect class="card s-cfn w1" x="20" y="140" width="572" height="34" rx="8"/><text class="bd ink" x="36" y="162">internet gateway · NAT gateway · route tables</text>
+      <rect class="card s-cfn w1" x="20" y="182" width="572" height="34" rx="8"/><text class="bd ink" x="36" y="204">ALB · listener · HTTPS certificate</text>
+      <rect class="card s-cfn w1" x="20" y="224" width="572" height="34" rx="8"/><text class="bd ink" x="36" y="246">ECS cluster, service and task</text>
+      <rect class="card s-cfn w1" x="20" y="266" width="572" height="34" rx="8"/><text class="bd ink" x="36" y="288">RDS PostgreSQL and its security group</text>
+      <rect class="card s-cfn w1" x="20" y="308" width="572" height="34" rx="8"/><text class="bd ink" x="36" y="330">DB password in Secrets Manager</text>
+      <rect class="card s-cfn w1" x="20" y="350" width="572" height="34" rx="8"/><text class="bd ink" x="36" y="372">CloudWatch alarms and log group</text>
+      <rect class="card s-cfn w1" x="20" y="392" width="572" height="34" rx="8"/><text class="bd ink" x="36" y="414">Cognito sign-in (built, switched off)</text>
+
+      <rect class="hdr-tf" x="614" y="20" width="572" height="64" rx="10"/>
+      <text class="tt15 wht" x="634" y="48">Terraform</text>
+      <text class="bd13 wht2" x="634" y="70">you · PX-107 · bootstrap → network → eks</text>
+      <rect class="card s-tf w1" x="614" y="98" width="572" height="34" rx="8"/><text class="bd ink" x="630" y="120"><tspan class="mono12 f-tf">bootstrap</tspan>  S3 state bucket</text>
+      <rect class="card s-tf w1" x="614" y="140" width="572" height="34" rx="8"/><text class="bd ink" x="630" y="162"><tspan class="mono12 f-tf">network</tspan>  2 EKS subnets (/19)</text>
+      <rect class="card s-tf w1" x="614" y="182" width="572" height="34" rx="8"/><text class="bd ink" x="630" y="204"><tspan class="mono12 f-tf">network</tspan>  links them to the existing route table</text>
+      <rect class="card s-tf w1" x="614" y="224" width="572" height="34" rx="8"/><text class="bd ink" x="630" y="246"><tspan class="mono12 f-tf">eks</tspan>  control plane and IAM roles</text>
+      <rect class="card s-tf w1" x="614" y="266" width="572" height="34" rx="8"/><text class="bd ink" x="630" y="288"><tspan class="mono12 f-tf">eks</tspan>  access entry for the admin role</text>
+      <rect class="card s-tf w1" x="614" y="308" width="572" height="34" rx="8"/><text class="bd ink" x="630" y="330"><tspan class="mono12 f-tf">eks</tspan>  system node group (t3.medium)</text>
+      <rect class="card s-tf w1" x="614" y="350" width="572" height="34" rx="8"/><text class="bd ink" x="630" y="372"><tspan class="mono12 f-tf">eks</tspan>  add-ons: VPC CNI, CoreDNS, kube-proxy</text>
+      <rect class="card s-tf w1" x="614" y="392" width="572" height="34" rx="8"/><text class="bd ink" x="630" y="414">RDS rule: 5432 ← EKS cluster SG</text>
+
+      <rect class="hdr-k8s" x="1208" y="20" width="572" height="64" rx="10"/>
+      <text class="tt15 wht" x="1228" y="48">Helm and kubectl</text>
+      <text class="bd13 wht2" x="1228" y="70">you as platform engineer · Sessions 07–08</text>
+      <rect class="card s-k8s w1" x="1208" y="98" width="572" height="34" rx="8"/><text class="bd ink" x="1224" y="120">Karpenter controller (Helm)</text>
+      <rect class="card s-k8s w1" x="1208" y="140" width="572" height="34" rx="8"/><text class="bd ink" x="1224" y="162">AWS Load Balancer Controller (Helm)</text>
+      <rect class="card s-k8s w1" x="1208" y="182" width="572" height="34" rx="8"/><text class="bd ink" x="1224" y="204">NodePool + EC2NodeClass "general"</text>
+      <rect class="card s-k8s w1" x="1208" y="224" width="572" height="34" rx="8"/><text class="bd ink" x="1224" y="246">encrypted gp3 StorageClass</text>
+      <rect class="card s-k8s w1" x="1208" y="266" width="572" height="34" rx="8"/><text class="bd ink" x="1224" y="288">app Deployment · 2 pods</text>
+      <rect class="card s-k8s w1" x="1208" y="308" width="572" height="34" rx="8"/><text class="bd ink" x="1224" y="330">ConfigMap + Secret for the app's settings</text>
+      <rect class="card s-k8s w1 dash" x="1208" y="350" width="572" height="34" rx="8"/><text class="bd ink" x="1224" y="372">Helm chart for the app (next class)</text>
+      <rect class="card s-k8s w1 dash" x="1208" y="392" width="572" height="34" rx="8"/><text class="bd ink" x="1224" y="414">Service + TargetGroupBinding for the cutover (later)</text>
+    </svg>
+  </figure>
+
+  <footer>Sources: projectx-26a-infra (decisions/, environments/dev, assessments/2026-11-02-ecs-to-eks, branch codex/dev-eks-foundation, your class/04/terraform), projectx-26a-company, the class ticket board on Nov 15, and your Session 01–08 notes. Plans on this page (cutover, import, Helm chart) haven't happened yet.</footer>
+</div>

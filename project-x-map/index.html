@@ -125,7 +125,7 @@ html{scroll-behavior:smooth}
 <header>
   <span class="eyebrow">312 School · Cohort 26a · Project X</span>
   <h1>Project X Map</h1>
-  <div class="meta"><span>Updated Mon, Nov 9, 2026</span><span>Sessions 01–05</span><span>Instructor: Marcel</span></div>
+  <div class="meta"><span>Updated Mon, Nov 16, 2026</span><span>Sessions 01–08</span><span>Instructor: Marsel</span></div>
   <p class="lede">Project X is the last stage of the course. We join a pretend investment-app startup as its <strong>platform engineer</strong>. The app already runs on <strong>ECS Fargate</strong>, built by Nadia with <strong>CloudFormation</strong>. Our job is to move it to <strong>EKS</strong> with <strong>Terraform</strong> without users noticing, and to do the work with AI agents the way teams do it now. This page shows everything in one place: who's who, the four repos, the infrastructure, the tickets, the sessions and the homework.</p>
   <nav aria-label="Sections">
     <a href="#homework">Homework</a><a href="#team">Team</a><a href="#repos">Repos</a><a href="#infra">Infrastructure</a><a href="#tickets">Tickets</a><a href="#sessions">Sessions</a><a href="#decisions">Decisions</a><a href="#reviews">PR reviews</a><a href="#where">Where things live</a>
@@ -134,39 +134,40 @@ html{scroll-behavior:smooth}
 
 <section id="homework">
   <div class="label"><span class="tag">Status</span><h2>Homework board</h2></div>
-  <div class="summary"><span><strong>0 of 4</strong> done</span><span>As of Mon, Nov 9</span><span>PX-108 was due today</span></div>
+  <div class="summary"><span><strong>1 of 4</strong> done</span><span><strong>1</strong> in review</span><span>As of Mon, Nov 16</span><span>PX-108 is due today</span></div>
   <div class="board">
-    <div class="hw part">
+    <div class="hw done">
       <span class="who">S02</span>
-      <div class="top"><h3>Work from a cloned repo with Claude Code or Codex</h3><span class="chip part">Setup only</span></div>
+      <div class="top"><h3>Work from a cloned repo with Claude Code or Codex</h3><span class="chip done">Done</span></div>
       <p class="due">Due Sat, Oct 31</p>
-      <p>The 4 repos are cloned in <code>~/DevOps/projectx</code>, but no real work has been done from them yet. Also review: serverless, PRs &amp; branching, ECS vs Kubernetes, CloudFormation vs Terraform, and the image loop (build → ECR → deploy).</p>
+      <p>PX-107 was built from the cloned infra repo on your own branch, <code>engineer/aiak6</code>. Still worth a review: serverless, PRs &amp; branching, ECS vs Kubernetes, CloudFormation vs Terraform, and the image loop (build → ECR → deploy).</p>
     </div>
     <div class="hw">
       <span class="who">S03</span>
-      <div class="top"><h3>Read the EKS guide and the Terraform layout, twice</h3><span class="chip todo">Not started</span></div>
+      <div class="top"><h3>Read the EKS guide and the Terraform layout, twice</h3><span class="chip todo">Not marked</span></div>
       <p class="due">Due Wed, Nov 4 · ticket PX-105</p>
-      <p>Two AI-made pages in <code>projectx-26a-infra/assessments/2026-11-02-ecs-to-eks/</code>: <code>eks-guide.html</code> and <code>terraform-layout.html</code>. Ask AI about anything you don't get.</p>
+      <p>Two AI-made pages in <code>projectx-26a-infra/assessments/2026-11-02-ecs-to-eks/</code>: <code>eks-guide.html</code> and <code>terraform-layout.html</code>. Worth reading before PX-108: they explain why EKS goes into the <strong>existing</strong> VPC.</p>
     </div>
-    <div class="hw">
+    <div class="hw part">
       <span class="who">S04</span>
-      <div class="top"><h3>PX-107: build EKS in your own AWS account with Terraform</h3><span class="chip todo">Not started</span></div>
-      <p class="due">Aim was Thu, Nov 5 · <code>class/04/README.md</code></p>
-      <p>Branch <code>engineer/aiak6</code>, code in <code>class/04/terraform/</code>. Write at least 10% yourself (start with a VPC lookup) and commit it before using AI. Apply, then prove a worker is Ready and a test pod is Running. Then <code>terraform destroy</code> and open a PR. Leave the PR open.</p>
+      <div class="top"><h3>PX-107: build EKS in your own AWS account with Terraform</h3><span class="chip part">In review</span></div>
+      <p class="due">PR #99 open since Nov 14 · <code>class/04/README.md</code></p>
+      <p>Code in <code>class/04/terraform/</code>: one root (<code>envs/dev</code>) calling two child modules (<code>vpc</code>, <code>eks</code>), its own new VPC, local state. Applied, checked (worker Ready, pods <code>1/1 Running</code>, DNS and HTTP) and destroyed on Nov 14. Sheldon's latest review passes <strong>9 of 10</strong> requirements.</p>
+      <p><strong>Still open:</strong> write at least 10% yourself and commit it on its own (Sheldon suggests the security group or the node group in <code>modules/eks/</code>), name that commit in the description, update the head commit it names, and answer Sheldon's questions in PR comments in your own words.</p>
     </div>
     <div class="hw">
       <span class="who">S05</span>
-      <div class="top"><h3>PX-108: run the investment app on your EKS</h3><span class="chip todo">Not started</span></div>
-      <p class="due">Try before Mon, Nov 9 · <code>class/05/README.md</code></p>
+      <div class="top"><h3>PX-108: run the investment app on your EKS</h3><span class="chip todo">Next · due today</span></div>
+      <p class="due">Moved to Mon, Nov 16 after Class 6 · <code>class/05/README.md</code></p>
       <p>Same branch. If your account has no ECS yet, deploy Nadia's template first. Build <code>projectx-26a-app/candidate</code>, push it to your own ECR, run the same image on EKS against the existing RDS, and let pods reach RDS on 5432. Close the PX-107 PR without merging and open a new PR.</p>
+      <p><strong>Watch out:</strong> your PX-107 cluster had its own VPC, but RDS lives in the CloudFormation VPC. The cluster has to go into that VPC (like the reference <code>network</code> root), and the RDS security group needs a 5432 rule from the cluster. Check it the Session 08 way: <code>kubectl port-forward</code>, then make a buy.</p>
     </div>
   </div>
-  <h3>Catch-up order</h3>
+  <h3>What's left, in order</h3>
   <ol>
-    <li><strong>Read first.</strong> The S03 guides explain every choice PX-107 asks you to make (workers, add-ons, state, layout).</li>
-    <li><strong>Branch, then your own 10%.</strong> <code>git switch -c engineer/aiak6 main</code> in the infra repo, write the VPC lookup by hand, commit.</li>
-    <li><strong>PX-107, then destroy.</strong> EKS bills by the hour: the control plane is ~$0.10/hr (~$73/month), and worker EC2s and a NAT gateway cost extra. Run <code>aws sts get-caller-identity</code> before every apply.</li>
-    <li><strong>PX-108 on the same branch.</strong> Rebuild the cluster from your Terraform, then deploy the app. RDS also costs money while it runs, so clean up when you're done.</li>
+    <li><strong>Finish PX-107's review.</strong> Your own hand-written part as its own commit, an updated description, then reply to Sheldon in your own words and comment <code>@sheldon</code>.</li>
+    <li><strong>PX-108 on the same branch.</strong> Cluster in the CloudFormation VPC, the image in your ECR, a Deployment with a ConfigMap and a Secret, the 5432 rule, then port-forward and a buy.</li>
+    <li><strong>Watch the bill.</strong> The EKS control plane is ~$0.10/hr (~$73/month), and workers, a NAT gateway and RDS cost extra. Run <code>aws sts get-caller-identity</code> before every apply and destroy when you're done.</li>
   </ol>
 </section>
 
@@ -209,6 +210,7 @@ html{scroll-behavior:smooth}
 <section id="infra">
   <div class="label"><span class="tag">AWS</span><h2>The infrastructure: today and next</h2></div>
   <p>Dev today is one CloudFormation stack (<code>projectx-dev</code>): a VPC, an ALB, a private Fargate task, a private encrypted RDS Postgres, a NAT gateway and monitoring. The plan from Session 03 is to <strong>build EKS next to it</strong> in the same VPC, run the same image against the same database, then move traffic over a little at a time.</p>
+  <p><strong>Where it stands after Session 08:</strong> in class, Terraform added two subnets (<code>10.40.32.0/19</code>, <code>10.40.64.0/19</code>) to the CloudFormation VPC and built the cluster. Helm added Karpenter and the load balancer controller. The app then ran on EKS as a Deployment with 2 Pods against the same RDS. It has <strong>no Service and no traffic yet</strong>, so users still reach ECS only. The big diagrams are on <a href="../how-project-x-fits-together/">How Project X Fits Together</a>.</p>
   <div class="diagram" role="img" aria-label="Users reach an ALB inside the existing VPC. The ALB splits traffic between the ECS Fargate task (today, CloudFormation) and EKS pods (next, Terraform). Both talk to the same RDS PostgreSQL database.">
     <svg viewBox="0 0 760 340" xmlns="http://www.w3.org/2000/svg">
       <defs>
@@ -232,8 +234,8 @@ html{scroll-behavior:smooth}
 
       <rect class="d-eks" x="320" y="208" width="200" height="72" rx="8"/>
       <text class="d-t1" x="420" y="232" text-anchor="middle">EKS pods</text>
-      <text class="d-t2" x="420" y="251" text-anchor="middle">next · Terraform · you</text>
-      <text class="d-t2" x="420" y="269" text-anchor="middle">traffic 0% → 100%</text>
+      <text class="d-t2" x="420" y="251" text-anchor="middle">built · Terraform + Helm · you</text>
+      <text class="d-t2" x="420" y="269" text-anchor="middle">2 pods up · traffic 0% → 100%</text>
 
       <rect class="d-db" x="588" y="124" width="150" height="72" rx="8"/>
       <text class="d-t1" x="663" y="148" text-anchor="middle">RDS PostgreSQL</text>
@@ -249,7 +251,7 @@ html{scroll-behavior:smooth}
       <text class="d-lab" x="10" y="326">SHARED BY BOTH: ECR (IMAGE) · SECRETS MANAGER (DB PASSWORD) · CLOUDWATCH (LOGS)</text>
     </svg>
   </div>
-  <div class="legend"><span><i class="sw ecs"></i>Running now (Nadia, CloudFormation)</span><span><i class="sw eks"></i>Being built (you, Terraform)</span></div>
+  <div class="legend"><span><i class="sw ecs"></i>Serving users now (Nadia, CloudFormation)</span><span><i class="sw eks"></i>Running, no traffic yet (you, Terraform + Helm)</span></div>
   <ul>
     <li><strong>Why users don't notice:</strong> same DNS name, same image, same database. Only where the container runs changes.</li>
     <li><strong>Traffic shift:</strong> 1% → 10% → 50% → 100% with a weighted second target group on the ALB (or Route 53 weighted records). To roll back, change the weights.</li>
@@ -259,11 +261,14 @@ html{scroll-behavior:smooth}
 
 <section id="tickets">
   <div class="label"><span class="tag">Board</span><h2>The tickets so far</h2></div>
+  <p>Board column in brackets, as of Nov 15.</p>
   <ol class="timeline">
-    <li><div class="when"><b>PX-001</b>Session 02</div><div><h3>Deploy PR #1 to dev (recent trades)</h3><p>QA (Jordan) asked us to deploy app PR #1, which shows the ten newest trades. Lesson: find where "dev" is before doing anything. Done in class; the ticket moved to Review with "Pending Jordan's validation".</p></div></li>
-    <li><div class="when"><b>PX-105</b>Session 03</div><div><h3>Assess moving the app from ECS to EKS</h3><p>A decision, not a build. Outcome: build EKS alongside ECS with Terraform, reuse the VPC and RDS, shift traffic slowly. The written assessment lives in <code>assessments/2026-11-02-ecs-to-eks/</code>.</p></div></li>
-    <li><div class="when"><b>PX-107</b>Session 04</div><div><h3>Build and verify an EKS cluster with Terraform</h3><p>Your own account, at least 10% hand-written, test pod, destroy, open PR. <strong>Your status: not started.</strong></p></div></li>
-    <li><div class="when"><b>PX-108</b>Session 05</div><div><h3>Run the investment app on Dev EKS</h3><p>Same image as ECS, existing RDS, pods Ready, app works. New PR, PX-107 PR closed unmerged. <strong>Your status: not started.</strong></p></div></li>
+    <li><div class="when"><b>PX-001</b>Session 02</div><div><h3>Recent trades feature [Review]</h3><p>The app change (PR #1) that shows the ten newest trades. QA (Jordan) validates it.</p></div></li>
+    <li><div class="when"><b>PX-104</b>Session 02</div><div><h3>Deploy PR #1 to Dev [Review]</h3><p>Our first ticket. Lesson: find where "dev" is before doing anything. Done in class: new image digest → change set → review → execute.</p></div></li>
+    <li><div class="when"><b>PX-105</b>Session 03</div><div><h3>Assess moving the app from ECS to EKS [In progress]</h3><p>A decision, not a build. Outcome: build EKS alongside ECS with Terraform, reuse the VPC and RDS, shift traffic slowly. The written assessment lives in <code>assessments/2026-11-02-ecs-to-eks/</code>.</p></div></li>
+    <li><div class="when"><b>PX-107</b>Sessions 04–06</div><div><h3>Build and verify an EKS cluster with Terraform [Ready]</h3><p>Your own account, at least 10% hand-written, test pod, destroy, open PR. <strong>Your status: PR #99 in review; the hand-written 10% is still open.</strong></p></div></li>
+    <li><div class="when"><b>PX-108</b>Sessions 05–08</div><div><h3>Run the investment app on Dev EKS [Ready]</h3><p>Same image as ECS, existing RDS, pods Ready, app works. New PR, PX-107 PR closed unmerged. <strong>Your status: next, due today.</strong></p></div></li>
+    <li><div class="when"><b>Others</b>Other roles</div><div><h3>PX-101 [In progress] · PX-103 [Ready] · PX-106 [Backlog]</h3><p>PX-101 is product work (Maya). PX-103 is the build path that feeds PX-108 (Sam). PX-106 is identity and secret access that also feeds PX-108 (Casey).</p></div></li>
   </ol>
 </section>
 
@@ -275,6 +280,10 @@ html{scroll-behavior:smooth}
     <li><div class="when"><b>03</b>Mon Nov 2</div><div><h3><a href="../project-x-session-03/">Assessing ECS → EKS</a></h3><p>Tickets and boards, worktrees for parallel agent sessions, context engineering, and arguing with AI because its first answer is the shortcut. Plan: build EKS alongside ECS.</p></div></li>
     <li><div class="when"><b>04</b>Wed Nov 4</div><div><h3><a href="../project-x-session-04/">Build EKS by hand first</a></h3><p>ClickOps a cluster, watch the workers fail to join (wrong subnets, a missing policy), find out why, then rebuild it in Terraform. Homework PX-107.</p></div></li>
     <li><div class="when"><b>05</b>Thu Nov 5</div><div><h3><a href="../project-x-session-05/">EKS foundation &amp; Terraform state</a></h3><p>Review of everyone's PX-107 PRs and the reference build (PR #18): short docs, three Terraform roots, an hour of planning with AI. Terraform state, S3 versioning and the lock. Homework PX-108.</p></div></li>
+    <li><div class="when"><b>06</b>Mon Nov 9</div><div><h3><a href="../project-x-session-06/">Terraform values &amp; the EKS foundation</a></h3><p>PR #18 read line by line: a data source finds the CloudFormation VPC, <code>for_each</code> makes the subnets, outputs save their IDs, and <code>terraform_remote_state</code> reads them in the EKS root. Also plans, <code>depends_on</code> and drift.</p></div></li>
+    <li><div class="when"><b>07</b>Wed Nov 11</div><div><h3><a href="../project-x-session-07/">EKS add-ons, Helm &amp; Karpenter</a></h3><p>EKS add-ons (CoreDNS, VPC CNI), Helm as templates plus values, and Karpenter installed by hand from the docs. One waiting pod made a new worker appear.</p></div></li>
+    <li><div class="when"><b>08</b>Thu Nov 12</div><div><h3><a href="../project-x-session-08/">Run the investment app on EKS</a></h3><p>Questions before YAML: which workload type, which Service, and what goes in a ConfigMap or a Secret. Two Pods stayed not Ready until the RDS security group let the workers in. Tested with <code>kubectl port-forward</code>.</p></div></li>
+    <li><div class="when"><b>09</b>Mon Nov 16</div><div><h3>Next: a Helm chart for the app</h3><p>Turning the Session 08 manifests into a Helm chart. The app repo already has a reference branch, <code>codex/class9-helm-reference</code>.</p></div></li>
   </ol>
 </section>
 
@@ -288,6 +297,8 @@ html{scroll-behavior:smooth}
       <tr><td class="nowrap">Nov 2</td><td>New infrastructure in <strong>Terraform</strong>, not CloudFormation</td><td>Works on any cloud, splits into modules, and most companies use it</td></tr>
       <tr><td class="nowrap">Nov 2</td><td>Reuse the <strong>existing VPC</strong> (<code>10.40.0.0/16</code>) and <strong>RDS</strong></td><td>How you'd do it in prod. Moving them under Terraform (import, not recreate) is a later ticket</td></tr>
       <tr><td class="nowrap">Nov 5</td><td>Reference layout: three roots, <strong>bootstrap → network → eks</strong>, then <strong>Karpenter</strong> via Helm</td><td>Separate lifecycles and a smaller blast radius. The cost: IDs must cross between roots (remote state or SSM). Branch <code>codex/dev-eks-foundation</code>, PR #18</td></tr>
+      <tr><td class="nowrap">Nov 9</td><td>PX-108 deadline moved to <strong>Mon, Nov 16</strong></td><td>Class 6 kept going through the EKS foundation, so the homework got more time</td></tr>
+      <tr><td class="nowrap">Nov 12</td><td>The app on EKS: a <strong>Deployment</strong> with 2 Pods, settings in a <strong>ConfigMap</strong>, password in a <strong>Secret</strong>, and RDS allows <strong>5432</strong> from the workers</td><td>Same image and same database as ECS. Manifests and Helm charts live in the <strong>app repo</strong>, not the infra repo</td></tr>
     </tbody>
   </table></div>
 </section>
@@ -299,6 +310,7 @@ html{scroll-behavior:smooth}
     <li>It runs when the PR is opened, reopened or marked ready. After you push a fix, comment <code>@sheldon</code> to get a new review.</li>
     <li>If Sheldon adds the <code>needs-human-review</code> label, a person reviews it. Every Monday a job also picks a few random PRs for a person to review.</li>
     <li>So write the PR description for a reader: which worker and add-on setup you chose and why, what you wrote yourself, how you checked it, and the cleanup result.</li>
+    <li><strong>Your PR #99</strong> has had several Sheldon rounds. The latest (Nov 14) keeps one ❌ (the part you write yourself) and asks you to answer its questions as replies on the PR, not in the README.</li>
   </ul>
 </section>
 
@@ -308,7 +320,8 @@ html{scroll-behavior:smooth}
     <thead><tr><th>What</th><th>Where</th></tr></thead>
     <tbody>
       <tr><td>Class repos</td><td><code>~/DevOps/projectx/</code> (app, company, infra, platform)</td></tr>
-      <tr><td>Task pages</td><td><code>projectx-26a-infra/class/04/README.md</code>, <code>class/05/README.md</code>, plus <code>class/04/commands.md</code></td></tr>
+      <tr><td>Task pages</td><td><code>projectx-26a-infra/class/04/README.md</code>, <code>class/05/README.md</code>, plus <code>class/04/commands.md</code>. Session 08 files: <code>projectx-26a-app/class/08</code></td></tr>
+      <tr><td>Big-picture diagrams</td><td><a href="../how-project-x-fits-together/">How Project X Fits Together</a></td></tr>
       <tr><td>Slides &amp; board</td><td><a href="https://26a.312school.com/projectx/resources/class-4/">26a.312school.com/projectx</a> (GitHub login)</td></tr>
       <tr><td>Notes + quizzes</td><td>Notion: DevOps / 312 - Notes / 🏁 ProjectX</td></tr>
       <tr><td>Codex commands</td><td><a href="../codex-cheat-sheet/">Codex Cheat Sheet</a></td></tr>
@@ -319,5 +332,5 @@ html{scroll-behavior:smooth}
   <blockquote>Find the situation and the task, give AI real context, argue with its first answer, then make the decision yourself.</blockquote>
 </section>
 
-<footer>Built from the Project X session notes and the four class repos as of Nov 9, 2026. Update the homework board as you finish each item.</footer>
+<footer>Built from the Project X session notes, the four class repos and the class board as of Nov 16, 2026. Update the homework board as you finish each item.</footer>
 </div>
