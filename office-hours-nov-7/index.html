@@ -1,0 +1,466 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Office Hours — Nov 7</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one reading column; sections as stacked "shipping manifest" blocks with a stencilled label; code and tables scroll in place. */
+:root{
+  --bg:#f3f5f7; --surface:#ffffff; --ink:#15202b; --muted:#56657a; --line:#d8dee6;
+  --accent:#c4501b; --accent-soft:#fbe9df; --steel:#1f5f8b; --steel-soft:#e3eef6;
+  --code-bg:#0f1b26; --code-fg:#dbe7f2; --code-cmt:#7f97ad;
+  --good:#2e7d4f; --bad:#b3261e;
+  --f-display:"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --f-body:"Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e151c; --surface:#16202a; --ink:#e6edf3; --muted:#9aabbd; --line:#2a3845;
+  --accent:#f0874f; --accent-soft:#3a2418; --steel:#7ab8e3; --steel-soft:#16303f;
+  --code-bg:#0a1016; --code-fg:#dbe7f2; --code-cmt:#6f879c;
+  --good:#6cc493; --bad:#f08a80; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0e151c; --surface:#16202a; --ink:#e6edf3; --muted:#9aabbd; --line:#2a3845;
+  --accent:#f0874f; --accent-soft:#3a2418; --steel:#7ab8e3; --steel-soft:#16303f;
+  --code-bg:#0a1016; --code-fg:#dbe7f2; --code-cmt:#6f879c;
+  --good:#6cc493; --bad:#f08a80; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:17px/1.6 var(--f-body);padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:28px 64px}
+.wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.15;margin:0}
+h1{font-size:clamp(30px,6vw,44px);font-weight:800;letter-spacing:-.01em}
+h2{font-size:24px;font-weight:800}
+h3{font-size:18px;font-weight:600;margin-top:6px}
+p{margin:0}
+a{color:var(--steel)}
+code{font-family:var(--f-mono);font-size:.86em;background:var(--steel-soft);color:var(--ink);padding:1px 5px;border-radius:4px}
+strong{font-weight:700}
+.eyebrow{font:600 12px/1 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+header{display:flex;flex-direction:column;gap:12px;border-bottom:3px solid var(--ink);padding-bottom:20px}
+.meta{display:flex;flex-wrap:wrap;gap:8px 16px;color:var(--muted);font-size:15px}
+.lede{font-size:19px;max-width:65ch}
+nav{display:flex;flex-wrap:wrap;gap:8px}
+nav a{font:600 13px/1 var(--f-mono);text-decoration:none;color:var(--ink);border:1px solid var(--line);background:var(--surface);padding:8px 10px;border-radius:6px}
+nav a:hover,nav a:focus-visible{border-color:var(--accent);color:var(--accent);outline:none}
+section{display:flex;flex-direction:column;gap:14px;scroll-margin-top:16px}
+section > .label{display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--line);padding-bottom:8px}
+section > .label .tag{font:600 11px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--surface);background:var(--ink);padding:5px 7px;border-radius:3px}
+ul,ol{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px}
+.table{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:15.5px;min-width:480px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:600 12px/1.3 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--bg)}
+tr:last-child td{border-bottom:0}
+blockquote{margin:0;border-left:4px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 8px 8px 0;font-weight:600}
+pre{margin:0;background:var(--code-bg);color:var(--code-fg);font:14px/1.6 var(--f-mono);padding:14px 16px;border-radius:8px;overflow-x:auto}
+pre .c{color:var(--code-cmt)}
+.codebox{position:relative}
+.copy{position:absolute;top:8px;right:8px;font:600 11px/1 var(--f-mono);background:transparent;color:var(--code-cmt);border:1px solid var(--code-cmt);border-radius:4px;padding:5px 7px;cursor:pointer}
+.copy:hover,.copy:focus-visible{color:var(--code-fg);border-color:var(--code-fg);outline:none}
+.flow{font:600 14px/1.5 var(--f-mono);background:var(--steel-soft);color:var(--ink);padding:14px 16px;border-radius:8px;overflow-x:auto;white-space:pre}
+.step{display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:start}
+.step > .n{font:800 18px/34px var(--f-display);text-align:center;background:var(--ink);color:var(--bg);border-radius:50%;width:34px;height:34px}
+.step > div{min-width:0;display:flex;flex-direction:column;gap:8px}
+.see{font-size:15px;color:var(--good)}
+.see::before{content:"You should see: ";font-weight:700}
+.warn{border:1px solid var(--bad);border-radius:8px;padding:12px 16px;display:flex;flex-direction:column;gap:10px;background:var(--surface)}
+.warn .eyebrow{color:var(--bad)}
+details{border:1px solid var(--line);background:var(--surface);border-radius:8px}
+details summary{cursor:pointer;padding:12px 16px;font-weight:600;list-style-position:inside}
+details summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:8px}
+details > div{padding:0 16px 14px;display:flex;flex-direction:column;gap:8px}
+.q{display:flex;flex-direction:column;gap:10px}
+.q p.ask{font-weight:600}
+.reread{font-style:italic;color:var(--muted);font-size:15px}
+footer{color:var(--muted);font-size:15px;border-top:1px solid var(--line);padding-top:16px}
+@media (prefers-reduced-motion: reduce){*{scroll-behavior:auto!important}}
+html{scroll-behavior:smooth}
+</style>
+
+<div class="wrap">
+<header>
+  <span class="eyebrow">312 School · Cohort 26a · Saturday office hours</span>
+  <h1>Office Hours — Nov 7</h1>
+  <div class="meta"><span>Sat, Nov 7, 2026 · 10:30am CST</span><span>Instructor</span><span>After Containers Session 13 · Project X week</span></div>
+  <p class="lede">A whole session built around one question: <strong>how does the VPC we built in Terraform connect to the cluster we log into with kubectl?</strong> The instructor drew the answer in three levels — the things that really exist, the tools that create them, and the <strong>navigation</strong> that makes a command land on the right cluster. Plus what actually happens after <code>kubectl apply</code>, what kubelet is for, and how different ECS really is.</p>
+  <nav aria-label="Sections">
+    <a href="#five">In 5 lines</a><a href="#levels">Three levels</a><a href="#vpc">VPC &amp; cluster</a><a href="#nav">Navigation</a><a href="#apply">After apply</a><a href="#kubelet">Kubelet</a><a href="#ecs">ECS vs K8s</a><a href="#tools">Which tool</a><a href="#todo">To do</a>
+  </nav>
+</header>
+
+<section id="five">
+  <div class="label"><span class="tag">The gist</span><h2>The whole session in 5 lines</h2></div>
+  <ol>
+    <li>A cluster lives inside <strong>one</strong> VPC — but one VPC can hold several clusters.</li>
+    <li>To picture it all, split it into three levels: real resources, creation tools, and navigation.</li>
+    <li><code>kubectl</code> needs <strong>two pointers</strong>: who you are in AWS, and the cluster's address.</li>
+    <li><code>kubectl apply</code> only <strong>sends a request</strong> — the control plane does all the real work.</li>
+    <li>ECS is the same idea as Kubernetes with different tools, so Kubernetes knowledge transfers.</li>
+  </ol>
+</section>
+
+<section id="levels">
+  <div class="label"><span class="tag">1 · Mental model</span><h2>The big picture in three levels</h2></div>
+
+  <div class="q">
+    <p class="ask">Why did the instructor split the diagram into three levels?</p>
+    <details><summary>Show answer</summary><div>
+      <p>Because the pieces are not all the same kind of thing. <strong>Mixing them is what makes the picture confusing.</strong></p>
+      <div class="table"><table>
+        <thead><tr><th>Level</th><th>What it holds</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Physical + virtual grouping</strong></td><td>AWS account, VPC, EKS control plane, EC2 worker nodes, your laptop</td></tr>
+          <tr><td><strong>Creation tools</strong></td><td>Terraform, kubectl, Helm, Ansible — just <em>labels</em>, they don't live anywhere</td></tr>
+          <tr><td><strong>Navigation</strong></td><td>How a tool knows <strong>which account</strong> and <strong>which cluster</strong> to talk to</td></tr>
+        </tbody>
+      </table></div>
+    </div></details>
+  </div>
+
+  <div class="q">
+    <p class="ask">Which parts actually "exist", and which are just tools?</p>
+    <details><summary>Show answer</summary><div>
+      <p>The cluster, the nodes, the network and the account are the things that exist and cost money.</p>
+      <p>Terraform, kubectl and Helm <strong>don't exist anywhere</strong> — they're just how you ask for something. The instructor's words: they're like a language. You speak, the cloud does the work.</p>
+    </div></details>
+  </div>
+
+  <div class="q">
+    <p class="ask">Where does my laptop fit in the picture?</p>
+    <details><summary>Show answer</summary><div>
+      <p>Outside AWS, on the public internet. Between your laptop and the AWS cloud there is only the internet. Everything else — accounts, VPCs, clusters, workers — is inside AWS.</p>
+      <div class="flow">your laptop → internet → AWS cloud → AWS account → VPC → EKS cluster → worker EC2s</div>
+    </div></details>
+  </div>
+</section>
+
+<section id="vpc">
+  <div class="label"><span class="tag">2 · Networking</span><h2>VPC, accounts and the cluster</h2></div>
+
+  <div class="q">
+    <p class="ask">Can one cluster live in two VPCs?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>No.</strong> A cluster launches in one network and stays there.</p>
+      <blockquote>"Can you be in two apartments at the same time?" Almost nothing in AWS belongs to two networks.</blockquote>
+    </div></details>
+  </div>
+
+  <div class="q">
+    <p class="ask">Can one VPC hold more than one cluster?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>Yes.</strong> Two, five, as many as you want in the same VPC.</p>
+      <p>The reason to do it: they're on the same network, <strong>so they can talk to each other</strong>. If you don't want them talking, put them in separate VPCs — that's the whole point of network isolation.</p>
+    </div></details>
+  </div>
+
+  <div class="q">
+    <p class="ask">What is the difference between an AWS account and a VPC?</p>
+    <details><summary>Show answer</summary><div>
+      <div class="table"><table>
+        <thead><tr><th></th><th>Isolates</th></tr></thead>
+        <tbody>
+          <tr><td><strong>AWS account</strong></td><td><strong>permissions</strong> — who is allowed to touch what</td></tr>
+          <tr><td><strong>VPC (network)</strong></td><td><strong>traffic</strong> — what can reach what</td></tr>
+        </tbody>
+      </table></div>
+      <p>Normally a VPC lives inside one account. It is technically possible to stretch a network across accounts with special AWS features, but 99% of the time it doesn't happen.</p>
+    </div></details>
+  </div>
+
+  <div class="q">
+    <p class="ask">Our RDS database and our EKS cluster are in the same VPC — can they talk automatically?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>Almost.</strong> Same network means the road exists, but there's still one more guard: the <strong>security group</strong>.</p>
+      <p>The RDS security group has to allow connections from the cluster's security group. Same VPC is not the same as "allowed".</p>
+    </div></details>
+  </div>
+
+  <div class="q">
+    <p class="ask">And if the database is in a different VPC?</p>
+    <details><summary>Show answer</summary><div>
+      <p>Then by default they <strong>cannot</strong> reach each other at all. You'd have to build a connection between the networks: <strong>VPC peering</strong> or a <strong>Transit Gateway</strong>. That's extra setup — it doesn't happen by itself.</p>
+      <p>So the choice is yours when you design it:</p>
+      <ul>
+        <li>same VPC → simpler networking</li>
+        <li>separate VPC → stronger isolation, more work to connect</li>
+      </ul>
+    </div></details>
+  </div>
+</section>
+
+<section id="nav">
+  <div class="label"><span class="tag">3 · Navigation</span><h2>How kubectl finds the right cluster</h2></div>
+
+  <div class="q">
+    <p class="ask">I type <code>kubectl get namespaces</code> on my laptop. How does it find MY cluster out of thousands?</p>
+    <details><summary>Show answer</summary><div>
+      <p>It doesn't guess. You give it <strong>two pointers</strong>:</p>
+      <ol>
+        <li><strong>AWS identity pointer</strong> — which account, and do you have permission. From <code>~/.aws/config</code> and <code>~/.aws/credentials</code>, or environment variables.</li>
+        <li><strong>Kubernetes identity pointer</strong> — the cluster's <strong>endpoint</strong>, a DNS address, stored in your kubeconfig.</li>
+      </ol>
+      <blockquote>Address + credentials. That's all any client ever needs. The rest — DNS, routing, IPs — the internet handles.</blockquote>
+    </div></details>
+  </div>
+
+  <div class="q">
+    <p class="ask">What does the cluster endpoint look like?</p>
+    <details><summary>Show answer</summary><div>
+      <div class="codebox"><pre>projectx-eks.&lt;account-id&gt;.us-east-1.eks.amazonaws.com</pre></div>
+      <p>Every EKS cluster gets its own DNS address.</p>
+    </div></details>
+  </div>
+
+  <div class="q">
+    <p class="ask">Does kubectl need to know which VPC the cluster is in?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>No — and this is the key idea.</strong> It doesn't need to know everything, it just needs to know <em>something</em>: the endpoint.</p>
+      <blockquote>If you know somebody's address and you have the key, you can get in. You don't need to know how the house was built.</blockquote>
+    </div></details>
+  </div>
+
+  <div class="q">
+    <p class="ask">What does <code>aws eks update-kubeconfig</code> actually do?</p>
+    <details><summary>Show answer</summary><div>
+      <p>It gets you <strong>both</strong> pointers in one command: the cluster's endpoint <strong>and</strong> the credentials, written into your kubeconfig.</p>
+      <div class="codebox"><pre>aws eks update-kubeconfig --name &lt;cluster&gt; --region &lt;region&gt;</pre></div>
+    </div></details>
+  </div>
+
+  <div class="q">
+    <p class="ask">What does Terraform need? Is it the same?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>Simpler</strong> — Terraform only needs the <strong>first</strong> pointer, the AWS credentials.</p>
+      <p>It talks straight to the <strong>AWS API server</strong>, not to Kubernetes. It gets into the right account, asks AWS to create resources, done.</p>
+    </div></details>
+  </div>
+
+  <div class="q">
+    <p class="ask">So where exactly does a kubectl command land?</p>
+    <details><summary>Show answer</summary><div>
+      <p>Not "at the cluster" — a cluster is a collection of things. It lands at <strong>one program</strong>: the <strong>Kubernetes API server</strong>, running on the control plane.</p>
+      <p>That endpoint address is the address of that program. Everything you do to the cluster, you do through it.</p>
+      <blockquote>AWS has an API server. Kubernetes has an API server. Same pattern.</blockquote>
+    </div></details>
+  </div>
+</section>
+
+<section id="apply">
+  <div class="label"><span class="tag">4 · The request</span><h2>What happens after kubectl apply</h2></div>
+
+  <div class="q">
+    <p class="ask">Does <code>kubectl apply</code> go and create the EC2 workers?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>No.</strong> This was the main misunderstanding cleared up in the session.</p>
+      <p><code>kubectl apply</code> <strong>only sends a request</strong> — "hey, I need a deployment with five replicas". At that moment kubectl's job is finished.</p>
+    </div></details>
+  </div>
+
+  <div class="q">
+    <p class="ask">Then what actually decides where pods run?</p>
+    <details><summary>Show answer</summary><div>
+      <p>Programs on the <strong>control plane</strong>: the controller, the scheduler and a few others. They receive the request and do the thinking:</p>
+      <ol>
+        <li>A request came in for 5 containers.</li>
+        <li>Do we have worker nodes with room?</li>
+        <li>If yes → send a request to the <strong>kubelet</strong> on that node.</li>
+        <li>If no → the pods sit in <strong>Pending</strong>.</li>
+      </ol>
+      <blockquote>That's why it's called an orchestration system — you send a request, the system handles it.</blockquote>
+    </div></details>
+  </div>
+
+  <div class="q">
+    <p class="ask">Is there an easy way to remember this?</p>
+    <details><summary>Show answer</summary><div>
+      <p>Two pictures the instructor used:</p>
+      <ul>
+        <li><strong>Warehouse:</strong> you don't tell the warehouse which shelf to put your box on. You say "ship five boxes." How they do it is their problem.</li>
+        <li><strong>Car shipping:</strong> you submit a request on a website. Brokers find a driver, check the route, the dates, the space. You don't do any of that.</li>
+      </ul>
+      <p>kubectl is not a magic command that does everything. <strong>The cluster does the heavy work.</strong></p>
+    </div></details>
+  </div>
+
+  <div class="q">
+    <p class="ask">So what is my job as the operator?</p>
+    <details><summary>Show answer</summary><div>
+      <p>To give Kubernetes <strong>enough physical resources</strong> — mostly worker nodes — so it has somewhere to put the containers. The placement itself isn't yours to do.</p>
+    </div></details>
+  </div>
+</section>
+
+<section id="kubelet">
+  <div class="label"><span class="tag">5 · The agent</span><h2>Kubelet — the agent on every worker</h2></div>
+
+  <div class="q">
+    <p class="ask">What is kubelet, and do we create it?</p>
+    <details><summary>Show answer</summary><div>
+      <p>It's a <strong>Kubernetes program</strong>, like etcd, the controller manager, the API server and the scheduler — but it's the <strong>one exception</strong>: it doesn't run on the control plane. It runs on <strong>every worker node</strong>.</p>
+      <p>You don't create it yourself; it's part of how a node joins the cluster.</p>
+    </div></details>
+  </div>
+
+  <div class="q">
+    <p class="ask">What does kubelet do?</p>
+    <details><summary>Show answer</summary><div>
+      <p>It's the control plane's <strong>representative on that node</strong> — the instructor called it an embassy.</p>
+      <ul>
+        <li>the control plane tells kubelet "launch this container" → kubelet launches it</li>
+        <li>kubelet reports back: running, healthy, failing, not passing the readiness probe, pending, not enough resources</li>
+        <li>your <strong>logs</strong> come back through kubelet too</li>
+      </ul>
+      <p>No kubelet on a node = you learn nothing about that node, because everything goes through that agent.</p>
+    </div></details>
+  </div>
+
+  <div class="q">
+    <p class="ask">Control plane vs worker — which programs live where?</p>
+    <details><summary>Show answer</summary><div>
+      <div class="table"><table>
+        <thead><tr><th>Where</th><th>Programs</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Control plane</strong> (master nodes)</td><td>API server, scheduler, controller manager, etcd</td></tr>
+          <tr><td><strong>Every worker node</strong></td><td><strong>kubelet</strong> (+ kube-proxy)</td></tr>
+        </tbody>
+      </table></div>
+      <p>The control plane is <strong>not</strong> where your applications run. It's where Kubernetes' own programs run.</p>
+    </div></details>
+  </div>
+</section>
+
+<section id="ecs">
+  <div class="label"><span class="tag">6 · Comparison</span><h2>ECS vs Kubernetes</h2></div>
+
+  <div class="q">
+    <p class="ask">Why didn't we study ECS properly?</p>
+    <details><summary>Show answer</summary><div>
+      <p>Because it isn't the core of what we're learning — but it matters for context. Kubernetes is the leader; ECS, Nomad and Docker Swarm are other brands of the same thing.</p>
+      <p>They all make the same promise: <strong>manage thousands of containers across hundreds of nodes</strong>. You can't do that by hand — that's the whole point of a cluster.</p>
+    </div></details>
+  </div>
+
+  <div class="q">
+    <p class="ask">What does "cluster" actually mean?</p>
+    <details><summary>Show answer</summary><div>
+      <p>When you group the resources of several servers together and use them for one purpose. Here: running many containers in one place.</p>
+      <p>Example from the session: <strong>Netflix</strong> runs most of its platform on very large Kubernetes clusters — tens of thousands of containers across thousands of nodes.</p>
+    </div></details>
+  </div>
+
+  <div class="q">
+    <p class="ask">How different is ECS really?</p>
+    <details><summary>Show answer</summary><div>
+      <p>The <strong>concepts</strong> are mostly the same, the <strong>tools</strong> are different. The instructor's comparison: BMW vs Volkswagen — different choices, same idea of a car.</p>
+      <p>ECS needs the same things Kubernetes needs: a way to connect and manage the cluster (its own API), and nodes where containers run, maybe under a different name.</p>
+    </div></details>
+  </div>
+
+  <div class="q">
+    <p class="ask">How do you deploy into each one?</p>
+    <details><summary>Show answer</summary><div>
+      <div class="table"><table>
+        <thead><tr><th></th><th>Kubernetes</th><th>ECS</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Define the workload</strong></td><td>Deployment YAML</td><td>ECS task / service definition</td></tr>
+          <tr><td><strong>Apply it</strong></td><td><code>kubectl apply</code>, Helm</td><td>AWS CLI, CloudFormation</td></tr>
+          <tr><td><strong>Also possible</strong></td><td>Terraform, Ansible</td><td>Terraform, Ansible</td></tr>
+        </tbody>
+      </table></div>
+      <p><code>kubectl</code> and Helm were built by the Kubernetes project, so they only work with Kubernetes. ECS is an AWS service, so it works with AWS tools.</p>
+    </div></details>
+  </div>
+
+  <div class="q">
+    <p class="ask">Does doing this migration make me an "ECS expert"?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>No, and don't claim it.</strong> You're taking container images <em>out</em> of ECS and repackaging them for EKS — you're not operating ECS itself.</p>
+      <p>Only study ECS deeply if you plan to put strong ECS experience on your resume and defend it in an interview. Otherwise: understanding Kubernetes is enough.</p>
+    </div></details>
+  </div>
+</section>
+
+<section id="tools">
+  <div class="label"><span class="tag">7 · Tooling</span><h2>Which tool can do what</h2></div>
+
+  <div class="q">
+    <p class="ask">Can kubectl and Helm create the cluster itself?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>No.</strong> They are limited to what's <em>inside</em> the cluster: create or delete a deployment, a service, a pod. They <strong>cannot create a node or a server</strong>.</p>
+      <div class="table"><table>
+        <thead><tr><th>Tool</th><th>Create the cluster</th><th>Manage things inside it</th></tr></thead>
+        <tbody>
+          <tr><td>kubectl</td><td>❌</td><td>✅</td></tr>
+          <tr><td>Helm</td><td>❌</td><td>✅</td></tr>
+          <tr><td>Terraform</td><td>✅</td><td>✅ (possible)</td></tr>
+          <tr><td>Ansible</td><td>✅</td><td>✅ (possible)</td></tr>
+          <tr><td>CloudFormation / AWS CLI</td><td>✅ (ECS)</td><td>✅ (ECS)</td></tr>
+        </tbody>
+      </table></div>
+    </div></details>
+  </div>
+
+  <div class="q">
+    <p class="ask">Can Terraform really create Kubernetes resources?</p>
+    <details><summary>Show answer</summary><div>
+      <p>Yes — there's a Kubernetes provider, and a deployment resource looks roughly like this:</p>
+      <div class="codebox"><pre>resource "kubernetes_deployment" "example" {
+  metadata { name = "my-app" }
+  spec {
+    replicas = 3
+    selector { match_labels = { app = "my-app" } }
+    template {
+      spec {
+        container {
+          image = "nginx:1.27"
+          name  = "my-app"
+          resources { limits = {} requests = {} }
+        }
+      }
+    }
+  }
+}</pre></div>
+      <p>Some companies do it. The instructor doesn't think it's great. <strong>In practice:</strong> Terraform builds the cluster, then kubectl and Helm manage what's inside.</p>
+    </div></details>
+  </div>
+</section>
+
+<section id="todo">
+  <div class="label"><span class="tag">Action</span><h2>To do &amp; what's next</h2></div>
+  <h3>To do</h3>
+  <ul>
+    <li><strong>Class 4 homework first: create the EKS cluster.</strong> Class 5 is <em>deploying to EKS</em> — it can't be attempted until EKS exists.</li>
+    <li>For the ECS side of Class 5, use the <strong>CloudFormation code already in the repo</strong> rather than writing it from scratch. It deploys ECS for you.</li>
+    <li>Why ECS at all: so the task is a <strong>realistic migration</strong> — an app already running on ECS, moved to EKS — not just a fresh deployment.</li>
+    <li>Instructor to send the Miro diagram from this session.</li>
+  </ul>
+  <h3>What's next (Monday)</h3>
+  <ul>
+    <li>Terraform deep dive: what Terraform builds vs what lives inside Kubernetes.</li>
+    <li><strong>Helm.</strong></li>
+    <li>The full visual diagram, extended to the inside of Kubernetes — students asked for it.</li>
+  </ul>
+</section>
+
+<footer><strong>🔑 Remember:</strong> one cluster = one VPC (but one VPC can hold many clusters) · kubectl needs an AWS identity <strong>and</strong> the cluster endpoint · <code>update-kubeconfig</code> gets you both · <code>apply</code> only sends a request, the control plane places the pods · kubelet is the agent on every worker · ECS ≈ Kubernetes with AWS tools</footer>
+</div>
+
+<script>
+document.querySelectorAll('.codebox').forEach(function(box){
+  var pre = box.querySelector('pre'); var b = document.createElement('button');
+  b.className = 'copy'; b.type = 'button'; b.textContent = 'Copy';
+  b.addEventListener('click', function(){
+    var text = pre.innerText.split('\n').map(function(l){ return l.replace(/\s+#.*$/, ''); }).join('\n').trim();
+    var done = function(){ b.textContent = 'Copied'; setTimeout(function(){ b.textContent = 'Copy'; }, 1500); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(function(){ selectPre(); });
+    } else { selectPre(); }
+    function selectPre(){ var r = document.createRange(); r.selectNodeContents(pre); var s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = 'Selected'; }
+  });
+  box.appendChild(b);
+});
+</script>
+</body></html>

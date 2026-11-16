@@ -1,0 +1,562 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Office Hours — Nov 14</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one reading column; sections as stacked "shipping manifest" blocks with a stencilled label; code and tables scroll in place. */
+:root{
+  --bg:#f3f5f7; --surface:#ffffff; --ink:#15202b; --muted:#56657a; --line:#d8dee6;
+  --accent:#c4501b; --accent-soft:#fbe9df; --steel:#1f5f8b; --steel-soft:#e3eef6;
+  --code-bg:#0f1b26; --code-fg:#dbe7f2; --code-cmt:#7f97ad;
+  --good:#2e7d4f; --bad:#b3261e;
+  --f-display:"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --f-body:"Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e151c; --surface:#16202a; --ink:#e6edf3; --muted:#9aabbd; --line:#2a3845;
+  --accent:#f0874f; --accent-soft:#3a2418; --steel:#7ab8e3; --steel-soft:#16303f;
+  --code-bg:#0a1016; --code-fg:#dbe7f2; --code-cmt:#6f879c;
+  --good:#6cc493; --bad:#f08a80; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0e151c; --surface:#16202a; --ink:#e6edf3; --muted:#9aabbd; --line:#2a3845;
+  --accent:#f0874f; --accent-soft:#3a2418; --steel:#7ab8e3; --steel-soft:#16303f;
+  --code-bg:#0a1016; --code-fg:#dbe7f2; --code-cmt:#6f879c;
+  --good:#6cc493; --bad:#f08a80; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:17px/1.6 var(--f-body);padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:28px 64px}
+.wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.15;margin:0}
+h1{font-size:clamp(30px,6vw,44px);font-weight:800;letter-spacing:-.01em}
+h2{font-size:24px;font-weight:800}
+h3{font-size:18px;font-weight:600;margin-top:6px}
+p{margin:0}
+a{color:var(--steel)}
+code{font-family:var(--f-mono);font-size:.86em;background:var(--steel-soft);color:var(--ink);padding:1px 5px;border-radius:4px}
+strong{font-weight:700}
+.eyebrow{font:600 12px/1 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+header{display:flex;flex-direction:column;gap:12px;border-bottom:3px solid var(--ink);padding-bottom:20px}
+.meta{display:flex;flex-wrap:wrap;gap:8px 16px;color:var(--muted);font-size:15px}
+.lede{font-size:19px;max-width:65ch}
+nav{display:flex;flex-wrap:wrap;gap:8px}
+nav a{font:600 13px/1 var(--f-mono);text-decoration:none;color:var(--ink);border:1px solid var(--line);background:var(--surface);padding:8px 10px;border-radius:6px}
+nav a:hover,nav a:focus-visible{border-color:var(--accent);color:var(--accent);outline:none}
+section{display:flex;flex-direction:column;gap:14px;scroll-margin-top:16px}
+section > .label{display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--line);padding-bottom:8px}
+section > .label .tag{font:600 11px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--surface);background:var(--ink);padding:5px 7px;border-radius:3px}
+ul,ol{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px}
+.table{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:15.5px;min-width:480px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:600 12px/1.3 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--bg)}
+tr:last-child td{border-bottom:0}
+blockquote{margin:0;border-left:4px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 8px 8px 0;font-weight:600}
+pre{margin:0;background:var(--code-bg);color:var(--code-fg);font:14px/1.6 var(--f-mono);padding:14px 16px;border-radius:8px;overflow-x:auto}
+pre .c{color:var(--code-cmt)}
+.codebox{position:relative}
+.copy{position:absolute;top:8px;right:8px;font:600 11px/1 var(--f-mono);background:transparent;color:var(--code-cmt);border:1px solid var(--code-cmt);border-radius:4px;padding:5px 7px;cursor:pointer}
+.copy:hover,.copy:focus-visible{color:var(--code-fg);border-color:var(--code-fg);outline:none}
+.flow{font:600 14px/1.5 var(--f-mono);background:var(--steel-soft);color:var(--ink);padding:14px 16px;border-radius:8px;overflow-x:auto;white-space:pre}
+.step{display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:start}
+.step > .n{font:800 18px/34px var(--f-display);text-align:center;background:var(--ink);color:var(--bg);border-radius:50%;width:34px;height:34px}
+.step > div{min-width:0;display:flex;flex-direction:column;gap:8px}
+.see{font-size:15px;color:var(--good)}
+.see::before{content:"You should see: ";font-weight:700}
+.warn{border:1px solid var(--bad);border-radius:8px;padding:12px 16px;display:flex;flex-direction:column;gap:10px;background:var(--surface)}
+.warn .eyebrow{color:var(--bad)}
+details{border:1px solid var(--line);background:var(--surface);border-radius:8px}
+details summary{cursor:pointer;padding:12px 16px;font-weight:600;list-style-position:inside}
+details summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:8px}
+details > div{padding:0 16px 14px;display:flex;flex-direction:column;gap:8px}
+.q{display:flex;flex-direction:column;gap:10px}
+.q p.ask{font-weight:600}
+.reread{font-style:italic;color:var(--muted);font-size:15px}
+footer{color:var(--muted);font-size:15px;border-top:1px solid var(--line);padding-top:16px}
+@media (prefers-reduced-motion: reduce){*{scroll-behavior:auto!important}}
+html{scroll-behavior:smooth}
+</style>
+
+<div class="wrap">
+<header>
+  <span class="eyebrow">312 School · Cohort 26a · Saturday office hours</span>
+  <h1>Office Hours — Nov 14</h1>
+  <div class="meta"><span>Sat, Nov 14, 2026 · 10:30am CST</span><span>Instructor</span><span>Project X week · Terraform, Helm, Karpenter</span></div>
+  <p class="lede">Half career session, half deep technical Q&amp;A. It opened with the question of <strong>how you actually decide</strong> between two reasonable options at work, moved through keeping AI in check, then the new <strong>solo Project-X</strong> format and the December push onto the job market — and finished with state-file history, safe destroys, Karpenter, contexts, namespaces and the three kinds of cloud storage.</p>
+  <nav aria-label="Sections">
+    <a href="#five">In 5 lines</a><a href="#decisions">Decisions</a><a href="#ai">AI in check</a><a href="#experience">Experience</a><a href="#projectx">Project-X</a><a href="#state">State &amp; destroy</a><a href="#karpenter">Karpenter</a><a href="#context">Context &amp; namespaces</a><a href="#storage">Storage</a><a href="#next">What's next</a>
+  </nav>
+</header>
+
+<section id="five">
+  <div class="label"><span class="tag">The gist</span><h2>The whole session in 5 lines</h2></div>
+  <ol>
+    <li>When no requirement forces a choice, <strong>it's your call</strong> — just be able to say why.</li>
+    <li>Years of experience ≠ good experience. <strong>Curiosity is the #1 success factor.</strong></li>
+    <li>Team final projects are gone: Project-X, <strong>solo, 7–8+ tickets</strong>, resume ready and applying in December.</li>
+    <li>The state file is only the <em>latest</em> snapshot — history comes from <strong>S3 versioning</strong>, not Terraform.</li>
+    <li>Karpenter scales on <strong>what pods need</strong>, not on EC2 CPU.</li>
+  </ol>
+</section>
+
+<section id="decisions">
+  <div class="label"><span class="tag">1 · Judgment</span><h2>Making decisions in a real work environment</h2></div>
+
+  <div class="q">
+    <p class="ask">I can always find a reason for either option (e.g. <code>preferred</code> vs <code>required</code> affinity). How do I actually pick?</p>
+    <details><summary>Show answer</summary><div>
+      <p>Go in this order:</p>
+      <ol>
+        <li><strong>Is anything specific needed here?</strong> Not "for the company" — for <em>this application</em> in <em>this cluster</em>. Did anyone state a requirement? Does the app have to run on particular nodes?</li>
+        <li><strong>If nothing specific → it's generally your call.</strong> Pick either one, based on best practice or your own reasoning.</li>
+      </ol>
+      <blockquote>More than half of real decisions end up at step 2.</blockquote>
+      <p>Within one company, 10 applications may split — half one way, half the other.</p>
+    </div></details>
+  </div>
+
+  <div class="q">
+    <p class="ask">So how do I defend the choice instead of letting AI pick blindly?</p>
+    <details><summary>Show answer</summary><div>
+      <p>The goal isn't a provably perfect answer, it's <strong>knowing why you chose it</strong>. Any reasonable option is fine.</p>
+      <p>The question to ask yourself: <em>how would someone have decided this before AI existed?</em></p>
+    </div></details>
+  </div>
+
+  <div class="q">
+    <p class="ask">Isn't "based on my experience" a good enough reason?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>Mostly no — experience gets old fast.</strong> If you decide today using judgment from 3–4 years ago, you're making a 3–4 year old decision.</p>
+      <p>The example the instructor gave: a few years ago, scaling a cluster meant <strong>Cluster Autoscaler</strong>. Today the answer is <strong>Karpenter</strong>. Same question, different answer.</p>
+      <p>Experience is only a fair basis if it's <strong>very recent</strong> (you did it a month ago), or if you actively stay current — e.g. you just came back from KubeCon.</p>
+    </div></details>
+  </div>
+
+  <div class="q">
+    <p class="ask">Then what IS the process?</p>
+    <details><summary>Show answer</summary><div>
+      <div class="table"><table>
+        <thead><tr><th></th><th>Before AI</th><th>With AI</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Find information</strong></td><td>Google, read articles</td><td>ask AI</td></tr>
+          <tr><td><strong>Compare options</strong></td><td>write down the trade-offs yourself</td><td>AI presents them</td></tr>
+          <tr><td><strong>Decide</strong></td><td><strong>you</strong></td><td><strong>you</strong></td></tr>
+        </tbody>
+      </table></div>
+      <p>Same process, just faster. Think of AI as <strong>your personal data scientist</strong> — someone who crawls all the data and answers questions. <strong>The decision stays yours.</strong></p>
+    </div></details>
+  </div>
+</section>
+
+<section id="ai">
+  <div class="label"><span class="tag">2 · Working with AI</span><h2>Staying in control of what AI writes</h2></div>
+
+  <div class="q">
+    <p class="ask">AI keeps making decisions I should have made. How do I catch that?</p>
+    <details><summary>Show answer</summary><div>
+      <p>The instructor sees the same pattern even with well-trained agents — no matter how carefully you set up the plan step, it still slips decisions in.</p>
+      <p>The fix: <strong>create your own interface files and force AI to write to them.</strong></p>
+      <div class="table"><table>
+        <thead><tr><th>File</th><th>What it holds</th></tr></thead>
+        <tbody>
+          <tr><td><code>plan.md</code></td><td>short, human-readable plan</td></tr>
+          <tr><td><code>decisions.md</code></td><td>a decision log — one entry per setup, with the reasoning</td></tr>
+        </tbody>
+      </table></div>
+      <p>Writing it down doesn't stop AI deciding — but it's <strong>how you catch it</strong>. You read the file and spot the call it made.</p>
+    </div></details>
+  </div>
+
+  <div class="q">
+    <p class="ask">What's the core principle?</p>
+    <details><summary>Show answer</summary><div>
+      <blockquote>AI can write a lot of files. You decide which ones you read — and read those carefully.</blockquote>
+      <p>So make those few files <strong>comfortable to read</strong>: tell it to keep them human-readable and well structured. That instruction is part of the prompt, every time.</p>
+    </div></details>
+  </div>
+</section>
+
+<section id="experience">
+  <div class="label"><span class="tag">3 · Career</span><h2>Why "years of experience" is a weak signal</h2></div>
+
+  <div class="q">
+    <p class="ask">How does platform work get narrow?</p>
+    <details><summary>Show answer</summary><div>
+      <p>You can easily spend <strong>six months on one migration</strong>, or <strong>two years on Helm chart updates</strong> for product teams.</p>
+      <p>The cost: you lose touch with everything else — monitoring, cluster deployments, infrastructure. Your world shrinks to your routine.</p>
+    </div></details>
+  </div>
+
+  <div class="q">
+    <p class="ask">Doesn't two years of Helm make someone good at Helm?</p>
+    <details><summary>Show answer</summary><div>
+      <p>Not necessarily. Many companies have <strong>standardized setups</strong>, so the work becomes changing a few values here and there. Nothing big, nothing challenging.</p>
+      <p>The instructor's point: someone with two years of daily Helm <strong>may still struggle with Helm interview questions</strong>.</p>
+      <blockquote>Years of experience is a poor track record of useful, valuable experience.</blockquote>
+      <p>People with 5, 10, even 15 years often lack basics outside their routine — because very few sit down and look at what they're doing structurally.</p>
+    </div></details>
+  </div>
+
+  <div class="q">
+    <p class="ask">What separates the good engineers then?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>Curiosity — the #1 success factor.</strong></p>
+      <div class="table"><table>
+        <thead><tr><th>Curious engineer</th><th>Everyone else</th></tr></thead>
+        <tbody>
+          <tr><td>asks "how does this work? why?"</td><td>copies from the internet, adjusts it until it works</td></tr>
+          <tr><td>explores alternatives: "we could have used that"</td><td>closes the ticket without understanding it</td></tr>
+          <tr><td>stays current</td><td>stays in the routine</td></tr>
+        </tbody>
+      </table></div>
+      <p>That's the work ethic of the majority — and the reason most people in tech aren't great engineers.</p>
+    </div></details>
+  </div>
+</section>
+
+<section id="projectx">
+  <div class="label"><span class="tag">4 · The program</span><h2>Project-X, the final project and December</h2></div>
+
+  <div class="q">
+    <p class="ask">Are we still doing the team final project?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>No — it's dropped and merged into Project-X, solo.</strong></p>
+      <p>Why: in the old format you got <strong>1 ticket out of 14–15</strong> and worked it for 3+ weeks. It <em>looked</em> like progress, but the outcome could have been reached in under a week. And the math doesn't work — 12 people × 7–8 tickets each is 80+ tickets in one group.</p>
+    </div></details>
+  </div>
+
+  <div class="q">
+    <p class="ask">So what do I do instead?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>At least 7–8 tickets yourself</strong>, with AI's help. Do as many as you can — some students are expected to finish all of them.</p>
+      <p>Tickets already assigned: <strong>PX-107, PX-108</strong>. More to come: identity, cluster services, secrets, cert-manager, external DNS. We're currently in <strong>epic one, platform foundation</strong>.</p>
+      <p>They're shared <strong>progressively</strong>, as the fundamentals are done — not all at once, because there's no point before the basics are in place.</p>
+    </div></details>
+  </div>
+
+  <div class="q">
+    <p class="ask">Does dropping teams mean less human support?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>No — the human time moves elsewhere.</strong> Instead of team sessions: short individual sessions to get unblocked, and group time on market prep or specific topics.</p>
+      <p>Right now, if you're stuck on a ticket → <strong>ask the mentor</strong>.</p>
+      <div class="warn">
+        <span class="eyebrow">Important</span>
+        <p><strong>You have to be proactive.</strong> Nobody will chase you for progress — reach out yourself.</p>
+      </div>
+    </div></details>
+  </div>
+
+  <div class="q">
+    <p class="ask">What happens in December?</p>
+    <details><summary>Show answer</summary><div>
+      <ul>
+        <li><strong>Resume ready as soon as possible.</strong></li>
+        <li>Start applying — <strong>50–100 applications just to get momentum</strong>, then ramp up.</li>
+        <li>Sessions switch from mentor sessions to <strong>market-prep sessions</strong>.</li>
+        <li>PX-107, PX-108 and the rest are what you present in interviews.</li>
+      </ul>
+      <p>💸 The cloud subscription <strong>cancels automatically on November 25th</strong>.</p>
+    </div></details>
+  </div>
+</section>
+
+<section id="state">
+  <div class="label"><span class="tag">5 · Terraform</span><h2>State file history &amp; safe destroy</h2></div>
+
+  <div class="q">
+    <p class="ask">Does the state file keep history?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>No.</strong> The state file is only the <strong>current / latest snapshot</strong> of what Terraform made in the real infrastructure.</p>
+      <div class="table"><table>
+        <thead><tr><th>Backend</th><th>What happens on each apply</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Local</strong></td><td>overwrites <code>terraform.tfstate</code>, saves the old one as <code>terraform.tfstate.backup</code> — <strong>only one version back</strong></td></tr>
+          <tr><td><strong>S3</strong></td><td>overwrites <code>terraform.tfstate</code> every time — Terraform keeps <strong>no</strong> backup</td></tr>
+        </tbody>
+      </table></div>
+    </div></details>
+  </div>
+
+  <div class="q">
+    <p class="ask">Then how do I roll back if I destroyed something by accident?</p>
+    <details><summary>Show answer</summary><div>
+      <p>With the S3 backend, the backup is <strong>AWS's job, not Terraform's</strong> — it's the <strong>S3 Versioning</strong> feature, and you have to turn it on.</p>
+      <p>With versioning, overwriting a file <strong>never deletes it</strong>. S3 saves the old one as a previous version and writes the change as a new file. You get the full history, as far back as you want:</p>
+      <div class="codebox"><pre>terraform.tfstate   (current)
+terraform.tfstate   2026-11-13
+terraform.tfstate   2026-11-12
+terraform.tfstate   2026-11-11  …</pre></div>
+      <p>In the console: <strong>Show versions</strong> on the object. Each version has its date, size and details.</p>
+      <p><strong>Note:</strong> it's not a daily backup — it saves <strong>per change</strong>, so several changes in a day means several versions.</p>
+    </div></details>
+  </div>
+
+  <div class="q">
+    <p class="ask">What do I watch out for before destroy — or before an apply that replaces something?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>First question: do you even need to run <code>terraform destroy</code>?</strong> Consider commenting out the resources instead.</p>
+      <p>Then watch for two categories:</p>
+      <ol>
+        <li><strong>Anything that holds data</strong> — it may be unrecoverable: databases (RDS), <strong>S3</strong>, <strong>EBS</strong>, <strong>EFS</strong>.</li>
+        <li><strong>Anything that forces other things to be recreated</strong> — <strong>VPC</strong> and subnets. You can't cleanly recreate a VPC; everything inside it has to be recreated too.</li>
+      </ol>
+    </div></details>
+  </div>
+
+  <div class="q">
+    <p class="ask">Is there any protection built in?</p>
+    <details><summary>Show answer</summary><div>
+      <p>Good news — the important things are <strong>not that easy to delete</strong>:</p>
+      <ul>
+        <li><strong>VPC:</strong> AWS won't let you delete it until everything inside is destroyed first.</li>
+        <li><strong>S3 buckets:</strong> similar protections.</li>
+        <li><strong>RDS:</strong> has <strong>deletion protection</strong> — one line in Terraform.</li>
+      </ul>
+      <div class="codebox"><pre>resource "aws_db_instance" "main" {
+  # …
+  deletion_protection = true
+}</pre></div>
+      <p>With it on, <strong><code>terraform destroy</code> won't destroy it.</strong> You must explicitly set it to false, or turn it off in the console, first.</p>
+      <div class="warn">
+        <span class="eyebrow">Watch out</span>
+        <p>This setting is <strong>specific to RDS</strong> — not every resource has one. <strong>EBS has no such protection.</strong></p>
+      </div>
+    </div></details>
+  </div>
+
+  <div class="q">
+    <p class="ask">A student destroyed EKS before Karpenter finished — what happened?</p>
+    <details><summary>Show answer</summary><div>
+      <p>Karpenter's deletion hadn't finished, EKS was destroyed anyway, and because there were <strong>no workers left</strong>, some AWS resources couldn't be removed — they had to be deleted by hand.</p>
+      <p>The fix they added: a <strong>dependency</strong> in the code so EKS waits until Karpenter is fully terminated before going.</p>
+      <p>The instructor's take: that kind of forced ordering is often a <strong>good thing</strong> — it prevents exactly this sort of accident.</p>
+    </div></details>
+  </div>
+
+  <div class="q">
+    <p class="ask">In a real company, would I even be able to fix that by hand?</p>
+    <details><summary>Show answer</summary><div>
+      <div class="table"><table>
+        <thead><tr><th>Environment</th><th>Typical platform-engineer access</th></tr></thead>
+        <tbody>
+          <tr><td>Dev / sandbox / non-production</td><td><strong>full admin</strong> — break it, fix it, that's what it's for</td></tr>
+          <tr><td>Production</td><td><strong>limited, specific access</strong> — often no permission to destroy</td></tr>
+        </tbody>
+      </table></div>
+      <p>Broader production access is granted <strong>temporarily when needed</strong>: an initial deployment, a big change window, a day or a week.</p>
+      <p>And it's a reason <strong>not to touch production in your first days</strong> at a company.</p>
+    </div></details>
+  </div>
+</section>
+
+<section id="karpenter">
+  <div class="label"><span class="tag">6 · Scaling</span><h2>Karpenter</h2></div>
+
+  <div class="q">
+    <p class="ask">What does Karpenter replace?</p>
+    <details><summary>Show answer</summary><div>
+      <p>AWS <strong>Auto Scaling of EC2s</strong>, for the cluster's worker nodes.</p>
+      <div class="table"><table>
+        <thead><tr><th></th><th>Scales based on</th></tr></thead>
+        <tbody>
+          <tr><td><strong>AWS Auto Scaling</strong></td><td><strong>EC2 metrics</strong> — CPU usage goes up, add nodes; goes down, remove them</td></tr>
+          <tr><td><strong>Karpenter</strong></td><td><strong>what the pods need</strong></td></tr>
+        </tbody>
+      </table></div>
+      <p>Same job, different trigger.</p>
+    </div></details>
+  </div>
+
+  <div class="q">
+    <p class="ask">What does Karpenter actually do?</p>
+    <details><summary>Show answer</summary><div>
+      <ul>
+        <li><strong>Pods need more room</strong> → launches new EC2 worker nodes.</li>
+        <li><strong>Nodes underutilized</strong> → <strong>consolidates</strong>: moves pods onto fewer workers, then deletes the EC2s that are no longer needed.</li>
+      </ul>
+    </div></details>
+  </div>
+
+  <div class="q">
+    <p class="ask">How does Karpenter know what a pod needs?</p>
+    <details><summary>Show answer</summary><div>
+      <p>Through <strong>resource requests</strong> — a Kubernetes feature.</p>
+      <p>When you create an EC2 you pick a size (t3.medium, m5.large…). When you create a <strong>pod you pick nothing</strong> — so <code>requests</code> is the only way to say how much it needs. It's the <strong>minimum resources</strong> for that pod.</p>
+      <p>That's the number Karpenter does its math with: <em>this pod needs 1 CPU — does that other node have 1 free CPU? Yes → move it. No → can't.</em></p>
+    </div></details>
+  </div>
+</section>
+
+<section id="context">
+  <div class="label"><span class="tag">7 · Kubernetes</span><h2>Context, namespaces and kube-proxy</h2></div>
+
+  <div class="q">
+    <p class="ask">What is a context in kubectl?</p>
+    <details><summary>Show answer</summary><div>
+      <p>A saved <strong>cluster + namespace combination</strong>, stored in <code>~/.kube/config</code>.</p>
+      <blockquote>The closest word is "profile" — exactly like AWS profiles.</blockquote>
+      <p>AWS profiles select which account; contexts select which <strong>cluster</strong> you're connected to. (The instructor: it would have saved a lot of explaining if they'd just called it profile.)</p>
+      <p>You can have 10 or 15 of them. Only <strong>one is current</strong>, because you can only connect to one cluster at a time.</p>
+      <div class="codebox"><pre>kubectl config get-contexts    <span class="c"># list them all, * marks the current one</span></pre></div>
+    </div></details>
+  </div>
+
+  <div class="q">
+    <p class="ask">If the context is already saved, why do I still have to run update-kubeconfig?</p>
+    <details><summary>Show answer</summary><div>
+      <p>Because with a saved context alone, <code>kubectl get nodes</code> <strong>fails</strong> — the credentials inside it are <strong>temporary</strong>.</p>
+      <p>That's an EKS <strong>security feature</strong>: access depends on your <strong>IAM role</strong>, and it's re-verified each time. So you re-run it per terminal session, and every day.</p>
+      <p class="see">even if someone steals your kubeconfig, they still can't connect — they'd need your IAM role too. On a plain, non-cloud cluster, a stolen kubeconfig <em>would</em> get them in.</p>
+    </div></details>
+  </div>
+
+  <div class="q">
+    <p class="ask">So what does <code>aws eks update-kubeconfig</code> do exactly?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>Two things at once:</strong></p>
+      <ol>
+        <li><strong>Authenticates</strong> you with EKS, via your IAM role.</li>
+        <li><strong>Sets the current context</strong> to that cluster.</li>
+      </ol>
+      <p>So you don't need <code>kubectl config set-context</code> afterwards — it's already done for you.</p>
+    </div></details>
+  </div>
+
+  <div class="q">
+    <p class="ask">What is a namespace — and is it network isolation?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>No, it's not network isolation.</strong> It's a <strong>virtual grouping of pods</strong> inside one cluster — <strong>like folders for files</strong>.</p>
+      <p>It's a core Kubernetes topic you can't skip. What it's actually used for:</p>
+      <ul>
+        <li>group <strong>resource limits</strong> for a set of pods</li>
+        <li>group <strong>permissions</strong> — e.g. give someone access to one namespace only</li>
+      </ul>
+    </div></details>
+  </div>
+
+  <div class="q">
+    <p class="ask">What is kube-system?</p>
+    <details><summary>Show answer</summary><div>
+      <p>A <strong>system-created namespace</strong>, made when the cluster is created. Kubernetes puts its <strong>own system pods</strong> there — CoreDNS, API server and others — so they don't mix with yours.</p>
+      <div class="codebox"><pre>kubectl get pods                 <span class="c"># your namespace</span>
+kubectl get pods -n kube-system  <span class="c"># the system pods</span></pre></div>
+      <p>Karpenter was installed into <code>kube-system</code> in our cluster.</p>
+    </div></details>
+  </div>
+
+  <div class="q">
+    <p class="ask">And kube-proxy?</p>
+    <details><summary>Show answer</summary><div>
+      <p>Another Kubernetes <strong>system component</strong>, running on <strong>every worker node</strong> — just like kubelet.</p>
+      <p>Its main job is to make the <strong>Service</strong> feature work (ClusterIP and the rest). Without kube-proxy, Services don't work properly.</p>
+      <div class="warn">
+        <span class="eyebrow">Don't confuse them</span>
+        <p>Context, namespace, kube-system and kube-proxy are <strong>four unrelated things</strong> that only share part of a name. Don't try to connect them.</p>
+      </div>
+    </div></details>
+  </div>
+</section>
+
+<section id="storage">
+  <div class="label"><span class="tag">8 · Storage &amp; networking</span><h2>Storage types &amp; networking limits</h2></div>
+
+  <div class="q">
+    <p class="ask">What are the three kinds of cloud storage?</p>
+    <details><summary>Show answer</summary><div>
+      <div class="table"><table>
+        <thead><tr><th>Type</th><th>AWS</th><th>What it is</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Object</strong></td><td>S3</td><td>files in buckets, reached over HTTP/HTTPS</td></tr>
+          <tr><td><strong>Block</strong></td><td>EBS</td><td>a disk attached to a server — <strong>one disk, one server</strong></td></tr>
+          <tr><td><strong>File system</strong></td><td>EFS</td><td>remote shared storage <strong>mounted as a folder</strong>, e.g. <code>/var/shared-files/</code></td></tr>
+        </tbody>
+      </table></div>
+    </div></details>
+  </div>
+
+  <div class="q">
+    <p class="ask">What makes EFS different from EBS?</p>
+    <details><summary>Show answer</summary><div>
+      <p>EBS is a disk for <strong>one</strong> server. EFS is <strong>centralized, shared</strong> storage: one <strong>or many</strong> servers mount the same folder.</p>
+      <p>If one server adds a file, <strong>the others see it immediately</strong>. Use it when your servers — or your pods — need shared storage.</p>
+    </div></details>
+  </div>
+
+  <div class="q">
+    <p class="ask">Challenge from the session</p>
+    <details><summary>Show the challenge</summary><div>
+      <p>Create an <strong>nginx Deployment with 3 replicas</strong> that all share the <strong>same folder at the nginx root</strong>, using <strong>EFS</strong> as the shared storage.</p>
+      <p>It's harder with pods than with EC2s — a bit of extra effort, but doable, and worth practising. It's not in the tickets, but you can build it into one of them.</p>
+    </div></details>
+  </div>
+
+  <div class="q">
+    <p class="ask">Can I change a VPC's CIDR block later?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>No. There is no such thing as changing a VPC.</strong></p>
+      <p>Subnets you can recreate. The VPC you cannot — and everything in a VPC lives with that VPC, so redoing it means <strong>recreating everything inside it</strong>.</p>
+      <blockquote>Set it correctly the first time.</blockquote>
+      <p>The good news: with all the Terraform code, recreating is possible — just big work. There's rarely a reason to change it. One case that forces it: a <strong>CIDR conflict in VPC peering</strong> — though Transit Gateway and other options can get around that now.</p>
+    </div></details>
+  </div>
+
+  <div class="q">
+    <p class="ask">If I have 15 clusters, how do I keep track of which Terraform code is which?</p>
+    <details><summary>Show answer</summary><div>
+      <p>More clusters = <strong>more Terraform root folders</strong>. The <strong>child modules stay shared</strong>; the <strong>root modules multiply</strong>.</p>
+      <p>So before every <code>terraform apply</code> or <code>terraform destroy</code>, <strong>know two things</strong>:</p>
+      <ol>
+        <li><strong>which folder</strong> you're in</li>
+        <li><strong>which AWS account</strong> you're in</li>
+      </ol>
+      <p>That's your job as the platform engineer — you're the one running destroy. <strong>Documentation listing what lives where is strongly recommended.</strong></p>
+    </div></details>
+  </div>
+
+  <div class="q">
+    <p class="ask">Do I need to know how SSO / Identity Center works?</p>
+    <details><summary>Show answer</summary><div>
+      <p>Understand <strong>what SSO is</strong> — yes. How to configure it — <strong>no</strong>.</p>
+      <p>It's a one-time setup; in bigger companies it's often done by dedicated <strong>IT administrators</strong>, not platform engineers. For most engineers it's like Gmail: already configured for you. Nobody will ask you to set it up in an interview.</p>
+    </div></details>
+  </div>
+</section>
+
+<section id="next">
+  <div class="label"><span class="tag">Action</span><h2>What's next (Monday)</h2></div>
+  <ul>
+    <li>Finish <strong>deploying the application</strong> and fully expose it to the internet — Ingress / load balancer.</li>
+    <li>Then the next stage: <strong>automation — CI/CD</strong> for the application, and automating <code>terraform apply</code> itself.</li>
+  </ul>
+
+  <div class="q">
+    <p class="ask">Stuck on a question you can't even phrase?</p>
+    <details><summary>Show answer</summary><div>
+      <p>The instructor's advice: <strong>summarize the question with AI first</strong>, then post it in the channel. An HTML artifact works too.</p>
+      <p>Often by the time you've put the question together properly, <strong>you've answered it yourself</strong> — rubber duck debugging.</p>
+    </div></details>
+  </div>
+</section>
+
+<footer><strong>🔑 Remember:</strong> no requirement → your call, just know why · curiosity beats years · Project-X solo, 7–8+ tickets, apply in December · state file = latest only, history comes from <strong>S3 versioning</strong> · <code>deletion_protection = true</code> on RDS · Karpenter scales on <strong>pod needs</strong>, not EC2 CPU · context = profile · namespace = folders, not network isolation · EFS = shared folder for many servers/pods · a VPC CIDR can never be changed</footer>
+</div>
+
+<script>
+document.querySelectorAll('.codebox').forEach(function(box){
+  var pre = box.querySelector('pre'); var b = document.createElement('button');
+  b.className = 'copy'; b.type = 'button'; b.textContent = 'Copy';
+  b.addEventListener('click', function(){
+    var text = pre.innerText.split('\n').map(function(l){ return l.replace(/\s+#.*$/, ''); }).join('\n').trim();
+    var done = function(){ b.textContent = 'Copied'; setTimeout(function(){ b.textContent = 'Copy'; }, 1500); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(function(){ selectPre(); });
+    } else { selectPre(); }
+    function selectPre(){ var r = document.createRange(); r.selectNodeContents(pre); var s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = 'Selected'; }
+  });
+  box.appendChild(b);
+});
+</script>
+</body></html>
