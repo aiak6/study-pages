@@ -1,0 +1,502 @@
+<title>Project X Session 10</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one reading column; sections as stacked "shipping manifest" blocks with a stencilled label; code and tables scroll in place. */
+:root{
+  --bg:#f3f5f7; --surface:#ffffff; --ink:#15202b; --muted:#56657a; --line:#d8dee6;
+  --accent:#c4501b; --accent-soft:#fbe9df; --steel:#1f5f8b; --steel-soft:#e3eef6;
+  --code-bg:#0f1b26; --code-fg:#dbe7f2; --code-cmt:#7f97ad;
+  --good:#2e7d4f; --bad:#b3261e;
+  --f-display:"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --f-body:"Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e151c; --surface:#16202a; --ink:#e6edf3; --muted:#9aabbd; --line:#2a3845;
+  --accent:#f0874f; --accent-soft:#3a2418; --steel:#7ab8e3; --steel-soft:#16303f;
+  --code-bg:#0a1016; --code-fg:#dbe7f2; --code-cmt:#6f879c;
+  --good:#6cc493; --bad:#f08a80; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0e151c; --surface:#16202a; --ink:#e6edf3; --muted:#9aabbd; --line:#2a3845;
+  --accent:#f0874f; --accent-soft:#3a2418; --steel:#7ab8e3; --steel-soft:#16303f;
+  --code-bg:#0a1016; --code-fg:#dbe7f2; --code-cmt:#6f879c;
+  --good:#6cc493; --bad:#f08a80; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:17px/1.6 var(--f-body);padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:28px 64px}
+.wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.15;margin:0}
+h1{font-size:clamp(30px,6vw,44px);font-weight:800;letter-spacing:-.01em}
+h2{font-size:24px;font-weight:800}
+h3{font-size:18px;font-weight:600;margin-top:6px}
+p{margin:0}
+a{color:var(--steel)}
+code{font-family:var(--f-mono);font-size:.86em;background:var(--steel-soft);color:var(--ink);padding:1px 5px;border-radius:4px}
+strong{font-weight:700}
+.eyebrow{font:600 12px/1 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+header{display:flex;flex-direction:column;gap:12px;border-bottom:3px solid var(--ink);padding-bottom:20px}
+.meta{display:flex;flex-wrap:wrap;gap:8px 16px;color:var(--muted);font-size:15px}
+.lede{font-size:19px;max-width:65ch}
+nav{display:flex;flex-wrap:wrap;gap:8px}
+nav a{font:600 13px/1 var(--f-mono);text-decoration:none;color:var(--ink);border:1px solid var(--line);background:var(--surface);padding:8px 10px;border-radius:6px}
+nav a:hover,nav a:focus-visible{border-color:var(--accent);color:var(--accent);outline:none}
+section{display:flex;flex-direction:column;gap:14px;scroll-margin-top:16px}
+section > .label{display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--line);padding-bottom:8px}
+section > .label .tag{font:600 11px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--surface);background:var(--ink);padding:5px 7px;border-radius:3px}
+ul,ol{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px}
+.table{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:15.5px;min-width:480px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:600 12px/1.3 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--bg)}
+tr:last-child td{border-bottom:0}
+blockquote{margin:0;border-left:4px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 8px 8px 0;font-weight:600}
+pre{margin:0;background:var(--code-bg);color:var(--code-fg);font:14px/1.6 var(--f-mono);padding:14px 16px;border-radius:8px;overflow-x:auto}
+pre .c{color:var(--code-cmt)}
+.codebox{position:relative}
+.copy{position:absolute;top:8px;right:8px;font:600 11px/1 var(--f-mono);background:transparent;color:var(--code-cmt);border:1px solid var(--code-cmt);border-radius:4px;padding:5px 7px;cursor:pointer}
+.copy:hover,.copy:focus-visible{color:var(--code-fg);border-color:var(--code-fg);outline:none}
+.flow{font:600 14px/1.5 var(--f-mono);background:var(--steel-soft);color:var(--ink);padding:14px 16px;border-radius:8px;overflow-x:auto;white-space:pre}
+.step{display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:start}
+.step > .n{font:800 18px/34px var(--f-display);text-align:center;background:var(--ink);color:var(--bg);border-radius:50%;width:34px;height:34px}
+.step > div{min-width:0;display:flex;flex-direction:column;gap:8px}
+.see{font-size:15px;color:var(--good)}
+.see::before{content:"You should see: ";font-weight:700}
+.warn{border:1px solid var(--bad);border-radius:8px;padding:12px 16px;display:flex;flex-direction:column;gap:10px;background:var(--surface)}
+.warn .eyebrow{color:var(--bad)}
+details{border:1px solid var(--line);background:var(--surface);border-radius:8px}
+details summary{cursor:pointer;padding:12px 16px;font-weight:600;list-style-position:inside}
+details summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:8px}
+details > div{padding:0 16px 14px;display:flex;flex-direction:column;gap:8px}
+.q{display:flex;flex-direction:column;gap:10px}
+.q p.ask{font-weight:600}
+.reread{font-style:italic;color:var(--muted);font-size:15px}
+footer{color:var(--muted);font-size:15px;border-top:1px solid var(--line);padding-top:16px}
+@media (prefers-reduced-motion: reduce){*{scroll-behavior:auto!important}}
+html{scroll-behavior:smooth}
+</style>
+
+<div class="wrap">
+<header>
+  <span class="eyebrow">312 School · Cohort 26a · Project X</span>
+  <h1>Session 10: The public EKS route and the DNS cutover</h1>
+  <div class="meta"><span>Wed, Nov 18, 2026</span><span>Board ticket PX-111 — no new homework assigned</span><span>Sources: class recording, written notes, class materials page</span></div>
+  <p class="lede">This is the class where the migration actually lands. The app had been running on EKS for two sessions, but every real visitor still went to <strong>ECS</strong>, because the public hostname pointed at the ECS load balancer. Class 10 built the EKS front door with <strong>Gateway API</strong> and moved the <strong>Route 53</strong> record across. It did not go smoothly, and that's the valuable part: the first ALB came out <strong>internal</strong> and unreachable, a <code>TargetGroupConfiguration</code> nobody expected turned out to be required, and the DNS was switched <strong>before</strong> the new route worked — so the site was briefly broken for everyone while it got debugged live. By the end the hostname resolved to the EKS ALB and the browser showed a padlock. ECS is still running, deliberately, as the way back.</p>
+  <nav aria-label="Sections"><a href="#s10">Notes</a><a href="#homework">What's left</a><a href="#quiz10">Check yourself</a></nav>
+</header>
+
+<section id="s10">
+  <div class="label"><span class="tag">Notes</span><h2>Quick reference and notes</h2></div>
+  <div class="table"><table>
+    <thead><tr><th>Topic</th><th>Key point</th></tr></thead>
+    <tbody>
+      <tr><td><strong>The four steps</strong></td><td>❶ Install the <strong>AWS Load Balancer Controller</strong> · ❷ Install <strong>Gateway API CRDs</strong> · ❸ Apply <strong>GatewayClass + Gateway</strong> (once per cluster) · ❹ Apply an <strong>HTTPRoute</strong> per app</td></tr>
+      <tr><td><strong>Only step 4 repeats</strong></td><td>Steps 1–3 are done <strong>once for the cluster</strong>. Every new app is one HTTPRoute plus its ClusterIP Service</td></tr>
+      <tr><td><strong>Controller install</strong></td><td>IAM role + policy from <strong>Terraform</strong>, then a <strong>Helm chart</strong> into <code>kube-system</code>. It needs the <strong>VPC ID</strong> passed in</td></tr>
+      <tr><td><strong>CRDs</strong></td><td><strong>Custom Resource Definitions</strong> — custom <code>kind</code>s beyond Pod/Deployment/Service. Gateway API ships ~<strong>17,000 lines</strong> of them</td></tr>
+      <tr><td><strong>Internal by default</strong></td><td>The controller built an <strong>internal</strong> ALB. You must add a <strong>LoadBalancerConfiguration</strong> with <code>scheme: internet-facing</code> and <strong>public subnets</strong></td></tr>
+      <tr><td><strong>Spot a public subnet</strong></td><td>Its route table sends <code>0.0.0.0/0</code> to an <strong>Internet Gateway</strong> — not to a NAT gateway</td></tr>
+      <tr><td><strong>TargetGroupConfiguration</strong></td><td>Also required, for <strong>Pod IP</strong> targets (<code>targetType: ip</code>). Set it as a <strong>cluster-wide default</strong> so every namespace inherits it</td></tr>
+      <tr><td><strong>HTTPRoute fields</strong></td><td><code>parentRefs</code> (gateway name + namespace) and <code>hostnames</code>, pointing at the app's <strong>ClusterIP</strong> Service</td></tr>
+      <tr><td><strong>Service stays ClusterIP</strong></td><td>Using <code>LoadBalancer</code> here would create a <strong>second</strong>, pointless load balancer</td></tr>
+      <tr><td><strong>Weighted DNS</strong></td><td>Route 53 weights are <strong>relative numbers, not percentages</strong>. Share = weight ÷ total. Max value <strong>255</strong></td></tr>
+      <tr><td><strong>Canary deployment</strong></td><td>ECS 99 / EKS 1 → 99 / 99 → delete the ECS record. That gradual shift <strong>is</strong> a canary</td></tr>
+      <tr><td><strong>Rollback</strong></td><td>Leave ECS and its ALB running. Re-add the ECS DNS record and traffic goes back</td></tr>
+      <tr><td><strong>Test without touching DNS</strong></td><td><code>curl</code> with a <strong>Host header</strong>, or add the ALB IP + hostname to <code>/etc/hosts</code> — affects only your machine</td></tr>
+      <tr><td><strong>Read the first clue</strong></td><td><code>could not resolve host</code> is a <strong>DNS</strong> problem, not a port problem. Don't skip ahead</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>📰 Why half the internet broke this month</h3>
+  <p>A student had asked the previous class about the wave of outages — Microsoft, airlines, banks. The instructor came back with a fuller answer.</p>
+  <ul>
+    <li><strong>The official line: no cyberattack.</strong> The explanation being given is accumulated <strong>bugs</strong>, found and fixed in a rush.</li>
+    <li>The chain of reasoning: <strong>AI got genuinely good this year</strong> and started finding real flaws in code, mostly <strong>security</strong> ones → companies had to fix them, because serious security bugs can't wait → <strong>every fix is a change, and every change can break something</strong> → many companies making many changes at once produced a cluster of outages.</li>
+    <li>🔑 The engineering principle underneath, true long before AI: <strong>the more you change, the more likely you break something.</strong></li>
+    <li>That's why <strong>banks keep old systems running</strong> unchanged, and why retailers impose <strong>change freezes</strong> — no code changes during the holiday season. Roughly <strong>75%</strong> of annual US shopping happens in that window, so nobody touches anything.</li>
+    <li>A student asked whether AI actually <strong>prevented</strong> something worse. The answer: yes, most likely. <strong>If a model can find a security flaw, so can an attacker using the same model.</strong> Fixing first beats being exploited first.</li>
+    <li>💡 He also flagged how much outage "news" is fake or AI-generated engagement bait. His filter: trusted sources, or run it through AI before believing it.</li>
+  </ul>
+
+  <h3>🗺️ The four steps to make an app public</h3>
+  <p>Everything in this class fits one checklist. Learn it as a unit — it's a clean interview answer to "how do you expose an app running on Kubernetes?"</p>
+  <div class="table"><table>
+    <thead><tr><th>#</th><th>Step</th><th>How often</th></tr></thead>
+    <tbody>
+      <tr><td><strong>1</strong></td><td>Install the <strong>AWS Load Balancer Controller</strong> (IAM role in AWS + Helm chart in Kubernetes)</td><td>Once per cluster</td></tr>
+      <tr><td><strong>2</strong></td><td>Install the <strong>Gateway API CRDs</strong></td><td>Once per cluster</td></tr>
+      <tr><td><strong>3</strong></td><td>Apply <strong>GatewayClass</strong> and <strong>Gateway</strong></td><td>Once per cluster</td></tr>
+      <tr><td><strong>4</strong></td><td>Apply an <strong>HTTPRoute</strong> for each application</td><td><strong>Per app</strong></td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li>🔑 Three of the four are <strong>one-time cluster setup</strong>. Once they exist, exposing the next application is a single HTTPRoute and a ClusterIP Service. That's the whole payoff of the design.</li>
+    <li><strong>Why Gateway API rather than a load balancer per app?</strong> Shared entrance = fewer load balancers to pay for and manage. In a microservice shop with dozens of small apps, that difference is enormous (Session 09).</li>
+    <li>💡 The instructor was honest that Gateway API is <strong>more complex than ingress-nginx was</strong>. Its predecessor was one resource; this is four moving parts. The trade is flexibility — and you only set it up once.</li>
+  </ul>
+
+  <h3>🎛️ Step 1: the AWS Load Balancer Controller</h3>
+  <p>Two halves, and both must exist — the same pattern as Karpenter (Session 08).</p>
+  <div class="table"><table>
+    <thead><tr><th>Half</th><th>What it is</th><th>Where it came from</th></tr></thead>
+    <tbody>
+      <tr><td><strong>AWS side</strong></td><td>IAM policy + role, attached via <strong>Pod Identity</strong></td><td>Already written in the <strong>Terraform</strong> EKS module</td></tr>
+      <tr><td><strong>Kubernetes side</strong></td><td>The controller itself, running as a Pod in <code>kube-system</code></td><td>A <strong>Helm chart</strong> — this is what had to be run</td></tr>
+    </tbody>
+  </table></div>
+  <div class="codebox"><pre>VPC_ID="&lt;your-cluster-vpc-id&gt;"
+
+helm upgrade --install aws-load-balancer-controller aws-load-balancer-controller \
+  --repo https://aws.github.io/eks-charts \
+  --version 3.4.0 \
+  --namespace kube-system \
+  --set-string clusterName=projectx-dev-eks \
+  --set-string region=us-east-1 \
+  --set-string vpcId="$VPC_ID" \
+  --set-string serviceAccount.name=aws-load-balancer-controller \
+  --set-string 'nodeSelector.projectx\.io/node-role=system' \
+  --set replicaCount=1 \
+  --set enableServiceMutatorWebhook=false \
+  --wait --timeout 10m
+
+kubectl -n kube-system get pods     <span class="c"># confirm the controller Pod is Running</span></pre></div>
+  <ul>
+    <li>🔑 Read that <strong>backslash</strong> carefully: <code>'nodeSelector.projectx\.io/node-role=system'</code>. Helm uses <strong>dots to separate setting levels</strong>, so a dot that's part of a <em>name</em> must be escaped. Miss it and Helm builds a nonsense nested structure.</li>
+    <li>The settings aren't arbitrary — <code>clusterName</code>, the service account name and the node selector all have to <strong>match what Terraform created</strong>. The instructor asked Claude to read the branch and produce the matching command rather than copying a generic one from the docs.</li>
+    <li>The <strong>VPC ID</strong> is the one value the AI couldn't infer; he looked it up in the console (the CloudFormation-tagged VPC) and passed it as a shell variable.</li>
+    <li>A student asked whether this installs into the EKS cluster. Yes — <strong>Helm always installs into whatever cluster your context points at</strong>, here into the <code>kube-system</code> namespace. And it's more than a Pod: a ServiceAccount plus the linked AWS IAM role come with it.</li>
+  </ul>
+
+  <h3>🧬 Step 2: Gateway API CRDs — and what a CRD is</h3>
+  <p><strong>CRD = Custom Resource Definition.</strong> Kubernetes ships with built-in kinds: <code>Pod</code>, <code>Deployment</code>, <code>Service</code>. A CRD <strong>teaches the cluster a new kind</strong>. Without the Gateway API CRDs installed, <code>kind: Gateway</code> is a word the cluster has never heard of, and <code>kubectl apply</code> refuses it.</p>
+  <div class="codebox"><pre>kubectl apply --server-side=true \
+  -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.5.0/standard-install.yaml</pre></div>
+  <ul>
+    <li>That one file is roughly <strong>17,000 lines</strong> — the full specification of how Gateway API behaves. You never read it; you just install it.</li>
+    <li>There are other install variants (experimental, etc.). Unless you need something specific, take <strong>standard</strong>.</li>
+    <li>🔑 <strong>Who writes CRDs?</strong> The people building the software — the Gateway API project here. As a platform engineer you <strong>install and use</strong> CRDs; you almost never author them. That's a clean, confident interview answer.</li>
+    <li>⚠️ Order matters, and the class proved it: the GatewayClass was applied before running this command, producing <code>Ensure CRDs are installed first</code>. The command had been pasted into the notes and never actually run.</li>
+  </ul>
+
+  <h3>🚪 Step 3: GatewayClass and Gateway — and the internal-ALB trap</h3>
+  <p>These two go in the <strong>platform repo</strong>, not the app chart, because they're once per cluster.</p>
+  <div class="codebox"><pre>cd projectx-26a-platform/
+kubectl apply -f gateway-api/</pre></div>
+  <div class="table"><table>
+    <thead><tr><th>Object</th><th>Says</th><th>Lives in</th></tr></thead>
+    <tbody>
+      <tr><td><strong>GatewayClass</strong></td><td>"Use the AWS Load Balancer Controller" → <code>controllerName: gateway.k8s.aws/alb</code></td><td>No namespace (cluster-scoped)</td></tr>
+      <tr><td><strong>Gateway</strong></td><td>"Listen on this port"</td><td><code>kube-system</code>, same as the controller</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li>💡 The Gateway permits routes <strong>from other namespaces</strong>, which is what lets the app's HTTPRoute in <code>main-product-line</code> attach to a Gateway in <code>kube-system</code>. Miss that and your route is silently ignored.</li>
+    <li>Both resources need an <code>apiVersion</code> — the slide excerpts omitted it and the first apply failed on exactly that.</li>
+  </ul>
+  <p><strong>Then the real problem.</strong> The ALB got created — and was completely unreachable from a browser.</p>
+  <div class="codebox"><pre>AWS console → Load balancers
+  ECS ALB  → scheme: internet-facing
+  EKS ALB  → scheme: internal          <span class="c">← there it is</span></pre></div>
+  <p><strong>Why internal?</strong> Two reasons together: <strong>no scheme was set</strong>, so it defaulted to internal; and the subnets it found were the <strong>private</strong> ones the ECS design used.</p>
+  <div class="codebox"><pre>scheme: internet-facing
+subnets:
+  - subnet-&lt;public-a&gt;      <span class="c"># public = route table → Internet Gateway</span>
+  - subnet-&lt;public-b&gt;</pre></div>
+  <div class="warn">
+    <span class="eyebrow">The test that actually tells you</span>
+    <p>🔑 <strong>How to identify a public subnet, reliably:</strong> open its <strong>route table</strong>. <code>0.0.0.0/0</code> → <strong>Internet Gateway</strong> = public. <code>0.0.0.0/0</code> → <strong>NAT gateway</strong> = private. Names lie; route tables don't. In this VPC the database subnets had no route out at all, the ECS subnets pointed at NAT, and only two subnets were genuinely public.</p>
+  </div>
+  <ul>
+    <li>An internet-facing load balancer <strong>must sit in public subnets</strong> — same logic as a NAT gateway (Scale Session 06).</li>
+    <li>To apply the change the Gateway had to be <strong>deleted and re-applied</strong>: <code>kubectl delete -f gateway-api/</code> then <code>kubectl apply -f gateway-api/</code>. That produces a <strong>new ALB with a new DNS name</strong>, which matters in a moment.</li>
+  </ul>
+
+  <h3>🎯 The TargetGroupConfiguration surprise — and how to doubt your AI properly</h3>
+  <p>Even after the scheme fix, no load balancer appeared. The controller logs (huge, JSON, genuinely unpleasant to read) showed: <code>target group port is empty</code>. The AI's answer: you need a <strong>TargetGroupConfiguration</strong>.</p>
+  <blockquote>🔑 "When I see something inconsistent like this, I try not to follow right away what the AI says, but rather confirm — because I assume AI did not confirm. A lot of times it just goes to the best first answer."</blockquote>
+  <ul>
+    <li>His actual doubt was sharp and specific: <strong>why wasn't this needed five minutes ago</strong>, when the internal ALB was created?</li>
+    <li>The confirmed answer: the internal one <strong>never had an application behind it</strong>. It was an empty load balancer that accepted no routes, so it never reached the point of needing target group settings. The requirement was always there; the earlier attempt just never got far enough to hit it.</li>
+    <li><strong>Where to put it:</strong> the AI offered a per-namespace version. He chose the <strong>cluster-wide default</strong> instead, so every namespace inherits it and nobody has to repeat it per app.</li>
+    <li>He also had to <strong>link it from the <code>LoadBalancerConfiguration</code></strong> — creating the object alone did nothing, a step that cost another round.</li>
+    <li>💡 Reading controller logs: they're verbose JSON. The honest advice is to paste them into an AI to parse — but keep the skepticism above.</li>
+    <li>💡 <strong>Targets are Pod IPs</strong> (<code>targetType: ip</code>), not nodes. The ALB talks straight to Pods, which is why the controller must keep updating it as Pods are replaced.</li>
+  </ul>
+
+  <h3>🧭 Step 4: the HTTPRoute — one per application</h3>
+  <p>This is the only piece that repeats, and it lives <strong>in the app's Helm chart</strong>. The AI generated the template; the interesting part is which values go <strong>where</strong>:</p>
+  <div class="codebox"><pre><span class="c"># values-dev.yaml — environment-specific, NOT shared values.yaml</span>
+httpRoute:
+  enabled: true
+  parentRefs:
+    - name: projectx-public       <span class="c"># the Gateway's name</span>
+      namespace: kube-system      <span class="c"># where the Gateway lives</span>
+  hostnames:
+    - &lt;your-app-hostname&gt;
+
+service:
+  type: ClusterIP                 <span class="c"># NOT LoadBalancer</span></pre></div>
+  <ul>
+    <li>🔑 The hostname is <strong>different in every environment</strong>, so this belongs in <code>values-dev.yaml</code>, never in the shared <code>values.yaml</code>. Putting it in the shared file would give staging and production the dev hostname.</li>
+    <li>🔑 The Service goes <strong>back to ClusterIP</strong>. The ALB is managed by the controller now; a <code>LoadBalancer</code> Service would spin up a <strong>second</strong> load balancer serving the same Pods — pure waste.</li>
+    <li><strong>The chain:</strong> HTTPRoute → ClusterIP Service → (selector) → Deployment's Pods. Each link is a name matching a name.</li>
+    <li><strong>A real error worth remembering:</strong> the first apply failed with <code>spec.hostnames: Invalid value</code> because the hostname had been pasted <strong>with <code>https://</code> on the front</strong>. A hostname is just the name — no scheme, no slashes.</li>
+  </ul>
+  <div class="codebox"><pre>helm upgrade --install investment-app charts/investment-app \
+  --values charts/investment-app/values-dev.yaml \
+  --namespace main-product-line --create-namespace
+
+kubectl -n main-product-line get httproute</pre></div>
+  <p>💡 The Secret had to be re-applied again, as in Session 09 — it's deliberately outside the chart, so recreating the namespace loses it.</p>
+
+  <h3>🔀 The DNS cutover: weighted records and canary deployment</h3>
+  <p>Both load balancers now exist and both work. The <strong>only</strong> thing still sending users to ECS is one Route 53 record. You could flip it in one move, but Route 53 lets you do it <strong>gradually</strong> with a <strong>weighted</strong> routing policy: two records, same hostname, different targets.</p>
+  <div class="table"><table>
+    <thead><tr><th>ECS weight</th><th>EKS weight</th><th>Where traffic goes</th></tr></thead>
+    <tbody>
+      <tr><td>99</td><td>1</td><td>~1 in 100 requests reaches EKS</td></tr>
+      <tr><td>99</td><td>99</td><td>Roughly half and half</td></tr>
+      <tr><td>—</td><td>(ECS record deleted)</td><td><strong>Everything</strong> to EKS</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li>🔑 <strong>Weights are relative numbers, not percentages.</strong> A record's share is <strong>its weight ÷ the sum of all weights</strong>. The maximum value is <strong>255</strong>. So 99 and 99 is 50/50, not 198%.</li>
+    <li><strong>This pattern has a name:</strong> <strong>canary deployment</strong> — send a small slice of real traffic to the new thing, watch, then widen. Used for migrations and for risky releases alike.</li>
+    <li><strong>Full cutover</strong> = delete the record pointing at ECS. Then the hostname resolves only to the EKS ALB.</li>
+    <li><strong>Rollback</strong> = re-add the ECS record. ECS and its ALB are deliberately left running for a couple of days so this stays possible.</li>
+  </ul>
+  <div class="warn">
+    <span class="eyebrow">Two honest warnings from this demo</span>
+    <p>⚠️ <strong>DNS caching blurs all of this.</strong> With 50/50 weights, a given person doesn't get an even split — they get whatever their resolver cached. And after a cutover some users keep hitting the old address for a while. The instructor had to flush his own DNS cache mid-demo to see the change.</p>
+    <p>⚠️ <strong>Never delete the old system first.</strong> If you delete it before switching traffic, users are still being sent there and get nothing. Switch traffic, verify, <em>then</em> decommission. In this class the DNS was switched <strong>before</strong> the EKS route worked, so the site was briefly broken for everybody — which is exactly what the next section would have prevented.</p>
+  </div>
+
+  <h3>🧪 Testing without changing public DNS</h3>
+  <p>The whole problem: you want to check the new load balancer using the <strong>real hostname</strong> (because the route matches on hostname) without affecting any real user.</p>
+  <div class="table"><table>
+    <thead><tr><th>Option</th><th>How</th><th>Catch</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Host header</strong></td><td><code>curl -H 'Host: app.example.net' http://&lt;alb-dns-name&gt;/</code></td><td>Works in <code>curl</code>, <strong>not</strong> in Chrome</td></tr>
+      <tr><td><strong><code>/etc/hosts</code></strong></td><td>Add <code>&lt;ALB-IP&gt; app.example.net</code></td><td>Affects <strong>only your machine</strong> — and you must remember to remove it</td></tr>
+    </tbody>
+  </table></div>
+  <div class="codebox"><pre>sudo vi /etc/hosts
+<span class="c"># add a line:  &lt;EKS-ALB-IP&gt;  &lt;your-app-hostname&gt;</span></pre></div>
+  <ul>
+    <li>🔑 <strong>Why this works:</strong> a machine checks its <strong>own DNS file first</strong>, then public DNS servers. Your entry wins locally and the rest of the world is unaffected.</li>
+    <li><strong>Troubleshooting lesson of the class.</strong> After switching to the new ALB, <code>curl</code> returned <code>could not resolve host</code>. A student guessed it was the port.</li>
+  </ul>
+  <blockquote>🔑 "Always look at the first clue first. <em>Could not resolve host</em> means it doesn't know the IP of the host — that's DNS. It's unlikely to be a port." If somebody says they have stomach pain, don't start by looking at their brain.</blockquote>
+  <p>The real cause fit perfectly: deleting and re-applying the Gateway had created a <strong>new ALB with a new DNS name</strong>, and the Route 53 record still pointed at the old one. Updating the record fixed it — after a local DNS cache flush.</p>
+
+  <h3>🔐 Adding HTTPS — and matching what ECS already did</h3>
+  <p>First success was <strong>HTTP on port 80</strong>. That's not a finished migration: the ECS site served <strong>HTTPS</strong>, and the replacement has to behave the same.</p>
+  <ul>
+    <li><strong>The certificate is already paid for and valid.</strong> Look at what the ECS ALB uses: its <code>443</code> listener references an <strong>ACM</strong> certificate for that exact hostname. Point the new ALB at the <strong>same certificate</strong>.</li>
+    <li>The change is a few lines in the <code>LoadBalancerConfiguration</code> — a <strong>443 listener</strong> with the ACM certificate ARN, plus a matching listener on the Gateway. Re-apply, and the browser shows a secure connection.</li>
+    <li>💡 A student asked about their own domain without a certificate: because we're on an AWS load balancer, an <strong>ACM</strong> certificate is free when used this way. No Certbot needed (Foundation Class 11 was the manual version).</li>
+  </ul>
+  <div class="table"><table>
+    <thead><tr><th>Worth copying across</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td><strong>443 listener + ACM certificate</strong></td><td>Same HTTPS behaviour</td></tr>
+      <tr><td><strong>HTTP → HTTPS redirect</strong></td><td>ECS had one. <strong>Not verified in class</strong></td></tr>
+      <tr><td><strong>Source IP restrictions</strong></td><td>If the old one only allowed certain IPs, the new one must too</td></tr>
+      <tr><td><strong>Health checks, deregistration delay</strong></td><td>Behaviour under deploys and failures</td></tr>
+    </tbody>
+  </table></div>
+  <blockquote>🔑 "If there is no change, there is no problem. If there is a change, there is a possibility of a problem." Even a setting you don't understand should be carried across, or consciously dropped after asking.</blockquote>
+  <p><strong>What was <em>not</em> done in class, and matters:</strong> the HTTP→HTTPS redirect wasn't verified, the listener rules weren't matched one-for-one, and <strong>no developer or QA sign-off</strong> was obtained before the cutover. In a real company, all three come before deleting ECS.</p>
+
+  <h3>🏢 Real-company scale: what these numbers look like at work</h3>
+  <p>The instructor published a "scale matrix" page linking our toy setup to reported figures from real companies.</p>
+  <div class="table"><table>
+    <thead><tr><th>We have</th><th>A real company has</th></tr></thead>
+    <tbody>
+      <tr><td>1 system node + 1 app node</td><td><strong>Prodigy Education: 300+ nodes</strong> across production, testing and internal — and they're not considered big</td></tr>
+      <tr><td><code>t3.medium</code> / <code>t3.large</code></td><td><strong>Slack: 8xlarge to 32xlarge</strong> instances, also with Karpenter</td></tr>
+      <tr><td>1 cluster</td><td>A Kazakh bank runs several, splitting workloads so one outage can't take everything</td></tr>
+      <tr><td>1 hostname, 1 ALB</td><td>A financial services firm had <strong>hundreds of routes</strong>; moving to shared gateways gave them <strong>96% fewer load balancers</strong></td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li>💡 That last row is the Session 09 cost argument with a real number attached. Worth remembering for an interview.</li>
+    <li><strong>On how long this takes:</strong> a migration like this used to be a <strong>one-to-four-week</strong> ticket — research, documentation, hitting each problem in turn. With agentic AI it's closer to <strong>a day</strong>.</li>
+    <li>🔑 Advice for turning that into interview material: <strong>tell your AI to log every problem it hits in writing</strong>, rather than silently fixing it. Those logged problems become your stories. "I had this problem where the load balancer wasn't reachable — it turned out to be an internal scheme and missing target group configuration." You can own that story honestly: you were the one steering.</li>
+    <li>A student asked how many engineers a real ECS→EKS migration takes. One can do it — but with 30 applications you're also moving CI/CD, monitoring, logging and years of accumulated tooling, and that's a team.</li>
+    <li>On <strong>ingress-nginx → Gateway API</strong> migrations: support ended March 2026, so most places have already done it. If you did one, it's the same work — each Ingress rule becomes an HTTPRoute.</li>
+  </ul>
+</section>
+
+<section id="homework">
+  <div class="label"><span class="tag">What's left</span><h2>No new homework — but the migration isn't finished</h2></div>
+  <p><strong>No new ticket was assigned in this class.</strong> On the board, this work is <strong>PX-111 — Public route and ECS retirement</strong>.</p>
+  <ol>
+    <li><strong>Finish HTTPS properly</strong> — port 443 with the ACM certificate <strong>and</strong> an HTTP→HTTPS redirect, matching what the ECS ALB did. The redirect was never verified.</li>
+    <li><strong>Match the remaining ALB listener rules</strong> — source restrictions, health checks, deregistration delay.</li>
+    <li><strong>Get developer or QA confirmation</strong> that the app on EKS behaves correctly. This comes <strong>before</strong> deleting anything.</li>
+    <li><strong>Then retire ECS</strong> — leave it running a couple of days as rollback, then delete the cluster and its ALB.</li>
+  </ol>
+  <ul>
+    <li>If you're doing this in your own account, the order from class is the checklist: controller → CRDs → GatewayClass + Gateway (<strong>with</strong> <code>scheme: internet-facing</code>, public subnets and a default TargetGroupConfiguration) → HTTPRoute in your chart → DNS.</li>
+    <li>Your hostname is <strong>your own domain</strong>, with a free <strong>ACM</strong> certificate on the load balancer.</li>
+    <li>Next class: <strong>application CI</strong> — building the app automatically. After that, the focus turns to <strong>interview preparation</strong>, putting all these pieces into one story.</li>
+  </ul>
+  <blockquote>🔑 The golden rule of this class: a migration isn't finished when the new thing works — it's finished when the old settings are matched, someone else has confirmed it, and you still have a way back. Switch the traffic before you delete anything, and read the first line of the error before you theorise about the second.</blockquote>
+</section>
+
+<section id="quiz10">
+  <div class="label"><span class="tag">Self-test</span><h2>Check yourself</h2></div>
+  <p class="reread">Answer each question out loud first, then open the answer. Score yourself out of 10.</p>
+
+  <div class="q"><p class="ask">1. An interviewer asks: "You've got an app running in EKS. Nobody outside can reach it. Walk me through making it public." Give the steps in order, and say which one you'd repeat for the next ten apps.</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>Four steps — and only the last one repeats.</strong></p>
+      <ul>
+        <li>Install the <strong>AWS Load Balancer Controller</strong>: an IAM role and policy on the AWS side, a Helm chart into <code>kube-system</code> on the Kubernetes side.</li>
+        <li>Install the <strong>Gateway API CRDs</strong>, so the cluster understands <code>Gateway</code> and <code>HTTPRoute</code> as kinds at all.</li>
+        <li>Apply the <strong>GatewayClass</strong> (which controller builds the load balancer) and the <strong>Gateway</strong> (which ports it listens on).</li>
+        <li>Apply an <strong>HTTPRoute</strong> per application, pointing a hostname at that app's <strong>ClusterIP</strong> Service.</li>
+      </ul>
+      <p>Steps 1–3 are <strong>once per cluster</strong>. Step 4 is the only per-app work — that, plus the app's Service. 🔑 That asymmetry <strong>is</strong> the argument for Gateway API.</p>
+      <p>💡 Finish the answer with DNS: once the ALB exists, point the public record at it — ideally gradually.</p>
+    </div></details></div>
+
+  <div class="q"><p class="ask">2. Your Gateway is accepted, the controller logs look clean, an ALB exists in the console — and a browser cannot reach it at all. What's your first suspicion, and how do you prove which subnets are public?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>Suspect an <code>internal</code> ALB in private subnets — and prove it with the subnets' route tables, not their names.</strong></p>
+      <ul>
+        <li>The controller creates an <strong>internal</strong> load balancer when no <code>scheme</code> is set. Internal means reachable only from inside the VPC — exactly what happened in class.</li>
+        <li>Confirm it in one glance: the AWS load balancer list shows a <strong>Scheme</strong> column. <code>internal</code> vs <code>internet-facing</code>.</li>
+        <li><strong>The fix:</strong> a <code>LoadBalancerConfiguration</code> with <code>scheme: internet-facing</code> and an explicit list of <strong>public subnets</strong>.</li>
+        <li>🔑 <strong>How to identify a public subnet:</strong> open its <strong>route table</strong>. <code>0.0.0.0/0</code> → <strong>Internet Gateway</strong> = public. <code>0.0.0.0/0</code> → <strong>NAT gateway</strong> = private. No default route at all = fully isolated (the database subnets).</li>
+      </ul>
+      <p>💡 Never trust the name. A subnet called <code>public-1a</code> with a NAT route is private, and the route table is the only authority (Scale Session 06).</p>
+    </div></details></div>
+
+  <div class="q"><p class="ask">3. Your AI says you need a <code>TargetGroupConfiguration</code>. But the load balancer was created five minutes ago <em>without</em> one. How should you handle that contradiction?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>Don't act on it yet — ask why it worked before. The AI gave the right answer without having checked the inconsistency.</strong></p>
+      <ul>
+        <li>The rule, said out loud in class: <em>"when I see something inconsistent like this, I try not to follow right away what the AI says, but rather confirm — because I assume AI did not confirm. A lot of times it just goes to the best first answer."</em></li>
+        <li>The specific question to ask: <strong>why wasn't this needed before?</strong></li>
+        <li>The real answer: the earlier ALB was <strong>internal and had no application behind it</strong>. It accepted no routes, so it never got far enough to need target group settings. The requirement existed all along.</li>
+        <li>So the AI was <strong>right</strong> — but you only know that after checking, and the check cost one question.</li>
+        <li>🔑 The transferable habit: when an AI answer contradicts something you just observed, <strong>the contradiction is the thing to investigate</strong>. Treating "it was right last time" as proof is how you end up applying fixes you can't explain.</li>
+      </ul>
+      <p>Practical extras from the same debugging run: the configuration had to be <strong>referenced from the LoadBalancerConfiguration</strong>, not just created, and setting it as a <strong>cluster-wide default</strong> beat repeating it per namespace.</p>
+    </div></details></div>
+
+  <div class="q"><p class="ask">4. In Route 53 you set the ECS record to weight 99 and the EKS record to weight 99. What share does each get? What's the maximum weight? And why won't 50 students refreshing the page see a clean 50/50 split?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>50% each — weights are relative, not percentages. Maximum is 255. And DNS caching means individuals don't get a fair coin flip.</strong></p>
+      <ul>
+        <li>The formula is <strong>weight ÷ sum of all weights</strong>. 99 ÷ (99+99) = 50%. Likewise 99 and 1 gives 99% and 1%, which is what the earlier step used.</li>
+        <li>Because they're relative, 99/99 and 5/5 and 255/255 are all identical. The numbers only mean something <strong>next to each other</strong>. Max: <strong>255</strong>.</li>
+        <li><strong>Why the split isn't clean in practice:</strong> a browser doesn't ask DNS per request — it uses a <strong>cached</strong> answer, from the OS or the resolver, for the record's TTL. One person gets one answer and sticks with it.</li>
+        <li>🔑 Same caching bites after a cutover: some users keep reaching the old address for a while, which is precisely why you <strong>leave the old system running</strong> rather than deleting it the moment you switch.</li>
+      </ul>
+      <p>💡 The name for this gradual shift is <strong>canary deployment</strong> — a small slice of real traffic to the new thing, widened as confidence grows.</p>
+    </div></details></div>
+
+  <div class="q"><p class="ask">5. You want to test the new ALB using the real public hostname, without any real user being affected. Give two ways, and explain why the second one works at all.</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>Send a Host header with <code>curl</code>, or point your own machine at the ALB with <code>/etc/hosts</code> — which works because a machine reads its own DNS file before asking the world.</strong></p>
+      <ul>
+        <li><strong>Option 1 — Host header:</strong> <code>curl -H 'Host: app.example.net' http://&lt;alb-dns-name&gt;/</code>. You connect to the ALB directly but claim the real hostname, so the HTTPRoute's hostname match still fires. Works in <code>curl</code>; <strong>not</strong> in Chrome.</li>
+        <li><strong>Option 2 — <code>/etc/hosts</code>:</strong> add <code>&lt;ALB-IP&gt;  app.example.net</code>. Now your browser works too.</li>
+        <li><strong>Why it works:</strong> name resolution checks the <strong>local hosts file first</strong>, then public DNS servers. Your entry wins on your machine only.</li>
+        <li>🔑 Why you need either: the HTTPRoute matches on <strong>hostname</strong>. Hitting the raw ALB DNS name doesn't match any route, so you can't test it that way.</li>
+        <li>⚠️ <strong>Remember to remove the line afterwards.</strong> A stale <code>/etc/hosts</code> entry is a classic self-inflicted outage.</li>
+      </ul>
+      <p>💡 Doing this <em>before</em> switching DNS is exactly what would have prevented the class's brief public breakage.</p>
+    </div></details></div>
+
+  <div class="q"><p class="ask">6. <code>curl</code> returns <code>could not resolve host</code>. A teammate says "the app's probably on 443, not 80 — try the other port." What do you tell them?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>It never got far enough to try a port. "Could not resolve host" is DNS — the name didn't turn into an IP address.</strong></p>
+      <ul>
+        <li>The request failed at <strong>name resolution</strong>, before any TCP connection was attempted. The port is irrelevant to an error that happens first.</li>
+        <li>A port problem looks different: <code>connection refused</code> (something answered and said no) or a <strong>hang/timeout</strong> (a firewall or security group is swallowing it).</li>
+        <li>🔑 The rule: <strong>always look at the first clue first.</strong> If somebody says they have stomach pain, don't start by looking at their brain.</li>
+        <li><strong>In class the real cause fit exactly:</strong> deleting and re-applying the Gateway created a <strong>brand-new ALB with a new DNS name</strong>, and Route 53 still pointed at the old one.</li>
+      </ul>
+      <p>💡 Error triage worth memorising: <code>could not resolve host</code> → DNS · <code>connection refused</code> → nothing listening on that port · <strong>timeout</strong> → security group or route · <code>404</code> → you reached the app and it doesn't have that path.</p>
+    </div></details></div>
+
+  <div class="q"><p class="ask">7. In Session 09 the Service was switched to <code>type: LoadBalancer</code>. In Session 10 it goes back to <code>ClusterIP</code>. Why — and what would happen if you left it as LoadBalancer?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>Because the ALB is now created and managed by the controller through the Gateway. Leaving it as LoadBalancer would create a second, redundant load balancer in front of the same Pods.</strong></p>
+      <ul>
+        <li><strong>The new chain:</strong> browser → <strong>ALB</strong> (built from the Gateway) → Pod IPs, selected via the <strong>HTTPRoute</strong> → <strong>ClusterIP Service</strong> → the Pods.</li>
+        <li>The Service's remaining job is <strong>identifying which Pods are the backend</strong>, by selector and readiness. It doesn't need to be publicly exposed itself.</li>
+        <li>Leave it as <code>LoadBalancer</code> and you get <strong>two</strong> load balancers for one app: double cost, two sets of settings to keep in sync, and a second public entrance nobody documented.</li>
+        <li>🔑 That's the whole point of the Gateway design: <strong>one shared entrance, many ClusterIP Services behind it.</strong> A per-app LoadBalancer is the exact pattern it exists to replace.</li>
+      </ul>
+      <p>💡 Ten apps done right: 1 ALB, 1 Gateway, 10 HTTPRoutes, 10 ClusterIP Services.</p>
+    </div></details></div>
+
+  <div class="q"><p class="ask">8. Your HTTPRoute is applied without error, the Gateway is healthy, but the route never attaches and the hostname returns nothing. Give two plausible causes.</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>Either the Gateway doesn't allow routes from your namespace, or the hostname is malformed.</strong></p>
+      <ul>
+        <li><strong>Cross-namespace permission:</strong> the Gateway lives in <code>kube-system</code> while the app's HTTPRoute lives in <code>main-product-line</code>. The Gateway must explicitly <strong>permit routes from other namespaces</strong>. If it doesn't, your route is ignored — and it isn't an apply-time error, so nothing complains.</li>
+        <li><strong>Bad hostname:</strong> in class the apply failed with <code>spec.hostnames: Invalid value</code> because the value had been pasted with <code>https://</code> in front. A hostname is <strong>just the name</strong> — no scheme, no slashes, no trailing path.</li>
+        <li>Two more worth checking: <code>parentRefs</code> must name the Gateway <strong>and its namespace</strong> correctly, and the <code>backendRefs</code> service name must match a Service that actually exists in the route's namespace.</li>
+        <li>🔑 <strong>Check the status, not just the apply.</strong> <code>kubectl get httproute</code> and <code>describe</code> show whether the route was <strong>accepted by its parent Gateway</strong>. "Applied successfully" only means the YAML was valid.</li>
+      </ul>
+      <p>💡 Then the controller logs — verbose JSON, but they say plainly when a route was rejected and why.</p>
+    </div></details></div>
+
+  <div class="q"><p class="ask">9. The hostname now resolves to the EKS ALB and the browser shows a padlock. Your manager asks if you can delete the ECS cluster today. What do you say?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>No — three things are still missing, and ECS is the only way back.</strong></p>
+      <ul>
+        <li><strong>Settings aren't fully matched.</strong> The <strong>HTTP→HTTPS redirect</strong> was never verified, and the old ALB's listener rules, <strong>source IP restrictions</strong>, health checks and deregistration delay weren't compared one-for-one.</li>
+        <li><strong>Nobody has confirmed it works.</strong> No <strong>developer or QA sign-off</strong>. A padlock in your browser is not a test of the application.</li>
+        <li><strong>Rollback is the whole reason to wait.</strong> While ECS and its ALB run, recovery is re-adding one DNS record. Delete it and the only route back is a rebuild. Leave it <strong>a couple of days</strong>.</li>
+        <li>⚠️ And never the reverse order: deleting the old system <strong>before</strong> switching traffic means users are still being sent somewhere that no longer exists.</li>
+        <li>🔑 The principle: <em>"if there is no change, there is no problem. If there is a change, there is a possibility of a problem."</em></li>
+      </ul>
+      <p>💡 Note the honest ordering in class: the DNS was switched <strong>before</strong> the route worked, and the site was briefly down. Naming that as the mistake is better interview material than pretending it went cleanly.</p>
+    </div></details></div>
+
+  <div class="q"><p class="ask">10. An interviewer says: "Tell me about a technical problem you had to debug." Build an answer out of this class.</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>Use the internal-ALB story: a clear symptom, a wrong first theory, a real root cause, and a second surprise underneath it.</strong></p>
+      <ul>
+        <li><strong>Situation:</strong> "We were migrating an application from ECS to EKS. I'd set up Gateway API so the app would get an Application Load Balancer."</li>
+        <li><strong>Symptom:</strong> "The load balancer was created and Kubernetes looked healthy, but nothing could reach it from a browser."</li>
+        <li><strong>First theory, and why I dropped it:</strong> "My first guess was a security group, since a timeout usually means one. But the ALB's <strong>scheme</strong> was <code>internal</code> — it had never been reachable from the internet at all."</li>
+        <li><strong>Root cause:</strong> "The controller defaults to internal, and the subnets it picked were private — their route tables pointed at a NAT gateway. I added a configuration setting it to <code>internet-facing</code> in the two genuinely public subnets."</li>
+        <li><strong>The second problem:</strong> "Then it still didn't come up: the target group needed explicit configuration for Pod IP targets. That hadn't surfaced earlier because the first load balancer had no application behind it. I set it as a cluster-wide default so other teams wouldn't hit it."</li>
+        <li><strong>Result:</strong> "The app served over HTTP, then HTTPS with the existing ACM certificate, and I moved DNS across with a weighted record so I could shift traffic gradually and roll back."</li>
+      </ul>
+      <p>🔑 Why this works: a specific symptom, a <strong>theory you discarded with evidence</strong>, a real cause, and a fix that helped people beyond you. Interviewers want the reasoning, not the YAML.</p>
+      <p>💡 Tip for generating these: tell your AI to <strong>log every problem it hits in writing</strong> instead of silently fixing it. Those logs become your stories — you were the one steering, so they're honestly yours.</p>
+    </div></details></div>
+
+  <p class="reread">Scoring: 9–10, you could run the cutover yourself 🏆 · 7–8, solid 💪 · below 7, reread Session 10 and retry 🔁</p>
+</section>
+
+<footer>The full study page and 10-question quiz are in Notion under DevOps / 312 - Notes / 🏁 ProjectX.</footer>
+</div>
+
+<script>
+document.querySelectorAll('.codebox').forEach(function(box){
+  var pre = box.querySelector('pre'); var b = document.createElement('button');
+  b.className = 'copy'; b.type = 'button'; b.textContent = 'Copy';
+  b.addEventListener('click', function(){
+    var text = pre.innerText.split('\n').map(function(l){ return l.replace(/\s+#.*$/, ''); }).join('\n').trim();
+    var done = function(){ b.textContent = 'Copied'; setTimeout(function(){ b.textContent = 'Copy'; }, 1500); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(function(){ selectPre(); });
+    } else { selectPre(); }
+    function selectPre(){ var r = document.createRange(); r.selectNodeContents(pre); var s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = 'Selected'; }
+  });
+  box.appendChild(b);
+});
+</script>

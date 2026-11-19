@@ -125,7 +125,7 @@ html{scroll-behavior:smooth}
 <header>
   <span class="eyebrow">312 School · Cohort 26a · Project X</span>
   <h1>Project X Map</h1>
-  <div class="meta"><span>Updated Mon, Nov 16, 2026</span><span>Sessions 01–08</span><span>Instructor: Marsel</span></div>
+  <div class="meta"><span>Updated Thu, Nov 19, 2026</span><span>Sessions 01–10</span><span>Instructor: Marsel</span></div>
   <p class="lede">Project X is the last stage of the course. We join a pretend investment-app startup as its <strong>platform engineer</strong>. The app already runs on <strong>ECS Fargate</strong>, built by Nadia with <strong>CloudFormation</strong>. Our job is to move it to <strong>EKS</strong> with <strong>Terraform</strong> without users noticing, and to do the work with AI agents the way teams do it now. This page shows everything in one place: who's who, the four repos, the infrastructure, the tickets, the sessions and the homework.</p>
   <nav aria-label="Sections">
     <a href="#homework">Homework</a><a href="#team">Team</a><a href="#repos">Repos</a><a href="#infra">Infrastructure</a><a href="#tickets">Tickets</a><a href="#sessions">Sessions</a><a href="#decisions">Decisions</a><a href="#reviews">PR reviews</a><a href="#where">Where things live</a>
@@ -134,7 +134,7 @@ html{scroll-behavior:smooth}
 
 <section id="homework">
   <div class="label"><span class="tag">Status</span><h2>Homework board</h2></div>
-  <div class="summary"><span><strong>1 of 4</strong> done</span><span><strong>1</strong> in review</span><span>As of Mon, Nov 16</span><span>PX-108 is due today</span></div>
+  <div class="summary"><span><strong>1 of 4</strong> done</span><span><strong>1</strong> in review</span><span>As of Thu, Nov 19</span><span>PX-108 was due Nov 16</span></div>
   <div class="board">
     <div class="hw done">
       <span class="who">S02</span>
@@ -210,7 +210,7 @@ html{scroll-behavior:smooth}
 <section id="infra">
   <div class="label"><span class="tag">AWS</span><h2>The infrastructure: today and next</h2></div>
   <p>Dev today is one CloudFormation stack (<code>projectx-dev</code>): a VPC, an ALB, a private Fargate task, a private encrypted RDS Postgres, a NAT gateway and monitoring. The plan from Session 03 is to <strong>build EKS next to it</strong> in the same VPC, run the same image against the same database, then move traffic over a little at a time.</p>
-  <p><strong>Where it stands after Session 08:</strong> in class, Terraform added two subnets (<code>10.40.32.0/19</code>, <code>10.40.64.0/19</code>) to the CloudFormation VPC and built the cluster. Helm added Karpenter and the load balancer controller. The app then ran on EKS as a Deployment with 2 Pods against the same RDS. It has <strong>no Service and no traffic yet</strong>, so users still reach ECS only. The big diagrams are on <a href="../how-project-x-fits-together/">How Project X Fits Together</a>.</p>
+  <p><strong>Where it stands after Session 10 — the migration has landed:</strong> Terraform added two subnets (<code>10.40.32.0/19</code>, <code>10.40.64.0/19</code>) to the CloudFormation VPC and built the cluster; Helm added Karpenter. Session 09 gave the app a <strong>ClusterIP Service</strong> and packaged it as a <strong>Helm chart</strong>. Session 10 installed the <strong>AWS Load Balancer Controller</strong> and <strong>Gateway API</strong>, which built an internet-facing <strong>ALB</strong>, and moved the <strong>Route 53</strong> record across. <strong>The public hostname now serves from EKS over HTTPS.</strong> ECS and its ALB are deliberately left running as the rollback path. The big diagrams are on <a href="../how-project-x-fits-together/">How Project X Fits Together</a>.</p>
   <div class="diagram" role="img" aria-label="Users reach an ALB inside the existing VPC. The ALB splits traffic between the ECS Fargate task (today, CloudFormation) and EKS pods (next, Terraform). Both talk to the same RDS PostgreSQL database.">
     <svg viewBox="0 0 760 340" xmlns="http://www.w3.org/2000/svg">
       <defs>
@@ -261,13 +261,14 @@ html{scroll-behavior:smooth}
 
 <section id="tickets">
   <div class="label"><span class="tag">Board</span><h2>The tickets so far</h2></div>
-  <p>Board column in brackets, as of Nov 15.</p>
+  <p>Board column in brackets, as of Nov 19.</p>
   <ol class="timeline">
     <li><div class="when"><b>PX-001</b>Session 02</div><div><h3>Recent trades feature [Review]</h3><p>The app change (PR #1) that shows the ten newest trades. QA (Jordan) validates it.</p></div></li>
     <li><div class="when"><b>PX-104</b>Session 02</div><div><h3>Deploy PR #1 to Dev [Review]</h3><p>Our first ticket. Lesson: find where "dev" is before doing anything. Done in class: new image digest → change set → review → execute.</p></div></li>
     <li><div class="when"><b>PX-105</b>Session 03</div><div><h3>Assess moving the app from ECS to EKS [In progress]</h3><p>A decision, not a build. Outcome: build EKS alongside ECS with Terraform, reuse the VPC and RDS, shift traffic slowly. The written assessment lives in <code>assessments/2026-11-02-ecs-to-eks/</code>.</p></div></li>
     <li><div class="when"><b>PX-107</b>Sessions 04–06</div><div><h3>Build and verify an EKS cluster with Terraform [Ready]</h3><p>Your own account, at least 10% hand-written, test pod, destroy, open PR. <strong>Your status: PR #99 in review; the hand-written 10% is still open.</strong></p></div></li>
-    <li><div class="when"><b>PX-108</b>Sessions 05–08</div><div><h3>Run the investment app on Dev EKS [Ready]</h3><p>Same image as ECS, existing RDS, pods Ready, app works. New PR, PX-107 PR closed unmerged. <strong>Your status: next, due today.</strong></p></div></li>
+    <li><div class="when"><b>PX-108</b>Sessions 05–08</div><div><h3>Run the investment app on Dev EKS [Ready]</h3><p>Same image as ECS, existing RDS, pods Ready, app works. New PR, PX-107 PR closed unmerged. <strong>Your status: still open — it was due Mon, Nov 16.</strong></p></div></li>
+    <li><div class="when"><b>PX-111</b>Sessions 09–10</div><div><h3>Public route and ECS retirement [New]</h3><p>Give the app on EKS a public front door with Gateway API, move the DNS record off the ECS ALB, then retire ECS. Done in class on Nov 18; <strong>no homework ticket was assigned</strong>. Still open on the board: the HTTP→HTTPS redirect, matching the old ALB’s listener rules, and developer/QA sign-off before anything is deleted.</p></div></li>
     <li><div class="when"><b>Others</b>Other roles</div><div><h3>PX-101 [In progress] · PX-103 [Ready] · PX-106 [Backlog]</h3><p>PX-101 is product work (Maya). PX-103 is the build path that feeds PX-108 (Sam). PX-106 is identity and secret access that also feeds PX-108 (Casey).</p></div></li>
   </ol>
 </section>
@@ -283,7 +284,9 @@ html{scroll-behavior:smooth}
     <li><div class="when"><b>06</b>Mon Nov 9</div><div><h3><a href="../project-x-session-06/">Terraform values &amp; the EKS foundation</a></h3><p>PR #18 read line by line: a data source finds the CloudFormation VPC, <code>for_each</code> makes the subnets, outputs save their IDs, and <code>terraform_remote_state</code> reads them in the EKS root. Also plans, <code>depends_on</code> and drift.</p></div></li>
     <li><div class="when"><b>07</b>Wed Nov 11</div><div><h3><a href="../project-x-session-07/">EKS add-ons, Helm &amp; Karpenter</a></h3><p>EKS add-ons (CoreDNS, VPC CNI), Helm as templates plus values, and Karpenter installed by hand from the docs. One waiting pod made a new worker appear.</p></div></li>
     <li><div class="when"><b>08</b>Thu Nov 12</div><div><h3><a href="../project-x-session-08/">Run the investment app on EKS</a></h3><p>Questions before YAML: which workload type, which Service, and what goes in a ConfigMap or a Secret. Two Pods stayed not Ready until the RDS security group let the workers in. Tested with <code>kubectl port-forward</code>.</p></div></li>
-    <li><div class="when"><b>09</b>Mon Nov 16</div><div><h3>Next: a Helm chart for the app</h3><p>Turning the Session 08 manifests into a Helm chart. The app repo already has a reference branch, <code>codex/class9-helm-reference</code>.</p></div></li>
+    <li><div class="when"><b>09</b>Mon Nov 16</div><div><h3><a href="../project-x-session-09/">Services, Helm &amp; public access</a></h3><p>A <strong>ClusterIP Service</strong> for the app, then the plain manifests became a <strong>Helm chart</strong> with a values file per environment. Switching the Service to <code>LoadBalancer</code> produced an unwanted <strong>Classic</strong> LB, because the AWS Load Balancer Controller was never reinstalled — which introduced <strong>Gateway API</strong>.</p></div></li>
+    <li><div class="when"><b>10</b>Wed Nov 18</div><div><h3><a href="../project-x-session-10/">The public EKS route &amp; DNS cutover</a></h3><p>The controller, the Gateway API CRDs, GatewayClass, Gateway and an HTTPRoute. The first ALB came out <strong>internal</strong> and unreachable; a <code>TargetGroupConfiguration</code> was also required. Then a <strong>weighted Route 53</strong> cutover off ECS, and HTTPS with the existing ACM certificate.</p></div></li>
+    <li><div class="when"><b>11</b>Next</div><div><h3>Application CI</h3><p>Building the app automatically. After that the course turns to <strong>interview preparation</strong>, putting all these pieces into one story.</p></div></li>
   </ol>
 </section>
 
@@ -299,6 +302,9 @@ html{scroll-behavior:smooth}
       <tr><td class="nowrap">Nov 5</td><td>Reference layout: three roots, <strong>bootstrap → network → eks</strong>, then <strong>Karpenter</strong> via Helm</td><td>Separate lifecycles and a smaller blast radius. The cost: IDs must cross between roots (remote state or SSM). Branch <code>codex/dev-eks-foundation</code>, PR #18</td></tr>
       <tr><td class="nowrap">Nov 9</td><td>PX-108 deadline moved to <strong>Mon, Nov 16</strong></td><td>Class 6 kept going through the EKS foundation, so the homework got more time</td></tr>
       <tr><td class="nowrap">Nov 12</td><td>The app on EKS: a <strong>Deployment</strong> with 2 Pods, settings in a <strong>ConfigMap</strong>, password in a <strong>Secret</strong>, and RDS allows <strong>5432</strong> from the workers</td><td>Same image and same database as ECS. Manifests and Helm charts live in the <strong>app repo</strong>, not the infra repo</td></tr>
+      <tr><td class="nowrap">Nov 16</td><td>Deploy with <strong>Helm</strong> from now on: one chart, a <strong>values file per environment</strong>. Delete the plain YAML after converting</td><td>One shared template instead of three copies of every manifest. The <strong>kubectl context</strong> picks the cluster, never the values filename</td></tr>
+      <tr><td class="nowrap">Nov 18</td><td>Expose apps with <strong>Gateway API</strong> on a <strong>shared ALB</strong>, not a LoadBalancer Service per app</td><td>ingress-nginx retired in March 2026. GatewayClass and Gateway are set up once per cluster; each app only adds an <strong>HTTPRoute</strong> and keeps a <strong>ClusterIP</strong> Service. Ten apps then cost one load balancer, not ten</td></tr>
+      <tr><td class="nowrap">Nov 18</td><td>Cut over with a <strong>weighted Route 53 record</strong>, and leave <strong>ECS running</strong> for a few days</td><td>A canary: weights are relative numbers (max 255), so you shift traffic gradually. Rollback is re-adding one DNS record — which only works while the old stack still exists</td></tr>
     </tbody>
   </table></div>
 </section>
@@ -332,5 +338,5 @@ html{scroll-behavior:smooth}
   <blockquote>Find the situation and the task, give AI real context, argue with its first answer, then make the decision yourself.</blockquote>
 </section>
 
-<footer>Built from the Project X session notes, the four class repos and the class board as of Nov 16, 2026. Update the homework board as you finish each item.</footer>
+<footer>Built from the Project X session notes, the four class repos and the class board as of Nov 19, 2026. Update the homework board as you finish each item.</footer>
 </div>

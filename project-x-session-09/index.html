@@ -1,0 +1,536 @@
+<title>Project X Session 09</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one reading column; sections as stacked "shipping manifest" blocks with a stencilled label; code and tables scroll in place. */
+:root{
+  --bg:#f3f5f7; --surface:#ffffff; --ink:#15202b; --muted:#56657a; --line:#d8dee6;
+  --accent:#c4501b; --accent-soft:#fbe9df; --steel:#1f5f8b; --steel-soft:#e3eef6;
+  --code-bg:#0f1b26; --code-fg:#dbe7f2; --code-cmt:#7f97ad;
+  --good:#2e7d4f; --bad:#b3261e;
+  --f-display:"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --f-body:"Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e151c; --surface:#16202a; --ink:#e6edf3; --muted:#9aabbd; --line:#2a3845;
+  --accent:#f0874f; --accent-soft:#3a2418; --steel:#7ab8e3; --steel-soft:#16303f;
+  --code-bg:#0a1016; --code-fg:#dbe7f2; --code-cmt:#6f879c;
+  --good:#6cc493; --bad:#f08a80; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0e151c; --surface:#16202a; --ink:#e6edf3; --muted:#9aabbd; --line:#2a3845;
+  --accent:#f0874f; --accent-soft:#3a2418; --steel:#7ab8e3; --steel-soft:#16303f;
+  --code-bg:#0a1016; --code-fg:#dbe7f2; --code-cmt:#6f879c;
+  --good:#6cc493; --bad:#f08a80; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:17px/1.6 var(--f-body);padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:28px 64px}
+.wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.15;margin:0}
+h1{font-size:clamp(30px,6vw,44px);font-weight:800;letter-spacing:-.01em}
+h2{font-size:24px;font-weight:800}
+h3{font-size:18px;font-weight:600;margin-top:6px}
+p{margin:0}
+a{color:var(--steel)}
+code{font-family:var(--f-mono);font-size:.86em;background:var(--steel-soft);color:var(--ink);padding:1px 5px;border-radius:4px}
+strong{font-weight:700}
+.eyebrow{font:600 12px/1 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+header{display:flex;flex-direction:column;gap:12px;border-bottom:3px solid var(--ink);padding-bottom:20px}
+.meta{display:flex;flex-wrap:wrap;gap:8px 16px;color:var(--muted);font-size:15px}
+.lede{font-size:19px;max-width:65ch}
+nav{display:flex;flex-wrap:wrap;gap:8px}
+nav a{font:600 13px/1 var(--f-mono);text-decoration:none;color:var(--ink);border:1px solid var(--line);background:var(--surface);padding:8px 10px;border-radius:6px}
+nav a:hover,nav a:focus-visible{border-color:var(--accent);color:var(--accent);outline:none}
+section{display:flex;flex-direction:column;gap:14px;scroll-margin-top:16px}
+section > .label{display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--line);padding-bottom:8px}
+section > .label .tag{font:600 11px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--surface);background:var(--ink);padding:5px 7px;border-radius:3px}
+ul,ol{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px}
+.table{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:15.5px;min-width:480px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:600 12px/1.3 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--bg)}
+tr:last-child td{border-bottom:0}
+blockquote{margin:0;border-left:4px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 8px 8px 0;font-weight:600}
+pre{margin:0;background:var(--code-bg);color:var(--code-fg);font:14px/1.6 var(--f-mono);padding:14px 16px;border-radius:8px;overflow-x:auto}
+pre .c{color:var(--code-cmt)}
+.codebox{position:relative}
+.copy{position:absolute;top:8px;right:8px;font:600 11px/1 var(--f-mono);background:transparent;color:var(--code-cmt);border:1px solid var(--code-cmt);border-radius:4px;padding:5px 7px;cursor:pointer}
+.copy:hover,.copy:focus-visible{color:var(--code-fg);border-color:var(--code-fg);outline:none}
+.flow{font:600 14px/1.5 var(--f-mono);background:var(--steel-soft);color:var(--ink);padding:14px 16px;border-radius:8px;overflow-x:auto;white-space:pre}
+.step{display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:start}
+.step > .n{font:800 18px/34px var(--f-display);text-align:center;background:var(--ink);color:var(--bg);border-radius:50%;width:34px;height:34px}
+.step > div{min-width:0;display:flex;flex-direction:column;gap:8px}
+.see{font-size:15px;color:var(--good)}
+.see::before{content:"You should see: ";font-weight:700}
+.warn{border:1px solid var(--bad);border-radius:8px;padding:12px 16px;display:flex;flex-direction:column;gap:10px;background:var(--surface)}
+.warn .eyebrow{color:var(--bad)}
+details{border:1px solid var(--line);background:var(--surface);border-radius:8px}
+details summary{cursor:pointer;padding:12px 16px;font-weight:600;list-style-position:inside}
+details summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:8px}
+details > div{padding:0 16px 14px;display:flex;flex-direction:column;gap:8px}
+.q{display:flex;flex-direction:column;gap:10px}
+.q p.ask{font-weight:600}
+.reread{font-style:italic;color:var(--muted);font-size:15px}
+footer{color:var(--muted);font-size:15px;border-top:1px solid var(--line);padding-top:16px}
+@media (prefers-reduced-motion: reduce){*{scroll-behavior:auto!important}}
+html{scroll-behavior:smooth}
+</style>
+
+<div class="wrap">
+<header>
+  <span class="eyebrow">312 School · Cohort 26a · Project X</span>
+  <h1>Session 09: Services, Helm &amp; public access</h1>
+  <div class="meta"><span>Mon, Nov 16, 2026</span><span>No new ticket — PX-108 continues</span><span>Sources: class recording, written notes, class materials page</span></div>
+  <p class="lede">The app has been running on EKS since Session 08, but only <strong>you</strong> could reach it, through <code>kubectl port-forward</code>. Class 9 fixed two of the three things still missing. First a <strong>ClusterIP Service</strong>, so other Pods get one stable address instead of chasing Pod IPs. Then the plain YAML files became a <strong>Helm chart</strong>: one shared template, a values file per environment, so dev, staging and production stop being three copies of the same thing. The third piece, <strong>public access</strong>, only half happened: switching the Service to <code>type: LoadBalancer</code> produced a <strong>Classic Load Balancer</strong> nobody wanted, because the <strong>AWS Load Balancer Controller</strong> was never reinstalled after the cluster was recreated. So the class ended by naming the modern answer — <strong>Gateway API</strong> — and leaving the real cutover for next time.</p>
+  <nav aria-label="Sections"><a href="#s9">Notes</a><a href="#homework">Homework</a><a href="#quiz9">Check yourself</a></nav>
+</header>
+
+<section id="s9">
+  <div class="label"><span class="tag">Notes</span><h2>Quick reference and notes</h2></div>
+  <div class="table"><table>
+    <thead><tr><th>Topic</th><th>Key point</th></tr></thead>
+    <tbody>
+      <tr><td><strong>ClusterIP Service</strong></td><td>A <strong>virtual</strong> IP and DNS name, not a Pod. No CPU, no RAM — just a <strong>networking rule</strong> that <code>kube-proxy</code> enforces</td></tr>
+      <tr><td><strong>Selector = the whole deal</strong></td><td>The Service finds Pods by <strong>label</strong>. Change a Pod's label and routing to it <strong>stops</strong></td></tr>
+      <tr><td><strong>Cluster DNS name</strong></td><td><code>service.namespace.svc.cluster.local</code>, or the short <code>service.namespace</code>. <strong>CoreDNS</strong> answers it — a required EKS add-on</td></tr>
+      <tr><td><strong>port vs targetPort</strong></td><td>Service <code>port: 80</code> can differ from the container's <code>8080</code>. Only <strong>targetPort</strong> must match the real Pod port</td></tr>
+      <tr><td><strong>Readiness filters traffic</strong></td><td>A Pod that fails its readiness probe is dropped from the endpoints. The Service only sends to <strong>Ready</strong> Pods</td></tr>
+      <tr><td><strong>Helm's two jobs</strong></td><td><strong>Tools</strong> (Karpenter, Grafana, CI/CD — chart already written for you) and <strong>your own apps</strong> (you write and maintain the chart). The second is most of the platform job</td></tr>
+      <tr><td><strong>Chart structure</strong></td><td><code>Chart.yaml</code> + <code>templates/</code> (that exact name) + <code>values.yaml</code>. <code>values.yaml</code> is <strong>always</strong> loaded; <code>values-dev.yaml</code> must be passed with <code>--values</code></td></tr>
+      <tr><td><strong>The install command</strong></td><td><code>helm upgrade --install &lt;release&gt; &lt;chart&gt; -f values-dev.yaml -n &lt;ns&gt;</code>. The <strong>kubectl context</strong> picks the cluster — the filename does <strong>not</strong></td></tr>
+      <tr><td><strong>range &amp; if</strong></td><td><code>range</code> is Helm's <code>for_each</code>; <code>if</code> makes a whole resource optional from a values flag</td></tr>
+      <tr><td><strong>HPA vs Karpenter</strong></td><td><strong>HPA</strong> adds and removes <strong>Pods</strong>. <strong>Karpenter</strong> adds and removes <strong>nodes</strong>. You need both — more Pods with nowhere to sit is just <code>Pending</code></td></tr>
+      <tr><td><strong>NodePort: don't</strong></td><td>Worker EC2 IPs change all day as the cluster scales, so a node's port is not a stable public address</td></tr>
+      <tr><td><strong>The Classic LB trap</strong></td><td><code>type: LoadBalancer</code> without the <strong>AWS Load Balancer Controller</strong> falls through to a <strong>legacy</strong> controller and you get a <strong>Classic</strong> LB</td></tr>
+      <tr><td><strong>Gateway API</strong></td><td>Replaced <strong>ingress-nginx</strong> (retired March 2026). <strong>GatewayClass</strong> + <strong>Gateway</strong> once per cluster, <strong>HTTPRoute</strong> per app, ~<strong>100</strong> routes per ALB</td></tr>
+      <tr><td><strong>One-way doors</strong></td><td>Most decisions can be undone. <strong>VPC CIDR</strong> and a production database can't — think hard only on those</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>🔌 The ClusterIP Service: one stable address for changing Pods</h3>
+  <p>The class opened with a question: <strong>can one Pod reach another Pod directly, with no Service?</strong></p>
+  <ul>
+    <li>Technically yes. Every Pod has its own IP, and a Pod could call the API server (<code>kubectl get pods</code>) to look them up.</li>
+    <li>But that is a bad deal: the app has to <strong>build that lookup into its own code</strong>; the Pod needs <strong>permission</strong> to list other Pods (a Role, a RoleBinding and a ServiceAccount — Containers Session 10); and Pod IPs <strong>change</strong> every time a Pod is replaced.</li>
+  </ul>
+  <p>🔑 The <strong>selector</strong> is the only thing that decides where traffic goes. <code>selector: app: investment-app</code> must match the Pods' <code>labels</code>. Nothing else links them.</p>
+  <p>What the Service does for you, for free:</p>
+  <ul>
+    <li>Keeps <strong>one virtual IP</strong> that doesn't change when Pods are replaced (it only changes if you delete and recreate the <strong>Service</strong>).</li>
+    <li>Keeps the <strong>endpoint list</strong> up to date as Pod IPs change.</li>
+    <li><strong>Stops sending traffic</strong> to a Pod whose readiness probe fails.</li>
+    <li>Spreads requests across all matching, Ready Pods.</li>
+  </ul>
+  <p>💡 A Service is <strong>virtual</strong>. A classmate asked where it "sits" — it doesn't sit anywhere. It is not a Pod, it uses no CPU or memory. It's a networking rule, and <strong>kube-proxy</strong> is what actually rewrites the traffic from the Service IP to a Pod IP.</p>
+  <div class="codebox"><pre>apiVersion: v1
+kind: Service
+metadata:
+  name: investment-app
+spec:
+  selector:
+    app: investment-app      <span class="c"># must match the Pod labels</span>
+  ports:
+    - port: 80               <span class="c"># what callers use</span>
+      targetPort: 8080       <span class="c"># the real port in the container</span>
+  type: ClusterIP            <span class="c"># internal only — this is NOT public access</span></pre></div>
+  <p><strong>Who actually needs this?</strong> Real examples from class: front-end Pods calling <strong>auth</strong> Pods to check who you are; the front end sending "buy 10 shares of Apple" to a separate <strong>trading</strong> service; add-on Pods reaching regular app Pods.</p>
+  <p>💡 Most applications in a real company are <strong>never public</strong>. They only ever talk to each other through ClusterIP Services — which is exactly why this is an interview must-know.</p>
+
+  <h3>🧭 Cluster DNS, kube-proxy and why there are two port numbers</h3>
+  <p>You could hard-code the Service's IP, but you use its <strong>DNS name</strong> instead.</p>
+  <div class="table"><table>
+    <thead><tr><th>Form</th><th>Example</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Full</strong></td><td><code>investment-app.main-product-line.svc.cluster.local</code></td></tr>
+      <tr><td><strong>Short</strong></td><td><code>investment-app.main-product-line</code></td></tr>
+      <tr><td><strong>Same namespace</strong></td><td>just <code>investment-app</code></td></tr>
+    </tbody>
+  </table></div>
+  <p>The name is built as <strong>service name</strong> → <strong>namespace</strong> → the standard cluster domain. <strong>CoreDNS</strong> answers it; without it nothing resolves, which is why CoreDNS is a required EKS add-on (Session 07).</p>
+  <div class="table"><table>
+    <thead><tr><th>Field</th><th>Who it's for</th><th>Rule</th></tr></thead>
+    <tbody>
+      <tr><td><code>port</code></td><td><strong>Callers</strong> of the Service</td><td>Pick anything. <code>80</code> is just a nice habit</td></tr>
+      <tr><td><code>targetPort</code></td><td>The <strong>container</strong></td><td><strong>Must</strong> be the port the app really listens on (<code>8080</code>)</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li>So <code>curl http://investment-app:80/</code> hits the Service on 80, and the Service forwards to 8080 on a Pod. If you chose <code>port: 1990</code>, every caller must use 1990. Get <code>targetPort</code> wrong and nothing works.</li>
+    <li><strong>Nodes don't matter here.</strong> A classmate asked — the Pods can be on the same node or on different nodes; the networking rule reaches them either way.</li>
+  </ul>
+  <div class="codebox"><pre>kubectl -n main-product-line apply -f service.yaml
+kubectl -n main-product-line describe endpointslice   <span class="c"># should list the Ready Pod IPs</span>
+
+<span class="c"># run a throwaway client Pod with curl in it</span>
+kubectl -n main-product-line run testpod --rm -it --image=curlimages/curl -- sh
+<span class="c"># inside the Pod:</span>
+curl http://investment-app/        <span class="c"># no port needed, because the Service is on 80</span></pre></div>
+  <p>💡 <code>port-forward</code> is <strong>not</strong> the same thing. It's a tunnel from <strong>your laptop</strong> through the API server to <strong>one named Pod</strong>. It skips the Service entirely and only exists while the command runs.</p>
+
+  <h3>⛵ Helm: what it's actually for</h3>
+  <p>Helm has already been used in this course — it's how <strong>Karpenter</strong> got installed (Session 07). There are <strong>two</strong> completely different ways you'll meet it:</p>
+  <div class="table"><table>
+    <thead><tr><th>Use case</th><th>Who wrote the chart</th><th>What you do</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Tools</strong> — Karpenter, Grafana, logging, CI/CD</td><td>The software vendor ships a ready chart</td><td>You're a <strong>user</strong>: <code>helm install</code>, adjust values</td></tr>
+      <tr><td><strong>Your company's apps</strong></td><td><strong>You</strong></td><td>You're the <strong>author</strong>: write templates, maintain them, change values</td></tr>
+    </tbody>
+  </table></div>
+  <p>🔑 The second row is where platform engineers spend most of their time. Nobody else is going to write your company's chart.</p>
+  <p><strong>What problem does it solve?</strong> You want the same app in <strong>dev, staging and production</strong>, with different settings in each.</p>
+  <ul>
+    <li><strong>Without Helm</strong> you'd keep <code>deployment-dev.yaml</code>, <code>deployment-staging.yaml</code>, <code>deployment-prod.yaml</code> — and the same again for the Service, the ConfigMap, and everything else. It works. It just multiplies forever, and every change has to be made in three places without forgetting one.</li>
+    <li><strong>With Helm</strong> you keep <strong>one template</strong> and three small values files: dev <code>replicaCount: 2</code>, staging <code>3</code>, production <code>60</code>.</li>
+    <li>Anything that's the <strong>same everywhere</strong> (resource requests and limits, for example) goes in the shared <code>values.yaml</code> instead of being repeated in all three.</li>
+  </ul>
+  <p>💡 The comparison from class: it's <strong>Terraform modules</strong> all over again. One reusable child module, different variable values per environment. Helm just has no "root module" concept — whatever you run <code>helm</code> against is the root.</p>
+  <p>💡 This is how almost every company does it, from dating apps to the New York Times. Real values files can run <strong>1,500 lines</strong>; the structure is identical, there's just more in it. Ours is about 15 lines.</p>
+
+  <h3>🗂️ Chart structure: templates, values and the environment files</h3>
+  <div class="codebox"><pre>charts/investment-app/
+  Chart.yaml          <span class="c"># name + version. That's it — the chart's metadata</span>
+  templates/          <span class="c"># MUST be exactly "templates" — no typo, no space</span>
+    deployment.yaml
+    service.yaml
+    configmap.yaml
+  values.yaml         <span class="c"># defaults + shared values. ALWAYS loaded automatically</span>
+
+values-dev.yaml        <span class="c"># outside the chart: this environment's choices</span>
+values-staging.yaml
+values-production.yaml</pre></div>
+  <p>🔑 Two filename rules that silently break things:</p>
+  <ul>
+    <li>The folder must be <strong><code>templates</code></strong>. People type <code>template</code>, or add a space, and then wonder why nothing renders.</li>
+    <li>The shared file must be <strong><code>values.yaml</code></strong>. Call it <code>shared-values.yaml</code> and Helm will never pick it up.</li>
+  </ul>
+  <p><strong>Why are the environment files outside the chart?</strong> Because the chart is the <strong>reusable</strong> part and the values are not. The chart can even live in its own repository; a single chart might serve 10 different apps, each with its own dev and production values.</p>
+  <p><strong>How values combine:</strong> <code>values.yaml</code> is <strong>always</strong> applied, then your chosen file is layered on top. Dev gets the shared resource limits <strong>plus</strong> 2 replicas. Production gets the same limits <strong>plus</strong> 60 replicas.</p>
+  <div class="codebox"><pre><span class="c"># before</span>
+replicas: 2
+name: investment-app
+
+<span class="c"># after</span>
+replicas: {{ .Values.replicaCount }}
+name: "{{ .Values.appName }}"      <span class="c"># quotes needed when it sits inside other text</span></pre></div>
+  <p>💡 A classmate asked the obvious question: <strong>if the values files live outside the chart, how does Helm know which one to use?</strong> It doesn't guess — you name it explicitly with <code>--values</code>.</p>
+  <div class="codebox"><pre>helm upgrade --install investment-app charts/investment-app \
+  --values charts/investment-app/values-dev.yaml \
+  --namespace main-product-line --create-namespace</pre></div>
+  <p><strong>Read the command left to right:</strong> <code>investment-app</code> is the <strong>release name</strong> · <code>charts/investment-app</code> is where the chart is · <code>--values</code> picks the environment file · <code>--namespace</code> picks the namespace.</p>
+  <p>🔑 <strong>The filename does not pick the cluster.</strong> <code>values-dev.yaml</code> only supplies values. The cluster comes from your <strong>kubectl context</strong>. To deploy to staging you log into the staging account, switch context, and change one word in the command. Check <code>kubectl config current-context</code> <em>before</em> you install.</p>
+  <p><strong>What is a "release"?</strong> Another classmate asked. It's Helm's own name for one installation. Whatever you type after <code>--install</code> becomes <code>.Release.Name</code>, and the templates use it to name the real resources. Call the release <code>demo</code> and your Service is called <code>demo</code>.</p>
+  <p>💡 Preview without touching the cluster: <code>helm template investment-app charts/investment-app -n main-product-line -f values-dev.yaml</code> renders the final YAML so you can read it first.</p>
+  <p>⚠️ Helm does <strong>not adopt</strong> your existing plain Deployment, Service and ConfigMap. Copy their settings into the values file first, check the rendered output matches, then replace them. The <strong>Secret stays put</strong> — secrets don't belong in a chart.</p>
+
+  <h3>🔁 Advanced Helm: range, if and what's worth learning</h3>
+  <div class="table"><table>
+    <thead><tr><th>Feature</th><th>What it is</th><th>Use it for</th></tr></thead>
+    <tbody>
+      <tr><td><code>range</code></td><td>A <strong>loop</strong> — Helm's <code>for_each</code></td><td>Six repeated ConfigMap env entries collapse into one block</td></tr>
+      <tr><td><code>if</code></td><td>A <strong>conditional</strong></td><td>Make a whole resource optional from a values flag</td></tr>
+    </tbody>
+  </table></div>
+  <div class="codebox"><pre>{{- if .Values.clusterIP.create }}
+apiVersion: v1
+kind: Service
+<span class="c"># ...the whole Service lives inside the if</span>
+{{- end }}
+
+<span class="c"># values.yaml</span>
+clusterIP:
+  create: true       <span class="c"># false → the Service is simply never rendered</span></pre></div>
+  <p>🔑 The one principle to remember: <strong>the chart holds the templates, and you change behaviour only by editing values files.</strong> Somebody has to maintain the chart, but the person <em>using</em> it never opens <code>templates/</code>.</p>
+  <ul>
+    <li>Helm also tracks <strong>release history</strong>, so you can roll back to a previous revision.</li>
+    <li><strong>Is Helm syntax still a skill?</strong> The instructor's blunt answer: not really, not any more. It used to be a genuine specialty because the syntax is awkward. Today AI writes it well, and the people he knows who work with charts daily all let AI make the changes.</li>
+    <li>💡 So don't memorise syntax. Learn the <strong>structure and the logic</strong>: what's shared, what's an input, which file wins. Nobody will ask you to hand-write a chart in an interview.</li>
+    <li>A classmate asked how to understand a chart you've never seen at work: ask AI to read it back to you, or read the README and walk the templates yourself the hard way.</li>
+  </ul>
+
+  <h3>🤖 The live demo: letting AI write the chart (and reining it in)</h3>
+  <p>The instructor started the conversion by hand, then handed it to Claude Code: <em>"I started working on a Helm chart for the application deployment. Can you finish it and make it professional looking?"</em> He used <strong>Sonnet</strong>, not Opus — "this is a very easy, simple task for AI".</p>
+  <p><strong>What went wrong is the useful part.</strong> Told to follow "good practices for real engineering work", the AI immediately overshot:</p>
+  <ul>
+    <li>Started optimising the <strong>container image</strong> → <em>"Your job is to focus on the Helm chart, not container image optimizations."</em></li>
+    <li>Started building <strong>CI</strong> → <em>"We didn't learn CI yet. Don't do CI yet."</em></li>
+    <li>Added an <strong>Ingress</strong>, a <strong>PodDisruptionBudget</strong> and a <strong>ServiceAccount</strong> nobody asked for.</li>
+    <li>Wrapped names in a <code>_helpers.tpl</code> <strong>fullname</strong> function so convoluted that he asked it to simplify back to <code>.Release.Name</code>.</li>
+  </ul>
+  <p>🔑 The real lesson: <strong>check the values, not the syntax.</strong> Helm itself will fail on bad syntax. What it won't catch is the AI setting production to 2 replicas because it was editing the wrong file.</p>
+  <ul>
+    <li><strong>And make it prove the work:</strong> don't accept a chart that was only written. Have it <strong>deploy</strong> to a dev cluster, then <code>kubectl describe pod</code> to confirm the resource limits really landed.</li>
+    <li>One thing the AI added that was worth keeping: an <strong>HPA</strong>, switched on and off from values.</li>
+    <li><strong>Matching your team beats being clever.</strong> If your company already uses <code>fullname</code> helpers everywhere, match them. If not, keep it simple — AI's default is more complex than you need.</li>
+  </ul>
+  <div class="codebox"><pre>aws eks update-kubeconfig --name &lt;cluster-name&gt;
+kubectl get namespaces
+
+helm upgrade --install investment-app charts/investment-app \
+  --values charts/investment-app/values-dev.yaml \
+  --namespace main-product-line --create-namespace</pre></div>
+  <ul>
+    <li>The Pods came up <strong>Pending</strong>. Cause: the cluster's workloads had been deleted the previous week and <strong>Karpenter was never reinstalled</strong>, so there were no worker nodes to schedule onto.</li>
+    <li>Then <code>CreateContainerConfigError</code>, because the <strong>Secret didn't exist</strong> yet (Containers Session 09). He applied it, the Pods restarted themselves and picked it up.</li>
+    <li>💡 Helm's <code>NOTES.txt</code> is what prints that friendly message after an install — it's templated too.</li>
+  </ul>
+
+  <h3>📈 HPA vs Karpenter: two autoscalers, two levels</h3>
+  <p>A classmate asked: <strong>do we even need HPA if we have Karpenter?</strong> Yes — they scale different things.</p>
+  <div class="table"><table>
+    <thead><tr><th></th><th>HPA (HorizontalPodAutoscaler)</th><th>Karpenter</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Scales</strong></td><td><strong>Pods</strong></td><td><strong>Worker nodes</strong> (EC2)</td></tr>
+      <tr><td><strong>Triggered by</strong></td><td>Load on the current Pods (e.g. CPU &gt; 70%)</td><td>Pods that can't be scheduled for lack of room</td></tr>
+      <tr><td><strong>Without it</strong></td><td>No new Pods, no matter how busy</td><td>New Pods stay <code>Pending</code> forever</td></tr>
+    </tbody>
+  </table></div>
+  <p>🔑 You need <strong>both</strong>. HPA asks for more Pods; Karpenter provides somewhere to put them.</p>
+  <div class="codebox"><pre>autoscaling:
+  enabled: false          <span class="c"># true → HPA is created, and replicaCount is ignored</span>
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70</pre></div>
+  <p>The template reads <code>if not .Values.autoscaling.enabled</code> → use <code>replicaCount</code>. When HPA <strong>is</strong> enabled the Deployment leaves <code>replicas</code> unset, because the HPA owns that number.</p>
+  <p>💡 <code>autoscaling</code> is just a name someone chose. Call it <code>hpa</code> if you like — it only has to match between the values file and the template. Karpenter and the HPA are both from Containers Session 12.</p>
+
+  <h3>🌍 Going public: NodePort, LoadBalancer and the Classic LB surprise</h3>
+  <p>Where we stood: the app ran on EKS, reachable <strong>only</strong> by <code>port-forward</code>. Meanwhile the <strong>ECS</strong> copy still served the real public hostname through its ALB. You cannot ask users to run a kubectl command.</p>
+  <p><strong>NodePort is ruled out immediately.</strong> It opens the same port on every worker node — but on AWS those workers are autoscaling EC2 instances whose <strong>IPs change all day</strong>. There's no stable address to point anything at.</p>
+  <div class="codebox"><pre>service:
+  type: LoadBalancer      <span class="c"># was ClusterIP</span>
+
+<span class="c"># then just re-run the same command — that's the point of "upgrade --install"</span>
+helm upgrade --install investment-app charts/investment-app \
+  --values charts/investment-app/values-dev.yaml -n main-product-line
+kubectl -n main-product-line get service     <span class="c"># now shows an external address</span></pre></div>
+  <p>💡 A <code>LoadBalancer</code> Service is <strong>two things in one</strong> — it still has a ClusterIP underneath, plus the external load balancer. You don't create a separate ClusterIP Service alongside it.</p>
+  <p><strong>And then the surprise.</strong> AWS created a <strong>Classic Load Balancer</strong> — the oldest of the three types (Classic, Network, Application) and the one nobody should be using.</p>
+  <p><strong>Why?</strong> The <strong>AWS Load Balancer Controller</strong> was never installed on this recreated cluster. It <em>is</em> in the platform repo's setup script, right next to Karpenter — the agent that rebuilt the cluster just never ran it. Without it, an old <strong>legacy</strong> in-tree controller handles the Service and produces a Classic LB.</p>
+  <div class="table"><table>
+    <thead><tr><th>Load balancer</th><th>Needs the AWS LB Controller?</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Classic</strong></td><td>No — the legacy path still makes one (this is what happened)</td></tr>
+      <tr><td><strong>Network (NLB)</strong></td><td>The instructor wasn't certain and said so out loud</td></tr>
+      <tr><td><strong>Application (ALB)</strong></td><td><strong>Yes, definitely</strong></td></tr>
+    </tbody>
+  </table></div>
+  <p><strong>What the controller actually does:</strong> it watches your Kubernetes objects and calls AWS. When a Pod is replaced and its IP changes from <code>10.0.3.17</code> to <code>10.0.4.28</code>, the controller <strong>updates the load balancer's targets</strong>. Browser traffic never passes through the controller — it only <strong>configures</strong> the load balancer.</p>
+  <p>💡 Note how not-knowing was handled: he said he couldn't find a definitive answer and that <strong>AI had given him a wrong one</strong>. Admitting the gap beats inventing an answer. The Classic LB did answer <code>curl</code> from his terminal but not his browser — left unresolved, because it was the wrong tool anyway.</p>
+
+  <h3>🚪 Gateway API: the modern way in</h3>
+  <p>🔑 <strong>ingress-nginx was retired in March 2026.</strong> <strong>Gateway API</strong> is now the official Kubernetes standard for routing traffic in. (Istio and others do a similar job.) It is three objects, and the split matters:</p>
+  <div class="table"><table>
+    <thead><tr><th>Object</th><th>Answers</th><th>How often</th></tr></thead>
+    <tbody>
+      <tr><td><strong>GatewayClass</strong></td><td><em>Which program builds the load balancer?</em> (e.g. the AWS controller → an ALB)</td><td><strong>Once per cluster</strong></td></tr>
+      <tr><td><strong>Gateway</strong></td><td><em>Which ports does it listen on?</em> (e.g. 443)</td><td><strong>Once per cluster</strong>, one per port</td></tr>
+      <tr><td><strong>HTTPRoute</strong></td><td><em>Which hostname goes to which app?</em></td><td><strong>Once per application</strong></td></tr>
+    </tbody>
+  </table></div>
+  <div class="codebox"><pre>kind: GatewayClass
+metadata:
+  name: projectx-alb
+spec:
+  controllerName: gateway.k8s.aws/alb      <span class="c"># the AWS Load Balancer Controller</span></pre></div>
+  <p><strong>Where each file lives</strong> — a classmate asked directly: <strong>GatewayClass and Gateway</strong> are once-per-cluster, so they belong <strong>outside</strong> the app chart (in the <strong>platform repo</strong>). <strong>HTTPRoute</strong> is per application, so it goes <strong>inside the app's Helm chart</strong>.</p>
+  <p>The HTTPRoute points at a <strong>ClusterIP</strong> Service — not a LoadBalancer Service. You don't want a second load balancer.</p>
+  <p>⚠️ Prerequisites, in order: install the <strong>AWS Load Balancer Controller</strong>, then the Gateway API <strong>object type definitions</strong>, and only then apply these YAMLs. None of that happened in Class 9 — it's all Class 10.</p>
+  <p>💡 The instructor was candid that Gateway API is <strong>more complicated than ingress-nginx was</strong>. That's the trade for flexibility, and you set it up once.</p>
+
+  <h3>💰 Why share one load balancer: 10 apps, 1 ALB</h3>
+  <p>Picture the startup growing: investing, portfolio, research, market data, learning, accounts, reports, notifications, admin, billing. <strong>Ten applications</strong>, each needing to be reachable.</p>
+  <div class="table"><table>
+    <thead><tr><th>Approach</th><th>What you end up with</th></tr></thead>
+    <tbody>
+      <tr><td>A <strong>LoadBalancer Service</strong> per app</td><td><strong>10 load balancers</strong> — ten bills, ten things to configure and monitor</td></tr>
+      <tr><td>One <strong>Gateway</strong> + an HTTPRoute per app</td><td><strong>1 load balancer</strong>, 10 HTTPRoutes, 10 ClusterIP Services</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li>🔑 Two reasons, and they're the interview answer: <strong>cost</strong> and <strong>simplicity at scale</strong>.</li>
+    <li>One ALB handles roughly <strong>100 HTTP routes</strong> under default configuration, so one shared gateway covers a lot of growth.</li>
+    <li>Adding app number eleven is then just: a ClusterIP Service, plus an HTTPRoute where you change <strong>two lines</strong> — the hostname and the backend service. The GatewayClass and Gateway never change.</li>
+    <li>💡 Separate load balancers still make sense when an app genuinely needs its own access rules, capacity or isolation. Sharing is the default, not a law.</li>
+  </ul>
+
+  <h3>🚦 One-way vs two-way door decisions</h3>
+  <p>A classmate asked how much to build "just in case" — private subnets you might not need, a ServiceAccount nobody uses. The answer: <strong>prefer simple and minimal</strong>. Over-building adds complexity, and complexity hurts too.</p>
+  <div class="table"><table>
+    <thead><tr><th>Door</th><th>Meaning</th><th>Examples</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Two-way</strong></td><td>You can change it back later. <strong>Most decisions.</strong></td><td>Replica counts, resource limits, Service type, chart layout</td></tr>
+      <tr><td><strong>One-way</strong></td><td>Very hard to undo — you'd redo the whole thing</td><td><strong>VPC CIDR</strong>, a production <strong>database</strong> change</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li>🔑 Spend your thinking time on the one-way doors. Everything else: pick something reasonable and move.</li>
+    <li>💡 Practical trick: <strong>ask your AI which decisions here are one-way</strong>. It'll usually flag the few that are final.</li>
+    <li>Related: the roles of a platform engineer now read <strong>infrastructure (Terraform/IaC)</strong> + <strong>application deployment</strong> + <strong>writing and maintaining Helm charts</strong>. That third one is new on your résumé as of this class.</li>
+  </ul>
+</section>
+
+<section id="homework">
+  <div class="label"><span class="tag">Before Wed Nov 18</span><h2>Homework: read up on Gateway API</h2></div>
+  <p><strong>No new ticket was assigned in this class.</strong> PX-108 continues.</p>
+  <ol>
+    <li><strong>Read up on Gateway API.</strong> This is the explicit ask. Start with what a <strong>controller</strong> is, then follow the chain <strong>GatewayClass → Gateway → HTTPRoute</strong>. Bring whatever stays unclear to the next class.</li>
+    <li><strong>Convert your Kubernetes YAML to a Helm chart</strong>, the same move as in class. Then <strong>delete the plain YAML files</strong> — don't keep two sources of truth. Let AI handle syntax; check the values yourself.</li>
+    <li><strong>Re-run the platform setup script</strong> so the <strong>AWS Load Balancer Controller</strong> and <strong>Karpenter</strong> are both installed. Neither survived the cluster being recreated, and nothing public will work without the controller.</li>
+    <li><strong>From now on, deploy with Helm, not plain <code>kubectl apply</code>.</strong> That's what real teams do.</li>
+  </ol>
+  <ul>
+    <li>Reference material: the instructor's <strong>Helm PR #6</strong> on the app repo, and a separate checked reference chart on the class page.</li>
+    <li>Next class (Wed Nov 18): deploy Gateway API properly and do the <strong>DNS cutover</strong> from the ECS ALB to the EKS one.</li>
+  </ul>
+  <blockquote>🔑 The golden rule of this class: package the shape once and change only the values — and remember that YAML in Kubernetes is just a <em>request</em>. Something has to be installed and running to turn it into a real AWS load balancer, which is exactly why an unasked-for Classic LB showed up.</blockquote>
+</section>
+
+<section id="quiz9">
+  <div class="label"><span class="tag">Self-test</span><h2>Check yourself</h2></div>
+  <p class="reread">Answer each question out loud first, then open the answer. Score yourself out of 10.</p>
+
+  <div class="q"><p class="ask">1. A teammate wants the front-end Pods to find the trading Pods by calling the Kubernetes API for their IPs. Why is a ClusterIP Service the better answer, and what two extra things would their approach force you to build?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>Because the Service does it outside the application, and their version drags the lookup into the app and into RBAC.</strong></p>
+      <ul>
+        <li>Their approach needs <strong>application code</strong> to call the API server and pick an IP — networking logic welded into a business app.</li>
+        <li>It also needs <strong>permissions</strong>: a ServiceAccount, a Role and a RoleBinding allowing that Pod to <code>list</code> Pods (Containers Session 10).</li>
+        <li>And it's fragile: <strong>Pod IPs change</strong> every replacement, so the app has to re-query constantly and handle Pods that are alive but not Ready.</li>
+        <li>A ClusterIP Service gives a <strong>stable virtual IP and DNS name</strong>, keeps the endpoint list current, drops not-Ready Pods, and spreads load — for free, with zero app changes.</li>
+      </ul>
+      <p>💡 There <em>is</em> a legitimate case for the hard way: distributed systems where you must reach <strong>one specific</strong> Pod, e.g. because that Pod holds particular data. That's what StatefulSets and headless Services are for.</p>
+    </div></details></div>
+
+  <div class="q"><p class="ask">2. Your Service is <code>port: 80, targetPort: 8080</code>. A teammate "simplifies" it to <code>port: 8080, targetPort: 8080</code> and ships it. What breaks, and what doesn't?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>Nothing inside Kubernetes breaks — but every existing caller does, because they're all still asking for port 80.</strong></p>
+      <ul>
+        <li><code>targetPort</code> was correct before and is correct after: the container really listens on <code>8080</code>. That half is fine.</li>
+        <li><code>port</code> is the <strong>front door number other Pods dial</strong>. Anything doing <code>curl http://investment-app/</code> (which implies port 80) now gets connection refused and must become <code>http://investment-app:8080/</code>.</li>
+        <li>🔑 The rule: <code>targetPort</code> <strong>must</strong> match reality; <code>port</code> can be anything you like, but it's a <strong>contract</strong> with your callers. Changing it is a breaking API change.</li>
+        <li>The reverse mistake is worse and quieter: get <code>targetPort</code> wrong and the Service looks perfectly healthy while every request times out.</li>
+      </ul>
+    </div></details></div>
+
+  <div class="q"><p class="ask">3. A Pod is <code>Running</code>, the Service exists, and <code>kubectl get pods</code> looks fine — but requests to the Service never reach that Pod. Give two different causes and how you'd tell them apart in one command.</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>Either the labels don't match the selector, or the Pod isn't Ready — and <code>describe endpointslice</code> distinguishes them instantly.</strong></p>
+      <ul>
+        <li><strong>Label mismatch:</strong> the Pod says <code>app: investment-app-v2</code>, the selector says <code>app: investment-app</code>. The Service has <strong>no idea the Pod exists</strong> — it never appears in the endpoints at all.</li>
+        <li><strong>Readiness failure:</strong> labels match fine, but the readiness probe is failing, so Kubernetes deliberately <strong>removes it from the endpoint list</strong>. <code>kubectl get pods</code> shows <code>1/1 Running</code> but <code>0/1 READY</code>.</li>
+        <li>The command: <code>kubectl -n &lt;ns&gt; describe endpointslice</code>. <strong>Pod absent entirely</strong> → labels. <strong>Pod listed as not-ready</strong> → the probe.</li>
+      </ul>
+      <p>💡 "Running" and "Ready" are different claims. Running = the container process started. Ready = the app says it can actually serve. Only Ready Pods get Service traffic (Session 08, Containers Session 08).</p>
+    </div></details></div>
+
+  <div class="q"><p class="ask">4. You run <code>helm upgrade --install app charts/app --values values-dev.yaml</code>. Your <code>kubectl</code> context happens to point at the production cluster. What happens?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>You deploy dev's settings straight into production — Helm never looks at the filename.</strong></p>
+      <ul>
+        <li><code>--values</code> supplies <strong>numbers and names</strong>. That's all it does. The word "dev" in the filename carries no meaning to Helm.</li>
+        <li>The <strong>cluster</strong> comes entirely from your <strong>kubectl context</strong>. The <strong>namespace</strong> comes from <code>-n</code>.</li>
+        <li>Result: production gets dev's replica count (maybe 2 instead of 60), dev's image tag, and dev's database settings written into its ConfigMap. The app may come up pointing at the wrong database.</li>
+        <li>🔑 The habit that prevents it: run <code>kubectl config current-context</code> <strong>before every install</strong>. That's the whole reason the demo checked the context first.</li>
+      </ul>
+      <p>💡 Real teams harden this further — separate AWS accounts per environment (so the wrong credentials simply can't reach prod), plus CI doing the deploy instead of laptops.</p>
+    </div></details></div>
+
+  <div class="q"><p class="ask">5. Why must the folder be called exactly <code>templates</code> and the shared file exactly <code>values.yaml</code>? What happens if you name the shared file <code>shared-values.yaml</code>, and why doesn't that same rule apply to <code>values-dev.yaml</code>?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>Because those two names are how Helm finds things automatically — and <code>values-dev.yaml</code> isn't found automatically, it's named by you.</strong></p>
+      <ul>
+        <li><strong><code>templates/</code></strong> is the only folder Helm renders. Typo it as <code>template</code> or add a space and Helm renders <strong>nothing</strong> — no error about your typo, just an install that creates no resources.</li>
+        <li><strong><code>values.yaml</code></strong> is loaded <strong>implicitly, every time</strong>. Rename it and it's simply ignored: your shared resource limits and defaults silently vanish.</li>
+        <li><code>values-dev.yaml</code> is different because you pass it <strong>explicitly</strong> with <code>--values</code>. It could be called <code>bananas.yaml</code> and work identically — which is also why it can live outside the chart folder.</li>
+        <li>🔑 Layering: <code>values.yaml</code> always applies, then your explicit file is merged on top and wins on conflicts.</li>
+      </ul>
+      <p>💡 This class of failure is nasty precisely because it's <strong>silent</strong>. <code>helm template</code> before installing shows you the rendered truth.</p>
+    </div></details></div>
+
+  <div class="q"><p class="ask">6. Traffic spikes. Your HPA scales from 2 Pods to 10. Eight of them sit in <code>Pending</code> and your dashboards stay red. What's wrong, and what would have happened with no HPA at all?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>You have a Pod autoscaler but no node autoscaler — the HPA asked for Pods and nothing provided room for them.</strong></p>
+      <ul>
+        <li><strong>HPA</strong> scales <strong>Pods</strong> based on load. <strong>Karpenter</strong> scales <strong>worker nodes</strong> when Pods can't be scheduled. They operate at different levels.</li>
+        <li><code>Pending</code> is the signature: the Pods were created fine, but the scheduler can't place them because the existing nodes have no spare CPU or memory.</li>
+        <li>Here Karpenter is missing or broken — exactly what happened in class, where Karpenter hadn't been reinstalled after the cluster was recreated.</li>
+        <li><strong>With no HPA at all</strong> you'd stay at 2 Pods, each getting hammered: slow responses, maybe readiness failures and restarts. The cluster would look calm while users suffer.</li>
+        <li>🔑 <strong>You need both.</strong> HPA alone gives you Pending Pods; Karpenter alone gives you an idle cluster that never adds capacity because nothing ever asks.</li>
+      </ul>
+      <p>💡 Check order: <code>kubectl describe pod</code> for the scheduling reason, then whether Karpenter's controller is running and whether its NodePool limits are capping you.</p>
+    </div></details></div>
+
+  <div class="q"><p class="ask">7. You set <code>type: LoadBalancer</code> and AWS hands you a <strong>Classic</strong> Load Balancer. Explain why, and say what you'd do to get an ALB instead.</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>Because the AWS Load Balancer Controller wasn't installed, so an old in-tree legacy controller handled the Service — and legacy only knows how to make Classic.</strong></p>
+      <ul>
+        <li>EKS still carries a <strong>legacy</strong> load-balancer integration. When the modern controller is absent, that path quietly takes over, which is why it "worked" but produced the wrong thing.</li>
+        <li>Classic is the oldest of AWS's three types (Classic, Network, Application) and shouldn't be used for new work.</li>
+        <li><strong>To get an ALB:</strong> install the <strong>AWS Load Balancer Controller</strong> (an IAM role in AWS plus a Helm chart in <code>kube-system</code>) — an ALB is <strong>not possible</strong> without it. Then expose the app through <strong>Gateway API</strong> (GatewayClass → Gateway → HTTPRoute) rather than a LoadBalancer Service.</li>
+        <li>💡 A <code>LoadBalancer</code> Service handled by the <em>modern</em> controller gives you an <strong>NLB</strong>, not an ALB. ALBs come from Ingress or Gateway API — the layer that understands hostnames and paths.</li>
+      </ul>
+      <p>🔑 Interview-worthy framing: a Kubernetes object is only a <strong>request</strong>. A controller has to be running to turn it into real AWS infrastructure, and <strong>which</strong> controller answers decides what you get.</p>
+    </div></details></div>
+
+  <div class="q"><p class="ask">8. For ten applications on one cluster, how many GatewayClasses, Gateways and HTTPRoutes do you have? Which of those files live in the platform repo and which in each app's Helm chart, and why does that split exist?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>One GatewayClass, one Gateway, ten HTTPRoutes — and the split follows ownership: cluster-wide things belong to the platform, per-app things ship with the app.</strong></p>
+      <ul>
+        <li><strong>GatewayClass</strong> × 1 — "use the AWS controller, build me an ALB". Cluster-wide. <strong>Platform repo.</strong></li>
+        <li><strong>Gateway</strong> × 1 (per listening port) — "listen on 443". Cluster-wide. <strong>Platform repo.</strong></li>
+        <li><strong>HTTPRoute</strong> × 10 — "this hostname goes to that app's Service". <strong>Each app's Helm chart.</strong></li>
+        <li><strong>Why it matters:</strong> an app team can ship a new route without touching shared cluster infrastructure, and the platform team can change the shared entrance without editing ten charts. Blast radius and ownership both line up.</li>
+        <li>Each app also needs its own <strong>ClusterIP</strong> Service — not LoadBalancer. A LoadBalancer Service here would create a second, redundant load balancer.</li>
+      </ul>
+      <p>💡 Adding app eleven is then two lines of real change: the hostname and the backend service name.</p>
+    </div></details></div>
+
+  <div class="q"><p class="ask">9. An interviewer asks: "We run ten microservices on EKS. Why wouldn't you just give each one a LoadBalancer Service?" Give the numbers, and then say when separate load balancers <em>are</em> the right call.</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>Ten LoadBalancer Services means ten load balancers to pay for and operate; one Gateway means one. Cost and operational simplicity.</strong></p>
+      <ul>
+        <li><strong>Per-app LoadBalancer:</strong> 10 Services → <strong>10 load balancers</strong>. Ten line items on the bill, ten sets of listeners, certificates, security groups and health checks to keep straight.</li>
+        <li><strong>Shared Gateway:</strong> 1 ALB, 10 HTTPRoutes, 10 ClusterIP Services. Hostnames or URL paths pick the app.</li>
+        <li>Capacity isn't the constraint: roughly <strong>100 HTTP routes per ALB</strong> under default configuration.</li>
+        <li>The class page cites a financial services company that moved to shared gateways and ended up with <strong>96% fewer</strong> load balancers.</li>
+        <li><strong>When separate is still right:</strong> an app needs its own <strong>access rules</strong> (different source IP restrictions), its own <strong>capacity</strong> or isolation, a different protocol, or regulatory separation.</li>
+      </ul>
+      <p>💡 Honest extra credit: Ingress could also share an ALB. Sharing isn't unique to Gateway API — Gateway API is just the supported, modern way to do it now that ingress-nginx is retired.</p>
+    </div></details></div>
+
+  <div class="q"><p class="ask">10. Of these, which deserve the most thinking time and why: replica count · VPC CIDR · Service type · resource limits · the production database engine? How should the answer change how you work day to day?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>VPC CIDR and the production database engine — they're one-way doors. The rest are two-way and can be changed next week.</strong></p>
+      <ul>
+        <li><strong>One-way:</strong> <strong>VPC CIDR</strong> can't be resized meaningfully once things are in it; you'd rebuild the network. The <strong>production database engine</strong> means a real migration with downtime and data risk.</li>
+        <li><strong>Two-way:</strong> replica count, resource limits and Service type are all a values edit and a redeploy away.</li>
+        <li><strong>How it changes your work:</strong> deliberate slowly on the one-way doors — write it down, ask for review, sleep on it. On two-way doors, <strong>pick something reasonable and move</strong>; deliberating costs more than being wrong.</li>
+        <li>It also answers "should I build this for the future?": mostly <strong>no</strong>. Over-building adds complexity now against a future that may not arrive.</li>
+      </ul>
+      <p>💡 Practical move: ask your AI <strong>which decisions in this design are one-way</strong>. It'll usually surface the two or three that are genuinely final.</p>
+    </div></details></div>
+
+  <p class="reread">Scoring: 9–10, you can package an app and explain how it gets a front door 🏆 · 7–8, solid 💪 · below 7, reread Session 09 and retry 🔁</p>
+</section>
+
+<footer>The full study page and 10-question quiz are in Notion under DevOps / 312 - Notes / 🏁 ProjectX.</footer>
+</div>
+
+<script>
+document.querySelectorAll('.codebox').forEach(function(box){
+  var pre = box.querySelector('pre'); var b = document.createElement('button');
+  b.className = 'copy'; b.type = 'button'; b.textContent = 'Copy';
+  b.addEventListener('click', function(){
+    var text = pre.innerText.split('\n').map(function(l){ return l.replace(/\s+#.*$/, ''); }).join('\n').trim();
+    var done = function(){ b.textContent = 'Copied'; setTimeout(function(){ b.textContent = 'Copy'; }, 1500); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(function(){ selectPre(); });
+    } else { selectPre(); }
+    function selectPre(){ var r = document.createRange(); r.selectNodeContents(pre); var s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = 'Selected'; }
+  });
+  box.appendChild(b);
+});
+</script>
