@@ -1,0 +1,566 @@
+<title>Project X Session 11</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one reading column; sections as stacked "shipping manifest" blocks with a stencilled label; code and tables scroll in place. */
+:root{
+  --bg:#f3f5f7; --surface:#ffffff; --ink:#15202b; --muted:#56657a; --line:#d8dee6;
+  --accent:#c4501b; --accent-soft:#fbe9df; --steel:#1f5f8b; --steel-soft:#e3eef6;
+  --code-bg:#0f1b26; --code-fg:#dbe7f2; --code-cmt:#7f97ad;
+  --good:#2e7d4f; --bad:#b3261e;
+  --f-display:"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --f-body:"Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e151c; --surface:#16202a; --ink:#e6edf3; --muted:#9aabbd; --line:#2a3845;
+  --accent:#f0874f; --accent-soft:#3a2418; --steel:#7ab8e3; --steel-soft:#16303f;
+  --code-bg:#0a1016; --code-fg:#dbe7f2; --code-cmt:#6f879c;
+  --good:#6cc493; --bad:#f08a80; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0e151c; --surface:#16202a; --ink:#e6edf3; --muted:#9aabbd; --line:#2a3845;
+  --accent:#f0874f; --accent-soft:#3a2418; --steel:#7ab8e3; --steel-soft:#16303f;
+  --code-bg:#0a1016; --code-fg:#dbe7f2; --code-cmt:#6f879c;
+  --good:#6cc493; --bad:#f08a80; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:17px/1.6 var(--f-body);padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:28px 64px}
+.wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.15;margin:0}
+h1{font-size:clamp(30px,6vw,44px);font-weight:800;letter-spacing:-.01em}
+h2{font-size:24px;font-weight:800}
+h3{font-size:18px;font-weight:600;margin-top:6px}
+p{margin:0}
+a{color:var(--steel)}
+code{font-family:var(--f-mono);font-size:.86em;background:var(--steel-soft);color:var(--ink);padding:1px 5px;border-radius:4px}
+strong{font-weight:700}
+.eyebrow{font:600 12px/1 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+header{display:flex;flex-direction:column;gap:12px;border-bottom:3px solid var(--ink);padding-bottom:20px}
+.meta{display:flex;flex-wrap:wrap;gap:8px 16px;color:var(--muted);font-size:15px}
+.lede{font-size:19px;max-width:65ch}
+nav{display:flex;flex-wrap:wrap;gap:8px}
+nav a{font:600 13px/1 var(--f-mono);text-decoration:none;color:var(--ink);border:1px solid var(--line);background:var(--surface);padding:8px 10px;border-radius:6px}
+nav a:hover,nav a:focus-visible{border-color:var(--accent);color:var(--accent);outline:none}
+section{display:flex;flex-direction:column;gap:14px;scroll-margin-top:16px}
+section > .label{display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--line);padding-bottom:8px}
+section > .label .tag{font:600 11px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--surface);background:var(--ink);padding:5px 7px;border-radius:3px}
+ul,ol{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px}
+.table{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:15.5px;min-width:480px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:600 12px/1.3 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--bg)}
+tr:last-child td{border-bottom:0}
+blockquote{margin:0;border-left:4px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 8px 8px 0;font-weight:600}
+pre{margin:0;background:var(--code-bg);color:var(--code-fg);font:14px/1.6 var(--f-mono);padding:14px 16px;border-radius:8px;overflow-x:auto}
+pre .c{color:var(--code-cmt)}
+.codebox{position:relative}
+.copy{position:absolute;top:8px;right:8px;font:600 11px/1 var(--f-mono);background:transparent;color:var(--code-cmt);border:1px solid var(--code-cmt);border-radius:4px;padding:5px 7px;cursor:pointer}
+.copy:hover,.copy:focus-visible{color:var(--code-fg);border-color:var(--code-fg);outline:none}
+.flow{font:600 14px/1.5 var(--f-mono);background:var(--steel-soft);color:var(--ink);padding:14px 16px;border-radius:8px;overflow-x:auto;white-space:pre}
+.step{display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:start}
+.step > .n{font:800 18px/34px var(--f-display);text-align:center;background:var(--ink);color:var(--bg);border-radius:50%;width:34px;height:34px}
+.step > div{min-width:0;display:flex;flex-direction:column;gap:8px}
+.see{font-size:15px;color:var(--good)}
+.see::before{content:"You should see: ";font-weight:700}
+.warn{border:1px solid var(--bad);border-radius:8px;padding:12px 16px;display:flex;flex-direction:column;gap:10px;background:var(--surface)}
+.warn .eyebrow{color:var(--bad)}
+details{border:1px solid var(--line);background:var(--surface);border-radius:8px}
+details summary{cursor:pointer;padding:12px 16px;font-weight:600;list-style-position:inside}
+details summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:8px}
+details > div{padding:0 16px 14px;display:flex;flex-direction:column;gap:8px}
+.q{display:flex;flex-direction:column;gap:10px}
+.q p.ask{font-weight:600}
+.reread{font-style:italic;color:var(--muted);font-size:15px}
+footer{color:var(--muted);font-size:15px;border-top:1px solid var(--line);padding-top:16px}
+@media (prefers-reduced-motion: reduce){*{scroll-behavior:auto!important}}
+html{scroll-behavior:smooth}
+</style>
+
+<div class="wrap">
+<header>
+  <span class="eyebrow">312 School · Cohort 26a · Project X</span>
+  <h1>Session 11: Application CI and a manual Dev release</h1>
+  <div class="meta"><span>Thu, Nov 19, 2026</span><span>Ticket PX-109 — weekend task</span><span>Sources: class recording, written notes, class materials, CI teaching page</span></div>
+  <p class="lede">Everything so far has been built by hand. This is the class where the building starts happening <strong>by itself</strong>. It opens by tracing a request all the way back — past the ALB, past the Service, past the Pod — to the one thing that actually answers you: a <strong>running process</strong>. That distinction (an <strong>image</strong> is just files; a <strong>container</strong> is files plus a process) is what makes the rest make sense. Then the same journey in reverse: from a developer typing code to that process running, and the realisation that a developer should only ever do <strong>two</strong> steps — write it, push it — and everything after is our job to automate. That's <strong>CI</strong>. The class built it live in <strong>GitHub Actions</strong>: push to a <code>feature/*</code> branch, build the image, run nine tests against a throwaway Postgres, then log into AWS through <strong>OIDC</strong> and push to ECR tagged with the <strong>Git commit ID</strong>. It failed twice before it worked. And it deliberately stopped short: a new image in ECR is <strong>not</strong> a running app, so the release itself was still a <strong>manual <code>helm upgrade</code></strong>.</p>
+  <nav aria-label="Sections"><a href="#s11">Notes</a><a href="#homework">Homework</a><a href="#quiz11">Check yourself</a></nav>
+</header>
+
+<section id="s11">
+  <div class="label"><span class="tag">Notes</span><h2>Quick reference and notes</h2></div>
+  <div class="table"><table>
+    <thead><tr><th>Topic</th><th>Key point</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Image vs container</strong></td><td>An <strong>image</strong> is a bunch of files — it only needs <strong>storage</strong>. A <strong>container</strong> is that image with a <strong>running process</strong> — it needs CPU, RAM and power. An image in ECR answers nothing</td></tr>
+      <tr><td><strong>What actually replies</strong></td><td>DNS → ALB → ClusterIP Service → one Pod → container → a <strong>running process</strong>. Everything before that is just routing</td></tr>
+      <tr><td><strong>Stateless Pods</strong></td><td>Delete the Pod that's serving you and nothing breaks: the next Pod answers and the data is in <strong>RDS</strong>, outside both</td></tr>
+      <tr><td><strong>Code's full journey</strong></td><td>Write → <strong>commit to Git</strong> → package (build image) → test → store somewhere reachable (<strong>ECR</strong>) → deploy (<code>helm upgrade</code>)</td></tr>
+      <tr><td><strong>The developer's job</strong></td><td>Exactly <strong>two steps</strong>: write the code, push it to Git. <strong>Everything after is the platform engineer's to automate</strong></td></tr>
+      <tr><td><strong>CI = integration</strong></td><td>Bringing <strong>several developers' changes together often</strong> and checking the combined app still works — not just "automation"</td></tr>
+      <tr><td><strong>Why a cloud runner</strong></td><td>Doesn't need your laptop on · pick the machine type · safer than a laptop left in a restaurant · and the big one: an <strong>automatic trigger</strong></td></tr>
+      <tr><td><strong>Workflow file</strong></td><td><code>.github/workflows/*.yml</code>. Triggers: <strong>push</strong> to matching branches, <strong>pull request</strong>, <strong>manual</strong>, or a <strong>schedule</strong>. No branch filter = every branch</td></tr>
+      <tr><td><strong>Runners</strong></td><td><code>ubuntu-latest</code> — 2 CPU, 8 GB RAM, 14 GB disk, with <strong>Docker, Compose, kubectl and Helm already installed</strong>. Self-hosted is possible but extra work</td></tr>
+      <tr><td><strong>uses vs run</strong></td><td><code>uses:</code> is a <strong>ready-made action</strong> someone else packaged. <code>run:</code> is a <strong>raw shell command</strong> on that machine</td></tr>
+      <tr><td><strong>Actions are the edge</strong></td><td><code>aws-actions/configure-aws-credentials</code> replaces 10–15 lines of CLI. This is GitHub Actions' main differentiator vs Jenkins, GitLab CI and CircleCI</td></tr>
+      <tr><td><strong>Fail fast</strong></td><td>If any step fails, the job <strong>aborts</strong> — so a failed test never reaches the push step</td></tr>
+      <tr><td><strong>OIDC</strong></td><td>How an IAM role trusts something <strong>outside AWS</strong>. Provider <code>token.actions.githubusercontent.com</code>, audience <code>sts.amazonaws.com</code>, trust scoped to one org and repo</td></tr>
+      <tr><td><strong>vars vs env vs secrets</strong></td><td><code>vars.X</code> = a <strong>repository variable</strong> (non-sensitive config) · <code>env.X</code> = defined in the workflow file · <strong>secrets</strong> = sensitive values</td></tr>
+      <tr><td><strong>Image tag</strong></td><td><code>github.sha</code>, the <strong>full commit ID</strong>. The image and the exact code that built it stay traceable to each other</td></tr>
+      <tr><td><strong>CI ≠ CD</strong></td><td>A green pipeline puts an image <strong>in ECR</strong>. The Deployment keeps running the old one until someone changes the tag and runs <code>helm upgrade</code></td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>🔎 Tracing a request all the way back to the code</h3>
+  <p>The class started by following one browser request backwards through everything built since Session 06.</p>
+  <div class="codebox"><pre>browser address
+  ↓  <span class="c">DNS (Route 53) returns an IP — whose IP? the load balancer's</span>
+Gateway API ALB <span class="c">(managed by the AWS Load Balancer Controller)</span>
+  ↓
+ClusterIP Service
+  ↓
+one of the investment-app Pods in the main-product-line namespace
+  ↓
+a container
+  ↓
+a RUNNING PROCESS   <span class="c">← this is the thing that actually answers</span></pre></div>
+  <ul>
+    <li><strong>Which Pod answered?</strong> A classmate suggested <code>exec</code>; the answer is <strong>logs</strong>: <code>kubectl -n main-product-line logs &lt;pod&gt; --tail 3</code>.</li>
+    <li>A nice accident in the demo: plain page loads weren't logged, but a <strong>buy</strong> was — so he bought a share to make the serving Pod reveal itself. The balance change on screen matched the log line.</li>
+    <li><strong>Then he deleted the Pod that was serving him</strong> — and the page kept working. The next request simply went to the other Pod, and the data was unchanged.</li>
+  </ul>
+  <p>🔑 <strong>That's what "stateless" means.</strong> The Pods hold no state; the trades live in <strong>RDS</strong>, outside both of them. Add Pods, delete Pods — it doesn't matter as long as enough remain. <strong>It's fine to kill a Pod in production.</strong> That's exactly why <strong>Deployment</strong> is the default workload type.</p>
+  <ul>
+    <li>A classmate was surprised how fast the replacement became Ready — a few seconds, because the readiness probe's initial delay is 3 seconds (Session 08).</li>
+    <li><strong>What would a user actually notice?</strong> Only if <strong>all</strong> Pods were down, all were overloaded, or the <strong>database</strong> was down.</li>
+  </ul>
+
+  <h3>🧠 Image vs container, package vs runtime</h3>
+  <p>The question that drove the whole first half: <em>"What exactly inside a container gives us back the response?"</em> Not the server, not the API — a <strong>running process</strong>. A process is what <strong>uses CPU, RAM and storage</strong>. Without one, you have files that do nothing.</p>
+  <div class="table"><table>
+    <thead><tr><th></th><th>Image</th><th>Container</th></tr></thead>
+    <tbody>
+      <tr><td><strong>What it is</strong></td><td>A bunch of <strong>files</strong></td><td>The image <strong>with running processes</strong></td></tr>
+      <tr><td><strong>Needs</strong></td><td>Only <strong>storage</strong></td><td>CPU, RAM, storage, power</td></tr>
+      <tr><td><strong>Answers requests?</strong></td><td><strong>No</strong></td><td><strong>Yes</strong></td></tr>
+    </tbody>
+  </table></div>
+  <p>💡 Two analogies worth keeping:</p>
+  <ul>
+    <li><strong>A downloaded app.</strong> The installer file is dead — just files. It becomes something only when you <strong>open it</strong>, and opening it <strong>starts processes</strong>.</li>
+    <li><strong>A brain.</strong> A dead brain is biomaterial. A living one has neurons firing — and it's <strong>burning energy</strong>. Same with a process and CPU.</li>
+  </ul>
+  <p>The same distinction has a formal name: <strong>package vs runtime</strong>. Runtime is the package while it's actually running.</p>
+  <blockquote>🔑 "You could put an image on a USB stick and keep it for 1,000 years and it still wouldn't do anything." This is why pushing to ECR is <em>not</em> deploying — the point the whole class builds toward.</blockquote>
+  <div class="codebox"><pre>kubectl -n main-product-line get pods
+kubectl -n main-product-line describe pod &lt;pod&gt; | grep -i image
+<span class="c"># the part before the colon is the ECR repository address</span>
+<span class="c"># the part after the colon is the TAG you chose</span>
+<span class="c"># the sha256 line is the image's own digest — a different thing</span></pre></div>
+  <p>A classmate asked whether EKS still needs permissions to pull from ECR when both are in the <strong>same account</strong>. Yes — simpler permissions, but still permissions.</p>
+
+  <h3>🛤️ The other direction: from a developer's keyboard to a running process</h3>
+  <p><strong>Creation:</strong> a developer writes code in an editor or an agent tool. <strong>Destination:</strong> running, with processes, in the Kubernetes cluster. What happens in between?</p>
+  <div class="table"><table>
+    <thead><tr><th>#</th><th>Step</th><th>The decision it hides</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td><strong>Write the code</strong></td><td>—</td></tr>
+      <tr><td>2</td><td><strong>Add it to version control</strong> (Git)</td><td>Standard practice: history, and somewhere to go back to</td></tr>
+      <tr><td>3</td><td><strong>Package it</strong> — build the image</td><td><strong>Where does this happen, and who does it?</strong> Packaging needs a machine</td></tr>
+      <tr><td>4</td><td><strong>Run automated tests</strong></td><td>Before, during or after packaging</td></tr>
+      <tr><td>5</td><td><strong>Store the package</strong> somewhere reachable</td><td>Where · permissions · network access</td></tr>
+      <tr><td>6</td><td><strong>Deploy</strong> (<code>kubectl apply</code> / <code>helm upgrade</code>)</td><td><strong>Which version?</strong> There are many</td></tr>
+    </tbody>
+  </table></div>
+  <p><strong>Why store it at all?</strong> Because an image built on your laptop isn't reachable by the cluster's workers. It has to live somewhere they can pull from.</p>
+  <div class="codebox"><pre><span class="c"># how it works today, by hand</span>
+cd &lt;app folder&gt;            <span class="c"># where the Dockerfile is</span>
+docker build -t &lt;name&gt; .
+aws ecr get-login-password ... | docker login ...   <span class="c"># and you need permissions</span>
+docker push &lt;ecr-repo&gt;:&lt;tag&gt;</pre></div>
+  <p>🔑 <strong>The target state:</strong> a developer should only ever do steps <strong>1 and 2</strong>. Everything from step 3 onward happens on its own, in seconds or minutes.</p>
+  <blockquote>🔑 "That's the design of modern engineering platforms — and we are the people who set up the rest." Steps 3–6, automated, are exactly what <strong>CI/CD</strong> names.</blockquote>
+
+  <h3>☁️ Why run the build on a cloud runner instead of your laptop</h3>
+  <p>A <strong>runner</strong> is a machine provisioned to do one short job and then disappear. GitHub Actions provides them.</p>
+  <div class="table"><table>
+    <thead><tr><th>Reason</th><th>Why it matters</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Doesn't depend on your machine</strong></td><td>Laptop closed, you're asleep, you're on holiday — it still runs</td></tr>
+      <tr><td><strong>Choose the machine</strong></td><td>Need Linux when you're on a Mac? More CPU or RAM? Pick it</td></tr>
+      <tr><td><strong>Security</strong></td><td>Permissions live on an isolated datacenter machine, not on the laptop you might leave in a restaurant</td></tr>
+      <tr><td><strong>🔑 Automatic trigger</strong></td><td><strong>The big one.</strong> Any push or merge starts the job. Nobody has to remember, be in the right folder, or have the right permissions</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li>Without it, <strong>somebody</strong> has to sit down, be in the right directory, run the right commands, have the right credentials, and do it at the right moment. Every single time.</li>
+    <li><strong>These are short-lived machines</strong>, not an EC2 you manage. GitHub creates one, runs the job, deletes it.</li>
+    <li>💡 The runner spec, for the interview: <code>ubuntu-latest</code> gives <strong>2 CPUs, 8 GB RAM, 14 GB storage</strong> on private repos, and already has <strong>Docker, Docker Compose, kubectl and Helm</strong> installed. Windows and macOS runners exist but cost noticeably more, so Linux is what nearly everyone uses.</li>
+    <li><strong>Self-hosted runners</strong> (your own EC2s or Kubernetes containers) are supported, usually for compliance reasons — a company that won't run jobs on GitHub's servers. Extra setup, but not difficult.</li>
+  </ul>
+
+  <h3>🤝 What the "I" in CI actually means</h3>
+  <p>A fair question: why is it called <strong>continuous integration</strong> and not just "automation"? <strong>Integration</strong> is the ordinary English word: bringing changes <strong>together</strong>.</p>
+  <div class="table"><table>
+    <thead><tr><th>Developer</th><th>Change</th></tr></thead>
+    <tbody>
+      <tr><td><strong>A</strong></td><td>Rename the database field <code>price</code> → <code>trade_price</code> (to avoid confusion with another price)</td></tr>
+      <tr><td><strong>B</strong></td><td>Write code that <strong>reads</strong> <code>price</code> from the database</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li>Each change works <strong>on its own</strong>. Put them together and the trade history page breaks.</li>
+    <li>🔑 So CI is: <strong>merge changes from different people frequently, and automatically check that the combined app still works.</strong> The automation is the means; the integration is the point.</li>
+    <li><strong>Integration tests</strong> are the tests that specifically check several features still work <strong>together</strong>.</li>
+    <li><strong>Whose job are the tests?</strong> Developers or QA write them — <strong>not</strong> the platform engineer. <em>"Our job is to make sure they run, and that the job fails if they fail."</em></li>
+    <li>The app's nine existing tests check things like: paginating trade history (create 12 trades, the page must show exactly 10) and buy/sell regressions.</li>
+    <li>💡 AI is now very good at writing test cases — but deciding they run on every change is still a platform decision.</li>
+  </ul>
+
+  <h3>⚙️ GitHub Actions: triggers, runners, jobs and steps</h3>
+  <p>A workflow is just a <strong>YAML file</strong> in <code>.github/workflows/</code> in the repo. Nothing to click, nothing to install. The class built a throwaway demo job first, to see the shape before the real thing.</p>
+  <div class="codebox"><pre>name: GitHub Actions basic job demo
+
+on:                       <span class="c"># WHEN it runs</span>
+  push:
+    branches: [ "feature/*" ]   <span class="c"># no branches: key at all → ANY branch</span>
+  pull_request:
+    types: [ opened ]
+  workflow_dispatch:      <span class="c"># a manual button in the GitHub UI</span>
+  # schedule:
+  #   - cron: "0 23 * * *"      <span class="c"># cron-style, e.g. the class's own publishing job</span>
+
+jobs:
+  do-something:
+    runs-on: ubuntu-latest        <span class="c"># WHICH machine</span>
+    steps:
+      - uses: actions/checkout@v4 <span class="c"># a ready-made action</span>
+      - run: echo "hello"         <span class="c"># a raw command</span>
+      - run: |
+          echo "${{ github.repository }}"
+          ls</pre></div>
+  <div class="table"><table>
+    <thead><tr><th>Trigger</th><th>When it fires</th></tr></thead>
+    <tbody>
+      <tr><td><code>push</code></td><td>A change lands in a matching branch (including a merge)</td></tr>
+      <tr><td><code>pull_request</code></td><td>A PR is opened</td></tr>
+      <tr><td><code>workflow_dispatch</code></td><td>You click a button in the Actions tab</td></tr>
+      <tr><td><code>schedule</code></td><td>Cron-style, on a timer</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li>🔑 <strong>Jobs fail fast.</strong> If any step fails, the whole job aborts — which is the entire safety mechanism: a failed test can never reach the push step.</li>
+    <li>The workflow is <strong>always tied to its own repository</strong>. A classmate asked how checkout knows which repo — it defaults to the one the workflow lives in; another repo has to be named explicitly.</li>
+    <li><strong>Where to watch it:</strong> the repo's <strong>Actions</strong> tab shows every run, its branch, each step and its output.</li>
+    <li>💡 It isn't only for builds. The class's own recording-publishing pipeline is a <strong>scheduled</strong> GitHub Actions job: it checks Vimeo for new recordings, publishes them to the site and posts to Slack.</li>
+  </ul>
+
+  <h3>🧩 uses vs run: why they're called "actions"</h3>
+  <div class="table"><table>
+    <thead><tr><th>Keyword</th><th>What it is</th></tr></thead>
+    <tbody>
+      <tr><td><code>run:</code></td><td>A <strong>raw shell command</strong> on that machine. Nothing prepackaged</td></tr>
+      <tr><td><code>uses:</code></td><td>A <strong>ready-made action</strong> — a packaged tool that does a whole process for you</td></tr>
+    </tbody>
+  </table></div>
+  <p><strong>The comparison that makes it click.</strong> To log into ECR by hand you'd run <code>aws ecr get-login-password ... | docker login ...</code> — and first work out your region and account ID. That's 10–15 lines once you include assuming a role and setting credentials. Or:</p>
+  <div class="codebox"><pre>- uses: aws-actions/amazon-ecr-login@v2      <span class="c"># ...just this</span></pre></div>
+  <p>AWS publishes official actions under <strong><code>aws-actions/</code></strong>: <code>configure-aws-credentials</code> (log into AWS — give it a role and a region), <code>amazon-ecr-login</code>, and a <strong>Secrets Manager</strong> retrieval action which can even transform the values it fetches.</p>
+  <p>🔑 <strong>This is the interview point.</strong> Actions are GitHub Actions' main differentiator against <strong>Jenkins</strong>, <strong>GitLab CI/CD</strong> and <strong>CircleCI</strong> — those run jobs too, but none has this library of prepackaged steps. It's a big part of why so many teams moved.</p>
+  <ul>
+    <li>💡 Context worth having: GitHub Actions launched in <strong>2019</strong>; GitLab CI and Jenkins are much older. <strong>GitHub is owned by Microsoft</strong>, so trusting GitHub Actions means trusting Microsoft.</li>
+    <li>A classmate confused <strong>GitLab</strong> with GitHub — they're separate competing companies, each with their own hosting and their own CI tool.</li>
+    <li>Each action has <strong>its own documentation</strong>. If you need something non-default (pushing to a <em>different</em> AWS account, say), that's where the option lives.</li>
+  </ul>
+
+  <h3>🛠️ The real pipeline: build-test-push.yml</h3>
+  <p>The plan, written out before any YAML: clone the repo branch · build the image · run the tests · log into AWS as an IAM role · log into ECR · push the image.</p>
+  <p>🔑 <strong>The prompting method is worth copying.</strong> Rather than asking for YAML straight away, he asked the AI to write the workflow in <strong>plain English first</strong>, following the shape of a workflow but without syntax — <em>"so I can explain the job to somebody in English"</em> — and kept that file as <code>plain-english.md</code>. Only then: <em>"Now build an actual YAML… Make it minimal and simple as possible. Don't overcomplicate it."</em> His reasoning: <em>"Spending time on GitHub Actions syntax, I don't believe that's going to be worth our time. Nobody's going to question you on the syntax."</em></p>
+  <div class="codebox"><pre>name: Build, test and push to Dev ECR
+
+on:
+  push:
+    branches: [ "feature/*" ]     <span class="c"># only feature branches trigger this</span>
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPO: investment-app
+  IMAGE_TAG: ${{ github.sha }}    <span class="c"># the Git commit ID as the version</span>
+
+jobs:
+  build-test-push:
+    runs-on: ubuntu-latest
+    services:
+      postgres:                   <span class="c"># a throwaway DB, on the same runner, for the tests</span>
+        image: postgres:16
+    steps:
+      - uses: actions/checkout@v4                 <span class="c"># 1. get the code</span>
+      - run: docker build -t $ECR_REPO:$IMAGE_TAG ./candidate/   <span class="c"># 2. build</span>
+      - run: python -m unittest discover          <span class="c"># 3. nine tests</span>
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}   <span class="c"># 4. log into AWS</span>
+          aws-region: ${{ env.AWS_REGION }}
+      - uses: aws-actions/amazon-ecr-login@v2     <span class="c"># 5. log into ECR</span>
+      - run: docker push &lt;account&gt;.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG</pre></div>
+  <ul>
+    <li>The <strong><code>services:</code></strong> block starts a <strong>Postgres container on the same runner</strong> purely so the tests have a database. It is completely separate from the real RDS — a classmate asked exactly this, and the answer is that tests don't need the real environment.</li>
+    <li>🔑 <strong><code>IMAGE_TAG: ${{ github.sha }}</code></strong> is the detail to remember. The image is tagged with the <strong>full commit ID</strong>, so from any running image you can find the exact code that produced it. He proved it live: <code>git log</code>'s newest commit ID matched the tag in ECR character for character.</li>
+    <li><strong>Nothing happened on the first push</strong> — because his branch was named <code>codex/...</code> and the trigger only matches <code>feature/*</code>. He created <code>feature/ci-cd</code> and it fired.</li>
+    <li>💡 He also moved an older standalone test workflow into an <code>archive/</code> folder, because those tests now run inside this job. Two workflows doing the same work is noise.</li>
+  </ul>
+
+  <h3>🔐 OIDC: how an IAM role trusts something outside AWS</h3>
+  <p>The first real run got all the way to <strong>"Login to AWS"</strong> and failed. Expected — the runner had no credentials yet.</p>
+  <p>🔑 <strong>Never put AWS access keys in GitHub.</strong> The best practice is an <strong>IAM role</strong> that <strong>trusts GitHub through OIDC</strong>.</p>
+  <p><strong>What OIDC (OpenID Connect) is:</strong> a protocol that lets AWS establish a trust relationship with something that <strong>isn't an AWS resource</strong>. Normally you attach a role to an EC2 instance, a Lambda, an EKS cluster. OIDC extends that to a <strong>Kubernetes Pod</strong> (this is what Pod Identity does — Session 10, Containers Session 11), a <strong>GitHub Actions runner</strong>, cloud-hosted AI agent sessions, and anything else that can present a token.</p>
+  <div class="table"><table>
+    <thead><tr><th>Step</th><th>Where</th><th>Value</th></tr></thead>
+    <tbody>
+      <tr><td>1. Add an <strong>identity provider</strong></td><td>IAM → Identity providers → OpenID Connect</td><td>URL <code>https://token.actions.githubusercontent.com</code>, audience <code>sts.amazonaws.com</code></td></tr>
+      <tr><td>2. Create a <strong>role</strong></td><td>IAM → Roles → <strong>Web identity</strong></td><td>Pick that provider, then narrow it to your <strong>organisation</strong> and <strong>repository</strong> (a branch too, if you want)</td></tr>
+      <tr><td>3. Attach <strong>permissions</strong></td><td>The role's policies</td><td>ECR push rights. He took a shortcut with a broad image-builder policy and <strong>said so out loud</strong> — a repo-scoped custom policy would be tighter</td></tr>
+      <tr><td>4. Give GitHub the <strong>role ARN</strong></td><td>Repo → Settings → Secrets and variables → Actions</td><td>A <strong>repository variable</strong> named <code>AWS_ROLE_ARN</code></td></tr>
+    </tbody>
+  </table></div>
+  <div class="table"><table>
+    <thead><tr><th>Syntax</th><th>Comes from</th></tr></thead>
+    <tbody>
+      <tr><td><code>${{ vars.X }}</code></td><td>A <strong>repository variable</strong> — non-sensitive configuration</td></tr>
+      <tr><td><code>${{ env.X }}</code></td><td>The <code>env:</code> block <strong>in this workflow file</strong></td></tr>
+      <tr><td><code>${{ secrets.X }}</code></td><td>A <strong>repository secret</strong> — sensitive values, hidden in logs</td></tr>
+    </tbody>
+  </table></div>
+  <p>💡 Narrowing the trust to one org and one repo is the whole security story: only jobs from <strong>that</strong> repository can assume the role. You can go further and scope it to a single branch.</p>
+
+  <h3>🐛 Two failures debugged live (the most useful part)</h3>
+  <p>Even with the role in place, the job still failed at login. Twice. Both are worth knowing.</p>
+  <div class="warn">
+    <span class="eyebrow">Failure 1 — the AI wrote an outdated action version</span>
+    <p>The step sat on <code>configure-aws-credentials</code> without progressing. A classmate suggested the action version, and the docs confirmed <strong>v6</strong> was current while the workflow pinned something older. 🔑 His read on why: <em>"AI probably wrote it from memory, and it might have used some old version."</em> A good thing to check first whenever a ready-made action behaves oddly.</p>
+  </div>
+  <div class="warn">
+    <span class="eyebrow">Failure 2 — GitHub's new immutable subject</span>
+    <p><code>Not authorized to perform sts:AssumeRoleWithWebIdentity</code></p>
+    <p>🔑 His first move was the right one: <em>"Is this a GitHub permission or an AWS permission?"</em> — decide <strong>which side</strong> is refusing before you start changing things. The message pointed at the AWS side.</p>
+    <p>The cause was genuinely new: GitHub now puts <strong>numeric organisation and repository IDs</strong> into the OIDC token's <code>sub</code> claim (the "immutable subject" change). A trust policy written the old way — with just the org and repo <strong>names</strong> — no longer matches. The fix: update the <code>StringLike</code> condition in the role's trust policy to include those numeric IDs, one entry per repository.</p>
+    <p>💡 He was candid that he'd never seen this before and that it hadn't been like this five months ago. Even the documented path can be stale — <strong>read the actual error</strong>.</p>
+  </div>
+  <p>With that fixed, the run went green: logged into AWS, logged into ECR, pushed the image. He then spotted a <strong>leftover manual <code>run:</code> login</strong> he'd written while demonstrating, sitting redundantly next to the action — and removed it.</p>
+
+  <h3>🚀 The release: where CI stops and CD would begin</h3>
+  <p>To show the <strong>whole path</strong> end to end, he played the developer: a real application change, from <strong>ten</strong> recent trades to <strong>five</strong>. The AI touched several files — the query, the page text, <strong>and the tests</strong> (which asserted 10 and now assert 5). Then: <code>git commit</code>, <code>git push</code>. <strong>And that is the entire developer experience.</strong></p>
+  <div class="table"><table>
+    <thead><tr><th>Step</th><th>Who does it</th><th>What happened</th></tr></thead>
+    <tbody>
+      <tr><td>1. Change the code</td><td>Developer</td><td>10 → 5 recent trades</td></tr>
+      <tr><td>2. Push to Git</td><td>Developer</td><td><strong>Their job ends here</strong></td></tr>
+      <tr><td>3. Build + test + push</td><td><strong>Automatic</strong></td><td>A new image reached ECR, tagged with the commit ID</td></tr>
+      <tr><td>4. <strong>Deploy</strong></td><td><strong>Still a human</strong></td><td>Edit the tag in <code>values-dev.yaml</code>, run <code>helm upgrade</code></td></tr>
+    </tbody>
+  </table></div>
+  <blockquote>🔑 "Nobody's watching it. We're watching because we want to see it, but generally nobody cares about this unless something fails." That is what success looks like.</blockquote>
+  <div class="codebox"><pre><span class="c"># the manual half — this is what next class automates</span>
+<span class="c"># values-dev.yaml:  image.tag: &lt;the new commit ID&gt;</span>
+helm upgrade --install investment-app charts/investment-app \
+  --values charts/investment-app/values-dev.yaml -n main-product-line
+
+kubectl -n main-product-line get pods -o wide</pre></div>
+  <ul>
+    <li>The rollout behaved exactly as Kubernetes should: the new Pod went <strong>Pending</strong> first (Karpenter had to bring up a node), and <strong>the old Pod kept serving until the new one was Ready</strong>. Then the page showed five trades.</li>
+    <li>💡 The image tag belongs in <strong><code>values-dev.yaml</code></strong>, not the shared <code>values.yaml</code> — he caught himself putting it in the wrong file and moved it. Each environment runs its own version (Session 09).</li>
+    <li><strong>Older trades were still there</strong> in RDS. Only the view changed; the data never moved.</li>
+  </ul>
+  <p>🔑 <strong>The gap this leaves is the whole point:</strong> a green pipeline means a new image <strong>exists</strong>. The running Deployment doesn't care until someone changes the tag. <strong>CI got the package made and stored; CD gets it running.</strong></p>
+
+  <h3>🏢 How promotion works at a real company</h3>
+  <p>Several classmates asked variations of the same thing: does every push go to production? 🔑 <strong>No.</strong> This pipeline deploys to <strong>Dev</strong> only. Reaching production takes a lot more.</p>
+  <ul>
+    <li><strong>Humans still control promotion</strong> — but they do it <strong>through Git</strong>: merging into a particular branch, or adding a <strong>Git tag</strong>. A specific, defined Git event triggers a deployment to the next environment.</li>
+    <li>Changes can move <strong>one at a time or grouped</strong>: several changes can sit in staging and be released to production together.</li>
+    <li>Each environment runs <strong>the same checks</strong>, and usually a few more as you get closer to production.</li>
+    <li>💡 On scale: the class's scale matrix cites <strong>Square running ~300 builds a day for a single iOS app</strong>. Running the pipeline often is the normal state, not an exception. And it's cheap — you pay a small amount per run.</li>
+    <li>💡 Where manual QA fits was asked repeatedly. The honest answer: <strong>not yet</strong>. These nine automated tests are not a QA sign-off — the same point as the missing sign-off in Session 10. Dev/staging/production as a full flow is a later topic.</li>
+  </ul>
+</section>
+
+<section id="homework">
+  <div class="label"><span class="tag">PX-109 · this weekend</span><h2>Homework: build your own CI pipeline</h2></div>
+  <p><strong>There is a new ticket this time: PX-109.</strong> In your <strong>own AWS account</strong>, and a repository where you can configure GitHub Actions.</p>
+  <p><strong>Required — publish a tested image</strong></p>
+  <ol>
+    <li>A push to a <strong><code>feature/*</code></strong> branch starts a runner.</li>
+    <li>Check out the code, <strong>build the image</strong>, and run the existing tests against a <strong>temporary PostgreSQL</strong> service container.</li>
+    <li>If they pass, <strong>push the image to your Dev ECR</strong> repository.</li>
+    <li>Tag the image with the <strong>full Git commit ID</strong>.</li>
+  </ol>
+  <p><strong>Optional — try the deployment step (CD)</strong></p>
+  <ul>
+    <li>Once the image is in ECR, see if you can deploy it to Dev automatically. <strong>Try it yourself first</strong> — Monday's class shows one specific way, and you'll get far more out of it having struggled with it.</li>
+  </ul>
+  <ul>
+    <li>⚠️ You'll need the <strong>OIDC setup</strong> before anything can push: the identity provider, a role with Web Identity trust scoped to your org and repo, ECR permissions, and the role ARN as a repository variable. <strong>Remember the numeric org and repo IDs</strong> in the trust policy.</li>
+    <li><strong>Also suggested:</strong> rewatch any session that felt hard. <em>"The second time you already have context. The first time you're building from zero."</em></li>
+    <li><strong>Schedule:</strong> questions on <strong>Saturday</strong> or Monday. Monday automates the deployment. <strong>No class on Thursday Nov 26</strong> (Thanksgiving); Wednesday Nov 25 is on.</li>
+  </ul>
+  <blockquote>🔑 The golden rule of this class: a developer writes the code and pushes it — everything after that is a system you built. And know where that system stops: an image in a registry is just files, and nothing you ship is <em>running</em> until a process somewhere is burning CPU on it.</blockquote>
+</section>
+
+<section id="quiz11">
+  <div class="label"><span class="tag">Self-test</span><h2>Check yourself</h2></div>
+  <p class="reread">Answer each question out loud first, then open the answer. Score yourself out of 10.</p>
+
+  <div class="q"><p class="ask">1. An interviewer asks: "You push a new image to ECR. Is the new version live?" Answer it, and explain the difference you're relying on.</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>No. An image is a package sitting in storage; nothing is running until something starts a process from it.</strong></p>
+      <ul>
+        <li>An <strong>image</strong> is <strong>a bunch of files</strong>. It needs only <strong>storage</strong>. You could keep it on a USB stick for a thousand years and it would never answer a request.</li>
+        <li>A <strong>container</strong> is that image <strong>with running processes</strong>. It needs <strong>CPU, RAM and power</strong>. That process is the thing that actually returns a response.</li>
+        <li>The same distinction is <strong>package vs runtime</strong>: the runtime is the package while it's actually running.</li>
+        <li>So the running Deployment keeps serving the <strong>old</strong> image until someone changes which image it uses — the tag in <code>values-dev.yaml</code> plus a <code>helm upgrade</code>.</li>
+        <li>🔑 That gap is exactly the <strong>CI / CD boundary</strong>. CI produced and stored the package; CD would get it running.</li>
+      </ul>
+      <p>💡 Good analogy to reuse: a downloaded app installer is dead files. It becomes something only when you open it — and opening it <strong>starts processes</strong>.</p>
+    </div></details></div>
+
+  <div class="q"><p class="ask">2. Your app is serving traffic from two Pods. You delete the exact Pod that just answered your request. What does a user see, and what single design fact makes that true?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>Nothing — the next request goes to the other Pod. It works because the Pods hold no state: the trades live in RDS, outside both of them.</strong></p>
+      <ul>
+        <li>The Service keeps routing to whichever matching Pods are <strong>Ready</strong>, so the remaining Pod simply answers.</li>
+        <li>The data is identical because it was never in the Pod. The replacement Pod starts empty of state and reads the same database.</li>
+        <li>The new Pod became Ready in <strong>seconds</strong> — the readiness probe's initial delay is about 3 seconds.</li>
+        <li>🔑 This is what <strong>stateless</strong> means, and it's why <strong>Deployment</strong> is the default workload type: <em>it's fine to kill a Pod, even in production</em>.</li>
+        <li><strong>What a user <em>would</em> notice:</strong> all Pods down, all Pods overloaded, or the <strong>database</strong> down.</li>
+      </ul>
+      <p>💡 To find which Pod answered, read its <strong>logs</strong>, not <code>exec</code>. In the demo plain page loads weren't logged but a <strong>buy</strong> was, so the instructor bought a share to make the serving Pod reveal itself.</p>
+    </div></details></div>
+
+  <div class="q"><p class="ask">3. Trace a code change from a developer's editor to a running process. Name every step — and say which two steps the developer should be doing.</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>Write → commit to Git → package → test → store → deploy. The developer should only do the first two.</strong></p>
+      <ol>
+        <li><strong>Write the code.</strong></li>
+        <li><strong>Add it to version control</strong> — history, and a place to roll back to.</li>
+        <li><strong>Package it</strong> (build the image). Hidden decision: <strong>where does this happen, and who does it?</strong> Packaging needs a machine.</li>
+        <li><strong>Run automated tests</strong> — before, during or after packaging.</li>
+        <li><strong>Store the package</strong> somewhere reachable (ECR). Hidden decisions: where, permissions, network access.</li>
+        <li><strong>Deploy</strong> (<code>kubectl apply</code> / <code>helm upgrade</code>). Hidden decision: <strong>which version?</strong></li>
+      </ol>
+      <ul>
+        <li><strong>Why step 5 exists at all:</strong> an image built on your laptop isn't reachable by the cluster's workers.</li>
+        <li>🔑 <strong>Steps 3–6 automated is the definition of CI/CD</strong>, and building that is the platform engineer's job.</li>
+      </ul>
+      <p>💡 A strong closing line for an interview: done right, a developer pushes and the change is running within minutes, and nobody watches it happen unless something fails.</p>
+    </div></details></div>
+
+  <div class="q"><p class="ask">4. Your teammate says "I can just run <code>docker build</code> and <code>docker push</code> from my laptop — why pay for a cloud runner?" Give the reasons, and say which one actually matters most.</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>Four reasons — and the one that matters is the automatic trigger, not the machine.</strong></p>
+      <ul>
+        <li><strong>Independence:</strong> it doesn't need your laptop powered on, connected, or you being awake and available.</li>
+        <li><strong>Machine choice:</strong> you need Linux and you're on a Mac, or you need more CPU and RAM than your laptop has.</li>
+        <li><strong>Security:</strong> the AWS permissions live on an isolated datacenter machine instead of the laptop you might leave in a restaurant.</li>
+        <li>🔑 <strong>The automatic trigger.</strong> Without it, <strong>a person</strong> must sit down, be in the right folder, run the right commands, hold the right credentials, and do it at the right moment — every time, for every change.</li>
+        <li>That's the real argument: the laptop version is not <em>harder</em>, it's <strong>manual</strong>, and manual doesn't scale or survive someone's holiday.</li>
+      </ul>
+      <p>💡 Runner facts worth having ready: <code>ubuntu-latest</code> gives 2 CPUs, 8 GB RAM, 14 GB disk, with <strong>Docker, Compose, kubectl and Helm pre-installed</strong>, and it's destroyed when the job ends.</p>
+    </div></details></div>
+
+  <div class="q"><p class="ask">5. Why is it called continuous <em>integration</em> rather than just "build automation"? Give a concrete example of what it catches.</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>Because the point is bringing several developers' changes together often and proving the combined app still works. The automation is the means, not the meaning.</strong></p>
+      <ul>
+        <li>The class example: developer A renames the database field <code>price</code> → <code>trade_price</code>. Developer B writes code that <strong>reads</strong> <code>price</code>.</li>
+        <li><strong>Each change works perfectly on its own.</strong> Put them together and the trade history page breaks. Nothing but integration would catch that.</li>
+        <li><strong>Integration tests</strong> are specifically the tests that check several features still work <strong>together</strong>.</li>
+        <li>"Continuous" = merge frequently and check every time, instead of a painful big merge later.</li>
+        <li>🔑 <strong>Who writes the tests?</strong> Developers or QA — <strong>not</strong> the platform engineer. <em>"Our job is to make sure they run, and that the job fails if they fail."</em></li>
+      </ul>
+      <p>💡 The app's nine tests are things like: create 12 trades and assert the history page shows exactly 10, plus buy/sell regressions.</p>
+    </div></details></div>
+
+  <div class="q"><p class="ask">6. In a workflow, what's the difference between a step that uses <code>run:</code> and one that uses <code>uses:</code>? Why is this GitHub Actions' main selling point against Jenkins or GitLab CI?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong><code>run:</code> is a raw shell command on the runner. <code>uses:</code> calls a ready-made action — a packaged step someone else wrote — and that library is the differentiator.</strong></p>
+      <ul>
+        <li>Logging into ECR by hand means <code>aws ecr get-login-password ... | docker login ...</code>, after you've worked out your region and account ID — and 10–15 lines once you include assuming a role and setting credentials.</li>
+        <li>With an action it's <code>uses: aws-actions/amazon-ecr-login@v2</code>. Same outcome, far less to get wrong.</li>
+        <li>AWS publishes official ones under <strong><code>aws-actions/</code></strong>: <code>configure-aws-credentials</code>, <code>amazon-ecr-login</code>, and a Secrets Manager retrieval action.</li>
+        <li>🔑 <strong>Jenkins, GitLab CI/CD and CircleCI all run jobs too — none has this library of prepackaged steps.</strong> It's a large part of why so many teams migrated, especially teams already on GitHub.</li>
+      </ul>
+      <p>💡 Dates for context: GitHub Actions launched <strong>2019</strong>; the others are much older. GitHub is owned by <strong>Microsoft</strong>, so trusting GitHub Actions means trusting Microsoft.</p>
+    </div></details></div>
+
+  <div class="q"><p class="ask">7. You want the runner to push to ECR. A teammate suggests creating an IAM user and putting its access key in GitHub Secrets. What do you propose instead, and how does it work?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>No long-lived keys — an IAM role that trusts GitHub through OIDC, so the runner gets temporary credentials.</strong></p>
+      <ul>
+        <li><strong>OIDC (OpenID Connect)</strong> lets an IAM role trust something that <strong>isn't an AWS resource</strong>. Normally a role attaches to an EC2 instance, a Lambda or an EKS cluster; OIDC extends that to a GitHub runner, a Kubernetes Pod, or a cloud-hosted agent session.</li>
+        <li><strong>The setup:</strong> (1) add an <strong>OIDC identity provider</strong> in IAM — URL <code>https://token.actions.githubusercontent.com</code>, audience <code>sts.amazonaws.com</code>; (2) create a role with <strong>Web identity</strong> trust <strong>scoped to your org and repository</strong>; (3) attach ECR push permissions; (4) store the <strong>role ARN</strong> as a GitHub <strong>repository variable</strong>.</li>
+        <li><strong>Why it's better:</strong> no secret to leak, rotate or forget. The credentials are temporary and only a job from <strong>that</strong> repository can get them.</li>
+      </ul>
+      <p>💡 The instructor took a shortcut on permissions — a broad image-builder policy — and <strong>said so out loud</strong>. A policy scoped to the one ECR repository would be tighter.</p>
+    </div></details></div>
+
+  <div class="q"><p class="ask">8. Your workflow fails with <code>Not authorized to perform sts:AssumeRoleWithWebIdentity</code>. Walk through how you'd diagnose it — and name the specific recent change that causes this.</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>First decide which side is refusing, then check the trust policy — GitHub now puts numeric org and repository IDs in the token's subject.</strong></p>
+      <ul>
+        <li>🔑 <strong>The first question is the right one:</strong> "is this GitHub refusing to give me a token, or AWS refusing to accept it?" The wording points at the AWS side — the token arrived and the role declined it.</li>
+        <li>That narrows it to <strong>the role's trust policy</strong>, not the workflow, not the permissions policy.</li>
+        <li><strong>The cause:</strong> GitHub's <strong>immutable subject</strong> change puts <strong>numeric organisation and repository IDs</strong> into the OIDC token's <code>sub</code> claim. A trust policy matching only org and repo <strong>names</strong> no longer matches.</li>
+        <li><strong>The fix:</strong> update the <code>StringLike</code> condition in the trust policy to include those numeric IDs, one entry per repository.</li>
+        <li><strong>The other failure the same day:</strong> the AWS login action was pinned to an old version (v6 was current). <em>"AI probably wrote it from memory."</em> Check the action's version when a ready-made step behaves oddly.</li>
+      </ul>
+      <p>💡 The honest takeaway: this was new enough that the instructor had never seen it and it hadn't been that way five months earlier. <strong>Documentation and AI both go stale — read the actual error.</strong></p>
+    </div></details></div>
+
+  <div class="q"><p class="ask">9. Your pipeline tags images with <code>${{ github.sha }}</code>. A teammate wants <code>latest</code> instead — "simpler, and you don't have to update the Helm values every time." What's your answer?</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>The commit ID is the point: it ties a running image back to the exact code that made it. <code>latest</code> throws that away and makes deploys unrepeatable.</strong></p>
+      <ul>
+        <li>With the commit ID you can take any running Pod, read its image tag, and find that <strong>exact commit</strong> in Git. The instructor proved it live — <code>git log</code>'s newest commit matched the ECR tag character for character.</li>
+        <li><code>latest</code> is a <strong>moving pointer</strong>. Two deploys of "latest" can be different code, and you cannot tell afterwards which is running or roll back to a known build.</li>
+        <li>It also breaks the thing they think it fixes: <strong>having to choose the version is a feature</strong>. It's what lets you promote a <em>specific, tested</em> image from Dev to Staging to Production.</li>
+        <li>And nothing would change in the cluster anyway — the tag string stays identical, so Kubernetes may not pull at all.</li>
+        <li>🔑 <strong>Traceability and repeatability.</strong> With the commit ID the deploy is a deliberate choice; with <code>latest</code> it's a guess.</li>
+      </ul>
+      <p>💡 Put that tag in <strong><code>values-dev.yaml</code></strong>, not the shared <code>values.yaml</code> — each environment runs its own version (Session 09).</p>
+    </div></details></div>
+
+  <div class="q"><p class="ask">10. Your CI pipeline is green and the new image is in ECR. The product manager asks whether every push now goes straight to production. Answer it, and describe what actually controls promotion.</p>
+    <details><summary>Show answer</summary><div>
+      <p><strong>No. This pipeline reaches Dev, and only Dev. Humans still control promotion — but they do it through Git.</strong></p>
+      <ul>
+        <li>The Class 11 workflow <strong>built, tested and pushed</strong>. It did not deploy anything at all: the release was a manual <code>helm upgrade</code>.</li>
+        <li>Even once deployment is automated, it targets <strong>Dev</strong>. Getting to production takes considerably more.</li>
+        <li><strong>What controls promotion:</strong> a <strong>specific Git event</strong> — merging into a particular branch, or adding a <strong>Git tag</strong>. A person decides; the automation reacts.</li>
+        <li>Changes can move <strong>one at a time or grouped</strong> — several can sit in staging and go to production together.</li>
+        <li>🔑 The shape to remember: <strong>everything is automated except the Git change.</strong></li>
+      </ul>
+      <p>💡 Two honest caveats: nine passing tests are <strong>not</strong> a QA sign-off (the same gap as Session 10's missing developer/QA confirmation), and running often is normal — the scale matrix cites <strong>Square at ~300 builds a day</strong> for one iOS app.</p>
+    </div></details></div>
+
+  <p class="reread">Scoring: 9–10, you can build the pipeline and explain where it stops 🏆 · 7–8, solid 💪 · below 7, reread Session 11 and retry 🔁</p>
+</section>
+
+<footer>The full study page and 10-question quiz are in Notion under DevOps / 312 - Notes / 🏁 ProjectX.</footer>
+</div>
+
+<script>
+document.querySelectorAll('.codebox').forEach(function(box){
+  var pre = box.querySelector('pre'); var b = document.createElement('button');
+  b.className = 'copy'; b.type = 'button'; b.textContent = 'Copy';
+  b.addEventListener('click', function(){
+    var text = pre.innerText.split('\n').map(function(l){ return l.replace(/\s+#.*$/, ''); }).join('\n').trim();
+    var done = function(){ b.textContent = 'Copied'; setTimeout(function(){ b.textContent = 'Copy'; }, 1500); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(function(){ selectPre(); });
+    } else { selectPre(); }
+    function selectPre(){ var r = document.createRange(); r.selectNodeContents(pre); var s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = 'Selected'; }
+  });
+  box.appendChild(b);
+});
+</script>

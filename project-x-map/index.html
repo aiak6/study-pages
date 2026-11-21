@@ -125,7 +125,7 @@ html{scroll-behavior:smooth}
 <header>
   <span class="eyebrow">312 School · Cohort 26a · Project X</span>
   <h1>Project X Map</h1>
-  <div class="meta"><span>Updated Thu, Nov 19, 2026</span><span>Sessions 01–10</span><span>Instructor: Marsel</span></div>
+  <div class="meta"><span>Updated Sat, Nov 21, 2026</span><span>Sessions 01–11</span><span>Instructor: Marsel</span></div>
   <p class="lede">Project X is the last stage of the course. We join a pretend investment-app startup as its <strong>platform engineer</strong>. The app already runs on <strong>ECS Fargate</strong>, built by Nadia with <strong>CloudFormation</strong>. Our job is to move it to <strong>EKS</strong> with <strong>Terraform</strong> without users noticing, and to do the work with AI agents the way teams do it now. This page shows everything in one place: who's who, the four repos, the infrastructure, the tickets, the sessions and the homework.</p>
   <nav aria-label="Sections">
     <a href="#homework">Homework</a><a href="#team">Team</a><a href="#repos">Repos</a><a href="#infra">Infrastructure</a><a href="#tickets">Tickets</a><a href="#sessions">Sessions</a><a href="#decisions">Decisions</a><a href="#reviews">PR reviews</a><a href="#where">Where things live</a>
@@ -134,7 +134,7 @@ html{scroll-behavior:smooth}
 
 <section id="homework">
   <div class="label"><span class="tag">Status</span><h2>Homework board</h2></div>
-  <div class="summary"><span><strong>1 of 4</strong> done</span><span><strong>1</strong> in review</span><span>As of Thu, Nov 19</span><span>PX-108 was due Nov 16</span></div>
+  <div class="summary"><span><strong>1 of 5</strong> done</span><span><strong>1</strong> in review</span><span>As of Sat, Nov 21</span><span>PX-109 is due this weekend</span></div>
   <div class="board">
     <div class="hw done">
       <span class="who">S02</span>
@@ -162,11 +162,20 @@ html{scroll-behavior:smooth}
       <p>Same branch. If your account has no ECS yet, deploy Nadia's template first. Build <code>projectx-26a-app/candidate</code>, push it to your own ECR, run the same image on EKS against the existing RDS, and let pods reach RDS on 5432. Close the PX-107 PR without merging and open a new PR.</p>
       <p><strong>Watch out:</strong> your PX-107 cluster had its own VPC, but RDS lives in the CloudFormation VPC. The cluster has to go into that VPC (like the reference <code>network</code> root), and the RDS security group needs a 5432 rule from the cluster. Check it the Session 08 way: <code>kubectl port-forward</code>, then make a buy.</p>
     </div>
+    <div class="hw">
+      <span class="who">S11</span>
+      <div class="top"><h3>PX-109: build your own CI pipeline</h3><span class="chip todo">Due this weekend</span></div>
+      <p class="due">Set Thu, Nov 19 · questions Saturday or Monday</p>
+      <p><strong>Required:</strong> a push to a <code>feature/*</code> branch starts a GitHub Actions runner that checks out the code, builds the image, runs the existing tests against a temporary PostgreSQL service container, and — only if they pass — pushes the image to <strong>your Dev ECR</strong>, tagged with the <strong>full Git commit ID</strong>.</p>
+      <p><strong>Optional:</strong> automate the deployment too. Try it yourself before Monday’s class shows one specific way.</p>
+      <p><strong>Watch out:</strong> nothing can push until the <strong>OIDC</strong> setup exists — an IAM identity provider, a role with Web Identity trust scoped to your org and repo, ECR permissions, and the role ARN as a GitHub repository variable. The trust policy now needs the <strong>numeric org and repository IDs</strong>.</p>
+    </div>
   </div>
   <h3>What's left, in order</h3>
   <ol>
     <li><strong>Finish PX-107's review.</strong> Your own hand-written part as its own commit, an updated description, then reply to Sheldon in your own words and comment <code>@sheldon</code>.</li>
     <li><strong>PX-108 on the same branch.</strong> Cluster in the CloudFormation VPC, the image in your ECR, a Deployment with a ConfigMap and a Secret, the 5432 rule, then port-forward and a buy.</li>
+    <li><strong>PX-109 over the weekend.</strong> The CI pipeline in your own account and a repo where you can configure Actions: feature-branch trigger, build, tests, OIDC login, push to Dev ECR tagged with the commit ID.</li>
     <li><strong>Watch the bill.</strong> The EKS control plane is ~$0.10/hr (~$73/month), and workers, a NAT gateway and RDS cost extra. Run <code>aws sts get-caller-identity</code> before every apply and destroy when you're done.</li>
   </ol>
 </section>
@@ -210,7 +219,7 @@ html{scroll-behavior:smooth}
 <section id="infra">
   <div class="label"><span class="tag">AWS</span><h2>The infrastructure: today and next</h2></div>
   <p>Dev today is one CloudFormation stack (<code>projectx-dev</code>): a VPC, an ALB, a private Fargate task, a private encrypted RDS Postgres, a NAT gateway and monitoring. The plan from Session 03 is to <strong>build EKS next to it</strong> in the same VPC, run the same image against the same database, then move traffic over a little at a time.</p>
-  <p><strong>Where it stands after Session 10 — the migration has landed:</strong> Terraform added two subnets (<code>10.40.32.0/19</code>, <code>10.40.64.0/19</code>) to the CloudFormation VPC and built the cluster; Helm added Karpenter. Session 09 gave the app a <strong>ClusterIP Service</strong> and packaged it as a <strong>Helm chart</strong>. Session 10 installed the <strong>AWS Load Balancer Controller</strong> and <strong>Gateway API</strong>, which built an internet-facing <strong>ALB</strong>, and moved the <strong>Route 53</strong> record across. <strong>The public hostname now serves from EKS over HTTPS.</strong> ECS and its ALB are deliberately left running as the rollback path. The big diagrams are on <a href="../how-project-x-fits-together/">How Project X Fits Together</a>.</p>
+  <p><strong>Where it stands after Session 10 — the migration has landed:</strong> Terraform added two subnets (<code>10.40.32.0/19</code>, <code>10.40.64.0/19</code>) to the CloudFormation VPC and built the cluster; Helm added Karpenter. Session 09 gave the app a <strong>ClusterIP Service</strong> and packaged it as a <strong>Helm chart</strong>. Session 10 installed the <strong>AWS Load Balancer Controller</strong> and <strong>Gateway API</strong>, which built an internet-facing <strong>ALB</strong>, and moved the <strong>Route 53</strong> record across. <strong>The public hostname now serves from EKS over HTTPS.</strong> ECS and its ALB are deliberately left running as the rollback path. Since Session 11 the Dev image is also <strong>built automatically</strong>: a push to a <code>feature/*</code> branch runs GitHub Actions, which builds, tests and pushes it to ECR tagged with the commit ID — but the release itself is still a <strong>manual <code>helm upgrade</code></strong>. The big diagrams are on <a href="../how-project-x-fits-together/">How Project X Fits Together</a>.</p>
   <div class="diagram" role="img" aria-label="Users reach an ALB inside the existing VPC. The ALB splits traffic between the ECS Fargate task (today, CloudFormation) and EKS pods (next, Terraform). Both talk to the same RDS PostgreSQL database.">
     <svg viewBox="0 0 760 340" xmlns="http://www.w3.org/2000/svg">
       <defs>
@@ -261,7 +270,7 @@ html{scroll-behavior:smooth}
 
 <section id="tickets">
   <div class="label"><span class="tag">Board</span><h2>The tickets so far</h2></div>
-  <p>Board column in brackets, as of Nov 19.</p>
+  <p>Board column in brackets, as of Nov 21.</p>
   <ol class="timeline">
     <li><div class="when"><b>PX-001</b>Session 02</div><div><h3>Recent trades feature [Review]</h3><p>The app change (PR #1) that shows the ten newest trades. QA (Jordan) validates it.</p></div></li>
     <li><div class="when"><b>PX-104</b>Session 02</div><div><h3>Deploy PR #1 to Dev [Review]</h3><p>Our first ticket. Lesson: find where "dev" is before doing anything. Done in class: new image digest → change set → review → execute.</p></div></li>
@@ -269,6 +278,7 @@ html{scroll-behavior:smooth}
     <li><div class="when"><b>PX-107</b>Sessions 04–06</div><div><h3>Build and verify an EKS cluster with Terraform [Ready]</h3><p>Your own account, at least 10% hand-written, test pod, destroy, open PR. <strong>Your status: PR #99 in review; the hand-written 10% is still open.</strong></p></div></li>
     <li><div class="when"><b>PX-108</b>Sessions 05–08</div><div><h3>Run the investment app on Dev EKS [Ready]</h3><p>Same image as ECS, existing RDS, pods Ready, app works. New PR, PX-107 PR closed unmerged. <strong>Your status: still open — it was due Mon, Nov 16.</strong></p></div></li>
     <li><div class="when"><b>PX-111</b>Sessions 09–10</div><div><h3>Public route and ECS retirement [New]</h3><p>Give the app on EKS a public front door with Gateway API, move the DNS record off the ECS ALB, then retire ECS. Done in class on Nov 18; <strong>no homework ticket was assigned</strong>. Still open on the board: the HTTP→HTTPS redirect, matching the old ALB’s listener rules, and developer/QA sign-off before anything is deleted.</p></div></li>
+    <li><div class="when"><b>PX-109</b>Session 11</div><div><h3>Application CI for the investment app [New]</h3><p>A developer pushes a change and finds its <strong>tested</strong> image in Dev ECR, tagged with the Git commit ID. Built in class on Nov 19 with GitHub Actions and OIDC. <strong>Your status: this is the weekend task</strong> — automating the deployment is optional.</p></div></li>
     <li><div class="when"><b>Others</b>Other roles</div><div><h3>PX-101 [In progress] · PX-103 [Ready] · PX-106 [Backlog]</h3><p>PX-101 is product work (Maya). PX-103 is the build path that feeds PX-108 (Sam). PX-106 is identity and secret access that also feeds PX-108 (Casey).</p></div></li>
   </ol>
 </section>
@@ -286,7 +296,8 @@ html{scroll-behavior:smooth}
     <li><div class="when"><b>08</b>Thu Nov 12</div><div><h3><a href="../project-x-session-08/">Run the investment app on EKS</a></h3><p>Questions before YAML: which workload type, which Service, and what goes in a ConfigMap or a Secret. Two Pods stayed not Ready until the RDS security group let the workers in. Tested with <code>kubectl port-forward</code>.</p></div></li>
     <li><div class="when"><b>09</b>Mon Nov 16</div><div><h3><a href="../project-x-session-09/">Services, Helm &amp; public access</a></h3><p>A <strong>ClusterIP Service</strong> for the app, then the plain manifests became a <strong>Helm chart</strong> with a values file per environment. Switching the Service to <code>LoadBalancer</code> produced an unwanted <strong>Classic</strong> LB, because the AWS Load Balancer Controller was never reinstalled — which introduced <strong>Gateway API</strong>.</p></div></li>
     <li><div class="when"><b>10</b>Wed Nov 18</div><div><h3><a href="../project-x-session-10/">The public EKS route &amp; DNS cutover</a></h3><p>The controller, the Gateway API CRDs, GatewayClass, Gateway and an HTTPRoute. The first ALB came out <strong>internal</strong> and unreachable; a <code>TargetGroupConfiguration</code> was also required. Then a <strong>weighted Route 53</strong> cutover off ECS, and HTTPS with the existing ACM certificate.</p></div></li>
-    <li><div class="when"><b>11</b>Next</div><div><h3>Application CI</h3><p>Building the app automatically. After that the course turns to <strong>interview preparation</strong>, putting all these pieces into one story.</p></div></li>
+    <li><div class="when"><b>11</b>Thu Nov 19</div><div><h3><a href="../project-x-session-11/">Application CI &amp; a manual Dev release</a></h3><p>Tracing a request back to the <strong>running process</strong>, then the same path forwards: a developer should only write code and push. <strong>GitHub Actions</strong> builds the image, runs nine tests against a throwaway Postgres and pushes to ECR tagged with the commit ID, logging in through <strong>OIDC</strong>. Two live failures: an outdated action version and GitHub’s new numeric IDs in the OIDC subject. The release itself was still a manual <code>helm upgrade</code>. Homework PX-109.</p></div></li>
+    <li><div class="when"><b>12</b>Mon Nov 24</div><div><h3>Next: automate the deployment</h3><p>The CD half — moving a selected image into the running Dev app without a manual Helm run. <strong>No class Thu Nov 26</strong> (Thanksgiving); Wed Nov 25 is on.</p></div></li>
   </ol>
 </section>
 
@@ -305,6 +316,9 @@ html{scroll-behavior:smooth}
       <tr><td class="nowrap">Nov 16</td><td>Deploy with <strong>Helm</strong> from now on: one chart, a <strong>values file per environment</strong>. Delete the plain YAML after converting</td><td>One shared template instead of three copies of every manifest. The <strong>kubectl context</strong> picks the cluster, never the values filename</td></tr>
       <tr><td class="nowrap">Nov 18</td><td>Expose apps with <strong>Gateway API</strong> on a <strong>shared ALB</strong>, not a LoadBalancer Service per app</td><td>ingress-nginx retired in March 2026. GatewayClass and Gateway are set up once per cluster; each app only adds an <strong>HTTPRoute</strong> and keeps a <strong>ClusterIP</strong> Service. Ten apps then cost one load balancer, not ten</td></tr>
       <tr><td class="nowrap">Nov 18</td><td>Cut over with a <strong>weighted Route 53 record</strong>, and leave <strong>ECS running</strong> for a few days</td><td>A canary: weights are relative numbers (max 255), so you shift traffic gradually. Rollback is re-adding one DNS record — which only works while the old stack still exists</td></tr>
+      <tr><td class="nowrap">Nov 19</td><td><strong>GitHub Actions</strong> for CI, on a <strong>GitHub-hosted runner</strong></td><td>It lives next to the code, and its <b>actions</b> (prepackaged steps like <code>aws-actions/configure-aws-credentials</code>) replace 10–15 lines of CLI — the thing Jenkins, GitLab CI and CircleCI don’t have</td></tr>
+      <tr><td class="nowrap">Nov 19</td><td>The runner gets AWS access through an <strong>IAM role trusted via OIDC</strong>, never an access key</td><td>No long-lived secret to leak or rotate, and the trust is scoped to one org and one repository. The trust policy now needs the <strong>numeric org and repo IDs</strong></td></tr>
+      <tr><td class="nowrap">Nov 19</td><td>Tag every image with the <strong>Git commit ID</strong> (<code>github.sha</code>), not <code>latest</code></td><td>Any running Pod can be traced back to the exact commit that built it, and you promote a specific tested image rather than whatever built last</td></tr>
     </tbody>
   </table></div>
 </section>
@@ -338,5 +352,5 @@ html{scroll-behavior:smooth}
   <blockquote>Find the situation and the task, give AI real context, argue with its first answer, then make the decision yourself.</blockquote>
 </section>
 
-<footer>Built from the Project X session notes, the four class repos and the class board as of Nov 19, 2026. Update the homework board as you finish each item.</footer>
+<footer>Built from the Project X session notes, the four class repos and the class board as of Nov 21, 2026. Update the homework board as you finish each item.</footer>
 </div>
